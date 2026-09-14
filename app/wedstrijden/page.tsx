@@ -1,32 +1,99 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+
+type Match = {
+  id: number;
+  utcDate: string;
+  status: string;
+  homeTeam: {
+    name: string;
+  };
+  awayTeam: {
+    name: string;
+  };
+  competition: {
+    name: string;
+  };
+};
 
 export default function Wedstrijden() {
   const [playerName, setPlayerName] = useState("");
-  const [ajaxHome, setAjaxHome] = useState("");
-  const [ajaxAway, setAjaxAway] = useState("");
-  const [feyenoordHome, setFeyenoordHome] = useState("");
-  const [feyenoordAway, setFeyenoordAway] = useState("");
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [predictions, setPredictions] = useState<
+    Record<number, { home: string; away: string }>
+  >({});
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const savePrediction = async (
-    matchName: string,
-    homeScore: string,
-    awayScore: string
+  useEffect(() => {
+    loadMatches();
+  }, []);
+
+  async function loadMatches() {
+    try {
+      const response = await fetch("/api/matches");
+
+      if (!response.ok) {
+        throw new Error("Kon wedstrijden niet ophalen");
+      }
+
+      const data = await response.json();
+
+      const upcomingMatches = (data.matches || [])
+        .filter(
+          (match: Match) =>
+            match.status === "SCHEDULED" ||
+            match.status === "TIMED"
+        )
+        .sort(
+          (a: Match, b: Match) =>
+            new Date(a.utcDate).getTime() -
+            new Date(b.utcDate).getTime()
+        );
+
+      setMatches(upcomingMatches);
+    } catch (error) {
+      console.error(error);
+      setMessage("De wedstrijden konden niet worden opgehaald.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const updatePrediction = (
+    matchId: number,
+    type: "home" | "away",
+    value: string
   ) => {
+    setPredictions((current) => ({
+      ...current,
+      [matchId]: {
+        home: current[matchId]?.home || "",
+        away: current[matchId]?.away || "",
+        [type]: value,
+      },
+    }));
+  };
+
+  const savePrediction = async (match: Match) => {
     if (!playerName.trim()) {
       setMessage("Vul eerst je spelersnaam in.");
       return;
     }
 
-    const home = Number(homeScore);
-    const away = Number(awayScore);
+    const prediction = predictions[match.id];
+
+    if (!prediction || prediction.home === "" || prediction.away === "") {
+      setMessage("Vul eerst een volledige uitslag in.");
+      return;
+    }
+
+    const home = Number(prediction.home);
+    const away = Number(prediction.away);
 
     if (
-      homeScore === "" ||
-      awayScore === "" ||
       !Number.isInteger(home) ||
       !Number.isInteger(away) ||
       home < 0 ||
@@ -34,9 +101,11 @@ export default function Wedstrijden() {
       home > 20 ||
       away > 20
     ) {
-      setMessage("Vul een geldige uitslag in (0 t/m 20).");
+      setMessage("Vul een geldige uitslag in van 0 t/m 20.");
       return;
     }
+
+    const matchName = `${match.homeTeam.name} - ${match.awayTeam.name}`;
 
     const { error } = await supabase.from("predictions").insert({
       player_name: playerName.trim(),
@@ -51,7 +120,7 @@ export default function Wedstrijden() {
       return;
     }
 
-    setMessage("Voorspelling opgeslagen!");
+    setMessage(`Voorspelling opgeslagen voor ${matchName}!`);
   };
 
   return (
@@ -82,7 +151,13 @@ export default function Wedstrijden() {
           <h1 style={{ margin: 0 }}>VoetIQ</h1>
 
           <nav style={{ display: "flex", gap: "20px" }}>
-            <a href="/" style={{ color: "white", textDecoration: "none" }}>
+            <a
+              href="/"
+              style={{
+                color: "white",
+                textDecoration: "none",
+              }}
+            >
               Home
             </a>
 
@@ -99,7 +174,10 @@ export default function Wedstrijden() {
 
             <a
               href="/ranglijst"
-              style={{ color: "white", textDecoration: "none" }}
+              style={{
+                color: "white",
+                textDecoration: "none",
+              }}
             >
               Ranglijst
             </a>
@@ -114,11 +192,21 @@ export default function Wedstrijden() {
           padding: "50px 20px",
         }}
       >
-        <h2 style={{ fontSize: "36px", marginBottom: "10px" }}>
+        <h2
+          style={{
+            fontSize: "36px",
+            marginBottom: "10px",
+          }}
+        >
           Wedstrijden
         </h2>
 
-        <p style={{ color: "#666", marginBottom: "25px" }}>
+        <p
+          style={{
+            color: "#666",
+            marginBottom: "25px",
+          }}
+        >
           Voorspel de uitslag en verdien punten.
         </p>
 
@@ -150,176 +238,170 @@ export default function Wedstrijden() {
           />
         </div>
 
+        {loading && (
+          <p style={{ color: "#666" }}>
+            Wedstrijden laden...
+          </p>
+        )}
+
+        {!loading && matches.length === 0 && (
+          <div
+            style={{
+              background: "white",
+              padding: "25px",
+              borderRadius: "16px",
+              boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
+            }}
+          >
+            Er zijn momenteel geen komende Eredivisie-wedstrijden
+            beschikbaar.
+          </div>
+        )}
+
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(300px, 1fr))",
             gap: "25px",
           }}
         >
-          <div
-            style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "25px",
-              boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
-            }}
-          >
-            <p style={{ color: "#777", marginTop: 0 }}>Eredivisie</p>
+          {matches.map((match) => {
+            const prediction = predictions[match.id] || {
+              home: "",
+              away: "",
+            };
 
-            <h3 style={{ fontSize: "24px" }}>Ajax 🆚 PSV</h3>
+            const date = new Date(match.utcDate);
 
-            <p style={{ color: "#777" }}>Voorspel de eindstand</p>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                alignItems: "center",
-                marginTop: "20px",
-              }}
-            >
-              <input
-                type="number"
-                min="0"
-                max="20"
-                placeholder="Ajax"
-                value={ajaxHome}
-                onChange={(e) => setAjaxHome(e.target.value)}
+            return (
+              <div
+                key={match.id}
                 style={{
-                  width: "80px",
-                  padding: "12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  fontSize: "18px",
-                  textAlign: "center",
+                  background: "white",
+                  borderRadius: "16px",
+                  padding: "25px",
+                  boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
                 }}
-              />
+              >
+                <p
+                  style={{
+                    color: "#777",
+                    marginTop: 0,
+                  }}
+                >
+                  {match.competition.name}
+                </p>
 
-              <span style={{ fontSize: "20px" }}>-</span>
+                <p
+                  style={{
+                    color: "#888",
+                    fontSize: "14px",
+                  }}
+                >
+                  {date.toLocaleDateString("nl-NL", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                  })}{" "}
+                  om{" "}
+                  {date.toLocaleTimeString("nl-NL", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
 
-              <input
-                type="number"
-                min="0"
-                max="20"
-                placeholder="PSV"
-                value={ajaxAway}
-                onChange={(e) => setAjaxAway(e.target.value)}
-                style={{
-                  width: "80px",
-                  padding: "12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  fontSize: "18px",
-                  textAlign: "center",
-                }}
-              />
-            </div>
+                <h3
+                  style={{
+                    fontSize: "22px",
+                    marginTop: "18px",
+                  }}
+                >
+                  {match.homeTeam.name} 🆚{" "}
+                  {match.awayTeam.name}
+                </h3>
 
-            <button
-              onClick={() =>
-                savePrediction("Ajax - PSV", ajaxHome, ajaxAway)
-              }
-              style={{
-                marginTop: "20px",
-                width: "100%",
-                padding: "13px",
-                background: "#0b8f4d",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "16px",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              Voorspelling opslaan
-            </button>
-          </div>
+                <p style={{ color: "#777" }}>
+                  Voorspel de eindstand
+                </p>
 
-          <div
-            style={{
-              background: "white",
-              borderRadius: "16px",
-              padding: "25px",
-              boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
-            }}
-          >
-            <p style={{ color: "#777", marginTop: 0 }}>Eredivisie</p>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center",
+                    marginTop: "20px",
+                  }}
+                >
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    placeholder="Thuis"
+                    value={prediction.home}
+                    onChange={(e) =>
+                      updatePrediction(
+                        match.id,
+                        "home",
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      width: "80px",
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      borderRadius: "8px",
+                      fontSize: "18px",
+                      textAlign: "center",
+                    }}
+                  />
 
-            <h3 style={{ fontSize: "24px" }}>Feyenoord 🆚 AZ</h3>
+                  <span style={{ fontSize: "20px" }}>-</span>
 
-            <p style={{ color: "#777" }}>Voorspel de eindstand</p>
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    placeholder="Uit"
+                    value={prediction.away}
+                    onChange={(e) =>
+                      updatePrediction(
+                        match.id,
+                        "away",
+                        e.target.value
+                      )
+                    }
+                    style={{
+                      width: "80px",
+                      padding: "12px",
+                      border: "1px solid #ddd",
+                      borderRadius: "8px",
+                      fontSize: "18px",
+                      textAlign: "center",
+                    }}
+                  />
+                </div>
 
-            <div
-              style={{
-                display: "flex",
-                gap: "10px",
-                alignItems: "center",
-                marginTop: "20px",
-              }}
-            >
-              <input
-                type="number"
-                min="0"
-                max="20"
-                placeholder="Feyenoord"
-                value={feyenoordHome}
-                onChange={(e) => setFeyenoordHome(e.target.value)}
-                style={{
-                  width: "80px",
-                  padding: "12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  fontSize: "18px",
-                  textAlign: "center",
-                }}
-              />
-
-              <span style={{ fontSize: "20px" }}>-</span>
-
-              <input
-                type="number"
-                min="0"
-                max="20"
-                placeholder="AZ"
-                value={feyenoordAway}
-                onChange={(e) => setFeyenoordAway(e.target.value)}
-                style={{
-                  width: "80px",
-                  padding: "12px",
-                  border: "1px solid #ddd",
-                  borderRadius: "8px",
-                  fontSize: "18px",
-                  textAlign: "center",
-                }}
-              />
-            </div>
-
-            <button
-              onClick={() =>
-                savePrediction(
-                  "Feyenoord - AZ",
-                  feyenoordHome,
-                  feyenoordAway
-                )
-              }
-              style={{
-                marginTop: "20px",
-                width: "100%",
-                padding: "13px",
-                background: "#0b8f4d",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                fontSize: "16px",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              Voorspelling opslaan
-            </button>
-          </div>
+                <button
+                  onClick={() => savePrediction(match)}
+                  style={{
+                    marginTop: "20px",
+                    width: "100%",
+                    padding: "13px",
+                    background: "#0b8f4d",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                  }}
+                >
+                  Voorspelling opslaan
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         {message && (
@@ -336,6 +418,16 @@ export default function Wedstrijden() {
             {message}
           </p>
         )}
+
+        <p
+          style={{
+            marginTop: "40px",
+            fontSize: "13px",
+            color: "#888",
+          }}
+        >
+          Data provided by football-data.org
+        </p>
       </section>
     </main>
   );
