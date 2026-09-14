@@ -11,10 +11,14 @@ export async function GET() {
   }
 
   const today = new Date();
+
+  const previousMonth = new Date();
+  previousMonth.setDate(today.getDate() - 30);
+
   const nextMonth = new Date();
   nextMonth.setDate(today.getDate() + 30);
 
-  const dateFrom = today.toISOString().split("T")[0];
+  const dateFrom = previousMonth.toISOString().split("T")[0];
   const dateTo = nextMonth.toISOString().split("T")[0];
 
   const response = await fetch(
