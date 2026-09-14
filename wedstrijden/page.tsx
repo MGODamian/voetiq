@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import { useState } from "react";
@@ -6,21 +5,16 @@ import { supabase } from "@/lib/supabase";
 
 export default function Wedstrijden() {
   const [playerName, setPlayerName] = useState("");
-
-  const [predictions, setPredictions] = useState({
-    ajaxHome: "",
-    ajaxAway: "",
-    feyenoordHome: "",
-    feyenoordAway: "",
-  });
-
+  const [ajaxHome, setAjaxHome] = useState("");
+  const [ajaxAway, setAjaxAway] = useState("");
+  const [feyenoordHome, setFeyenoordHome] = useState("");
+  const [feyenoordAway, setFeyenoordAway] = useState("");
   const [message, setMessage] = useState("");
 
   const savePrediction = async (
     matchName: string,
     homeScore: string,
-    awayScore: string,
-    playerName: string
+    awayScore: string
   ) => {
     if (!playerName.trim()) {
       setMessage("Vul eerst je spelersnaam in.");
@@ -57,7 +51,7 @@ export default function Wedstrijden() {
       return;
     }
 
-    setMessage("Voorspelling voor " + matchName + " opgeslagen!");
+    setMessage("Voorspelling opgeslagen!");
   };
 
   return (
@@ -190,13 +184,8 @@ export default function Wedstrijden() {
                 min="0"
                 max="20"
                 placeholder="Ajax"
-                value={predictions.ajaxHome}
-                onChange={(e) =>
-                  setPredictions({
-                    ...predictions,
-                    ajaxHome: e.target.value,
-                  })
-                }
+                value={ajaxHome}
+                onChange={(e) => setAjaxHome(e.target.value)}
                 style={{
                   width: "80px",
                   padding: "12px",
@@ -214,13 +203,8 @@ export default function Wedstrijden() {
                 min="0"
                 max="20"
                 placeholder="PSV"
-                value={predictions.ajaxAway}
-                onChange={(e) =>
-                  setPredictions({
-                    ...predictions,
-                    ajaxAway: e.target.value,
-                  })
-                }
+                value={ajaxAway}
+                onChange={(e) => setAjaxAway(e.target.value)}
                 style={{
                   width: "80px",
                   padding: "12px",
@@ -234,12 +218,7 @@ export default function Wedstrijden() {
 
             <button
               onClick={() =>
-                savePrediction(
-                  "Ajax - PSV",
-                  predictions.ajaxHome,
-                  predictions.ajaxAway,
-                  playerName
-                )
+                savePrediction("Ajax - PSV", ajaxHome, ajaxAway)
               }
               style={{
                 marginTop: "20px",
@@ -285,13 +264,8 @@ export default function Wedstrijden() {
                 min="0"
                 max="20"
                 placeholder="Feyenoord"
-                value={predictions.feyenoordHome}
-                onChange={(e) =>
-                  setPredictions({
-                    ...predictions,
-                    feyenoordHome: e.target.value,
-                  })
-                }
+                value={feyenoordHome}
+                onChange={(e) => setFeyenoordHome(e.target.value)}
                 style={{
                   width: "80px",
                   padding: "12px",
@@ -309,13 +283,8 @@ export default function Wedstrijden() {
                 min="0"
                 max="20"
                 placeholder="AZ"
-                value={predictions.feyenoordAway}
-                onChange={(e) =>
-                  setPredictions({
-                    ...predictions,
-                    feyenoordAway: e.target.value,
-                  })
-                }
+                value={feyenoordAway}
+                onChange={(e) => setFeyenoordAway(e.target.value)}
                 style={{
                   width: "80px",
                   padding: "12px",
@@ -331,9 +300,8 @@ export default function Wedstrijden() {
               onClick={() =>
                 savePrediction(
                   "Feyenoord - AZ",
-                  predictions.feyenoordHome,
-                  predictions.feyenoordAway,
-                  playerName
+                  feyenoordHome,
+                  feyenoordAway
                 )
               }
               style={{
@@ -372,4 +340,3 @@ export default function Wedstrijden() {
     </main>
   );
 }
-```
