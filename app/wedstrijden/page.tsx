@@ -109,6 +109,7 @@ export default function Wedstrijden() {
 
     const { error } = await supabase.from("predictions").insert({
       player_name: playerName.trim(),
+      match_id: match.id,
       match_name: matchName,
       home_score: home,
       away_score: away,
