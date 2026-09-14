@@ -41,10 +41,11 @@ export default function Home() {
       away_score: away,
     });
 
-    if (error) {
-      console.error(error);
-      setMessage("Er ging iets mis met opslaan.");
-      return;
+     if (error) {
+     console.error(error);
+     setMessage(`Fout: ${error.message}`);
+     return;
+    }
     }
 
     setMessage(`Voorspelling voor ${matchName} opgeslagen!`);
