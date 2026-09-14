@@ -78,6 +78,16 @@ export default function Wedstrijden() {
   };
 
   const savePrediction = async (match: Match) => {
+    if (
+      match.status !== "SCHEDULED" &&
+      match.status !== "TIMED"
+    ) {
+      setMessage(
+        "Deze wedstrijd is al begonnen. Voorspellen kan niet meer."
+      );
+      return;
+    }
+
     if (!playerName.trim()) {
       setMessage("Vul eerst je spelersnaam in.");
       return;
