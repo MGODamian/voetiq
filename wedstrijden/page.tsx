@@ -57,7 +57,7 @@ export default function Wedstrijden() {
       return;
     }
 
-    setMessage(`Voorspelling voor ${matchName} opgeslagen!`);
+    setMessage("Voorspelling voor " + matchName + " opgeslagen!");
   };
 
   return (
@@ -163,7 +163,6 @@ export default function Wedstrijden() {
             gap: "25px",
           }}
         >
-          {/* Ajax - PSV */}
           <div
             style={{
               background: "white",
@@ -259,7 +258,6 @@ export default function Wedstrijden() {
             </button>
           </div>
 
-          {/* Feyenoord - AZ */}
           <div
             style={{
               background: "white",
