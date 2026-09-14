@@ -1,9 +1,12 @@
+```tsx
 "use client";
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function Wedstrijden() {
+  const [playerName, setPlayerName] = useState("");
+
   const [predictions, setPredictions] = useState({
     ajaxHome: "",
     ajaxAway: "",
@@ -16,8 +19,14 @@ export default function Wedstrijden() {
   const savePrediction = async (
     matchName: string,
     homeScore: string,
-    awayScore: string
+    awayScore: string,
+    playerName: string
   ) => {
+    if (!playerName.trim()) {
+      setMessage("Vul eerst je spelersnaam in.");
+      return;
+    }
+
     const home = Number(homeScore);
     const away = Number(awayScore);
 
@@ -36,6 +45,7 @@ export default function Wedstrijden() {
     }
 
     const { error } = await supabase.from("predictions").insert({
+      player_name: playerName.trim(),
       match_name: matchName,
       home_score: home,
       away_score: away,
@@ -81,6 +91,7 @@ export default function Wedstrijden() {
             <a href="/" style={{ color: "white", textDecoration: "none" }}>
               Home
             </a>
+
             <a
               href="/wedstrijden"
               style={{
@@ -91,8 +102,9 @@ export default function Wedstrijden() {
             >
               Wedstrijden
             </a>
+
             <a
-              href="/"
+              href="/ranglijst"
               style={{ color: "white", textDecoration: "none" }}
             >
               Ranglijst
@@ -112,9 +124,37 @@ export default function Wedstrijden() {
           Wedstrijden
         </h2>
 
-        <p style={{ color: "#666", marginBottom: "35px" }}>
+        <p style={{ color: "#666", marginBottom: "25px" }}>
           Voorspel de uitslag en verdien punten.
         </p>
+
+        <div style={{ marginBottom: "35px" }}>
+          <label
+            style={{
+              display: "block",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Jouw spelersnaam
+          </label>
+
+          <input
+            type="text"
+            placeholder="Bijvoorbeeld Damian"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            maxLength={20}
+            style={{
+              width: "100%",
+              maxWidth: "350px",
+              padding: "12px",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              fontSize: "16px",
+            }}
+          />
+        </div>
 
         <div
           style={{
@@ -132,17 +172,11 @@ export default function Wedstrijden() {
               boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
             }}
           >
-            <p style={{ color: "#777", marginTop: 0 }}>
-              Eredivisie
-            </p>
+            <p style={{ color: "#777", marginTop: 0 }}>Eredivisie</p>
 
-            <h3 style={{ fontSize: "24px" }}>
-              Ajax 🆚 PSV
-            </h3>
+            <h3 style={{ fontSize: "24px" }}>Ajax 🆚 PSV</h3>
 
-            <p style={{ color: "#777" }}>
-              Voorspel de eindstand
-            </p>
+            <p style={{ color: "#777" }}>Voorspel de eindstand</p>
 
             <div
               style={{
@@ -204,7 +238,8 @@ export default function Wedstrijden() {
                 savePrediction(
                   "Ajax - PSV",
                   predictions.ajaxHome,
-                  predictions.ajaxAway
+                  predictions.ajaxAway,
+                  playerName
                 )
               }
               style={{
@@ -233,17 +268,11 @@ export default function Wedstrijden() {
               boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
             }}
           >
-            <p style={{ color: "#777", marginTop: 0 }}>
-              Eredivisie
-            </p>
+            <p style={{ color: "#777", marginTop: 0 }}>Eredivisie</p>
 
-            <h3 style={{ fontSize: "24px" }}>
-              Feyenoord 🆚 AZ
-            </h3>
+            <h3 style={{ fontSize: "24px" }}>Feyenoord 🆚 AZ</h3>
 
-            <p style={{ color: "#777" }}>
-              Voorspel de eindstand
-            </p>
+            <p style={{ color: "#777" }}>Voorspel de eindstand</p>
 
             <div
               style={{
@@ -305,7 +334,8 @@ export default function Wedstrijden() {
                 savePrediction(
                   "Feyenoord - AZ",
                   predictions.feyenoordHome,
-                  predictions.feyenoordAway
+                  predictions.feyenoordAway,
+                  playerName
                 )
               }
               style={{
@@ -344,3 +374,4 @@ export default function Wedstrijden() {
     </main>
   );
 }
+```
