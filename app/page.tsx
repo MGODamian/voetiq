@@ -4,12 +4,12 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
-  const [predictions, setPredictions] = useState({
-    ajaxHome: "",
-    ajaxAway: "",
-    feyenoordHome: "",
-    feyenoordAway: "",
-  });
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const [ajaxHome, setAjaxHome] = useState("");
+  const [ajaxAway, setAjaxAway] = useState("");
+  const [feyenoordHome, setFeyenoordHome] = useState("");
+  const [feyenoordAway, setFeyenoordAway] = useState("");
 
   const [message, setMessage] = useState("");
 
@@ -36,6 +36,7 @@ export default function Home() {
     }
 
     const { error } = await supabase.from("predictions").insert({
+      player_name: "Gast",
       match_name: matchName,
       home_score: home,
       away_score: away,
@@ -43,206 +44,321 @@ export default function Home() {
 
     if (error) {
       console.error(error);
-      setMessage(`Fout: ${error.message}`);
+      setMessage("Er ging iets mis met opslaan.");
       return;
     }
 
-    setMessage(`Voorspelling voor ${matchName} opgeslagen!`);
+    setMessage("Voorspelling opgeslagen!");
   };
 
   return (
-    <main className="min-h-screen bg-green-950 text-white">
-      <header className="border-b border-green-800 bg-green-900">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
-          <h1 className="text-2xl font-bold">VoetIQ</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: "#f5f7f6",
+        color: "#111",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      <header
+        style={{
+          background: "#0b8f4d",
+          color: "white",
+          padding: "18px 20px",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <h1 style={{ margin: 0 }}>VoetIQ</h1>
 
-          <nav className="flex gap-6 text-sm font-medium">
-            <a href="#" className="hover:text-green-300">
-              Home
-            </a>
-            <a href="#wedstrijden" className="hover:text-green-300">
-              Wedstrijden
-            </a>
-            <a href="#ranglijst" className="hover:text-green-300">
-              Ranglijst
-            </a>
-          </nav>
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "white",
+              fontSize: "30px",
+              cursor: "pointer",
+            }}
+          >
+            ☰
+          </button>
         </div>
+
+        {menuOpen && (
+          <div
+            style={{
+              position: "absolute",
+              top: "70px",
+              right: "20px",
+              background: "white",
+              borderRadius: "12px",
+              boxShadow: "0 5px 20px rgba(0,0,0,0.2)",
+              overflow: "hidden",
+              width: "200px",
+              zIndex: 10,
+            }}
+          >
+            <a
+              href="/"
+              style={{
+                display: "block",
+                padding: "15px",
+                color: "#111",
+                textDecoration: "none",
+              }}
+            >
+              🏠 Home
+            </a>
+
+            <a
+              href="/wedstrijden"
+              style={{
+                display: "block",
+                padding: "15px",
+                color: "#111",
+                textDecoration: "none",
+              }}
+            >
+              ⚽ Wedstrijden
+            </a>
+
+            <a
+              href="/ranglijst"
+              style={{
+                display: "block",
+                padding: "15px",
+                color: "#111",
+                textDecoration: "none",
+              }}
+            >
+              🏆 Ranglijst
+            </a>
+          </div>
+        )}
       </header>
 
-      <section className="mx-auto max-w-6xl px-6 py-20 text-center">
-        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-green-300">
+      <section
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          padding: "60px 20px",
+        }}
+      >
+        <h2
+          style={{
+            fontSize: "42px",
+            marginBottom: "10px",
+          }}
+        >
           Voetbal Voorspellen
-        </p>
-
-        <h2 className="text-5xl font-black tracking-tight sm:text-6xl">
-          Voorspel. Scoor. Win.
         </h2>
 
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-green-100">
-          Voorspel voetbalwedstrijden, verdien punten en klim naar de top van
-          de VoetIQ-ranglijst.
+        <p
+          style={{
+            fontSize: "20px",
+            color: "#666",
+            marginBottom: "40px",
+          }}
+        >
+          Voorspel. Scoor. Win.
         </p>
-      </section>
 
-      <section
-        id="wedstrijden"
-        className="mx-auto grid max-w-6xl gap-6 px-6 pb-16 md:grid-cols-2"
-      >
-        <div className="rounded-2xl border border-green-800 bg-green-900 p-6 shadow-xl">
-          <div className="mb-6 flex items-center justify-between">
-            <span className="rounded-full bg-green-700 px-3 py-1 text-xs font-semibold">
-              Eredivisie
-            </span>
-            <span className="text-sm text-green-300">Vandaag</span>
-          </div>
-
-          <h3 className="text-center text-2xl font-bold">Ajax – PSV</h3>
-
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <input
-              type="number"
-              min="0"
-              max="20"
-              value={predictions.ajaxHome}
-              onChange={(e) =>
-                setPredictions({
-                  ...predictions,
-                  ajaxHome: e.target.value,
-                })
-              }
-              className="w-20 rounded-xl bg-white px-4 py-3 text-center text-2xl font-bold text-black"
-            />
-
-            <span className="text-2xl font-bold">-</span>
-
-            <input
-              type="number"
-              min="0"
-              max="20"
-              value={predictions.ajaxAway}
-              onChange={(e) =>
-                setPredictions({
-                  ...predictions,
-                  ajaxAway: e.target.value,
-                })
-              }
-              className="w-20 rounded-xl bg-white px-4 py-3 text-center text-2xl font-bold text-black"
-            />
-          </div>
-
-          <button
-            onClick={() =>
-              savePrediction(
-                "Ajax - PSV",
-                predictions.ajaxHome,
-                predictions.ajaxAway
-              )
-            }
-            className="mt-6 w-full rounded-xl bg-green-400 px-5 py-3 font-bold text-green-950 transition hover:bg-green-300"
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gap: "25px",
+          }}
+        >
+          <div
+            style={{
+              background: "white",
+              borderRadius: "16px",
+              padding: "25px",
+              boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
+            }}
           >
-            Voorspelling opslaan
-          </button>
+            <p style={{ color: "#777" }}>Eredivisie</p>
+
+            <h3 style={{ fontSize: "25px" }}>Ajax 🆚 PSV</h3>
+
+            <p style={{ color: "#777" }}>Voorspel de eindstand</p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                marginTop: "20px",
+              }}
+            >
+              <input
+                type="number"
+                min="0"
+                max="20"
+                placeholder="Ajax"
+                value={ajaxHome}
+                onChange={(e) => setAjaxHome(e.target.value)}
+                style={{
+                  width: "80px",
+                  padding: "12px",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "18px",
+                  textAlign: "center",
+                }}
+              />
+
+              <span>-</span>
+
+              <input
+                type="number"
+                min="0"
+                max="20"
+                placeholder="PSV"
+                value={ajaxAway}
+                onChange={(e) => setAjaxAway(e.target.value)}
+                style={{
+                  width: "80px",
+                  padding: "12px",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "18px",
+                  textAlign: "center",
+                }}
+              />
+            </div>
+
+            <button
+              onClick={() =>
+                savePrediction("Ajax - PSV", ajaxHome, ajaxAway)
+              }
+              style={{
+                marginTop: "20px",
+                width: "100%",
+                padding: "13px",
+                background: "#0b8f4d",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Voorspelling opslaan
+            </button>
+          </div>
+
+          <div
+            style={{
+              background: "white",
+              borderRadius: "16px",
+              padding: "25px",
+              boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
+            }}
+          >
+            <p style={{ color: "#777" }}>Eredivisie</p>
+
+            <h3 style={{ fontSize: "25px" }}>Feyenoord 🆚 AZ</h3>
+
+            <p style={{ color: "#777" }}>Voorspel de eindstand</p>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                marginTop: "20px",
+              }}
+            >
+              <input
+                type="number"
+                min="0"
+                max="20"
+                placeholder="Feyenoord"
+                value={feyenoordHome}
+                onChange={(e) => setFeyenoordHome(e.target.value)}
+                style={{
+                  width: "80px",
+                  padding: "12px",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "18px",
+                  textAlign: "center",
+                }}
+              />
+
+              <span>-</span>
+
+              <input
+                type="number"
+                min="0"
+                max="20"
+                placeholder="AZ"
+                value={feyenoordAway}
+                onChange={(e) => setFeyenoordAway(e.target.value)}
+                style={{
+                  width: "80px",
+                  padding: "12px",
+                  border: "1px solid #ddd",
+                  borderRadius: "8px",
+                  fontSize: "18px",
+                  textAlign: "center",
+                }}
+              />
+            </div>
+
+            <button
+              onClick={() =>
+                savePrediction(
+                  "Feyenoord - AZ",
+                  feyenoordHome,
+                  feyenoordAway
+                )
+              }
+              style={{
+                marginTop: "20px",
+                width: "100%",
+                padding: "13px",
+                background: "#0b8f4d",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              Voorspelling opslaan
+            </button>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-green-800 bg-green-900 p-6 shadow-xl">
-          <div className="mb-6 flex items-center justify-between">
-            <span className="rounded-full bg-green-700 px-3 py-1 text-xs font-semibold">
-              Eredivisie
-            </span>
-            <span className="text-sm text-green-300">Morgen</span>
-          </div>
-
-          <h3 className="text-center text-2xl font-bold">Feyenoord – AZ</h3>
-
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <input
-              type="number"
-              min="0"
-              max="20"
-              value={predictions.feyenoordHome}
-              onChange={(e) =>
-                setPredictions({
-                  ...predictions,
-                  feyenoordHome: e.target.value,
-                })
-              }
-              className="w-20 rounded-xl bg-white px-4 py-3 text-center text-2xl font-bold text-black"
-            />
-
-            <span className="text-2xl font-bold">-</span>
-
-            <input
-              type="number"
-              min="0"
-              max="20"
-              value={predictions.feyenoordAway}
-              onChange={(e) =>
-                setPredictions({
-                  ...predictions,
-                  feyenoordAway: e.target.value,
-                })
-              }
-              className="w-20 rounded-xl bg-white px-4 py-3 text-center text-2xl font-bold text-black"
-            />
-          </div>
-
-          <button
-            onClick={() =>
-              savePrediction(
-                "Feyenoord - AZ",
-                predictions.feyenoordHome,
-                predictions.feyenoordAway
-              )
-            }
-            className="mt-6 w-full rounded-xl bg-green-400 px-5 py-3 font-bold text-green-950 transition hover:bg-green-300"
+        {message && (
+          <p
+            style={{
+              marginTop: "30px",
+              padding: "15px",
+              background: "#e8f7ef",
+              borderRadius: "10px",
+              color: "#08763e",
+              fontWeight: "bold",
+            }}
           >
-            Voorspelling opslaan
-          </button>
-        </div>
-      </section>
-
-      {message && (
-        <div className="mx-auto mb-12 max-w-2xl px-6">
-          <div className="rounded-xl border border-green-700 bg-green-900 p-4 text-center font-semibold">
             {message}
-          </div>
-        </div>
-      )}
-
-      <section id="ranglijst" className="mx-auto max-w-4xl px-6 pb-20">
-        <h2 className="mb-6 text-center text-3xl font-bold">Ranglijst</h2>
-
-        <div className="overflow-hidden rounded-2xl border border-green-800 bg-green-900">
-          <div className="grid grid-cols-3 border-b border-green-800 px-6 py-4 font-semibold text-green-300">
-            <span>#</span>
-            <span>Speler</span>
-            <span className="text-right">Punten</span>
-          </div>
-
-          <div className="grid grid-cols-3 px-6 py-4">
-            <span>1</span>
-            <span>AjaxFan</span>
-            <span className="text-right font-bold">1240</span>
-          </div>
-
-          <div className="grid grid-cols-3 border-t border-green-800 px-6 py-4">
-            <span>2</span>
-            <span>VoetbalPro</span>
-            <span className="text-right font-bold">1185</span>
-          </div>
-
-          <div className="grid grid-cols-3 border-t border-green-800 px-6 py-4">
-            <span>3</span>
-            <span>Damian</span>
-            <span className="text-right font-bold">1100</span>
-          </div>
-        </div>
+          </p>
+        )}
       </section>
-
-      <footer className="border-t border-green-800 bg-green-900 py-8 text-center text-sm text-green-300">
-        © 2026 VoetIQ — Voorspel de wedstrijd.
-      </footer>
     </main>
   );
 }
