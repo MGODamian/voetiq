@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [playerName, setPlayerName] = useState("");
 
   const [ajaxHome, setAjaxHome] = useState("");
   const [ajaxAway, setAjaxAway] = useState("");
@@ -18,6 +19,11 @@ export default function Home() {
     homeScore: string,
     awayScore: string
   ) => {
+    if (!playerName.trim()) {
+      setMessage("Vul eerst je spelersnaam in.");
+      return;
+    }
+
     const home = Number(homeScore);
     const away = Number(awayScore);
 
@@ -36,7 +42,7 @@ export default function Home() {
     }
 
     const { error } = await supabase.from("predictions").insert({
-      player_name: "Gast",
+      player_name: playerName.trim(),
       match_name: matchName,
       home_score: home,
       away_score: away,
@@ -166,11 +172,39 @@ export default function Home() {
           style={{
             fontSize: "20px",
             color: "#666",
-            marginBottom: "40px",
+            marginBottom: "30px",
           }}
         >
           Voorspel. Scoor. Win.
         </p>
+
+        <div style={{ marginBottom: "35px" }}>
+          <label
+            style={{
+              display: "block",
+              fontWeight: "bold",
+              marginBottom: "8px",
+            }}
+          >
+            Jouw spelersnaam
+          </label>
+
+          <input
+            type="text"
+            placeholder="Bijvoorbeeld Damian"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            maxLength={20}
+            style={{
+              width: "100%",
+              maxWidth: "350px",
+              padding: "12px",
+              border: "1px solid #ddd",
+              borderRadius: "8px",
+              fontSize: "16px",
+            }}
+          />
+        </div>
 
         <div
           style={{
