@@ -6,674 +6,578 @@ import { supabase } from "@/lib/supabase";
 import Navbar from "../Navbar";
 
 type Profile = {
-  username: string;
-  first_name: string;
-  last_name: string;
+username: string;
+first_name: string;
+last_name: string;
 };
 
 type Prediction = {
-  id: number;
-  match_id: number;
-  match_name: string;
-  home_score: number;
-  away_score: number;
-  actual_home_score: number | null;
-  actual_away_score: number | null;
-  points: number;
-  created_at: string;
-};
-
-type RankingPlayer = {
-  user_id: string;
-  username: string;
-  total_points: number;
+id: number;
+match_id: number;
+match_name: string;
+home_score: number;
+away_score: number;
+actual_home_score: number | null;
+actual_away_score: number | null;
+points: number;
+created_at: string;
 };
 
 export default function ProfielPage() {
-  const router = useRouter();
+const router = useRouter();
 
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [predictions, setPredictions] = useState<Prediction[]>([]);
-  const [rankPosition, setRankPosition] = useState<number | null>(null);
-  const [totalPlayers, setTotalPlayers] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+const [profile, setProfile] = useState<Profile | null>(null);
+const [predictions, setPredictions] = useState<Prediction[]>([]);
+const [rankPosition, setRankPosition] = useState<number | null>(null);
+const [totalPlayers, setTotalPlayers] = useState(0);
+const [loading, setLoading] = useState(true);
+const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+useEffect(() => {
+loadProfile();
+}, []);
 
-  async function loadProfile() {
-    setLoading(true);
-    setErrorMessage("");
+async function loadProfile() {
+setLoading(true);
+setErrorMessage("");
 
-    try {
-      console.log("1. Profiel laden gestart");
+try {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
 
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+  if (userError) {
+    throw userError;
+  }
 
-      console.log("2. Gebruiker:", user);
+  if (!user) {
+    router.push("/inloggen");
+    return;
+  }
 
-      if (userError) {
-        console.error("AUTH ERROR:", userError);
-        throw userError;
-      }
+  const { data: profileData, error: profileError } = await supabase
+    .from("profiles")
+    .select("username, first_name, last_name")
+    .eq("id", user.id)
+    .maybeSingle();
 
-      if (!user) {
-        router.push("/inloggen");
-        return;
-      }
+  if (profileError) {
+    throw profileError;
+  }
 
-      console.log("3. Profiel ophalen voor:", user.id);
+  if (!profileData) {
+    throw new Error("Er is geen profiel gevonden voor dit account.");
+  }
 
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("username, first_name, last_name")
-        .eq("id", user.id)
-        .maybeSingle();
+  const {
+    data: predictionData,
+    error: predictionError,
+  } = await supabase
+    .from("predictions")
+    .select(
+      "id, match_id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at"
+    )
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
 
-      console.log("4. Profiel resultaat:", profileData);
-      console.log("5. Profiel fout:", profileError);
+  if (predictionError) {
+    throw predictionError;
+  }
 
-      if (profileError) {
-        throw profileError;
-      }
+  const { data: rankingData, error: rankingError } =
+    await supabase.rpc("get_leaderboard");
 
-      if (!profileData) {
-        throw new Error(
-          "Er is geen profiel gevonden voor dit account."
-        );
-      }
+  if (rankingError) {
+    console.error("Ranglijst fout:", rankingError);
+  } else {
+    const ranking = (rankingData || []) as {
+      username: string;
+      total_points: number;
+    }[];
 
-      console.log("6. Voorspellingen ophalen");
+    setTotalPlayers(ranking.length);
 
-      const {
-        data: predictionData,
-        error: predictionError,
-      } = await supabase
-        .from("predictions")
-        .select(
-          `
-          id,
-          match_id,
-          match_name,
-          home_score,
-          away_score,
-          actual_home_score,
-          actual_away_score,
-          points,
-          created_at
-        `
-        )
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+    const currentPlayerIndex = ranking.findIndex(
+      (player) => player.username === profileData.username
+    );
 
-      console.log("7. Voorspellingen:", predictionData);
-      console.log("8. Voorspellingen fout:", predictionError);
-
-      if (predictionError) {
-        throw predictionError;
-      }
-
-      console.log("9. Ranglijst ophalen");
-
-      const { data: rankingData, error: rankingError } = await supabase
-        .from("predictions")
-        .select(
-          `
-          user_id,
-          points,
-          profiles!inner (
-            username
-          )
-        `
-        );
-
-      if (rankingError) {
-        console.error("RANGLIJST FOUT:", rankingError);
-      } else {
-        const rankingMap = new Map<
-          string,
-          RankingPlayer
-        >();
-
-        (rankingData || []).forEach((row: any) => {
-          const existing = rankingMap.get(row.user_id);
-
-          const points = row.points || 0;
-          const username = row.profiles?.username || "Onbekend";
-
-          if (existing) {
-            existing.total_points += points;
-          } else {
-            rankingMap.set(row.user_id, {
-              user_id: row.user_id,
-              username,
-              total_points: points,
-            });
-          }
-        });
-
-        const ranking = Array.from(rankingMap.values()).sort(
-          (a, b) => b.total_points - a.total_points
-        );
-
-        setTotalPlayers(ranking.length);
-
-        const currentPosition = ranking.findIndex(
-          (player) => player.user_id === user.id
-        );
-
-        if (currentPosition !== -1) {
-          setRankPosition(currentPosition + 1);
-        } else {
-          setRankPosition(null);
-        }
-      }
-
-      setProfile(profileData);
-      setPredictions(predictionData || []);
-
-      console.log("10. Profiel succesvol geladen");
-    } catch (error: any) {
-      console.error("PROFIEL FOUT:", error);
-
-      const message =
-        error?.message ||
-        error?.details ||
-        error?.hint ||
-        "Onbekende fout bij het laden van je profiel.";
-
-      setErrorMessage(`Fout: ${message}`);
-    } finally {
-      setLoading(false);
+    if (currentPlayerIndex !== -1) {
+      setRankPosition(currentPlayerIndex + 1);
     }
   }
 
-  const totalPoints = predictions.reduce(
-    (total, prediction) => total + (prediction.points || 0),
-    0
-  );
+  setProfile(profileData);
+  setPredictions(predictionData || []);
+} catch (error: unknown) {
+  console.error("PROFIEL FOUT:", error);
 
-  const totalPredictions = predictions.length;
+  const message =
+    error instanceof Error
+      ? error.message
+      : "Onbekende fout bij het laden van je profiel.";
 
-  const exactPredictions = predictions.filter(
-    (prediction) =>
-      prediction.actual_home_score !== null &&
-      prediction.actual_away_score !== null &&
-      prediction.home_score === prediction.actual_home_score &&
-      prediction.away_score === prediction.actual_away_score
-  ).length;
-
-  const correctResults = predictions.filter((prediction) => {
-    if (
-      prediction.actual_home_score === null ||
-      prediction.actual_away_score === null
-    ) {
-      return false;
-    }
-
-    const predictionResult =
-      prediction.home_score === prediction.away_score
-        ? "draw"
-        : prediction.home_score > prediction.away_score
-          ? "home"
-          : "away";
-
-    const actualResult =
-      prediction.actual_home_score === prediction.actual_away_score
-        ? "draw"
-        : prediction.actual_home_score > prediction.actual_away_score
-          ? "home"
-          : "away";
-
-    return predictionResult === actualResult;
-  }).length;
-
-  function formatDate(date: string) {
-    return new Date(date).toLocaleString("nl-NL", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  }
-
-  return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(180deg, #020e09 0%, #04150d 45%, #071b12 100%)",
-        color: "white",
-      }}
-    >
-      <Navbar />
-
-      <section
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-          padding: "40px 20px 60px",
-        }}
-      >
-        {loading && (
-          <div
-            style={{
-              padding: "50px 20px",
-              textAlign: "center",
-              color: "#a9c5b5",
-            }}
-          >
-            Profiel laden...
-          </div>
-        )}
-
-        {!loading && errorMessage && (
-          <div
-            style={{
-              maxWidth: "650px",
-              margin: "50px auto",
-              padding: "25px",
-              borderRadius: "18px",
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              textAlign: "center",
-            }}
-          >
-            <p
-              style={{
-                marginBottom: "20px",
-                color: "#ffb4b4",
-                lineHeight: 1.6,
-              }}
-            >
-              {errorMessage}
-            </p>
-
-            <button
-              onClick={loadProfile}
-              style={{
-                border: "none",
-                borderRadius: "10px",
-                padding: "12px 20px",
-                background: "#2ee681",
-                color: "#03150c",
-                fontWeight: 800,
-                cursor: "pointer",
-              }}
-            >
-              Opnieuw proberen
-            </button>
-          </div>
-        )}
-
-        {!loading && !errorMessage && profile && (
-          <>
-            <div
-              style={{
-                marginBottom: "30px",
-                padding: "30px",
-                borderRadius: "22px",
-                background:
-                  "linear-gradient(145deg, rgba(13,50,31,0.95), rgba(4,21,13,0.95))",
-                border: "1px solid rgba(75,255,153,0.12)",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.25)",
-              }}
-            >
-              <p
-                style={{
-                  margin: 0,
-                  color: "#2ee681",
-                  fontSize: "13px",
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: "1px",
-                }}
-              >
-                Mijn profiel
-              </p>
-
-              <h1
-                style={{
-                  margin: "8px 0 5px",
-                  fontSize: "34px",
-                  fontWeight: 900,
-                }}
-              >
-                {profile.username}
-              </h1>
-
-              <p
-                style={{
-                  margin: 0,
-                  color: "#a9c5b5",
-                  fontSize: "14px",
-                }}
-              >
-                {profile.first_name} {profile.last_name}
-              </p>
-
-              {rankPosition !== null && (
-                <div
-                  style={{
-                    marginTop: "20px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "9px 13px",
-                    borderRadius: "10px",
-                    background: "rgba(46,230,129,0.10)",
-                    border: "1px solid rgba(46,230,129,0.14)",
-                    color: "#b9f5d2",
-                    fontSize: "13px",
-                    fontWeight: 800,
-                  }}
-                >
-                  🏆 #{rankPosition} van {totalPlayers} spelers
-                </div>
-              )}
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(auto-fit, minmax(180px, 1fr))",
-                gap: "15px",
-                marginBottom: "35px",
-              }}
-            >
-              <StatCard
-                icon="⭐"
-                label="Totaal punten"
-                value={totalPoints.toString()}
-              />
-
-              <StatCard
-                icon="⚽"
-                label="Voorspellingen"
-                value={totalPredictions.toString()}
-              />
-
-              <StatCard
-                icon="🎯"
-                label="Exact"
-                value={exactPredictions.toString()}
-              />
-
-              <StatCard
-                icon="✅"
-                label="Juiste uitslag"
-                value={correctResults.toString()}
-              />
-            </div>
-
-            <section>
-              <div style={{ marginBottom: "18px" }}>
-                <h2
-                  style={{
-                    margin: 0,
-                    fontSize: "24px",
-                    fontWeight: 900,
-                  }}
-                >
-                  Voorspellingsgeschiedenis
-                </h2>
-
-                <p
-                  style={{
-                    margin: "6px 0 0",
-                    color: "#8fa99a",
-                    fontSize: "14px",
-                  }}
-                >
-                  Een overzicht van jouw voorspellingen en behaalde punten.
-                </p>
-              </div>
-
-              {predictions.length === 0 && (
-                <div
-                  style={{
-                    padding: "35px 20px",
-                    borderRadius: "18px",
-                    background: "rgba(255,255,255,0.04)",
-                    border: "1px solid rgba(255,255,255,0.07)",
-                    textAlign: "center",
-                    color: "#8fa99a",
-                  }}
-                >
-                  Je hebt nog geen voorspellingen gedaan.
-                </div>
-              )}
-
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
-              >
-                {predictions.map((prediction) => {
-                  const hasResult =
-                    prediction.actual_home_score !== null &&
-                    prediction.actual_away_score !== null;
-
-                  const isExact =
-                    hasResult &&
-                    prediction.home_score ===
-                      prediction.actual_home_score &&
-                    prediction.away_score ===
-                      prediction.actual_away_score;
-
-                  return (
-                    <div
-                      key={prediction.id}
-                      style={{
-                        padding: "20px",
-                        borderRadius: "17px",
-                        background: "rgba(255,255,255,0.045)",
-                        border:
-                          "1px solid rgba(255,255,255,0.07)",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: "15px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <div>
-                          <p
-                            style={{
-                              margin: 0,
-                              fontWeight: 800,
-                              fontSize: "16px",
-                            }}
-                          >
-                            {prediction.match_name}
-                          </p>
-
-                          <p
-                            style={{
-                              margin: "6px 0 0",
-                              color: "#718d7d",
-                              fontSize: "12px",
-                            }}
-                          >
-                            Voorspeld op{" "}
-                            {formatDate(prediction.created_at)}
-                          </p>
-                        </div>
-
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
-                          }}
-                        >
-                          <div style={{ textAlign: "center" }}>
-                            <span
-                              style={{
-                                display: "block",
-                                color: "#718d7d",
-                                fontSize: "11px",
-                                marginBottom: "4px",
-                              }}
-                            >
-                              Jouw voorspelling
-                            </span>
-
-                            <strong style={{ fontSize: "22px" }}>
-                              {prediction.home_score} -{" "}
-                              {prediction.away_score}
-                            </strong>
-                          </div>
-
-                          {hasResult && (
-                            <>
-                              <span
-                                style={{
-                                  color: "#50695a",
-                                  fontWeight: 800,
-                                }}
-                              >
-                                →
-                              </span>
-
-                              <div style={{ textAlign: "center" }}>
-                                <span
-                                  style={{
-                                    display: "block",
-                                    color: "#718d7d",
-                                    fontSize: "11px",
-                                    marginBottom: "4px",
-                                  }}
-                                >
-                                  Uitslag
-                                </span>
-
-                                <strong style={{ fontSize: "22px" }}>
-                                  {prediction.actual_home_score} -{" "}
-                                  {prediction.actual_away_score}
-                                </strong>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          marginTop: "15px",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          gap: "10px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            padding: "6px 10px",
-                            borderRadius: "8px",
-                            background: hasResult
-                              ? isExact
-                                ? "rgba(46,230,129,0.12)"
-                                : "rgba(255,255,255,0.05)"
-                              : "rgba(255,255,255,0.05)",
-                            color: hasResult
-                              ? isExact
-                                ? "#2ee681"
-                                : "#b6c8bd"
-                              : "#8fa99a",
-                            fontSize: "12px",
-                            fontWeight: 800,
-                          }}
-                        >
-                          {hasResult
-                            ? isExact
-                              ? "🎯 Exact voorspeld"
-                              : "⚽ Wedstrijd gespeeld"
-                            : "⏳ Nog niet gespeeld"}
-                        </span>
-
-                        <span
-                          style={{
-                            fontWeight: 900,
-                            color:
-                              prediction.points > 0
-                                ? "#2ee681"
-                                : "#8fa99a",
-                          }}
-                        >
-                          {prediction.points || 0} punten
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          </>
-        )}
-      </section>
-    </main>
-  );
+  setErrorMessage(message);
+} finally {
+  setLoading(false);
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
+}
+
+const totalPoints = predictions.reduce(
+(total, prediction) => total + (prediction.points || 0),
+0
+);
+
+const totalPredictions = predictions.length;
+
+const playedPredictions = predictions.filter(
+(prediction) =>
+prediction.actual_home_score !== null &&
+prediction.actual_away_score !== null
+);
+
+const exactPredictions = playedPredictions.filter(
+(prediction) =>
+prediction.home_score === prediction.actual_home_score &&
+prediction.away_score === prediction.actual_away_score
+).length;
+
+const correctResults = playedPredictions.filter((prediction) => {
+const predictedResult =
+prediction.home_score === prediction.away_score
+? "draw"
+: prediction.home_score > prediction.away_score
+? "home"
+: "away";
+
+const actualResult =
+  prediction.actual_home_score === prediction.actual_away_score
+    ? "draw"
+    : prediction.actual_home_score > prediction.actual_away_score
+      ? "home"
+      : "away";
+
+return predictedResult === actualResult;
+
+}).length;
+
+const accuracy =
+playedPredictions.length > 0
+? Math.round((correctResults / playedPredictions.length) * 100)
+: 0;
+
+const averagePoints =
+playedPredictions.length > 0
+? (totalPoints / playedPredictions.length).toFixed(1)
+: "0.0";
+
+function formatDate(date: string) {
+return new Date(date).toLocaleString("nl-NL", {
+day: "2-digit",
+month: "2-digit",
+year: "numeric",
+hour: "2-digit",
+minute: "2-digit",
+});
+}
+
+function getPredictionStatus(prediction: Prediction) {
+const hasResult =
+prediction.actual_home_score !== null &&
+prediction.actual_away_score !== null;
+
+if (!hasResult) {
+  return {
+    label: "⏳ Nog niet gespeeld",
+    color: "#8fa99a",
+    background: "rgba(255,255,255,0.05)",
+  };
+}
+
+const isExact =
+  prediction.home_score === prediction.actual_home_score &&
+  prediction.away_score === prediction.actual_away_score;
+
+if (isExact) {
+  return {
+    label: "🎯 Exact",
+    color: "#2ee681",
+    background: "rgba(46,230,129,0.12)",
+  };
+}
+
+if (prediction.points > 0) {
+  return {
+    label: "✅ Juiste uitslag",
+    color: "#9ee7bd",
+    background: "rgba(46,230,129,0.08)",
+  };
+}
+
+return {
+  label: "❌ Geen punten",
+  color: "#a9aaa9",
+  background: "rgba(255,255,255,0.04)",
+};
+
+}
+
+return (
+<main className="min-h-screen bg-gradient-to-b from-green-950 via-green-900 to-gray-950 text-white">
+<Navbar />
+
+  <section className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
+    {loading && (
+      <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-16 text-center text-green-100/70">
+        Profiel laden...
+      </div>
+    )}
+
+    {!loading && errorMessage && (
+      <div className="mx-auto max-w-xl rounded-2xl border border-red-400/20 bg-red-500/10 p-8 text-center">
+        <div className="mb-3 text-4xl">⚠️</div>
+
+        <p className="font-semibold text-red-200">
+          {errorMessage}
+        </p>
+
+        <button
+          onClick={loadProfile}
+          className="mt-5 rounded-xl bg-green-600 px-6 py-3 font-bold text-white transition hover:bg-green-500"
+        >
+          Opnieuw proberen
+        </button>
+      </div>
+    )}
+
+    {!loading && !errorMessage && profile && (
+      <>
+        <section className="overflow-hidden rounded-3xl border border-green-400/10 bg-gradient-to-br from-green-800/80 via-green-950/90 to-gray-950 shadow-2xl">
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-5">
+                <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-green-500/15 text-4xl ring-1 ring-green-400/20">
+                  ⚽
+                </div>
+
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+                    Mijn profiel
+                  </p>
+
+                  <h1 className="mt-1 text-3xl font-black sm:text-4xl">
+                    {profile.username}
+                  </h1>
+
+                  <p className="mt-1 text-sm text-green-100/60">
+                    {profile.first_name} {profile.last_name}
+                  </p>
+                </div>
+              </div>
+
+              {rankPosition !== null && (
+                <div className="rounded-2xl border border-green-400/20 bg-green-400/10 px-5 py-4 text-center sm:min-w-[180px]">
+                  <p className="text-xs font-bold uppercase tracking-wide text-green-300">
+                    Rang
+                  </p>
+
+                  <p className="mt-1 text-3xl font-black text-white">
+                    #{rankPosition}
+                  </p>
+
+                  <p className="text-xs text-green-100/50">
+                    van {totalPlayers} spelers
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 border-t border-white/10 sm:grid-cols-4">
+            <ProfileHeaderStat
+              label="Punten"
+              value={totalPoints.toString()}
+            />
+
+            <ProfileHeaderStat
+              label="Voorspellingen"
+              value={totalPredictions.toString()}
+            />
+
+            <ProfileHeaderStat
+              label="Exact"
+              value={exactPredictions.toString()}
+            />
+
+            <ProfileHeaderStat
+              label="Accuracy"
+              value={`${accuracy}%`}
+            />
+          </div>
+        </section>
+
+        <section className="mt-8">
+          <div className="mb-4">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
+              Performance
+            </p>
+
+            <h2 className="mt-1 text-2xl font-black">
+              Jouw voorspellingen
+            </h2>
+
+            <p className="mt-1 text-sm text-green-100/50">
+              Bekijk hoe je presteert als voorspeller.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <PerformanceCard
+              icon="🎯"
+              label="Exacte scores"
+              value={exactPredictions.toString()}
+              description="Precies goed voorspeld"
+            />
+
+            <PerformanceCard
+              icon="✅"
+              label="Juiste uitslagen"
+              value={correctResults.toString()}
+              description="Winst, verlies of gelijk"
+            />
+
+            <PerformanceCard
+              icon="📈"
+              label="Accuracy"
+              value={`${accuracy}%`}
+              description={
+                playedPredictions.length > 0
+                  ? `${playedPredictions.length} gespeelde wedstrijden`
+                  : "Nog geen wedstrijden gespeeld"
+              }
+            />
+
+            <PerformanceCard
+              icon="⭐"
+              label="Gemiddeld"
+              value={averagePoints}
+              description="Punten per gespeelde wedstrijd"
+            />
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
+                Mijn geschiedenis
+              </p>
+
+              <h2 className="mt-1 text-2xl font-black">
+                Voorspellingen
+              </h2>
+            </div>
+
+            <p className="text-sm text-green-100/40">
+              {totalPredictions} voorspelling
+              {totalPredictions === 1 ? "" : "en"}
+            </p>
+          </div>
+
+          {predictions.length === 0 && (
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-12 text-center">
+              <div className="text-4xl">⚽</div>
+
+              <p className="mt-3 font-bold">
+                Je hebt nog geen voorspellingen gedaan.
+              </p>
+
+              <p className="mt-1 text-sm text-green-100/50">
+                Ga naar Wedstrijden en doe je eerste voorspelling.
+              </p>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            {predictions.map((prediction) => {
+              const status = getPredictionStatus(prediction);
+
+              const hasResult =
+                prediction.actual_home_score !== null &&
+                prediction.actual_away_score !== null;
+
+              return (
+                <article
+                  key={prediction.id}
+                  className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 transition hover:border-green-400/20 hover:bg-white/[0.07]"
+                >
+                  <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-bold text-white">
+                        {prediction.match_name}
+                      </p>
+
+                      <p className="mt-1 text-xs text-green-100/40">
+                        Voorspeld op {formatDate(prediction.created_at)}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <ScoreBox
+                        label="Jouw voorspelling"
+                        home={prediction.home_score}
+                        away={prediction.away_score}
+                      />
+
+                      {hasResult && (
+                        <>
+                          <span className="text-xl font-black text-green-100/20">
+                            →
+                          </span>
+
+                          <ScoreBox
+                            label="Uitslag"
+                            home={prediction.actual_home_score!}
+                            away={prediction.actual_away_score!}
+                          />
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-4">
+                    <span
+                      className="rounded-lg px-3 py-1.5 text-xs font-bold"
+                      style={{
+                        color: status.color,
+                        background: status.background,
+                      }}
+                    >
+                      {status.label}
+                    </span>
+
+                    <span
+                      className={`text-sm font-black ${
+                        prediction.points > 0
+                          ? "text-green-300"
+                          : "text-green-100/40"
+                      }`}
+                    >
+                      +{prediction.points || 0} punten
+                    </span>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="mt-10 rounded-2xl border border-white/10 bg-white/[0.035] p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-black">🏆 Jouw VoetIQ-carrière</p>
+
+              <p className="mt-1 text-sm text-green-100/45">
+                Blijf voorspellen, verbeter je accuracy en klim op de
+                ranglijst.
+              </p>
+            </div>
+
+            <div className="rounded-xl bg-green-500/10 px-4 py-3 text-center ring-1 ring-green-400/10">
+              <p className="text-xs text-green-100/50">
+                Totaalpunten
+              </p>
+
+              <p className="text-xl font-black text-green-300">
+                {totalPoints}
+              </p>
+            </div>
+          </div>
+        </section>
+      </>
+    )}
+  </section>
+</main>
+
+);
+}
+
+function ProfileHeaderStat({
+label,
+value,
 }: {
-  icon: string;
-  label: string;
-  value: string;
+label: string;
+value: string;
 }) {
-  return (
-    <div
-      style={{
-        padding: "22px",
-        borderRadius: "17px",
-        background: "rgba(255,255,255,0.045)",
-        border: "1px solid rgba(255,255,255,0.07)",
-      }}
-    >
-      <div style={{ fontSize: "22px", marginBottom: "12px" }}>
-        {icon}
-      </div>
+return (
+<div className="border-r border-white/10 px-4 py-5 text-center last:border-r-0">
+<p className="text-xl font-black text-white sm:text-2xl">
+{value}
+</p>
 
-      <div
-        style={{
-          fontSize: "27px",
-          fontWeight: 900,
-          color: "white",
-        }}
-      >
-        {value}
-      </div>
+  <p className="mt-1 text-[11px] font-bold uppercase tracking-wide text-green-100/40">
+    {label}
+  </p>
+</div>
 
-      <div
-        style={{
-          marginTop: "3px",
-          color: "#8fa99a",
-          fontSize: "13px",
-          fontWeight: 700,
-        }}
-      >
-        {label}
-      </div>
-    </div>
-  );
+);
+}
+
+function PerformanceCard({
+icon,
+label,
+value,
+description,
+}: {
+icon: string;
+label: string;
+value: string;
+description: string;
+}) {
+return (
+<div className="rounded-2xl border border-white/10 bg-white/[0.045] p-5 transition hover:border-green-400/20 hover:bg-white/[0.07]">
+<div className="flex items-center justify-between">
+<span className="text-2xl">{icon}</span>
+
+    <span className="text-2xl font-black text-white">
+      {value}
+    </span>
+  </div>
+
+  <p className="mt-4 font-bold text-white">
+    {label}
+  </p>
+
+  <p className="mt-1 text-xs leading-5 text-green-100/40">
+    {description}
+  </p>
+</div>
+
+);
+}
+
+function ScoreBox({
+label,
+home,
+away,
+}: {
+label: string;
+home: number;
+away: number;
+}) {
+return (
+<div className="min-w-[90px] text-center">
+<p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-green-100/35">
+{label}
+</p>
+
+  <div className="rounded-xl border border-white/10 bg-black/10 px-3 py-2">
+    <span className="text-xl font-black">
+      {home} - {away}
+    </span>
+  </div>
+</div>
+
+);
 }
