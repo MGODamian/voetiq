@@ -23,11 +23,19 @@ type Prediction = {
   created_at: string;
 };
 
+type RankingPlayer = {
+  user_id: string;
+  username: string;
+  total_points: number;
+};
+
 export default function ProfielPage() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [rankPosition, setRankPosition] = useState<number | null>(null);
+  const [totalPlayers, setTotalPlayers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -110,10 +118,66 @@ export default function ProfielPage() {
         throw predictionError;
       }
 
+      console.log("9. Ranglijst ophalen");
+
+      const { data: rankingData, error: rankingError } = await supabase
+        .from("predictions")
+        .select(
+          `
+          user_id,
+          points,
+          profiles!inner (
+            username
+          )
+        `
+        );
+
+      if (rankingError) {
+        console.error("RANGLIJST FOUT:", rankingError);
+      } else {
+        const rankingMap = new Map<
+          string,
+          RankingPlayer
+        >();
+
+        (rankingData || []).forEach((row: any) => {
+          const existing = rankingMap.get(row.user_id);
+
+          const points = row.points || 0;
+          const username = row.profiles?.username || "Onbekend";
+
+          if (existing) {
+            existing.total_points += points;
+          } else {
+            rankingMap.set(row.user_id, {
+              user_id: row.user_id,
+              username,
+              total_points: points,
+            });
+          }
+        });
+
+        const ranking = Array.from(rankingMap.values()).sort(
+          (a, b) => b.total_points - a.total_points
+        );
+
+        setTotalPlayers(ranking.length);
+
+        const currentPosition = ranking.findIndex(
+          (player) => player.user_id === user.id
+        );
+
+        if (currentPosition !== -1) {
+          setRankPosition(currentPosition + 1);
+        } else {
+          setRankPosition(null);
+        }
+      }
+
       setProfile(profileData);
       setPredictions(predictionData || []);
 
-      console.log("9. Profiel succesvol geladen");
+      console.log("10. Profiel succesvol geladen");
     } catch (error: any) {
       console.error("PROFIEL FOUT:", error);
 
@@ -293,12 +357,33 @@ export default function ProfielPage() {
               >
                 {profile.first_name} {profile.last_name}
               </p>
+
+              {rankPosition !== null && (
+                <div
+                  style={{
+                    marginTop: "20px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "9px 13px",
+                    borderRadius: "10px",
+                    background: "rgba(46,230,129,0.10)",
+                    border: "1px solid rgba(46,230,129,0.14)",
+                    color: "#b9f5d2",
+                    fontSize: "13px",
+                    fontWeight: 800,
+                  }}
+                >
+                  🏆 #{rankPosition} van {totalPlayers} spelers
+                </div>
+              )}
             </div>
 
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+                gridTemplateColumns:
+                  "repeat(auto-fit, minmax(180px, 1fr))",
                 gap: "15px",
                 marginBottom: "35px",
               }}
@@ -380,8 +465,10 @@ export default function ProfielPage() {
 
                   const isExact =
                     hasResult &&
-                    prediction.home_score === prediction.actual_home_score &&
-                    prediction.away_score === prediction.actual_away_score;
+                    prediction.home_score ===
+                      prediction.actual_home_score &&
+                    prediction.away_score ===
+                      prediction.actual_away_score;
 
                   return (
                     <div
@@ -390,7 +477,8 @@ export default function ProfielPage() {
                         padding: "20px",
                         borderRadius: "17px",
                         background: "rgba(255,255,255,0.045)",
-                        border: "1px solid rgba(255,255,255,0.07)",
+                        border:
+                          "1px solid rgba(255,255,255,0.07)",
                       }}
                     >
                       <div
@@ -420,7 +508,8 @@ export default function ProfielPage() {
                               fontSize: "12px",
                             }}
                           >
-                            Voorspeld op {formatDate(prediction.created_at)}
+                            Voorspeld op{" "}
+                            {formatDate(prediction.created_at)}
                           </p>
                         </div>
 
@@ -561,7 +650,9 @@ function StatCard({
         border: "1px solid rgba(255,255,255,0.07)",
       }}
     >
-      <div style={{ fontSize: "22px", marginBottom: "12px" }}>{icon}</div>
+      <div style={{ fontSize: "22px", marginBottom: "12px" }}>
+        {icon}
+      </div>
 
       <div
         style={{
