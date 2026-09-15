@@ -1,1 +1,379 @@
-"use client"; import { useEffect, useState } from "react"; import Link from "next/link"; import { supabase } from "@/lib/supabase"; type Match = { id: number; homeTeam: { name: string }; awayTeam: { name: string }; utcDate: string; status: string; competition: { name: string }; }; type Prediction = { home: string; away: string; }; export default function Home() { const [matches, setMatches] = useState<Match[]>([]); const [predictions, setPredictions] = useState<Record<number, Prediction>>({}); const [playerName, setPlayerName] = useState(""); const [message, setMessage] = useState(""); const [loading, setLoading] = useState(true); useEffect(() => { loadMatches(); }, []); async function loadMatches() { try { const response = await fetch("/api/matches", { cache: "no-store", }); if (!response.ok) { throw new Error("Kon wedstrijden niet ophalen."); } const data = await response.json(); const upcoming = (data.matches || []) .filter( (match: Match) => match.status === "SCHEDULED" || match.status === "TIMED" ) .sort( (a: Match, b: Match) => new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime() ) .slice(0, 6); setMatches(upcoming); } catch (error) { console.error(error); setMessage("De wedstrijden konden niet worden geladen."); } finally { setLoading(false); } } function updatePrediction( matchId: number, field: "home" | "away", value: string ) { setPredictions((current) => ({ ...current, [matchId]: { home: current[matchId]?.home ?? "", away: current[matchId]?.away ?? "", [field]: value, }, })); } async function savePrediction(match: Match) { if ( match.status !== "SCHEDULED" && match.status !== "TIMED" ) { setMessage( "Deze wedstrijd is al begonnen. Voorspellen kan niet meer." ); return; } if (!playerName.trim()) { setMessage("Vul eerst je spelersnaam in."); return; } const prediction = predictions[match.id]; if ( !prediction || prediction.home === "" || prediction.away === "" ) { setMessage("Vul eerst een volledige uitslag in."); return; } const home = Number(prediction.home); const away = Number(prediction.away); if ( !Number.isInteger(home) || !Number.isInteger(away) || home < 0 || away < 0 || home > 20 || away > 20 ) { setMessage("Gebruik alleen geldige scores van 0 t/m 20."); return; } const matchName = `${match.homeTeam.name} - ${match.awayTeam.name}`; const { error } = await supabase .from("predictions") .insert({ player_name: playerName.trim(), match_id: match.id, match_name: matchName, home_score: home, away_score: away, }); if (error) { console.error(error); setMessage("Er ging iets mis bij het opslaan."); return; } setMessage( `Voorspelling opgeslagen voor ${matchName}!` ); setPredictions((current) => ({ ...current, [match.id]: { home: "", away: "", }, })); } function formatDate(date: string) { return new Date(date).toLocaleString("nl-NL", { weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", }); } return ( <main className="min-h-screen bg-gray-100"> <header className="bg-green-700 text-white"> <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5"> <Link href="/" className="text-2xl font-bold" > VoetIQ </Link> <nav className="flex gap-5 text-sm font-medium"> <Link href="/" className="hover:underline"> Home </Link> <Link href="/wedstrijden" className="hover:underline" > Wedstrijden </Link> <Link href="/ranglijst" className="hover:underline" > Ranglijst </Link> </nav> </div> </header> <section className="bg-green-700 px-6 pb-10 text-center text-white"> <h1 className="text-4xl font-bold"> Voorspel. Scoor. Win. </h1> <p className="mx-auto mt-3 max-w-2xl text-green-100"> Voorspel echte voetbalwedstrijden, verdien punten en klim naar de top van de VoetIQ-ranglijst. </p> </section> <section className="mx-auto max-w-6xl px-6 py-8"> <div className="mb-8 rounded-xl bg-white p-6 shadow"> <label className="mb-2 block font-semibold text-gray-800"> Jouw spelersnaam </label> <input type="text" value={playerName} onChange={(e) => setPlayerName(e.target.value)} placeholder="Bijvoorbeeld Damian" className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-green-600" /> </div> <div className="mb-6 flex items-center justify-between"> <div> <h2 className="text-2xl font-bold text-gray-900"> Aankomende wedstrijden </h2> <p className="mt-1 text-sm text-gray-500"> Voorspel de uitslag voordat de wedstrijd begint. </p> </div> <Link href="/wedstrijden" className="rounded-lg bg-green-700 px-4 py-2 text-sm font-semibold text-white hover:bg-green-800" > Alle wedstrijden </Link> </div> {loading && ( <div className="rounded-xl bg-white p-8 text-center shadow"> <p className="text-gray-600"> Wedstrijden laden... </p> </div> )} {!loading && matches.length === 0 && ( <div className="rounded-xl bg-white p-8 text-center shadow"> <p className="text-gray-600"> Er zijn momenteel geen aankomende wedstrijden. </p> </div> )} <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"> {matches.map((match) => { const prediction = predictions[match.id] || { home: "", away: "", }; return ( <div key={match.id} className="rounded-xl bg-white p-6 shadow transition hover:-translate-y-1 hover:shadow-lg" > <div className="mb-4 text-center"> <p className="text-xs font-semibold uppercase text-green-700"> {match.competition.name} </p> <p className="mt-1 text-sm text-gray-500"> {formatDate(match.utcDate)} </p> </div> <div className="mb-6 flex items-center justify-between gap-3"> <div className="w-2/5 text-center font-semibold text-gray-900"> {match.homeTeam.name} </div> <div className="text-lg font-bold text-gray-400"> VS </div> <div className="w-2/5 text-center font-semibold text-gray-900"> {match.awayTeam.name} </div> </div> <div className="mb-4 flex items-center justify-center gap-3"> <input type="number" min="0" max="20" value={prediction.home} onChange={(e) => updatePrediction( match.id, "home", e.target.value ) } className="w-16 rounded-lg border border-gray-300 px-3 py-2 text-center text-lg font-bold" /> <span className="font-bold text-gray-400"> - </span> <input type="number" min="0" max="20" value={prediction.away} onChange={(e) => updatePrediction( match.id, "away", e.target.value ) } className="w-16 rounded-lg border border-gray-300 px-3 py-2 text-center text-lg font-bold" /> </div> <button onClick={() => savePrediction(match)} className="w-full rounded-lg bg-green-700 px-4 py-3 font-semibold text-white transition hover:bg-green-800" > Voorspelling opslaan </button> </div> ); })} </div> {message && ( <div className="mt-6 rounded-lg bg-white p-4 text-center font-medium text-gray-700 shadow"> {message} </div> )} <p className="mt-8 text-center text-xs text-gray-400"> Data provided by football-data.org </p> </section> </main> ); }
+"use client";
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+type Match = {
+id: number;
+utcDate: string;
+status: string;
+competition?: {
+name: string;
+};
+homeTeam: {
+name: string;
+};
+awayTeam: {
+name: string;
+};
+};
+
+export default function Home() {
+const [matches, setMatches] = useState<Match[]>([]);
+const [playerName, setPlayerName] = useState("");
+const [predictions, setPredictions] = useState<
+Record<number, { home: string; away: string }>
+
+({});
+const [message, setMessage] = useState("");
+const [loading, setLoading] = useState(true);
+
+useEffect(() => {
+loadMatches();
+}, []);
+
+async function loadMatches() {
+try {
+const response = await fetch("/api/matches");
+const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "Kon wedstrijden niet laden.");
+  }
+
+  const upcomingMatches = (data.matches || [])
+    .filter(
+      (match: Match) =>
+        match.status === "SCHEDULED" || match.status === "TIMED"
+    )
+    .sort(
+      (a: Match, b: Match) =>
+        new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
+    )
+    .slice(0, 6);
+
+  setMatches(upcomingMatches);
+} catch (error) {
+  console.error(error);
+  setMessage("De wedstrijden konden niet worden geladen.");
+} finally {
+  setLoading(false);
+}
+
+}
+
+function updatePrediction(
+matchId: number,
+type: "home" | "away",
+value: string
+) {
+setPredictions((current) => ({
+...current,
+[matchId]: {
+home: current[matchId]?.home || "",
+away: current[matchId]?.away || "",
+[type]: value,
+},
+}));
+}
+
+async function savePrediction(match: Match) {
+setMessage("");
+
+if (!playerName.trim()) {
+  setMessage("Vul eerst je naam in.");
+  return;
+}
+
+const prediction = predictions[match.id];
+
+if (!prediction?.home || !prediction?.away) {
+  setMessage("Vul beide scores in.");
+  return;
+}
+
+const home = Number(prediction.home);
+const away = Number(prediction.away);
+
+if (
+  !Number.isInteger(home) ||
+  !Number.isInteger(away) ||
+  home < 0 ||
+  away < 0 ||
+  home > 20 ||
+  away > 20
+) {
+  setMessage("Gebruik geldige scores tussen 0 en 20.");
+  return;
+}
+
+if (
+  match.status !== "SCHEDULED" &&
+  match.status !== "TIMED"
+) {
+  setMessage(
+    "Deze wedstrijd is al begonnen. Voorspellen kan niet meer."
+  );
+  return;
+}
+
+const matchName = `${match.homeTeam.name}-${match.awayTeam.name}`;
+
+const { error } = await supabase.from("predictions").insert({
+  player_name: playerName.trim(),
+  match_id: match.id,
+  match_name: matchName,
+  home_score: home,
+  away_score: away,
+});
+
+if (error) {
+  console.error(error);
+
+  if (error.code === "23505") {
+    setMessage(
+      "Je hebt al een voorspelling voor deze wedstrijd."
+    );
+    return;
+  }
+
+  setMessage(
+    "Er ging iets mis bij het opslaan van je voorspelling."
+  );
+  return;
+}
+
+setMessage(
+  `Voorspelling opgeslagen: ${match.homeTeam.name} ${home}-${away} ${match.awayTeam.name}`
+);
+
+}
+
+return (
+<main
+style={{
+minHeight: "100vh",
+background: "#f5f7f6",
+padding: "30px 20px",
+}}
+>
+<div
+style={{
+maxWidth: "900px",
+margin: "0 auto",
+}}
+>
+<header
+style={{
+background: "#00843d",
+color: "white",
+padding: "20px",
+borderRadius: "14px",
+marginBottom: "25px",
+}}
+>
+<h1 style={{ margin: 0 }}>VoetIQ</h1>
+
+      <nav style={{ marginTop: "12px" }}>
+        <a
+          href="/"
+          style={{
+            color: "white",
+            marginRight: "20px",
+            textDecoration: "none",
+          }}
+        >
+          Home
+        </a>
+
+        <a
+          href="/wedstrijden"
+          style={{
+            color: "white",
+            marginRight: "20px",
+            textDecoration: "none",
+          }}
+        >
+          Wedstrijden
+        </a>
+
+        <a
+          href="/ranglijst"
+          style={{
+            color: "white",
+            textDecoration: "none",
+          }}
+        >
+          Ranglijst
+        </a>
+      </nav>
+    </header>
+
+    <section
+      style={{
+        background: "white",
+        padding: "20px",
+        borderRadius: "14px",
+        marginBottom: "20px",
+      }}
+    >
+      <h2>Voorspel de wedstrijden ⚽</h2>
+
+      <input
+        type="text"
+        placeholder="Jouw naam"
+        value={playerName}
+        onChange={(e) => setPlayerName(e.target.value)}
+        style={{
+          width: "100%",
+          maxWidth: "350px",
+          padding: "12px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          marginBottom: "20px",
+          fontSize: "16px",
+        }}
+      />
+
+      {message && (
+        <div
+          style={{
+            background: "#eef7f1",
+            padding: "12px",
+            borderRadius: "8px",
+            marginBottom: "20px",
+          }}
+        >
+          {message}
+        </div>
+      )}
+    </section>
+
+    {loading && (
+      <p>Wedstrijden laden...</p>
+    )}
+
+    {!loading && matches.length === 0 && (
+      <p>Er zijn momenteel geen aankomende wedstrijden.</p>
+    )}
+
+    {matches.map((match) => {
+      const prediction = predictions[match.id] || {
+        home: "",
+        away: "",
+      };
+
+      const matchDate = new Date(match.utcDate);
+
+      return (
+        <section
+          key={match.id}
+          style={{
+            background: "white",
+            padding: "20px",
+            borderRadius: "14px",
+            marginBottom: "18px",
+          }}
+        >
+          <p
+            style={{
+              marginTop: 0,
+              color: "#666",
+            }}
+          >
+            {match.competition?.name || "Voetbal"} •{" "}
+            {matchDate.toLocaleDateString("nl-NL")} •{" "}
+            {matchDate.toLocaleTimeString("nl-NL", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </p>
+
+          <h3>
+            {match.homeTeam.name} – {match.awayTeam.name}
+          </h3>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              alignItems: "center",
+              marginTop: "15px",
+            }}
+          >
+            <input
+              type="number"
+              min="0"
+              max="20"
+              value={prediction.home}
+              onChange={(e) =>
+                updatePrediction(
+                  match.id,
+                  "home",
+                  e.target.value
+                )
+              }
+              style={{
+                width: "70px",
+                padding: "10px",
+                fontSize: "18px",
+                textAlign: "center",
+              }}
+            />
+
+            <span>-</span>
+
+            <input
+              type="number"
+              min="0"
+              max="20"
+              value={prediction.away}
+              onChange={(e) =>
+                updatePrediction(
+                  match.id,
+                  "away",
+                  e.target.value
+                )
+              }
+              style={{
+                width: "70px",
+                padding: "10px",
+                fontSize: "18px",
+                textAlign: "center",
+              }}
+            />
+
+            <button
+              onClick={() => savePrediction(match)}
+              style={{
+                padding: "11px 16px",
+                background: "#00843d",
+                color: "white",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontWeight: "bold",
+              }}
+            >
+              Voorspel
+            </button>
+          </div>
+        </section>
+      );
+    })}
+
+    <p
+      style={{
+        textAlign: "center",
+        color: "#777",
+        fontSize: "13px",
+        marginTop: "30px",
+      }}
+    >
+      Data provided by football-data.org
+    </p>
+  </div>
+</main>
+
+);
+}
