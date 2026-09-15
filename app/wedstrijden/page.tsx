@@ -130,7 +130,9 @@ export default function Wedstrijden() {
       const matchdays = upcomingMatches
         .map((match: Match) => match.matchday)
         .filter(
-          (matchday): matchday is number =>
+          (
+            matchday: number | undefined
+          ): matchday is number =>
             typeof matchday === "number"
         );
 
@@ -151,9 +153,11 @@ export default function Wedstrijden() {
     return Array.from(
       new Set(
         matches
-          .map((match) => match.matchday)
+          .map((match: Match) => match.matchday)
           .filter(
-            (matchday): matchday is number =>
+            (
+              matchday: number | undefined
+            ): matchday is number =>
               typeof matchday === "number"
           )
       )
@@ -350,7 +354,8 @@ export default function Wedstrijden() {
               gap: "8px",
               padding:
                 "7px 12px",
-              borderRadius: "999px",
+              borderRadius:
+                "999px",
               background:
                 "rgba(46,230,129,0.12)",
               border:
@@ -748,22 +753,19 @@ export default function Wedstrijden() {
                         }
                         disabled={
                           currentMatchdayIndex ===
-                          availableMatchdays.length -
-                            1
+                          availableMatchdays.length - 1
                         }
                         style={{
                           border:
                             "none",
                           background:
                             currentMatchdayIndex ===
-                            availableMatchdays.length -
-                              1
+                            availableMatchdays.length - 1
                               ? "#f1f3f2"
                               : "#e9faf1",
                           color:
                             currentMatchdayIndex ===
-                            availableMatchdays.length -
-                              1
+                            availableMatchdays.length - 1
                               ? "#a1aaa5"
                               : "#08763e",
                           borderRadius:
@@ -774,8 +776,7 @@ export default function Wedstrijden() {
                             800,
                           cursor:
                             currentMatchdayIndex ===
-                            availableMatchdays.length -
-                              1
+                            availableMatchdays.length - 1
                               ? "default"
                               : "pointer",
                         }}
