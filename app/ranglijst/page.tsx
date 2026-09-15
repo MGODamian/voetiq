@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -80,11 +79,12 @@ export default function Ranglijst() {
             players.map((player, index) => (
               <div
                 key={player.username}
-                className={`grid grid-cols-[70px_1fr_120px] items-center px-5 py-5 transition ${
-                  index < 3
+                className={
+                  "grid grid-cols-[70px_1fr_120px] items-center px-5 py-5 transition " +
+                  (index < 3
                     ? "bg-white/10"
-                    : "border-t border-white/5"
-                }`}
+                    : "border-t border-white/5")
+                }
               >
                 <div className="text-xl font-bold">
                   {index === 0
@@ -110,25 +110,4 @@ export default function Ranglijst() {
 
                 <div className="text-right">
                   <span className="font-black text-green-300">
-                    {player.total_points}
-                  </span>
-                  <span className="ml-1 text-sm text-green-100/60">
-                    punten
-                  </span>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-sm text-green-100/60">
-            💡 Elke voorspelling kan je punten opleveren. Hoe meer juiste
-            voorspellingen, hoe hoger je komt op de ranglijst.
-          </p>
-        </div>
-      </section>
-    </main>
-  );
-}
 ```
