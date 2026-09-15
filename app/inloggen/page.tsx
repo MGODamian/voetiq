@@ -35,13 +35,13 @@ export default function Inloggen() {
     }
 
     if (!rememberMe) {
-      Object.keys(localStorage)
-        .filter(
-          (key) => key.startsWith("sb-") && key.endsWith("-auth-token")
-        )
-        .forEach((key) => {
-          localStorage.removeItem(key);
-        });
+      const authKeys = Object.keys(localStorage).filter(
+        (key) => key.startsWith("sb-") && key.endsWith("-auth-token")
+      );
+
+      authKeys.forEach((key) => {
+        localStorage.removeItem(key);
+      });
     }
 
     setLoading(false);
@@ -291,13 +291,5 @@ export default function Inloggen() {
             textAlign: "center",
             color: "#53675e",
             fontSize: "11px",
-            marginTop: "20px",
-          }}
-        >
-          VoetIQ • Voorspel. Scoor punten.
-        </p>
-      </div>
-    </main>
-  );
-}
+            marginTop: "
 ```
