@@ -18,15 +18,19 @@ name: string;
 };
 };
 
+type Prediction = {
+home: string;
+away: string;
+};
+
 export default function Home() {
 const [matches, setMatches] = useState<Match[]>([]);
 const [playerName, setPlayerName] = useState("");
-const [predictions, setPredictions] = useState<
-Record<number, { home: string; away: string }>
-
-> ({});
-> const [message, setMessage] = useState("");
-> const [loading, setLoading] = useState(true);
+const [predictions, setPredictions] = useState<Record<number, Prediction>>(
+{}
+);
+const [message, setMessage] = useState("");
+const [loading, setLoading] = useState(true);
 
 useEffect(() => {
 loadMatches();
@@ -37,7 +41,6 @@ try {
 const response = await fetch("/api/matches");
 const data = await response.json();
 
-```
   if (!response.ok) {
     throw new Error(data.error || "Kon wedstrijden niet laden.");
   }
@@ -61,7 +64,6 @@ const data = await response.json();
 } finally {
   setLoading(false);
 }
-```
 
 }
 
@@ -71,28 +73,25 @@ type: "home" | "away",
 value: string
 ) {
 setPredictions((current) => {
-const oldPrediction = current[matchId] || {
+const existing = current[matchId] || {
 home: "",
 away: "",
 };
 
-```
   return {
     ...current,
     [matchId]: {
-      home: type === "home" ? value : oldPrediction.home,
-      away: type === "away" ? value : oldPrediction.away,
+      home: type === "home" ? value : existing.home,
+      away: type === "away" ? value : existing.away,
     },
   };
 });
-```
 
 }
 
 async function savePrediction(match: Match) {
 setMessage("");
 
-```
 if (!playerName.trim()) {
   setMessage("Vul eerst je naam in.");
   return;
@@ -100,7 +99,7 @@ if (!playerName.trim()) {
 
 const prediction = predictions[match.id];
 
-if (!prediction?.home || !prediction?.away) {
+if (!prediction || prediction.home === "" || prediction.away === "") {
   setMessage("Vul beide scores in.");
   return;
 }
@@ -120,10 +119,7 @@ if (
   return;
 }
 
-if (
-  match.status !== "SCHEDULED" &&
-  match.status !== "TIMED"
-) {
+if (match.status !== "SCHEDULED" && match.status !== "TIMED") {
   setMessage(
     "Deze wedstrijd is al begonnen. Voorspellen kan niet meer."
   );
@@ -132,36 +128,29 @@ if (
 
 const matchName = `${match.homeTeam.name}-${match.awayTeam.name}`;
 
-const { error } = await supabase
-  .from("predictions")
-  .insert({
-    player_name: playerName.trim(),
-    match_id: match.id,
-    match_name: matchName,
-    home_score: home,
-    away_score: away,
-  });
+const { error } = await supabase.from("predictions").insert({
+  player_name: playerName.trim(),
+  match_id: match.id,
+  match_name: matchName,
+  home_score: home,
+  away_score: away,
+});
 
 if (error) {
   console.error(error);
 
   if (error.code === "23505") {
-    setMessage(
-      "Je hebt al een voorspelling voor deze wedstrijd."
-    );
+    setMessage("Je hebt al een voorspelling voor deze wedstrijd.");
     return;
   }
 
-  setMessage(
-    "Er ging iets mis bij het opslaan van je voorspelling."
-  );
+  setMessage("Er ging iets mis bij het opslaan van je voorspelling.");
   return;
 }
 
 setMessage(
   `Voorspelling opgeslagen: ${match.homeTeam.name} ${home}-${away} ${match.awayTeam.name}`
 );
-```
 
 }
 
@@ -190,7 +179,6 @@ marginBottom: "25px",
 >
 <h1 style={{ margin: 0 }}>VoetIQ</h1>
 
-```
       <nav style={{ marginTop: "12px" }}>
         <a
           href="/"
@@ -240,7 +228,7 @@ marginBottom: "25px",
         type="text"
         placeholder="Jouw naam"
         value={playerName}
-        onChange={(e) => setPlayerName(e.target.value)}
+        onChange={(event) => setPlayerName(event.target.value)}
         style={{
           width: "100%",
           maxWidth: "350px",
@@ -321,11 +309,11 @@ marginBottom: "25px",
               min="0"
               max="20"
               value={prediction.home}
-              onChange={(e) =>
+              onChange={(event) =>
                 updatePrediction(
                   match.id,
                   "home",
-                  e.target.value
+                  event.target.value
                 )
               }
               style={{
@@ -343,11 +331,11 @@ marginBottom: "25px",
               min="0"
               max="20"
               value={prediction.away}
-              onChange={(e) =>
+              onChange={(event) =>
                 updatePrediction(
                   match.id,
                   "away",
-                  e.target.value
+                  event.target.value
                 )
               }
               style={{
@@ -389,7 +377,6 @@ marginBottom: "25px",
     </p>
   </div>
 </main>
-```
 
 );
 }
