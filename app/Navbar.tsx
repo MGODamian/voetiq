@@ -213,15 +213,4 @@ borderRadius: "5px",
 };
 
 const menuItemStyle = {
-display: "flex",
-alignItems: "center",
-gap: "12px",
-width: "100%",
-boxSizing: "border-box" as const,
-padding: "13px 12px",
-borderRadius: "11px",
-color: "#e8f5ee",
-textDecoration: "none",
-fontSize: "14px",
-fontWeight: 700,
-};
+dis
