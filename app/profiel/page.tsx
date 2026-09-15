@@ -65,13 +65,19 @@ export default function ProfielPage() {
         .from("profiles")
         .select("username, first_name, last_name")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
       console.log("4. Profiel resultaat:", profileData);
       console.log("5. Profiel fout:", profileError);
 
       if (profileError) {
         throw profileError;
+      }
+
+      if (!profileData) {
+        throw new Error(
+          "Er is geen profiel gevonden voor dit account."
+        );
       }
 
       console.log("6. Voorspellingen ophalen");
