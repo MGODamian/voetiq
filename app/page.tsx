@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -177,7 +178,6 @@ export default function Home() {
         overflow: "hidden",
       }}
     >
-      {/* Achtergrond decoratie */}
       <div
         style={{
           position: "fixed",
@@ -206,7 +206,6 @@ export default function Home() {
         }}
       />
 
-      {/* Subtiele voetbalveld-lijnen */}
       <div
         style={{
           position: "fixed",
@@ -233,12 +232,10 @@ export default function Home() {
           zIndex: 1,
         }}
       >
-        {/* NIEUWE NAVIGATIE */}
         <div style={{ marginBottom: "28px" }}>
           <Navbar />
         </div>
 
-        {/* HERO */}
         <section
           style={{
             position: "relative",
@@ -330,7 +327,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SPELER */}
         <section
           style={{
             background: "rgba(7, 28, 19, 0.78)",
@@ -422,7 +418,6 @@ export default function Home() {
           )}
         </section>
 
-        {/* TITEL WEDSTRIJDEN */}
         <div
           style={{
             display: "flex",
@@ -466,7 +461,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* LADEN */}
         {loading && (
           <section
             style={{
@@ -482,7 +476,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* GEEN WEDSTRIJDEN */}
         {!loading && matches.length === 0 && (
           <section
             style={{
@@ -498,7 +491,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* WEDSTRIJDEN */}
         <div
           style={{
             display: "grid",
@@ -642,267 +634,5 @@ export default function Home() {
                     style={{
                       fontSize: "11px",
                       color: "#71877d",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.8px",
-                      fontWeight: 800,
-                      marginBottom: "10px",
-                    }}
-                  >
-                    Jouw voorspelling
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "9px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <input
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={prediction.home}
-                      aria-label={`Voorspelling ${match.homeTeam.name}`}
-                      onChange={(event) =>
-                        updatePrediction(
-                          match.id,
-                          "home",
-                          event.target.value
-                        )
-                      }
-                      style={{
-                        width: "64px",
-                        height: "48px",
-                        boxSizing: "border-box",
-                        background: "rgba(0,0,0,0.25)",
-                        border:
-                          "1px solid rgba(255,255,255,0.09)",
-                        borderRadius: "10px",
-                        color: "white",
-                        fontSize: "20px",
-                        fontWeight: 800,
-                        textAlign: "center",
-                        outline: "none",
-                      }}
-                    />
-
-                    <span
-                      style={{
-                        color: "#647970",
-                        fontWeight: 800,
-                      }}
-                    >
-                      -
-                    </span>
-
-                    <input
-                      type="number"
-                      min="0"
-                      max="20"
-                      value={prediction.away}
-                      aria-label={`Voorspelling ${match.awayTeam.name}`}
-                      onChange={(event) =>
-                        updatePrediction(
-                          match.id,
-                          "away",
-                          event.target.value
-                        )
-                      }
-                      style={{
-                        width: "64px",
-                        height: "48px",
-                        boxSizing: "border-box",
-                        background: "rgba(0,0,0,0.25)",
-                        border:
-                          "1px solid rgba(255,255,255,0.09)",
-                        borderRadius: "10px",
-                        color: "white",
-                        fontSize: "20px",
-                        fontWeight: 800,
-                        textAlign: "center",
-                        outline: "none",
-                      }}
-                    />
-
-                    <button
-                      onClick={() => savePrediction(match)}
-                      style={{
-                        flex: 1,
-                        minHeight: "48px",
-                        border: "none",
-                        borderRadius: "10px",
-                        background:
-                          "linear-gradient(135deg, #25d879, #0cae59)",
-                        color: "#02170c",
-                        fontSize: "13px",
-                        fontWeight: 900,
-                        letterSpacing: "0.3px",
-                        cursor: "pointer",
-                        boxShadow:
-                          "0 8px 22px rgba(22,211,111,0.18)",
-                      }}
-                    >
-                      VOORSPEL →
-                    </button>
-                  </div>
-                </div>
-              </section>
-            );
-          })}
-        </div>
-
-        {/* PUNTENSYSTEEM */}
-        <section
-          style={{
-            marginTop: "24px",
-            padding: "22px",
-            borderRadius: "18px",
-            background:
-              "linear-gradient(135deg, rgba(36,216,120,0.09), rgba(7,28,19,0.65))",
-            border: "1px solid rgba(36,216,120,0.12)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "14px",
-            }}
-          >
-            <span style={{ fontSize: "22px" }}>🏆</span>
-
-            <div>
-              <div
-                style={{
-                  fontWeight: 900,
-                  fontSize: "15px",
-                }}
-              >
-                Zo verdien je punten
-              </div>
-
-              <div
-                style={{
-                  color: "#789187",
-                  fontSize: "12px",
-                }}
-              >
-                Hoe beter je voorspelt, hoe hoger je score.
-              </div>
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(150px, 1fr))",
-              gap: "10px",
-            }}
-          >
-            <div
-              style={{
-                padding: "13px",
-                borderRadius: "11px",
-                background: "rgba(255,255,255,0.035)",
-              }}
-            >
-              <div
-                style={{
-                  color: "#2ee681",
-                  fontSize: "22px",
-                  fontWeight: 900,
-                }}
-              >
-                +10
-              </div>
-
-              <div
-                style={{
-                  color: "#8da197",
-                  fontSize: "12px",
-                  marginTop: "2px",
-                }}
-              >
-                Exacte uitslag
-              </div>
-            </div>
-
-            <div
-              style={{
-                padding: "13px",
-                borderRadius: "11px",
-                background: "rgba(255,255,255,0.035)",
-              }}
-            >
-              <div
-                style={{
-                  color: "#a8c2b5",
-                  fontSize: "22px",
-                  fontWeight: 900,
-                }}
-              >
-                +5
-              </div>
-
-              <div
-                style={{
-                  color: "#8da197",
-                  fontSize: "12px",
-                  marginTop: "2px",
-                }}
-              >
-                Juiste winnaar/gelijk
-              </div>
-            </div>
-
-            <div
-              style={{
-                padding: "13px",
-                borderRadius: "11px",
-                background: "rgba(255,255,255,0.035)",
-              }}
-            >
-              <div
-                style={{
-                  color: "#71847b",
-                  fontSize: "22px",
-                  fontWeight: 900,
-                }}
-              >
-                0
-              </div>
-
-              <div
-                style={{
-                  color: "#8da197",
-                  fontSize: "12px",
-                  marginTop: "2px",
-                }}
-              >
-                Verkeerde voorspelling
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FOOTER */}
-        <footer
-          style={{
-            textAlign: "center",
-            color: "#53675e",
-            fontSize: "11px",
-            marginTop: "35px",
-            lineHeight: 1.7,
-          }}
-        >
-          <div>VoetIQ • Voorspel de wedstrijd</div>
-          <div>Data provided by football-data.org</div>
-        </footer>
-      </div>
-    </main>
-  );
-}
+                      tex
 ```
