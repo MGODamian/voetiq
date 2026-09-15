@@ -1,13 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
 export default function RegistrerenPage() {
-  const router = useRouter();
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [username, setUsername] = useState("");
@@ -16,6 +13,7 @@ export default function RegistrerenPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [registered, setRegistered] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleRegister(e: React.FormEvent) {
@@ -25,12 +23,13 @@ export default function RegistrerenPage() {
     const cleanFirstName = firstName.trim();
     const cleanLastName = lastName.trim();
     const cleanUsername = username.trim();
+    const cleanEmail = email.trim();
 
     if (
       !cleanFirstName ||
       !cleanLastName ||
       !cleanUsername ||
-      !email.trim() ||
+      !cleanEmail ||
       !password
     ) {
       setErrorMessage("Vul alle velden in.");
@@ -58,7 +57,7 @@ export default function RegistrerenPage() {
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
+        email: cleanEmail,
         password,
         options: {
           data: {
@@ -86,12 +85,141 @@ export default function RegistrerenPage() {
         return;
       }
 
-      router.push("/");
+      // Supabase vereist e-mailbevestiging.
+      // We tonen daarom een bevestigingsscherm.
+      if (!data.session) {
+        setRegistered(true);
+        setLoading(false);
+        return;
+      }
+
+      // Als e-mailbevestiging niet vereist is,
+      // kan de gebruiker direct verder.
+      window.location.href = "/";
     } catch (error) {
       console.error(error);
       setErrorMessage("Er ging iets mis. Probeer het opnieuw.");
       setLoading(false);
     }
+  }
+
+  if (registered) {
+    return (
+      <main
+        style={{
+          minHeight: "100vh",
+          background:
+            "radial-gradient(circle at top, rgba(46,230,129,0.10), transparent 35%), #020e09",
+          color: "white",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "40px 20px",
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "460px",
+            textAlign: "center",
+          }}
+        >
+          <Link
+            href="/"
+            style={{
+              display: "block",
+              color: "white",
+              textDecoration: "none",
+              fontSize: "32px",
+              fontWeight: 900,
+              marginBottom: "30px",
+            }}
+          >
+            Voet<span style={{ color: "#2ee681" }}>IQ</span>
+          </Link>
+
+          <div
+            style={{
+              background:
+                "linear-gradient(145deg, rgba(8,36,24,0.98), rgba(4,21,13,0.98))",
+              border: "1px solid rgba(75,255,153,0.13)",
+              borderRadius: "22px",
+              padding: "35px 30px",
+              boxShadow: "0 25px 80px rgba(0,0,0,0.35)",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "48px",
+                marginBottom: "15px",
+              }}
+            >
+              📧
+            </div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "28px",
+                fontWeight: 900,
+              }}
+            >
+              Controleer je e-mail
+            </h1>
+
+            <p
+              style={{
+                margin: "15px 0 0",
+                color: "#9fb6a8",
+                fontSize: "15px",
+                lineHeight: 1.6,
+              }}
+            >
+              We hebben een bevestigingslink gestuurd naar:
+            </p>
+
+            <p
+              style={{
+                margin: "10px 0 20px",
+                color: "#2ee681",
+                fontWeight: 800,
+                wordBreak: "break-word",
+              }}
+            >
+              {email}
+            </p>
+
+            <p
+              style={{
+                margin: 0,
+                color: "#789183",
+                fontSize: "13px",
+                lineHeight: 1.6,
+              }}
+            >
+              Klik op de link in de e-mail om je account te bevestigen.
+              Daarna kun je inloggen en beginnen met voorspellen.
+            </p>
+
+            <Link
+              href="/inloggen"
+              style={{
+                display: "block",
+                marginTop: "25px",
+                padding: "13px",
+                borderRadius: "11px",
+                background: "#2ee681",
+                color: "#03150b",
+                textDecoration: "none",
+                fontWeight: 900,
+              }}
+            >
+              Naar inloggen
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -122,7 +250,6 @@ export default function RegistrerenPage() {
             textDecoration: "none",
             fontSize: "32px",
             fontWeight: 900,
-            letterSpacing: "-1.5px",
             marginBottom: "30px",
           }}
         >
@@ -144,7 +271,6 @@ export default function RegistrerenPage() {
               margin: 0,
               fontSize: "28px",
               fontWeight: 900,
-              letterSpacing: "-0.8px",
             }}
           >
             Account aanmaken
@@ -155,7 +281,6 @@ export default function RegistrerenPage() {
               margin: "8px 0 26px",
               color: "#9fb6a8",
               fontSize: "14px",
-              lineHeight: 1.5,
             }}
           >
             Maak gratis een account en begin met voorspellen.
@@ -202,7 +327,6 @@ export default function RegistrerenPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Bijv. AjaxFan1907"
-                autoComplete="username"
                 maxLength={20}
                 style={inputStyle}
               />
@@ -250,11 +374,6 @@ export default function RegistrerenPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  aria-label={
-                    showPassword
-                      ? "Wachtwoord verbergen"
-                      : "Wachtwoord tonen"
-                  }
                   style={{
                     position: "absolute",
                     right: "8px",
@@ -282,7 +401,6 @@ export default function RegistrerenPage() {
                   border: "1px solid rgba(255,70,70,0.18)",
                   color: "#ff9b9b",
                   fontSize: "13px",
-                  lineHeight: 1.45,
                 }}
               >
                 {errorMessage}
@@ -332,19 +450,6 @@ export default function RegistrerenPage() {
             </Link>
           </div>
         </div>
-
-        <p
-          style={{
-            textAlign: "center",
-            color: "#60776a",
-            fontSize: "12px",
-            lineHeight: 1.5,
-            marginTop: "18px",
-          }}
-        >
-          Je e-mailadres wordt gebruikt voor je account. Andere spelers zien
-          alleen je gebruikersnaam.
-        </p>
       </div>
     </main>
   );
