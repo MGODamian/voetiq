@@ -34,6 +34,11 @@ export default function Navbar() {
     setLoggedIn(!!user);
   }
 
+  async function handleLogout() {
+    await supabase.auth.signOut({ scope: "local" });
+    setOpen(false);
+  }
+
   function closeMenu() {
     setOpen(false);
   }
@@ -151,14 +156,38 @@ export default function Navbar() {
             </Link>
 
             {loggedIn && (
-              <Link
-                href="/profiel"
-                onClick={closeMenu}
-                style={menuItemStyle}
-              >
-                👤
-                <span>Mijn profiel</span>
-              </Link>
+              <>
+                <Link
+                  href="/profiel"
+                  onClick={closeMenu}
+                  style={menuItemStyle}
+                >
+                  👤
+                  <span>Mijn profiel</span>
+                </Link>
+
+                <div
+                  style={{
+                    height: "1px",
+                    background: "rgba(255,255,255,0.07)",
+                    margin: "8px 4px",
+                  }}
+                />
+
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    ...menuItemStyle,
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    textAlign: "left",
+                  }}
+                >
+                  🚪
+                  <span>Uitloggen</span>
+                </button>
+              </>
             )}
 
             {!loggedIn && (
