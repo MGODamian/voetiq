@@ -48,7 +48,8 @@ const data = await response.json();
     )
     .sort(
       (a: Match, b: Match) =>
-        new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
+        new Date(a.utcDate).getTime() -
+        new Date(b.utcDate).getTime()
     )
     .slice(0, 6);
 
@@ -67,14 +68,21 @@ matchId: number,
 type: "home" | "away",
 value: string
 ) {
-setPredictions((current) => ({
-...current,
-[matchId]: {
-home: current[matchId]?.home || "",
-away: current[matchId]?.away || "",
-[type]: value,
-},
-}));
+setPredictions((current) => {
+const oldPrediction = current[matchId] || {
+home: "",
+away: "",
+};
+
+  return {
+    ...current,
+    [matchId]: {
+      home: type === "home" ? value : oldPrediction.home,
+      away: type === "away" ? value : oldPrediction.away,
+    },
+  };
+});
+
 }
 
 async function savePrediction(match: Match) {
@@ -119,13 +127,15 @@ if (
 
 const matchName = `${match.homeTeam.name}-${match.awayTeam.name}`;
 
-const { error } = await supabase.from("predictions").insert({
-  player_name: playerName.trim(),
-  match_id: match.id,
-  match_name: matchName,
-  home_score: home,
-  away_score: away,
-});
+const { error } = await supabase
+  .from("predictions")
+  .insert({
+    player_name: playerName.trim(),
+    match_id: match.id,
+    match_name: matchName,
+    home_score: home,
+    away_score: away,
+  });
 
 if (error) {
   console.error(error);
@@ -249,9 +259,7 @@ marginBottom: "25px",
       )}
     </section>
 
-    {loading && (
-      <p>Wedstrijden laden...</p>
-    )}
+    {loading && <p>Wedstrijden laden...</p>}
 
     {!loading && matches.length === 0 && (
       <p>Er zijn momenteel geen aankomende wedstrijden.</p>
