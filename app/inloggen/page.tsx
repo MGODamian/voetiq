@@ -1,1 +1,303 @@
-"use client"; import { useState } from "react"; import { supabase } from "@/lib/supabase"; export default function Inloggen() { const [email, setEmail] = useState(""); const [password, setPassword] = useState(""); const [message, setMessage] = useState(""); const [loading, setLoading] = useState(false); async function login() { setMessage(""); if (!email || !password) { setMessage("Vul je e-mailadres en wachtwoord in."); return; } setLoading(true); const { error } = await supabase.auth.signInWithPassword({ email, password, }); setLoading(false); if (error) { setMessage( "Inloggen mislukt. Controleer je e-mailadres en wachtwoord." ); return; } window.location.href = "/"; } return ( <main style={{ minHeight: "100vh", background: "radial-gradient(circle at 50% -10%, rgba(0,190,90,0.25), transparent 35%), linear-gradient(135deg, #03150d 0%, #061f14 45%, #020806 100%)", color: "white", padding: "30px 20px", display: "flex", alignItems: "center", justifyContent: "center", }} > <div style={{ width: "100%", maxWidth: "430px", }} > <a href="/" style={{ display: "block", textAlign: "center", color: "white", textDecoration: "none", fontSize: "32px", fontWeight: 900, letterSpacing: "-1.5px", marginBottom: "25px", }} > Voet<span style={{ color: "#2ee681" }}>IQ</span> </a> <section style={{ background: "rgba(7, 28, 19, 0.88)", border: "1px solid rgba(75,255,153,0.13)", borderRadius: "22px", padding: "28px", boxShadow: "0 25px 70px rgba(0,0,0,0.35)", backdropFilter: "blur(18px)", }} > <div style={{ textAlign: "center", marginBottom: "25px" }}> <div style={{ fontSize: "42px", marginBottom: "8px", }} > ⚽ </div> <h1 style={{ margin: 0, fontSize: "27px", letterSpacing: "-0.8px", }} > Welkom terug </h1> <p style={{ color: "#8fa69b", fontSize: "14px", lineHeight: 1.5, marginTop: "9px", }} > Log in en ga verder met <br /> jouw voetbalvoorspellingen. </p> </div> <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "7px", color: "#c5d3cd", }} > E-mailadres </label> <input type="email" placeholder="jij@email.nl" value={email} onChange={(event) => setEmail(event.target.value)} style={{ width: "100%", boxSizing: "border-box", padding: "14px", marginBottom: "17px", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: "11px", color: "white", fontSize: "15px", outline: "none", }} /> <label style={{ display: "block", fontSize: "13px", fontWeight: 700, marginBottom: "7px", color: "#c5d3cd", }} > Wachtwoord </label> <input type="password" placeholder="Je wachtwoord" value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { login(); } }} style={{ width: "100%", boxSizing: "border-box", padding: "14px", marginBottom: "18px", background: "rgba(0,0,0,0.25)", border: "1px solid rgba(255,255,255,0.09)", borderRadius: "11px", color: "white", fontSize: "15px", outline: "none", }} /> {message && ( <div style={{ marginBottom: "16px", padding: "12px", borderRadius: "10px", background: "rgba(255,80,80,0.08)", border: "1px solid rgba(255,80,80,0.15)", color: "#ffaaaa", fontSize: "13px", lineHeight: 1.5, }} > {message} </div> )} <button onClick={login} disabled={loading} style={{ width: "100%", minHeight: "50px", border: "none", borderRadius: "11px", background: loading ? "#237c50" : "linear-gradient(135deg, #25d879, #0cae59)", color: "#02170c", fontSize: "14px", fontWeight: 900, cursor: loading ? "default" : "pointer", }} > {loading ? "Inloggen..." : "INLOGGEN →"} </button> <div style={{ textAlign: "center", marginTop: "20px", paddingTop: "18px", borderTop: "1px solid rgba(255,255,255,0.06)", color: "#71877d", fontSize: "13px", }} > Nog geen account?{" "} <a href="/registreren" style={{ color: "#42e78e", textDecoration: "none", fontWeight: 800, }} > Registreren </a> </div> </section> <p style={{ textAlign: "center", color: "#53675e", fontSize: "11px", marginTop: "20px", }} > VoetIQ • Voorspel. Scoor punten. </p> </div> </main> ); }
+```tsx
+"use client";
+
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+export default function Inloggen() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function login() {
+    setMessage("");
+
+    if (!email || !password) {
+      setMessage("Vul je e-mailadres en wachtwoord in.");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setLoading(false);
+      setMessage(
+        "Inloggen mislukt. Controleer je e-mailadres en wachtwoord."
+      );
+      return;
+    }
+
+    if (!rememberMe) {
+      Object.keys(localStorage)
+        .filter(
+          (key) => key.startsWith("sb-") && key.endsWith("-auth-token")
+        )
+        .forEach((key) => {
+          localStorage.removeItem(key);
+        });
+    }
+
+    setLoading(false);
+    window.location.href = "/";
+  }
+
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        background:
+          "radial-gradient(circle at 50% -10%, rgba(0,190,90,0.25), transparent 35%), linear-gradient(135deg, #03150d 0%, #061f14 45%, #020806 100%)",
+        color: "white",
+        padding: "30px 20px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          width: "100%",
+          maxWidth: "430px",
+        }}
+      >
+        <a
+          href="/"
+          style={{
+            display: "block",
+            textAlign: "center",
+            color: "white",
+            textDecoration: "none",
+            fontSize: "32px",
+            fontWeight: 900,
+            letterSpacing: "-1.5px",
+            marginBottom: "25px",
+          }}
+        >
+          Voet<span style={{ color: "#2ee681" }}>IQ</span>
+        </a>
+
+        <section
+          style={{
+            background: "rgba(7, 28, 19, 0.88)",
+            border: "1px solid rgba(75,255,153,0.13)",
+            borderRadius: "22px",
+            padding: "28px",
+            boxShadow: "0 25px 70px rgba(0,0,0,0.35)",
+            backdropFilter: "blur(18px)",
+          }}
+        >
+          <div
+            style={{
+              textAlign: "center",
+              marginBottom: "25px",
+            }}
+          >
+            <div
+              style={{
+                fontSize: "42px",
+                marginBottom: "8px",
+              }}
+            >
+              ⚽
+            </div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "27px",
+                letterSpacing: "-0.8px",
+              }}
+            >
+              Welkom terug
+            </h1>
+
+            <p
+              style={{
+                color: "#8fa69b",
+                fontSize: "14px",
+                lineHeight: 1.5,
+                marginTop: "9px",
+              }}
+            >
+              Log in en ga verder met
+              <br />
+              jouw voetbalvoorspellingen.
+            </p>
+          </div>
+
+          <label
+            style={{
+              display: "block",
+              fontSize: "13px",
+              fontWeight: 700,
+              marginBottom: "7px",
+              color: "#c5d3cd",
+            }}
+          >
+            E-mailadres
+          </label>
+
+          <input
+            type="email"
+            placeholder="jij@email.nl"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "14px",
+              marginBottom: "17px",
+              background: "rgba(0,0,0,0.25)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: "11px",
+              color: "white",
+              fontSize: "15px",
+              outline: "none",
+            }}
+          />
+
+          <label
+            style={{
+              display: "block",
+              fontSize: "13px",
+              fontWeight: 700,
+              marginBottom: "7px",
+              color: "#c5d3cd",
+            }}
+          >
+            Wachtwoord
+          </label>
+
+          <input
+            type="password"
+            placeholder="Je wachtwoord"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                login();
+              }
+            }}
+            style={{
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "14px",
+              marginBottom: "12px",
+              background: "rgba(0,0,0,0.25)",
+              border: "1px solid rgba(255,255,255,0.09)",
+              borderRadius: "11px",
+              color: "white",
+              fontSize: "15px",
+              outline: "none",
+            }}
+          />
+
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "9px",
+              marginBottom: "18px",
+              color: "#a9bbb2",
+              fontSize: "13px",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(event) => setRememberMe(event.target.checked)}
+              style={{
+                width: "17px",
+                height: "17px",
+                accentColor: "#2ee681",
+                cursor: "pointer",
+              }}
+            />
+
+            <span>Ingelogd blijven</span>
+          </label>
+
+          {message && (
+            <div
+              style={{
+                marginBottom: "16px",
+                padding: "12px",
+                borderRadius: "10px",
+                background: "rgba(255,80,80,0.08)",
+                border: "1px solid rgba(255,80,80,0.15)",
+                color: "#ffaaaa",
+                fontSize: "13px",
+                lineHeight: 1.5,
+              }}
+            >
+              {message}
+            </div>
+          )}
+
+          <button
+            onClick={login}
+            disabled={loading}
+            style={{
+              width: "100%",
+              minHeight: "50px",
+              border: "none",
+              borderRadius: "11px",
+              background: loading
+                ? "#237c50"
+                : "linear-gradient(135deg, #25d879, #0cae59)",
+              color: "#02170c",
+              fontSize: "14px",
+              fontWeight: 900,
+              cursor: loading ? "default" : "pointer",
+            }}
+          >
+            {loading ? "Inloggen..." : "INLOGGEN →"}
+          </button>
+
+          <div
+            style={{
+              textAlign: "center",
+              marginTop: "20px",
+              paddingTop: "18px",
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+              color: "#71877d",
+              fontSize: "13px",
+            }}
+          >
+            Nog geen account?{" "}
+            <a
+              href="/registreren"
+              style={{
+                color: "#42e78e",
+                textDecoration: "none",
+                fontWeight: 800,
+              }}
+            >
+              Registreren
+            </a>
+          </div>
+        </section>
+
+        <p
+          style={{
+            textAlign: "center",
+            color: "#53675e",
+            fontSize: "11px",
+            marginTop: "20px",
+          }}
+        >
+          VoetIQ • Voorspel. Scoor punten.
+        </p>
+      </div>
+    </main>
+  );
+}
+```
