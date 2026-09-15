@@ -1,147 +1,92 @@
+```tsx
 "use client";
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Navbar from "../Navbar";
+
 type Player = {
-  name: string;
-  points: number;
+  username: string;
+  total_points: number;
 };
+
 export default function Ranglijst() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     loadLeaderboard();
   }, []);
+
   async function loadLeaderboard() {
-    const { data, error } = await supabase
-      .from("predictions")
-      .select("player_name, points");
+    const { data, error } = await supabase.rpc("get_leaderboard");
+
     if (error) {
       console.error(error);
       setLoading(false);
       return;
     }
-    const totals: Record<string, number> = {};
-    data.forEach((prediction) => {
-      const name = prediction.player_name || "Gast";
-      totals[name] = (totals[name] || 0) + (prediction.points || 0);
-    });
-    const leaderboard = Object.entries(totals)
-      .map(([name, points]) => ({
-        name,
-        points,
-      }))
-      .sort((a, b) => b.points - a.points);
+
+    const leaderboard = (data || []).map(
+      (player: {
+        username: string;
+        total_points: number;
+      }) => ({
+        username: player.username,
+        total_points: Number(player.total_points),
+      })
+    );
+
     setPlayers(leaderboard);
     setLoading(false);
   }
+
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f5f7f6",
-        color: "#111",
-        fontFamily: "Arial, sans-serif",
-      }}
-    >
-      <header
-        style={{
-          background: "#0b8f4d",
-          color: "white",
-          padding: "20px",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "900px",
-            margin: "0 auto",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <h1 style={{ margin: 0 }}>VoetIQ</h1>
-          <nav style={{ display: "flex", gap: "20px" }}>
-            <a
-              href="/"
-              style={{ color: "white", textDecoration: "none" }}
-            >
-              Home
-            </a>
-            <a
-              href="/wedstrijden"
-              style={{ color: "white", textDecoration: "none" }}
-            >
-              Wedstrijden
-            </a>
-            <a
-              href="/ranglijst"
-              style={{
-                color: "white",
-                textDecoration: "none",
-                fontWeight: "bold",
-              }}
-            >
-              Ranglijst
-            </a>
-          </nav>
+    <main className="min-h-screen bg-gradient-to-b from-green-950 via-green-900 to-gray-950 text-white">
+      <Navbar />
+
+      <section className="mx-auto max-w-6xl px-6 py-12">
+        <div className="mb-10 text-center">
+          <div className="mb-4 inline-flex rounded-full bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-300 ring-1 ring-green-400/20">
+            🏆 VoetIQ
+          </div>
+
+          <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
+            Ranglijst
+          </h1>
+
+          <p className="mx-auto mt-3 max-w-xl text-green-100/70">
+            Bekijk wie de meeste punten heeft verzameld met zijn
+            voetbalvoorspellingen.
+          </p>
         </div>
-      </header>
-      <section
-        style={{
-          maxWidth: "900px",
-          margin: "0 auto",
-          padding: "50px 20px",
-        }}
-      >
-        <h2 style={{ fontSize: "36px", marginBottom: "10px" }}>
-          🏆 Ranglijst
-        </h2>
-        <p style={{ color: "#666", marginBottom: "30px" }}>
-          Wie scoort de meeste punten?
-        </p>
-        <div
-          style={{
-            background: "white",
-            borderRadius: "16px",
-            overflow: "hidden",
-            boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "80px 1fr 120px",
-              padding: "18px 20px",
-              background: "#0b8f4d",
-              color: "white",
-              fontWeight: "bold",
-            }}
-          >
+
+        <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur">
+          <div className="grid grid-cols-[70px_1fr_120px] bg-green-600/90 px-5 py-4 text-sm font-bold uppercase tracking-wide">
             <span>#</span>
             <span>Speler</span>
-            <span>Punten</span>
+            <span className="text-right">Punten</span>
           </div>
+
           {loading ? (
-            <div style={{ padding: "25px", textAlign: "center" }}>
+            <div className="px-6 py-12 text-center text-green-100/70">
               Ranglijst laden...
             </div>
           ) : players.length === 0 ? (
-            <div style={{ padding: "25px", textAlign: "center" }}>
-              Nog geen spelers op de ranglijst.
+            <div className="px-6 py-12 text-center text-green-100/70">
+              Er zijn nog geen spelers op de ranglijst.
             </div>
           ) : (
             players.map((player, index) => (
               <div
-                key={player.name}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "80px 1fr 120px",
-                  padding: "18px 20px",
-                  borderBottom: "1px solid #eee",
-                  alignItems: "center",
-                }}
+                key={player.username}
+                className={`grid grid-cols-[70px_1fr_120px] items-center px-5 py-5 transition ${
+                  index < 3
+                    ? "bg-white/10"
+                    : "border-t border-white/5"
+                }`}
               >
-                <strong>
+                <div className="text-xl font-bold">
                   {index === 0
                     ? "🥇"
                     : index === 1
@@ -149,14 +94,41 @@ export default function Ranglijst() {
                     : index === 2
                     ? "🥉"
                     : index + 1}
-                </strong>
-                <span>{player.name}</span>
-                <strong>{player.points} punten</strong>
+                </div>
+
+                <div>
+                  <p className="font-bold text-white">
+                    {player.username}
+                  </p>
+
+                  {index === 0 && (
+                    <p className="mt-1 text-xs font-medium text-yellow-300">
+                      Leider van de ranglijst
+                    </p>
+                  )}
+                </div>
+
+                <div className="text-right">
+                  <span className="font-black text-green-300">
+                    {player.total_points}
+                  </span>
+                  <span className="ml-1 text-sm text-green-100/60">
+                    punten
+                  </span>
+                </div>
               </div>
             ))
           )}
+        </div>
+
+        <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
+          <p className="text-sm text-green-100/60">
+            💡 Elke voorspelling kan je punten opleveren. Hoe meer juiste
+            voorspellingen, hoe hoger je komt op de ranglijst.
+          </p>
         </div>
       </section>
     </main>
   );
 }
+```
