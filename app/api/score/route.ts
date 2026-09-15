@@ -21,17 +21,19 @@ export async function GET() {
     },
   });
 
+  // We controleren alleen de afgelopen 7 dagen.
+  // Daardoor hoeven we niet steeds een enorme hoeveelheid wedstrijden op te halen.
   const today = new Date();
 
-  const previousMonth = new Date();
-  previousMonth.setDate(today.getDate() - 30);
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(today.getDate() - 7);
 
-  const dateFrom = previousMonth.toISOString().split("T")[0];
+  const dateFrom = sevenDaysAgo.toISOString().split("T")[0];
   const dateTo = today.toISOString().split("T")[0];
 
   try {
     const response = await fetch(
-      `https://api.football-data.org/v4/competitions/DED/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+      `https://api.football-data.org/v4/competitions/DED/matches?dateFrom=${dateFrom}&dateTo=${dateTo}&status=FINISHED`,
       {
         headers: {
           "X-Auth-Token": footballToken,
@@ -57,8 +59,8 @@ export async function GET() {
     const finishedMatches = (data.matches || []).filter(
       (match: any) =>
         match.status === "FINISHED" &&
-        match.score?.fullTime?.home !== null &&
-        match.score?.fullTime?.away !== null
+        typeof match.score?.fullTime?.home === "number" &&
+        typeof match.score?.fullTime?.away === "number"
     );
 
     let updatedPredictions = 0;
@@ -78,7 +80,10 @@ export async function GET() {
         .select("id");
 
       if (error) {
-        console.error(error);
+        console.error(
+          `Fout bij wedstrijd ${match.id}:`,
+          error
+        );
         continue;
       }
 
@@ -87,6 +92,8 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
+      checkedFrom: dateFrom,
+      checkedTo: dateTo,
       finishedMatches: finishedMatches.length,
       updatedPredictions,
     });
