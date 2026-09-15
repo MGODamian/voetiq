@@ -200,7 +200,7 @@ Voet<span style={{ color: "#2ee681" }}>IQ</span> </Link>
     </>
   )}
 </>
-```
+
 
 );
 }
