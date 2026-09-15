@@ -11,6 +11,7 @@ export default function RegistrerenPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [registered, setRegistered] = useState(false);
@@ -33,6 +34,13 @@ export default function RegistrerenPage() {
       !password
     ) {
       setErrorMessage("Vul alle velden in.");
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setErrorMessage(
+        "Je moet akkoord gaan met de Algemene voorwaarden en het Privacybeleid."
+      );
       return;
     }
 
@@ -85,16 +93,12 @@ export default function RegistrerenPage() {
         return;
       }
 
-      // Supabase vereist e-mailbevestiging.
-      // We tonen daarom een bevestigingsscherm.
       if (!data.session) {
         setRegistered(true);
         setLoading(false);
         return;
       }
 
-      // Als e-mailbevestiging niet vereist is,
-      // kan de gebruiker direct verder.
       window.location.href = "/";
     } catch (error) {
       console.error(error);
@@ -390,6 +394,61 @@ export default function RegistrerenPage() {
                 </button>
               </div>
             </div>
+
+            <label
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                marginTop: "20px",
+                color: "#a9bbb2",
+                fontSize: "13px",
+                lineHeight: 1.5,
+                cursor: "pointer",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                style={{
+                  width: "17px",
+                  height: "17px",
+                  marginTop: "2px",
+                  flexShrink: 0,
+                  accentColor: "#2ee681",
+                  cursor: "pointer",
+                }}
+              />
+
+              <span>
+                Ik ga akkoord met de{" "}
+                <Link
+                  href="/voorwaarden"
+                  target="_blank"
+                  style={{
+                    color: "#2ee681",
+                    fontWeight: 800,
+                    textDecoration: "none",
+                  }}
+                >
+                  Algemene voorwaarden
+                </Link>{" "}
+                en het{" "}
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  style={{
+                    color: "#2ee681",
+                    fontWeight: 800,
+                    textDecoration: "none",
+                  }}
+                >
+                  Privacybeleid
+                </Link>
+                .
+              </span>
+            </label>
 
             {errorMessage && (
               <div
