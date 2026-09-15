@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Navbar from "@/app/Navbar";
 
@@ -25,17 +26,37 @@ type Prediction = {
 };
 
 export default function Home() {
+  const router = useRouter();
+
   const [matches, setMatches] = useState<Match[]>([]);
-  const [playerName, setPlayerName] = useState("");
   const [predictions, setPredictions] = useState<
     Record<number, Prediction>
   >({});
-  const [message, setMessage] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const [loading, setLoading] = useState(true);
+  const [userLoading, setUserLoading] = useState(true);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
+    loadUser();
     loadMatches();
   }, []);
+
+  async function loadUser() {
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        setUserEmail(user.email || "");
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setUserLoading(false);
+    }
+  }
 
   async function loadMatches() {
     try {
@@ -43,13 +64,16 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Kon wedstrijden niet laden.");
+        throw new Error(
+          data.error || "Kon wedstrijden niet laden."
+        );
       }
 
       const upcomingMatches = (data.matches || [])
         .filter(
           (match: Match) =>
-            match.status === "SCHEDULED" || match.status === "TIMED"
+            match.status === "SCHEDULED" ||
+            match.status === "TIMED"
         )
         .sort(
           (a: Match, b: Match) =>
@@ -81,8 +105,10 @@ export default function Home() {
       return {
         ...current,
         [matchId]: {
-          home: type === "home" ? value : existing.home,
-          away: type === "away" ? value : existing.away,
+          home:
+            type === "home" ? value : existing.home,
+          away:
+            type === "away" ? value : existing.away,
         },
       };
     });
@@ -91,8 +117,15 @@ export default function Home() {
   async function savePrediction(match: Match) {
     setMessage("");
 
-    if (!playerName.trim()) {
-      setMessage("Vul eerst je naam in.");
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setMessage(
+        "Je moet ingelogd zijn om een voorspelling te plaatsen."
+      );
+      router.push("/inloggen");
       return;
     }
 
@@ -137,7 +170,8 @@ export default function Home() {
     const { error } = await supabase
       .from("predictions")
       .insert({
-        player_name: playerName.trim(),
+        user_id: user.id,
+        user_email: user.email || "",
         match_id: match.id,
         match_name: matchName,
         home_score: home,
@@ -163,6 +197,14 @@ export default function Home() {
     setMessage(
       `Voorspelling opgeslagen: ${match.homeTeam.name} ${home}-${away} ${match.awayTeam.name}`
     );
+
+    setPredictions((current) => ({
+      ...current,
+      [match.id]: {
+        home: "",
+        away: "",
+      },
+    }));
   }
 
   return (
@@ -273,14 +315,20 @@ export default function Home() {
             }}
           />
 
-          <div style={{ position: "relative", zIndex: 1 }}>
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "7px",
                 background: "rgba(36,216,120,0.12)",
-                border: "1px solid rgba(36,216,120,0.2)",
+                border:
+                  "1px solid rgba(36,216,120,0.2)",
                 color: "#62efa0",
                 padding: "7px 11px",
                 borderRadius: "999px",
@@ -320,8 +368,9 @@ export default function Home() {
                 margin: "18px 0 0",
               }}
             >
-              Voorspel echte voetbalwedstrijden, verdien punten en
-              probeer bovenaan de VoetIQ-ranglijst te komen.
+              Voorspel echte voetbalwedstrijden, verdien
+              punten en probeer bovenaan de VoetIQ-ranglijst
+              te komen.
             </p>
           </div>
         </section>
@@ -329,7 +378,8 @@ export default function Home() {
         <section
           style={{
             background: "rgba(7, 28, 19, 0.78)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            border:
+              "1px solid rgba(255,255,255,0.07)",
             borderRadius: "18px",
             padding: "20px",
             marginBottom: "22px",
@@ -341,19 +391,19 @@ export default function Home() {
               display: "flex",
               alignItems: "center",
               gap: "12px",
-              marginBottom: "12px",
             }}
           >
             <div
               style={{
-                width: "38px",
-                height: "38px",
+                width: "42px",
+                height: "42px",
                 borderRadius: "12px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "rgba(36,216,120,0.12)",
-                fontSize: "19px",
+                background:
+                  "rgba(36,216,120,0.12)",
+                fontSize: "20px",
               }}
             >
               👤
@@ -366,55 +416,28 @@ export default function Home() {
                   fontWeight: 800,
                 }}
               >
-                Jouw speler
+                {userLoading
+                  ? "Account laden..."
+                  : userEmail
+                  ? "Je bent ingelogd"
+                  : "Je bent niet ingelogd"}
               </div>
 
               <div
                 style={{
                   fontSize: "12px",
                   color: "#789187",
+                  marginTop: "3px",
                 }}
               >
-                Vul je naam in om mee te doen
+                {userLoading
+                  ? "Even geduld..."
+                  : userEmail
+                  ? userEmail
+                  : "Log in om mee te doen met VoetIQ."}
               </div>
             </div>
           </div>
-
-          <input
-            type="text"
-            placeholder="Bijvoorbeeld: Damian"
-            value={playerName}
-            onChange={(event) =>
-              setPlayerName(event.target.value)
-            }
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              padding: "14px 15px",
-              background: "rgba(0,0,0,0.22)",
-              border: "1px solid rgba(255,255,255,0.09)",
-              borderRadius: "11px",
-              color: "white",
-              outline: "none",
-              fontSize: "15px",
-            }}
-          />
-
-          {message && (
-            <div
-              style={{
-                marginTop: "12px",
-                padding: "12px 14px",
-                borderRadius: "10px",
-                background: "rgba(36,216,120,0.08)",
-                border: "1px solid rgba(36,216,120,0.14)",
-                color: "#9df2c0",
-                fontSize: "13px",
-              }}
-            >
-              {message}
-            </div>
-          )}
         </section>
 
         <div
@@ -463,8 +486,10 @@ export default function Home() {
         {loading && (
           <section
             style={{
-              background: "rgba(7,28,19,0.78)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background:
+                "rgba(7,28,19,0.78)",
+              border:
+                "1px solid rgba(255,255,255,0.07)",
               borderRadius: "18px",
               padding: "30px",
               textAlign: "center",
@@ -478,8 +503,10 @@ export default function Home() {
         {!loading && matches.length === 0 && (
           <section
             style={{
-              background: "rgba(7,28,19,0.78)",
-              border: "1px solid rgba(255,255,255,0.07)",
+              background:
+                "rgba(7,28,19,0.78)",
+              border:
+                "1px solid rgba(255,255,255,0.07)",
               borderRadius: "18px",
               padding: "35px",
               textAlign: "center",
@@ -497,12 +524,14 @@ export default function Home() {
           }}
         >
           {matches.map((match) => {
-            const prediction = predictions[match.id] || {
-              home: "",
-              away: "",
-            };
+            const prediction =
+              predictions[match.id] || {
+                home: "",
+                away: "",
+              };
 
-            const matchDate = new Date(match.utcDate);
+            const matchDate =
+              new Date(match.utcDate);
 
             return (
               <section
@@ -512,7 +541,8 @@ export default function Home() {
                   overflow: "hidden",
                   background:
                     "linear-gradient(145deg, rgba(10,38,25,0.94), rgba(5,21,14,0.94))",
-                  border: "1px solid rgba(255,255,255,0.075)",
+                  border:
+                    "1px solid rgba(255,255,255,0.075)",
                   borderRadius: "19px",
                   padding: "20px",
                   boxShadow:
@@ -534,7 +564,8 @@ export default function Home() {
                 <div
                   style={{
                     display: "flex",
-                    justifyContent: "space-between",
+                    justifyContent:
+                      "space-between",
                     alignItems: "center",
                     gap: "10px",
                     marginBottom: "20px",
@@ -547,34 +578,43 @@ export default function Home() {
                       fontWeight: 600,
                     }}
                   >
-                    {match.competition?.name || "Voetbal"}
+                    {match.competition?.name ||
+                      "Voetbal"}
                   </div>
 
                   <div
                     style={{
                       color: "#91a69c",
                       fontSize: "12px",
-                      background: "rgba(255,255,255,0.04)",
+                      background:
+                        "rgba(255,255,255,0.04)",
                       padding: "6px 9px",
                       borderRadius: "8px",
                     }}
                   >
-                    {matchDate.toLocaleDateString("nl-NL", {
-                      day: "2-digit",
-                      month: "short",
-                    })}{" "}
+                    {matchDate.toLocaleDateString(
+                      "nl-NL",
+                      {
+                        day: "2-digit",
+                        month: "short",
+                      }
+                    )}{" "}
                     •{" "}
-                    {matchDate.toLocaleTimeString("nl-NL", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {matchDate.toLocaleTimeString(
+                      "nl-NL",
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }
+                    )}
                   </div>
                 </div>
 
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr auto 1fr",
+                    gridTemplateColumns:
+                      "1fr auto 1fr",
                     alignItems: "center",
                     gap: "12px",
                   }}
@@ -597,8 +637,10 @@ export default function Home() {
                       borderRadius: "50%",
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "center",
-                      background: "rgba(36,216,120,0.09)",
+                      justifyContent:
+                        "center",
+                      background:
+                        "rgba(36,216,120,0.09)",
                       border:
                         "1px solid rgba(36,216,120,0.16)",
                       color: "#57eb99",
@@ -633,7 +675,8 @@ export default function Home() {
                     style={{
                       fontSize: "11px",
                       color: "#71877d",
-                      textTransform: "uppercase",
+                      textTransform:
+                        "uppercase",
                       letterSpacing: "0.8px",
                       fontWeight: 800,
                       marginBottom: "10px",
@@ -645,7 +688,8 @@ export default function Home() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr auto 1fr",
+                      gridTemplateColumns:
+                        "1fr auto 1fr",
                       alignItems: "center",
                       gap: "10px",
                     }}
@@ -665,9 +709,11 @@ export default function Home() {
                       placeholder="0"
                       style={{
                         width: "100%",
-                        boxSizing: "border-box",
+                        boxSizing:
+                          "border-box",
                         padding: "14px",
-                        background: "rgba(0,0,0,0.24)",
+                        background:
+                          "rgba(0,0,0,0.24)",
                         border:
                           "1px solid rgba(255,255,255,0.09)",
                         borderRadius: "11px",
@@ -704,9 +750,11 @@ export default function Home() {
                       placeholder="0"
                       style={{
                         width: "100%",
-                        boxSizing: "border-box",
+                        boxSizing:
+                          "border-box",
                         padding: "14px",
-                        background: "rgba(0,0,0,0.24)",
+                        background:
+                          "rgba(0,0,0,0.24)",
                         border:
                           "1px solid rgba(255,255,255,0.09)",
                         borderRadius: "11px",
@@ -721,7 +769,9 @@ export default function Home() {
 
                   <button
                     type="button"
-                    onClick={() => savePrediction(match)}
+                    onClick={() =>
+                      savePrediction(match)
+                    }
                     style={{
                       width: "100%",
                       marginTop: "12px",
@@ -749,8 +799,10 @@ export default function Home() {
         <section
           style={{
             marginTop: "24px",
-            background: "rgba(7,28,19,0.78)",
-            border: "1px solid rgba(255,255,255,0.07)",
+            background:
+              "rgba(7,28,19,0.78)",
+            border:
+              "1px solid rgba(255,255,255,0.07)",
             borderRadius: "18px",
             padding: "22px",
           }}
@@ -760,7 +812,8 @@ export default function Home() {
               color: "#54e998",
               fontSize: "12px",
               fontWeight: 800,
-              textTransform: "uppercase",
+              textTransform:
+                "uppercase",
               letterSpacing: "1px",
               marginBottom: "7px",
             }}
@@ -787,17 +840,33 @@ export default function Home() {
             }}
           >
             <div>
-              🎯 <strong style={{ color: "#ffffff" }}>10 punten</strong>{" "}
+              🎯{" "}
+              <strong
+                style={{ color: "#ffffff" }}
+              >
+                10 punten
+              </strong>{" "}
               voor de exacte uitslag.
             </div>
 
             <div>
-              ⚽ <strong style={{ color: "#ffffff" }}>5 punten</strong>{" "}
-              voor de juiste winnaar of een correct gelijkspel.
+              ⚽{" "}
+              <strong
+                style={{ color: "#ffffff" }}
+              >
+                5 punten
+              </strong>{" "}
+              voor de juiste winnaar of een
+              correct gelijkspel.
             </div>
 
             <div>
-              ❌ <strong style={{ color: "#ffffff" }}>0 punten</strong>{" "}
+              ❌{" "}
+              <strong
+                style={{ color: "#ffffff" }}
+              >
+                0 punten
+              </strong>{" "}
               bij een verkeerde voorspelling.
             </div>
           </div>
@@ -807,18 +876,18 @@ export default function Home() {
           style={{
             marginTop: "30px",
             paddingTop: "20px",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
+            borderTop:
+              "1px solid rgba(255,255,255,0.06)",
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent:
+              "space-between",
             gap: "15px",
             flexWrap: "wrap",
             color: "#62766d",
             fontSize: "11px",
           }}
         >
-          <div>
-            © 2026 VoetIQ
-          </div>
+          <div>© 2026 VoetIQ</div>
 
           <div>
             Data provided by football-data.org
