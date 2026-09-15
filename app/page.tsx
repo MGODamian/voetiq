@@ -24,9 +24,9 @@ const [playerName, setPlayerName] = useState("");
 const [predictions, setPredictions] = useState<
 Record<number, { home: string; away: string }>
 
-({});
-const [message, setMessage] = useState("");
-const [loading, setLoading] = useState(true);
+> ({});
+> const [message, setMessage] = useState("");
+> const [loading, setLoading] = useState(true);
 
 useEffect(() => {
 loadMatches();
@@ -37,6 +37,7 @@ try {
 const response = await fetch("/api/matches");
 const data = await response.json();
 
+```
   if (!response.ok) {
     throw new Error(data.error || "Kon wedstrijden niet laden.");
   }
@@ -60,6 +61,7 @@ const data = await response.json();
 } finally {
   setLoading(false);
 }
+```
 
 }
 
@@ -74,6 +76,7 @@ home: "",
 away: "",
 };
 
+```
   return {
     ...current,
     [matchId]: {
@@ -82,12 +85,14 @@ away: "",
     },
   };
 });
+```
 
 }
 
 async function savePrediction(match: Match) {
 setMessage("");
 
+```
 if (!playerName.trim()) {
   setMessage("Vul eerst je naam in.");
   return;
@@ -156,6 +161,7 @@ if (error) {
 setMessage(
   `Voorspelling opgeslagen: ${match.homeTeam.name} ${home}-${away} ${match.awayTeam.name}`
 );
+```
 
 }
 
@@ -184,6 +190,7 @@ marginBottom: "25px",
 >
 <h1 style={{ margin: 0 }}>VoetIQ</h1>
 
+```
       <nav style={{ marginTop: "12px" }}>
         <a
           href="/"
@@ -382,6 +389,7 @@ marginBottom: "25px",
     </p>
   </div>
 </main>
+```
 
 );
 }
