@@ -26,7 +26,13 @@ export default function RegistrerenPage() {
     const cleanLastName = lastName.trim();
     const cleanUsername = username.trim();
 
-    if (!cleanFirstName || !cleanLastName || !cleanUsername || !email || !password) {
+    if (
+      !cleanFirstName ||
+      !cleanLastName ||
+      !cleanUsername ||
+      !email.trim() ||
+      !password
+    ) {
       setErrorMessage("Vul alle velden in.");
       return;
     }
@@ -51,30 +57,16 @@ export default function RegistrerenPage() {
     setLoading(true);
 
     try {
-      // Controleer eerst of de gebruikersnaam al bestaat
-      const { data: existingProfile, error: usernameCheckError } =
-        await supabase
-          .from("profiles")
-          .select("id")
-          .eq("username", cleanUsername)
-          .maybeSingle();
-
-      if (usernameCheckError) {
-        setErrorMessage("Er ging iets mis. Probeer het opnieuw.");
-        setLoading(false);
-        return;
-      }
-
-      if (existingProfile) {
-        setErrorMessage("Deze gebruikersnaam is al bezet.");
-        setLoading(false);
-        return;
-      }
-
-      // Account aanmaken
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
+        options: {
+          data: {
+            first_name: cleanFirstName,
+            last_name: cleanLastName,
+            username: cleanUsername,
+          },
+        },
       });
 
       if (error) {
@@ -94,24 +86,9 @@ export default function RegistrerenPage() {
         return;
       }
 
-      // Profiel aanmaken
-      const { error: profileError } = await supabase.from("profiles").insert({
-        id: data.user.id,
-        first_name: cleanFirstName,
-        last_name: cleanLastName,
-        username: cleanUsername,
-      });
-
-      if (profileError) {
-        setErrorMessage(
-          "Je account is aangemaakt, maar je profiel kon niet worden opgeslagen."
-        );
-        setLoading(false);
-        return;
-      }
-
       router.push("/");
-    } catch {
+    } catch (error) {
+      console.error(error);
       setErrorMessage("Er ging iets mis. Probeer het opnieuw.");
       setLoading(false);
     }
@@ -219,6 +196,7 @@ export default function RegistrerenPage() {
 
             <div style={{ marginTop: "14px" }}>
               <label style={labelStyle}>Gebruikersnaam</label>
+
               <input
                 type="text"
                 value={username}
@@ -242,6 +220,7 @@ export default function RegistrerenPage() {
 
             <div style={{ marginTop: "14px" }}>
               <label style={labelStyle}>E-mailadres</label>
+
               <input
                 type="email"
                 value={email}
