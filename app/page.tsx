@@ -1,4 +1,3 @@
-```tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -634,5 +633,198 @@ export default function Home() {
                     style={{
                       fontSize: "11px",
                       color: "#71877d",
-                      tex
-```
+                      textTransform: "uppercase",
+                      letterSpacing: "0.8px",
+                      fontWeight: 800,
+                      marginBottom: "10px",
+                    }}
+                  >
+                    Jouw voorspelling
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr auto 1fr",
+                      alignItems: "center",
+                      gap: "10px",
+                    }}
+                  >
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={prediction.home}
+                      onChange={(event) =>
+                        updatePrediction(
+                          match.id,
+                          "home",
+                          event.target.value
+                        )
+                      }
+                      placeholder="0"
+                      style={{
+                        width: "100%",
+                        boxSizing: "border-box",
+                        padding: "14px",
+                        background: "rgba(0,0,0,0.24)",
+                        border:
+                          "1px solid rgba(255,255,255,0.09)",
+                        borderRadius: "11px",
+                        color: "white",
+                        outline: "none",
+                        fontSize: "18px",
+                        fontWeight: 800,
+                        textAlign: "center",
+                      }}
+                    />
+
+                    <span
+                      style={{
+                        color: "#6f837a",
+                        fontWeight: 900,
+                        fontSize: "14px",
+                      }}
+                    >
+                      -
+                    </span>
+
+                    <input
+                      type="number"
+                      min="0"
+                      max="20"
+                      value={prediction.away}
+                      onChange={(event) =>
+                        updatePrediction(
+                          match.id,
+                          "away",
+                          event.target.value
+                        )
+                      }
+                      placeholder="0"
+                      style={{
+                        width: "100%",
+                        boxSizing: "border-box",
+                        padding: "14px",
+                        background: "rgba(0,0,0,0.24)",
+                        border:
+                          "1px solid rgba(255,255,255,0.09)",
+                        borderRadius: "11px",
+                        color: "white",
+                        outline: "none",
+                        fontSize: "18px",
+                        fontWeight: 800,
+                        textAlign: "center",
+                      }}
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => savePrediction(match)}
+                    style={{
+                      width: "100%",
+                      marginTop: "12px",
+                      padding: "14px",
+                      border: "none",
+                      borderRadius: "11px",
+                      background:
+                        "linear-gradient(135deg, #2ee681, #18bd68)",
+                      color: "#02150b",
+                      fontSize: "14px",
+                      fontWeight: 900,
+                      cursor: "pointer",
+                      boxShadow:
+                        "0 8px 25px rgba(46,230,129,0.16)",
+                    }}
+                  >
+                    Voorspelling opslaan
+                  </button>
+                </div>
+              </section>
+            );
+          })}
+        </div>
+
+        <section
+          style={{
+            marginTop: "24px",
+            background: "rgba(7,28,19,0.78)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            borderRadius: "18px",
+            padding: "22px",
+          }}
+        >
+          <div
+            style={{
+              color: "#54e998",
+              fontSize: "12px",
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "1px",
+              marginBottom: "7px",
+            }}
+          >
+            Puntentelling
+          </div>
+
+          <h2
+            style={{
+              margin: "0 0 12px",
+              fontSize: "22px",
+            }}
+          >
+            Scoor punten met je voorspelling
+          </h2>
+
+          <div
+            style={{
+              display: "grid",
+              gap: "9px",
+              color: "#9bb0a5",
+              fontSize: "14px",
+              lineHeight: 1.5,
+            }}
+          >
+            <div>
+              🎯 <strong style={{ color: "#ffffff" }}>10 punten</strong>{" "}
+              voor de exacte uitslag.
+            </div>
+
+            <div>
+              ⚽ <strong style={{ color: "#ffffff" }}>5 punten</strong>{" "}
+              voor de juiste winnaar of een correct gelijkspel.
+            </div>
+
+            <div>
+              ❌ <strong style={{ color: "#ffffff" }}>0 punten</strong>{" "}
+              bij een verkeerde voorspelling.
+            </div>
+          </div>
+        </section>
+
+        <footer
+          style={{
+            marginTop: "30px",
+            paddingTop: "20px",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+            display: "flex",
+            justifyContent: "space-between",
+            gap: "15px",
+            flexWrap: "wrap",
+            color: "#62766d",
+            fontSize: "11px",
+          }}
+        >
+          <div>
+            © 2026 VoetIQ
+          </div>
+
+          <div>
+            Data provided by football-data.org
+          </div>
+        </footer>
+      </div>
+    </main>
+  );
+}
