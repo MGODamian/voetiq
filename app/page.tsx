@@ -127,13 +127,16 @@ export default function Home() {
       <section
         style={{
           position: "relative",
-          minHeight: "620px",
+          minHeight: "calc(100vh - 70px)",
           display: "flex",
           alignItems: "center",
           overflow: "hidden",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
-          background:
-            "radial-gradient(circle at 50% 38%, rgba(46,230,129,0.16), transparent 28%), linear-gradient(180deg, #061a10 0%, #03130b 55%, #020d08 100%)",
+          backgroundImage:
+            "linear-gradient(180deg, rgba(1,9,5,0.30) 0%, rgba(2,13,8,0.62) 58%, #020d08 100%), radial-gradient(circle at 50% 30%, rgba(66,233,133,0.18), transparent 32%), url('/stadium-hero.jpg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
         }}
       >
         <div
@@ -198,7 +201,7 @@ export default function Home() {
               letterSpacing: "-1px",
             }}
           >
-            {tr("Voorspel. Scoor. Klim.")}
+            {tr("Voorspel. Beleef. Win punten.")}
           </h2>
 
           <p
@@ -210,7 +213,7 @@ export default function Home() {
               lineHeight: 1.7,
             }}
           >
-            {tr("Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.")}
+            {tr("Voorspel de grootste voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.")}
           </p>
 
           {!userLoading && username && (
@@ -359,214 +362,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
+      {/* QUICK LINKS */}
       <section
         style={{
           borderTop: "1px solid rgba(255,255,255,0.05)",
-          borderBottom:
-            "1px solid rgba(255,255,255,0.05)",
-          background: "rgba(255,255,255,0.018)",
+          padding: "0 20px 70px",
         }}
       >
         <div
           style={{
             maxWidth: "1100px",
             margin: "0 auto",
-            padding: "70px 20px",
-          }}
-        >
-          <SectionHeading
-            eyebrow={tr("Simpel en gratis")}
-            title={tr("Hoe werkt VoetIQ?")}
-            description={tr("Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.")}
-          />
-
-          <div
-            style={{
-              marginTop: "38px",
-              display: "grid",
-              gridTemplateColumns:
-                "repeat(auto-fit, minmax(210px, 1fr))",
-              gap: "16px",
-            }}
-          >
-            <StepCard
-              number="01"
-              icon="👤"
-              title={tr("Maak een account")}
-              text={tr("Registreer gratis en maak je eigen VoetIQ-profiel.")}
-            />
-
-            <StepCard
-              number="02"
-              icon="⚽"
-              title={tr("Voorspel")}
-              text={tr("Vul jouw voorspelling in voor aankomende voetbalwedstrijden.")}
-            />
-
-            <StepCard
-              number="03"
-              icon="⭐"
-              title={tr("Verdien punten")}
-              text={tr("Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.")}
-            />
-
-            <StepCard
-              number="04"
-              icon="🏆"
-              title={tr("Klim omhoog")}
-              text={tr("Vergelijk je score met andere spelers op de ranglijst.")}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* POINTS */}
-      <section
-        style={{
-          maxWidth: "1100px",
-          margin: "0 auto",
-          padding: "70px 20px",
-        }}
-      >
-        <div
-          style={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fit, minmax(300px, 1fr))",
-            gap: "22px",
-            alignItems: "stretch",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gap: "16px",
           }}
         >
-          <div
-            style={{
-              padding: "32px",
-              borderRadius: "22px",
-              background:
-                "linear-gradient(145deg, rgba(11,44,29,0.95), rgba(4,22,13,0.95))",
-              border:
-                "1px solid rgba(75,255,153,0.12)",
-            }}
+          <button
+            onClick={() => router.push("/hoe-het-werkt")}
+            style={featureLinkStyle}
           >
-            <div
-              style={{
-                color: "#42e985",
-                fontSize: "11px",
-                fontWeight: 900,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-              }}
-            >
-              {tr("Puntentelling")}
-            </div>
+            <span style={{ fontSize: "30px" }}>🎯</span>
+            <span>
+              <strong style={featureLinkTitleStyle}>{tr("Hoe werkt VoetIQ?")}</strong>
+              <span style={featureLinkTextStyle}>
+                {tr("Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.")}
+              </span>
+            </span>
+            <span style={{ color: "#42e985", fontSize: "22px" }}>→</span>
+          </button>
 
-            <h2
-              style={{
-                margin: "9px 0 10px",
-                fontSize: "28px",
-                fontWeight: 950,
-              }}
-            >
-              {tr("Iedere voorspelling telt.")}
-            </h2>
-
-            <p
-              style={{
-                margin: 0,
-                color: "#899f92",
-                lineHeight: 1.65,
-                fontSize: "14px",
-              }}
-            >
-              {tr("Hoe nauwkeuriger je voorspelt, hoe meer punten je verdient. Vooral een hoge uitslag exact voorspellen kan daarom veel punten opleveren.")}
-            </p>
-
-            <div
-              style={{
-                display: "grid",
-                gap: "10px",
-                marginTop: "25px",
-              }}
-            >
-              <PointsRow
-                icon="🎯"
-                points="10 + goals × 2"
-                text={tr("Exact goed: meer goals betekent meer punten")}
-              />
-
-              <PointsRow
-                icon="📉"
-                points={tr("-2 punten")}
-                text={tr("Per doelpunt dat je van de echte uitslag af zit")}
-              />
-
-              <PointsRow
-                icon="🔥"
-                points={tr("32 punten")}
-                text={tr("Voorbeeld: 6-5 exact voorspeld")}
-              />
-
-              <PointsRow
-                icon="❌"
-                points={tr("0 punten")}
-                text={tr("Verkeerde winnaar of verkeerd gelijkspel")}
-              />
-            </div>
-          </div>
-
-          <div
-            style={{
-              padding: "32px",
-              borderRadius: "22px",
-              background:
-                "linear-gradient(145deg, rgba(8,31,21,0.95), rgba(3,17,10,0.95))",
-              border:
-                "1px solid rgba(255,255,255,0.07)",
-            }}
+          <button
+            onClick={() => router.push("/ranglijst")}
+            style={featureLinkStyle}
           >
-            <div
-              style={{
-                color: "#42e985",
-                fontSize: "11px",
-                fontWeight: 900,
-                textTransform: "uppercase",
-                letterSpacing: "1px",
-              }}
-            >
-              {tr("Ranglijsten")}
-            </div>
-
-            <h2
-              style={{
-                margin: "9px 0 10px",
-                fontSize: "28px",
-                fontWeight: 950,
-              }}
-            >
-              {tr("Wie heeft de meeste voetbal-IQ?")}
-            </h2>
-
-            <p
-              style={{
-                margin: 0,
-                color: "#899f92",
-                lineHeight: 1.65,
-                fontSize: "14px",
-              }}
-            >
-              {tr("Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.")}
-            </p>
-
-            <button
-              onClick={() => router.push("/ranglijst")}
-              style={{
-                ...secondaryButtonStyle,
-                marginTop: "27px",
-              }}
-            >
-              🏆 {tr("Bekijk de ranglijst →")}
-            </button>
-          </div>
+            <span style={{ fontSize: "30px" }}>🏆</span>
+            <span>
+              <strong style={featureLinkTitleStyle}>{tr("Bekijk de ranglijst")}</strong>
+              <span style={featureLinkTextStyle}>
+                {tr("Bekijk wie de meeste punten heeft en klim zelf naar de top.")}
+              </span>
+            </span>
+            <span style={{ color: "#42e985", fontSize: "22px" }}>→</span>
+          </button>
         </div>
       </section>
 
@@ -1075,11 +913,19 @@ type HomeLanguage = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 const homeTranslations: Record<HomeLanguage, Record<string, string>> = {
   nl: {},
   en: {
-    "DE VOETBAL VOORSPELLINGSGAME":"THE FOOTBALL PREDICTION GAME","Voorspel. Scoor. Klim.":"Predict. Score. Climb.","Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.":"Predict real football matches, earn points and compete with other football fans.","Welkom terug":"Welcome back","Begin met voorspellen →":"Start predicting →","Begin gratis →":"Start for free →","Inloggen":"Log in","Bekijk ranglijst":"View leaderboard","Meer goals = meer punten":"More goals = more points","Per doelpunt afwijking":"Per goal difference","Gratis spelen":"Free to play","Kies je competitie":"Choose your competition","Populaire competities":"Popular competitions","Kies een competitie en begin direct met het voorspellen van wedstrijden.":"Choose a competition and start predicting matches right away.","Bekijk alle wedstrijden →":"View all matches →","Simpel en gratis":"Simple and free","Hoe werkt VoetIQ?":"How does VoetIQ work?","Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.":"Choose matches, predict the score and earn more points the more accurate your prediction is.","Maak een account":"Create an account","Registreer gratis en maak je eigen VoetIQ-profiel.":"Sign up for free and create your own VoetIQ profile.","Voorspel":"Predict","Vul jouw voorspelling in voor aankomende voetbalwedstrijden.":"Enter your prediction for upcoming football matches.","Verdien punten":"Earn points","Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.":"The more accurate your prediction, the more points you earn.","Klim omhoog":"Climb the rankings","Vergelijk je score met andere spelers op de ranglijst.":"Compare your score with other players on the leaderboard.","Puntentelling":"Scoring","Iedere voorspelling telt.":"Every prediction counts.","Hoe nauwkeuriger je voorspelt, hoe meer punten je verdient. Vooral een hoge uitslag exact voorspellen kan daarom veel punten opleveren.":"The more accurate your prediction, the more points you earn. Predicting a high-scoring result exactly can therefore earn you a lot of points.","Exact goed: meer goals betekent meer punten":"Exact score: more goals means more points","-2 punten":"-2 points","Per doelpunt dat je van de echte uitslag af zit":"For each goal your prediction differs from the actual score","32 punten":"32 points","Voorbeeld: 6-5 exact voorspeld":"Example: exact 6-5 prediction","0 punten":"0 points","Verkeerde winnaar of verkeerd gelijkspel":"Wrong winner or incorrectly predicted draw","Ranglijsten":"Leaderboards","Wie heeft de meeste voetbal-IQ?":"Who has the highest football IQ?","Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.":"Collect points, track your performance and climb the VoetIQ leaderboard.","Bekijk de ranglijst →":"View the leaderboard →","Speel tegen je vrienden":"Play against your friends","Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.":"Create your own pool, invite your friends and compete for the top spot on your own leaderboard.","Bekijk poules →":"View pools →","Klaar om jouw voetbal-IQ te testen?":"Ready to test your football IQ?","Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.":"Join in, predict matches and see how high you can climb on the leaderboard.","Ga naar wedstrijden →":"Go to matches →","Maak gratis een account →":"Create a free account →","Wedstrijden":"Matches","Ranglijst":"Leaderboard","Voorwaarden":"Terms","Privacy":"Privacy","Predictor":"Predictor","Voorspel nu →":"Predict now →",
+    "Voorspel. Beleef. Win punten.":"Predict. Experience. Earn points.",
+    "Voorspel de grootste voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.":"Predict the biggest football matches, collect points and compete with friends and other football fans.",
+    "Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.":"View the scoring system and discover how your predictions are rewarded.",
+    "Bekijk wie de meeste punten heeft en klim zelf naar de top.":"See who has the most points and climb to the top yourself.",
+    "DE VOETBAL VOORSPELLINGSGAME":"THE FOOTBALL PREDICTION GAME","Voorspel. Scoor. Klim.":"Predict. Score. Climb.","Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.":"Predict real football matches, earn points and compete with other football fans.","Welkom terug":"Welcome back","Begin met voorspellen →":"Start predicting →","Begin gratis →":"Start for free →","Inloggen":"Log in","Bekijk ranglijst":"View leaderboard","Meer goals = meer punten":"More goals = more points","Per doelpunt afwijking":"Per goal difference","Gratis spelen":"Free to play","Kies je competitie":"Choose your competition","Populaire competities":"Popular competitions","Kies een competitie en begin direct met het voorspellen van wedstrijden.":"Choose a competition and start predicting matches right away.","Bekijk alle wedstrijden →":"View all matches →","Simpel en gratis":"Simple and free","Hoe werkt VoetIQ?":"How does VoetIQ work?","Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.":"Choose matches, predict the score and earn more points the more accurate your prediction is.","Maak een account":"Create an account","Registreer gratis en maak je eigen VoetIQ-profiel.":"Sign up for free and create your own VoetIQ profile.","Voorspel":"Predict","Vul jouw voorspelling in voor aankomende voetbalwedstrijden.":"Enter your prediction for upcoming football matches.","Verdien punten":"Earn points","Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.":"The more accurate your prediction, the more points you earn.","Klim omhoog":"Climb the rankings","Vergelijk je score met andere spelers op de ranglijst.":"Compare your score with other players on the leaderboard.","Puntentelling":"Scoring","Iedere voorspelling telt.":"Every prediction counts.","Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.":"The more accurate your prediction, the more points you earn. Predicting a difficult high-scoring result exactly can therefore earn you a lot.","Exact goed: meer goals betekent meer punten":"Exact score: more goals means more points","-2 punten":"-2 points","Per doelpunt dat je van de echte uitslag af zit":"For each goal your prediction differs from the actual score","32 punten":"32 points","Voorbeeld: 6-5 exact voorspeld":"Example: exact 6-5 prediction","0 punten":"0 points","Verkeerde winnaar of verkeerd gelijkspel":"Wrong winner or incorrectly predicted draw","Ranglijsten":"Leaderboards","Wie heeft de meeste voetbal-IQ?":"Who has the highest football IQ?","Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.":"Collect points, track your performance and climb the VoetIQ leaderboard.","Bekijk de ranglijst →":"View the leaderboard →","Speel tegen je vrienden":"Play against your friends","Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.":"Create your own pool, invite your friends and compete for the top spot on your own leaderboard.","Bekijk poules →":"View pools →","Klaar om jouw voetbal-IQ te testen?":"Ready to test your football IQ?","Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.":"Join in, predict matches and see how high you can climb on the leaderboard.","Ga naar wedstrijden →":"Go to matches →","Maak gratis een account →":"Create a free account →","Wedstrijden":"Matches","Ranglijst":"Leaderboard","Voorwaarden":"Terms","Privacy":"Privacy","Predictor":"Predictor","Voorspel nu →":"Predict now →",
     "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.":"Predict matches featuring Ajax, PSV, Feyenoord and the rest of the Eredivisie.","Test je voetbalkennis in één van de grootste competities ter wereld.":"Test your football knowledge in one of the world's biggest leagues.","Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.":"Predict matches from Spain's top football league.","Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.":"Compete with other predictors on matches from Germany.","Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.":"Predict matches involving the biggest clubs in Italian football.","Voorspel de grootste Europese wedstrijden en verdien punten.":"Predict Europe's biggest matches and earn points."
   },
   de: {
-    "DE VOETBAL VOORSPELLINGSGAME":"DAS FUSSBALL-TIPPSPIEL","Voorspel. Scoor. Klim.":"Tippen. Punkten. Aufsteigen.","Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.":"Tippe echte Fußballspiele, sammle Punkte und tritt gegen andere Fußballfans an.","Welkom terug":"Willkommen zurück","Begin met voorspellen →":"Jetzt tippen →","Begin gratis →":"Kostenlos starten →","Inloggen":"Anmelden","Bekijk ranglijst":"Rangliste ansehen","Meer goals = meer punten":"Mehr Tore = mehr Punkte","Per doelpunt afwijking":"Pro Tor Abweichung","Gratis spelen":"Kostenlos spielen","Kies je competitie":"Wähle deinen Wettbewerb","Populaire competities":"Beliebte Wettbewerbe","Kies een competitie en begin direct met het voorspellen van wedstrijden.":"Wähle einen Wettbewerb und tippe direkt die nächsten Spiele.","Bekijk alle wedstrijden →":"Alle Spiele ansehen →","Simpel en gratis":"Einfach und kostenlos","Hoe werkt VoetIQ?":"Wie funktioniert VoetIQ?","Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.":"Wähle Spiele aus, tippe das Ergebnis und sammle umso mehr Punkte, je genauer dein Tipp ist.","Maak een account":"Konto erstellen","Registreer gratis en maak je eigen VoetIQ-profiel.":"Registriere dich kostenlos und erstelle dein eigenes VoetIQ-Profil.","Voorspel":"Tippen","Vul jouw voorspelling in voor aankomende voetbalwedstrijden.":"Gib deinen Tipp für kommende Fußballspiele ab.","Verdien punten":"Punkte sammeln","Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.":"Je genauer dein Tipp, desto mehr Punkte bekommst du.","Klim omhoog":"Aufsteigen","Vergelijk je score met andere spelers op de ranglijst.":"Vergleiche deine Punkte mit anderen Spielern in der Rangliste.","Puntentelling":"Punktesystem","Iedere voorspelling telt.":"Jeder Tipp zählt.","Hoe nauwkeuriger je voorspelt, hoe meer punten je verdient. Vooral een hoge uitslag exact voorspellen kan daarom veel punten opleveren.":"Je genauer dein Tipp ist, desto mehr Punkte erhältst du. Ein torreiches Ergebnis exakt vorherzusagen kann daher besonders viele Punkte bringen.","Exact goed: meer goals betekent meer punten":"Exakter Tipp: Mehr Tore bedeuten mehr Punkte","-2 punten":"-2 Punkte","Per doelpunt dat je van de echte uitslag af zit":"Für jedes Tor Abweichung vom tatsächlichen Ergebnis","32 punten":"32 Punkte","Voorbeeld: 6-5 exact voorspeld":"Beispiel: 6:5 exakt getippt","0 punten":"0 Punkte","Verkeerde winnaar of verkeerd gelijkspel":"Falscher Sieger oder fälschlich auf Unentschieden getippt","Ranglijsten":"Ranglisten","Wie heeft de meeste voetbal-IQ?":"Wer hat den höchsten Fußball-IQ?","Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.":"Sammle Punkte, verfolge deine Leistung und steige in der VoetIQ-Rangliste immer weiter auf.","Bekijk de ranglijst →":"Rangliste ansehen →","Speel tegen je vrienden":"Spiele gegen deine Freunde","Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.":"Erstelle eine eigene Tipprunde, lade deine Freunde ein und kämpft um Platz eins in eurer Rangliste.","Bekijk poules →":"Tipprunden ansehen →","Klaar om jouw voetbal-IQ te testen?":"Bereit, deinen Fußball-IQ zu testen?","Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.":"Mach mit, tippe Spiele und finde heraus, wie weit du in der Rangliste nach oben kommst.","Ga naar wedstrijden →":"Zu den Spielen →","Maak gratis een account →":"Kostenloses Konto erstellen →","Wedstrijden":"Spiele","Ranglijst":"Rangliste","Voorwaarden":"Nutzungsbedingungen","Privacy":"Datenschutz","Predictor":"Tippspiel","Voorspel nu →":"Jetzt tippen →",
+    "Voorspel. Beleef. Win punten.":"Tippen. Mitfiebern. Punkte sammeln.",
+    "Voorspel de grootste voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.":"Tippe die größten Fußballspiele, sammle Punkte und tritt gegen Freunde und andere Fußballfans an.",
+    "Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.":"Sieh dir das Punktesystem an und erfahre, wie deine Tipps belohnt werden.",
+    "Bekijk wie de meeste punten heeft en klim zelf naar de top.":"Sieh, wer die meisten Punkte hat, und kämpfe dich selbst an die Spitze.",
+    "DE VOETBAL VOORSPELLINGSGAME":"DAS FUSSBALL-TIPPSPIEL","Voorspel. Scoor. Klim.":"Tippen. Punkten. Aufsteigen.","Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.":"Tippe echte Fußballspiele, sammle Punkte und tritt gegen andere Fußballfans an.","Welkom terug":"Willkommen zurück","Begin met voorspellen →":"Jetzt tippen →","Begin gratis →":"Kostenlos starten →","Inloggen":"Anmelden","Bekijk ranglijst":"Rangliste ansehen","Meer goals = meer punten":"Mehr Tore = mehr Punkte","Per doelpunt afwijking":"Pro Tor Abweichung","Gratis spelen":"Kostenlos spielen","Kies je competitie":"Wähle deinen Wettbewerb","Populaire competities":"Beliebte Wettbewerbe","Kies een competitie en begin direct met het voorspellen van wedstrijden.":"Wähle einen Wettbewerb und tippe direkt die nächsten Spiele.","Bekijk alle wedstrijden →":"Alle Spiele ansehen →","Simpel en gratis":"Einfach und kostenlos","Hoe werkt VoetIQ?":"Wie funktioniert VoetIQ?","Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.":"Wähle Spiele aus, tippe das Ergebnis und sammle umso mehr Punkte, je genauer dein Tipp ist.","Maak een account":"Konto erstellen","Registreer gratis en maak je eigen VoetIQ-profiel.":"Registriere dich kostenlos und erstelle dein eigenes VoetIQ-Profil.","Voorspel":"Tippen","Vul jouw voorspelling in voor aankomende voetbalwedstrijden.":"Gib deinen Tipp für kommende Fußballspiele ab.","Verdien punten":"Punkte sammeln","Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.":"Je genauer dein Tipp, desto mehr Punkte bekommst du.","Klim omhoog":"Aufsteigen","Vergelijk je score met andere spelers op de ranglijst.":"Vergleiche deine Punkte mit anderen Spielern in der Rangliste.","Puntentelling":"Punktesystem","Iedere voorspelling telt.":"Jeder Tipp zählt.","Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.":"Je genauer dein Tipp, desto mehr Punkte bekommst du. Ein exakt getipptes torreiches Ergebnis kann daher besonders viele Punkte bringen.","Exact goed: meer goals betekent meer punten":"Exakter Tipp: Mehr Tore bedeuten mehr Punkte","-2 punten":"-2 Punkte","Per doelpunt dat je van de echte uitslag af zit":"Für jedes Tor Abweichung vom tatsächlichen Ergebnis","32 punten":"32 Punkte","Voorbeeld: 6-5 exact voorspeld":"Beispiel: 6:5 exakt getippt","0 punten":"0 Punkte","Verkeerde winnaar of verkeerd gelijkspel":"Falscher Sieger oder fälschlich auf Unentschieden getippt","Ranglijsten":"Ranglisten","Wie heeft de meeste voetbal-IQ?":"Wer hat den höchsten Fußball-IQ?","Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.":"Sammle Punkte, verfolge deine Leistung und steige in der VoetIQ-Rangliste immer weiter auf.","Bekijk de ranglijst →":"Rangliste ansehen →","Speel tegen je vrienden":"Spiele gegen deine Freunde","Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.":"Erstelle eine eigene Tipprunde, lade deine Freunde ein und kämpft um Platz eins in eurer Rangliste.","Bekijk poules →":"Tipprunden ansehen →","Klaar om jouw voetbal-IQ te testen?":"Bereit, deinen Fußball-IQ zu testen?","Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.":"Mach mit, tippe Spiele und finde heraus, wie weit du in der Rangliste nach oben kommst.","Ga naar wedstrijden →":"Zu den Spielen →","Maak gratis een account →":"Kostenloses Konto erstellen →","Wedstrijden":"Spiele","Ranglijst":"Rangliste","Voorwaarden":"Nutzungsbedingungen","Privacy":"Datenschutz","Predictor":"Tippspiel","Voorspel nu →":"Jetzt tippen →",
     "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.":"Tippe Spiele von Ajax, PSV, Feyenoord und den übrigen Teams der Eredivisie.","Test je voetbalkennis in één van de grootste competities ter wereld.":"Teste dein Fußballwissen in einer der größten Ligen der Welt.","Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.":"Tippe die Spiele der höchsten spanischen Fußballliga.","Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.":"Tritt bei Spielen aus Deutschland gegen andere Tipper an.","Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.":"Tippe die Spiele der größten Vereine im italienischen Fußball.","Voorspel de grootste Europese wedstrijden en verdien punten.":"Tippe die größten europäischen Spiele und sammle Punkte."
   },
   es: {}, fr: {}, it: {}, pt: {}
@@ -1103,10 +949,15 @@ Object.assign(homeTranslations.es, fallbackTranslations.es);
 Object.assign(homeTranslations.fr, fallbackTranslations.fr);
 Object.assign(homeTranslations.it, fallbackTranslations.it);
 Object.assign(homeTranslations.pt, fallbackTranslations.pt);
-Object.assign(homeTranslations.es, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Pronostica partidos de fútbol reales, gana puntos y compite contra otros aficionados.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Elige una competición y empieza a pronosticar partidos de inmediato.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Elige partidos, pronostica el resultado y gana más puntos cuanto más preciso sea tu pronóstico.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Regístrate gratis y crea tu propio perfil de VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Introduce tu pronóstico para los próximos partidos de fútbol.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Cuanto más preciso sea tu pronóstico, más puntos ganarás.", "Vergelijk je score met andere spelers op de ranglijst.": "Compara tu puntuación con la de otros jugadores en la clasificación.", "Hoe nauwkeuriger je voorspelt, hoe meer punten je verdient. Vooral een hoge uitslag exact voorspellen kan daarom veel punten opleveren.": "Cuanto más preciso sea tu pronóstico, más puntos ganarás. Acertar exactamente un resultado con muchos goles puede darte muchos puntos.", "Exact goed: meer goals betekent meer punten": "Resultado exacto: más goles significan más puntos", "Per doelpunt dat je van de echte uitslag af zit": "Por cada gol de diferencia respecto al resultado real", "Voorbeeld: 6-5 exact voorspeld": "Ejemplo: 6-5 pronosticado exactamente", "Verkeerde winnaar of verkeerd gelijkspel": "Ganador incorrecto o empate pronosticado erróneamente", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Acumula puntos, sigue tu rendimiento e intenta subir cada vez más en la clasificación de VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Crea tu propio grupo, invita a tus amigos y competid por el primer puesto de vuestra clasificación.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Participa, pronostica partidos y descubre hasta dónde puedes subir en la clasificación.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Pronostica los partidos del Ajax, PSV, Feyenoord y el resto de la Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Pon a prueba tus conocimientos de fútbol en una de las ligas más importantes del mundo.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Pronostica los partidos de la máxima categoría del fútbol español.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Compite contra otros jugadores con partidos del fútbol alemán.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Haz pronósticos para los partidos de los clubes más importantes del fútbol italiano.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Pronostica los grandes partidos europeos y gana puntos."});
-Object.assign(homeTranslations.fr, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Pronostiquez de vrais matchs de football, gagnez des points et affrontez d’autres fans de football.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Choisissez une compétition et commencez immédiatement à pronostiquer les matchs.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Choisissez des matchs, pronostiquez le score et gagnez davantage de points lorsque votre pronostic est plus précis.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Inscrivez-vous gratuitement et créez votre propre profil VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Saisissez votre pronostic pour les prochains matchs de football.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Plus votre pronostic est précis, plus vous gagnez de points.", "Vergelijk je score met andere spelers op de ranglijst.": "Comparez votre score à celui des autres joueurs dans le classement.", "Hoe nauwkeuriger je voorspelt, hoe meer punten je verdient. Vooral een hoge uitslag exact voorspellen kan daarom veel punten opleveren.": "Plus votre pronostic est précis, plus vous gagnez de points. Prédire exactement un score élevé peut donc rapporter beaucoup de points.", "Exact goed: meer goals betekent meer punten": "Score exact : plus il y a de buts, plus vous gagnez de points", "Per doelpunt dat je van de echte uitslag af zit": "Pour chaque but d’écart avec le score réel", "Voorbeeld: 6-5 exact voorspeld": "Exemple : score de 6-5 pronostiqué exactement", "Verkeerde winnaar of verkeerd gelijkspel": "Mauvais vainqueur ou match nul pronostiqué à tort", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Cumulez des points, suivez vos performances et tentez de grimper dans le classement VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Créez votre propre ligue, invitez vos amis et disputez-vous la première place de votre classement.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Participez, pronostiquez des matchs et voyez jusqu’où vous pouvez monter dans le classement.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Pronostiquez les matchs de l’Ajax, du PSV, de Feyenoord et des autres clubs d’Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Testez vos connaissances footballistiques dans l’un des plus grands championnats au monde.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Pronostiquez les matchs du championnat espagnol de première division.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Affrontez d’autres pronostiqueurs sur les matchs du championnat allemand.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Pronostiquez les matchs des plus grands clubs du football italien.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Pronostiquez les plus grands matchs européens et gagnez des points."});
-Object.assign(homeTranslations.it, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Pronostica vere partite di calcio, guadagna punti e sfida altri appassionati di calcio.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Scegli una competizione e inizia subito a pronosticare le partite.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Scegli le partite, pronostica il risultato e guadagna più punti quanto più preciso è il tuo pronostico.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Registrati gratuitamente e crea il tuo profilo VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Inserisci il tuo pronostico per le prossime partite di calcio.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Più preciso è il tuo pronostico, più punti guadagni.", "Vergelijk je score met andere spelers op de ranglijst.": "Confronta il tuo punteggio con quello degli altri giocatori in classifica.", "Hoe nauwkeuriger je voorspelt, hoe meer punten je verdient. Vooral een hoge uitslag exact voorspellen kan daarom veel punten opleveren.": "Più preciso è il tuo pronostico, più punti guadagni. Indovinare esattamente un risultato con molti gol può quindi farti guadagnare molti punti.", "Exact goed: meer goals betekent meer punten": "Risultato esatto: più gol significano più punti", "Per doelpunt dat je van de echte uitslag af zit": "Per ogni gol di differenza rispetto al risultato reale", "Voorbeeld: 6-5 exact voorspeld": "Esempio: 6-5 pronosticato esattamente", "Verkeerde winnaar of verkeerd gelijkspel": "Vincitore sbagliato o pareggio pronosticato erroneamente", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Accumula punti, segui le tue prestazioni e prova a salire sempre più in alto nella classifica VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Crea il tuo gruppo, invita i tuoi amici e sfidatevi per il primo posto nella vostra classifica.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Partecipa, pronostica le partite e scopri quanto puoi salire in classifica.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Pronostica le partite di Ajax, PSV, Feyenoord e delle altre squadre di Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Metti alla prova le tue conoscenze calcistiche in uno dei campionati più importanti al mondo.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Pronostica le partite della massima divisione spagnola.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Sfida altri giocatori pronosticando le partite del campionato tedesco.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Pronostica le partite dei più grandi club del calcio italiano.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Pronostica le più grandi partite europee e guadagna punti."});
-Object.assign(homeTranslations.pt, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Prevê resultados de jogos de futebol reais, ganha pontos e compete com outros adeptos.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Escolhe uma competição e começa já a prever os resultados dos jogos.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Escolhe jogos, prevê o resultado e ganha mais pontos quanto mais precisa for a tua previsão.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Regista-te gratuitamente e cria o teu próprio perfil VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Introduz a tua previsão para os próximos jogos de futebol.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Quanto mais precisa for a tua previsão, mais pontos ganhas.", "Vergelijk je score met andere spelers op de ranglijst.": "Compara a tua pontuação com a dos outros jogadores na classificação.", "Hoe nauwkeuriger je voorspelt, hoe meer punten je verdient. Vooral een hoge uitslag exact voorspellen kan daarom veel punten opleveren.": "Quanto mais precisa for a tua previsão, mais pontos ganhas. Acertar exatamente num resultado difícil com muitos golos pode, por isso, valer muitos pontos.", "Exact goed: meer goals betekent meer punten": "Resultado exato: mais golos significam mais pontos", "Per doelpunt dat je van de echte uitslag af zit": "Por cada golo de diferença em relação ao resultado real", "Voorbeeld: 6-5 exact voorspeld": "Exemplo: resultado 6-5 previsto exatamente", "Verkeerde winnaar of verkeerd gelijkspel": "Vencedor errado ou empate previsto incorretamente", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Acumula pontos, acompanha o teu desempenho e tenta subir cada vez mais na classificação do VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Cria o teu próprio grupo, convida os teus amigos e disputa o primeiro lugar da vossa classificação.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Participa, prevê resultados e vê até onde consegues subir na classificação.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Prevê os resultados dos jogos do Ajax, PSV, Feyenoord e das restantes equipas da Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Testa os teus conhecimentos de futebol numa das maiores ligas do mundo.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Prevê os resultados dos jogos da principal liga espanhola.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Compete com outros jogadores nos jogos do campeonato alemão.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Faz previsões para os jogos dos maiores clubes do futebol italiano.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Prevê os maiores jogos europeus e ganha pontos."});
+Object.assign(homeTranslations.es, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Pronostica partidos de fútbol reales, gana puntos y compite contra otros aficionados.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Elige una competición y empieza a pronosticar partidos de inmediato.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Elige partidos, pronostica el resultado y gana más puntos cuanto más preciso sea tu pronóstico.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Regístrate gratis y crea tu propio perfil de VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Introduce tu pronóstico para los próximos partidos de fútbol.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Cuanto más preciso sea tu pronóstico, más puntos ganarás.", "Vergelijk je score met andere spelers op de ranglijst.": "Compara tu puntuación con la de otros jugadores en la clasificación.", "Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.": "Cuanto más preciso sea tu pronóstico, más puntos ganarás. Acertar exactamente un resultado difícil con muchos goles puede darte muchos puntos.", "Exact goed: meer goals betekent meer punten": "Resultado exacto: más goles significan más puntos", "Per doelpunt dat je van de echte uitslag af zit": "Por cada gol de diferencia respecto al resultado real", "Voorbeeld: 6-5 exact voorspeld": "Ejemplo: 6-5 pronosticado exactamente", "Verkeerde winnaar of verkeerd gelijkspel": "Ganador incorrecto o empate pronosticado erróneamente", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Acumula puntos, sigue tu rendimiento e intenta subir cada vez más en la clasificación de VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Crea tu propio grupo, invita a tus amigos y competid por el primer puesto de vuestra clasificación.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Participa, pronostica partidos y descubre hasta dónde puedes subir en la clasificación.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Pronostica los partidos del Ajax, PSV, Feyenoord y el resto de la Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Pon a prueba tus conocimientos de fútbol en una de las ligas más importantes del mundo.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Pronostica los partidos de la máxima categoría del fútbol español.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Compite contra otros jugadores con partidos del fútbol alemán.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Haz pronósticos para los partidos de los clubes más importantes del fútbol italiano.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Pronostica los grandes partidos europeos y gana puntos."});
+Object.assign(homeTranslations.fr, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Pronostiquez de vrais matchs de football, gagnez des points et affrontez d’autres fans de football.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Choisissez une compétition et commencez immédiatement à pronostiquer les matchs.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Choisissez des matchs, pronostiquez le score et gagnez davantage de points lorsque votre pronostic est plus précis.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Inscrivez-vous gratuitement et créez votre propre profil VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Saisissez votre pronostic pour les prochains matchs de football.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Plus votre pronostic est précis, plus vous gagnez de points.", "Vergelijk je score met andere spelers op de ranglijst.": "Comparez votre score à celui des autres joueurs dans le classement.", "Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.": "Plus votre pronostic est précis, plus vous gagnez de points. Pronostiquer exactement un score élevé et difficile peut donc rapporter beaucoup de points.", "Exact goed: meer goals betekent meer punten": "Score exact : plus il y a de buts, plus vous gagnez de points", "Per doelpunt dat je van de echte uitslag af zit": "Pour chaque but d’écart avec le score réel", "Voorbeeld: 6-5 exact voorspeld": "Exemple : score de 6-5 pronostiqué exactement", "Verkeerde winnaar of verkeerd gelijkspel": "Mauvais vainqueur ou match nul pronostiqué à tort", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Cumulez des points, suivez vos performances et tentez de grimper dans le classement VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Créez votre propre ligue, invitez vos amis et disputez-vous la première place de votre classement.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Participez, pronostiquez des matchs et voyez jusqu’où vous pouvez monter dans le classement.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Pronostiquez les matchs de l’Ajax, du PSV, de Feyenoord et des autres clubs d’Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Testez vos connaissances footballistiques dans l’un des plus grands championnats au monde.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Pronostiquez les matchs du championnat espagnol de première division.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Affrontez d’autres pronostiqueurs sur les matchs du championnat allemand.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Pronostiquez les matchs des plus grands clubs du football italien.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Pronostiquez les plus grands matchs européens et gagnez des points."});
+Object.assign(homeTranslations.it, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Pronostica vere partite di calcio, guadagna punti e sfida altri appassionati di calcio.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Scegli una competizione e inizia subito a pronosticare le partite.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Scegli le partite, pronostica il risultato e guadagna più punti quanto più preciso è il tuo pronostico.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Registrati gratuitamente e crea il tuo profilo VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Inserisci il tuo pronostico per le prossime partite di calcio.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Più preciso è il tuo pronostico, più punti guadagni.", "Vergelijk je score met andere spelers op de ranglijst.": "Confronta il tuo punteggio con quello degli altri giocatori in classifica.", "Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.": "Più preciso è il tuo pronostico, più punti guadagni. Indovinare esattamente un risultato difficile con molti gol può quindi valere molti punti.", "Exact goed: meer goals betekent meer punten": "Risultato esatto: più gol significano più punti", "Per doelpunt dat je van de echte uitslag af zit": "Per ogni gol di differenza rispetto al risultato reale", "Voorbeeld: 6-5 exact voorspeld": "Esempio: 6-5 pronosticato esattamente", "Verkeerde winnaar of verkeerd gelijkspel": "Vincitore sbagliato o pareggio pronosticato erroneamente", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Accumula punti, segui le tue prestazioni e prova a salire sempre più in alto nella classifica VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Crea il tuo gruppo, invita i tuoi amici e sfidatevi per il primo posto nella vostra classifica.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Partecipa, pronostica le partite e scopri quanto puoi salire in classifica.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Pronostica le partite di Ajax, PSV, Feyenoord e delle altre squadre di Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Metti alla prova le tue conoscenze calcistiche in uno dei campionati più importanti al mondo.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Pronostica le partite della massima divisione spagnola.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Sfida altri giocatori pronosticando le partite del campionato tedesco.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Pronostica le partite dei più grandi club del calcio italiano.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Pronostica le più grandi partite europee e guadagna punti."});
+Object.assign(homeTranslations.pt, {"Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.": "Prevê resultados de jogos de futebol reais, ganha pontos e compete com outros adeptos.", "Kies een competitie en begin direct met het voorspellen van wedstrijden.": "Escolhe uma competição e começa já a prever os resultados dos jogos.", "Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.": "Escolhe jogos, prevê o resultado e ganha mais pontos quanto mais precisa for a tua previsão.", "Registreer gratis en maak je eigen VoetIQ-profiel.": "Regista-te gratuitamente e cria o teu próprio perfil VoetIQ.", "Vul jouw voorspelling in voor aankomende voetbalwedstrijden.": "Introduz a tua previsão para os próximos jogos de futebol.", "Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.": "Quanto mais precisa for a tua previsão, mais pontos ganhas.", "Vergelijk je score met andere spelers op de ranglijst.": "Compara a tua pontuação com a dos outros jogadores na classificação.", "Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.": "Quanto mais precisa for a tua previsão, mais pontos ganhas. Acertar exatamente num resultado difícil com muitos golos pode, por isso, valer muitos pontos.", "Exact goed: meer goals betekent meer punten": "Resultado exato: mais golos significam mais pontos", "Per doelpunt dat je van de echte uitslag af zit": "Por cada golo de diferença em relação ao resultado real", "Voorbeeld: 6-5 exact voorspeld": "Exemplo: resultado 6-5 previsto exatamente", "Verkeerde winnaar of verkeerd gelijkspel": "Vencedor errado ou empate previsto incorretamente", "Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.": "Acumula pontos, acompanha o teu desempenho e tenta subir cada vez mais na classificação do VoetIQ.", "Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.": "Cria o teu próprio grupo, convida os teus amigos e disputa o primeiro lugar da vossa classificação.", "Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.": "Participa, prevê resultados e vê até onde consegues subir na classificação.", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.": "Prevê os resultados dos jogos do Ajax, PSV, Feyenoord e das restantes equipas da Eredivisie.", "Test je voetbalkennis in één van de grootste competities ter wereld.": "Testa os teus conhecimentos de futebol numa das maiores ligas do mundo.", "Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.": "Prevê os resultados dos jogos da principal liga espanhola.", "Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.": "Compete com outros jogadores nos jogos do campeonato alemão.", "Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.": "Faz previsões para os jogos dos maiores clubes do futebol italiano.", "Voorspel de grootste Europese wedstrijden en verdien punten.": "Prevê os maiores jogos europeus e ganha pontos."});
+
+Object.assign(homeTranslations.es, {'Voorspel. Beleef. Win punten.': 'Pronostica. Vive. Gana puntos.', 'Voorspel de grootste voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.': 'Pronostica los grandes partidos de fútbol, acumula puntos y compite con amigos y otros aficionados.', 'Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.': 'Consulta el sistema de puntos y descubre cómo se premian tus pronósticos.', 'Bekijk wie de meeste punten heeft en klim zelf naar de top.': 'Descubre quién tiene más puntos y sube tú también hasta lo más alto.'});
+Object.assign(homeTranslations.fr, {'Voorspel. Beleef. Win punten.': 'Pronostiquez. Vibrez. Gagnez des points.', 'Voorspel de grootste voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.': 'Pronostiquez les plus grands matchs de football, cumulez des points et affrontez vos amis et d’autres fans.', 'Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.': 'Consultez le système de points et découvrez comment vos pronostics sont récompensés.', 'Bekijk wie de meeste punten heeft en klim zelf naar de top.': 'Découvrez qui a le plus de points et grimpez vous-même jusqu’au sommet.'});
+Object.assign(homeTranslations.it, {'Voorspel. Beleef. Win punten.': 'Pronostica. Vivi. Guadagna punti.', 'Voorspel de grootste voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.': 'Pronostica le grandi partite di calcio, accumula punti e sfida amici e altri appassionati.', 'Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.': 'Scopri il sistema di punteggio e come vengono premiati i tuoi pronostici.', 'Bekijk wie de meeste punten heeft en klim zelf naar de top.': 'Scopri chi ha più punti e scala anche tu la classifica.'});
+Object.assign(homeTranslations.pt, {'Voorspel. Beleef. Win punten.': 'Prevê. Vive. Ganha pontos.', 'Voorspel de grootste voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.': 'Prevê os maiores jogos de futebol, acumula pontos e compete com amigos e outros adeptos.', 'Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.': 'Consulta o sistema de pontos e descobre como as tuas previsões são recompensadas.', 'Bekijk wie de meeste punten heeft en klim zelf naar de top.': 'Vê quem tem mais pontos e sobe também até ao topo.'});
 
 function translateHome(language: string, text: string) {
   if (language === "nl") return text;
@@ -1114,6 +965,35 @@ function translateHome(language: string, text: string) {
   return homeTranslations[lang]?.[text] || homeTranslations.en[text] || text;
 }
 
+
+const featureLinkStyle = {
+  width: "100%",
+  display: "grid",
+  gridTemplateColumns: "auto 1fr auto",
+  alignItems: "center",
+  gap: "16px",
+  padding: "22px",
+  borderRadius: "18px",
+  border: "1px solid rgba(75,255,153,0.10)",
+  background: "linear-gradient(145deg, rgba(8,35,23,0.96), rgba(3,18,11,0.96))",
+  color: "white",
+  textAlign: "left" as const,
+  cursor: "pointer",
+};
+
+const featureLinkTitleStyle = {
+  display: "block",
+  fontSize: "17px",
+  fontWeight: 900,
+};
+
+const featureLinkTextStyle = {
+  display: "block",
+  marginTop: "5px",
+  color: "#83998c",
+  fontSize: "13px",
+  lineHeight: 1.5,
+};
 
 const primaryButtonStyle = {
   padding: "14px 24px",
