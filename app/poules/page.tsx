@@ -544,8 +544,8 @@ export default function PoulesPage() {
                 }}
               >
                 {creating
-                  ? "{t("createPool")}..."
-                  : "Poule aanmaken →"}
+                  ? t("creating")
+                  : `${t("createButton")} →`}
               </button>
             </section>
 
