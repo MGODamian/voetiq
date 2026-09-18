@@ -22,6 +22,94 @@ type LeaderboardPlayer = {
   exact_scores: number;
 };
 
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+type TranslationKey =
+  | "notFound" | "loadError" | "noAccess" | "leaderboardError" | "loading"
+  | "backPools" | "poolLabel" | "inviteCode" | "copied" | "copyCode"
+  | "participant" | "participants" | "competition" | "pointsSystem"
+  | "predictMatches" | "inviteFriends" | "poolLeaderboard" | "onlyPoints"
+  | "noParticipants" | "prediction" | "predictions" | "exact" | "predicted"
+  | "points" | "poolId";
+
+const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
+  nl: {
+    notFound:translations[initialLanguage]["notFound"], loadError:translations[language]["loadError"],
+    noAccess:translations[language]["noAccess"], leaderboardError:translations[language]["leaderboardError"],
+    loading:"Poule wordt geladen...", backPools:"Mijn poules", poolLabel:"{t("poolLabel")}", inviteCode:"{t("inviteCode")}",
+    copied:"Gekopieerd", copyCode:"Code kopiëren", participant:"Deelnemer", participants:"Deelnemers", competition:"Competitie",
+    pointsSystem:"Puntensysteem", predictMatches:"Voorspel wedstrijden", inviteFriends:"Vrienden uitnodigen",
+    poolLeaderboard:"Pouleklassement", onlyPoints:"Alleen punten uit {competition} tellen mee voor deze poule.",
+    noParticipants:"{t("noParticipants")}", prediction:"voorspelling", predictions:"voorspellingen",
+    exact:"exact", predicted:"voorspeld", points:"{t("points")}", poolId:"Poule-ID"
+  },
+  en: {
+    notFound:"This pool could not be found.", loadError:"The details for this pool could not be loaded.",
+    noAccess:"This pool does not exist or you do not have access.", leaderboardError:"The pool leaderboard could not be loaded.",
+    loading:"Loading pool...", backPools:"My pools", poolLabel:"VOETIQ POOL", inviteCode:"INVITATION CODE",
+    copied:"Copied", copyCode:"Copy code", participant:"Participant", participants:"Participants", competition:"Competition",
+    pointsSystem:"Points system", predictMatches:"Predict matches", inviteFriends:"Invite friends",
+    poolLeaderboard:"Pool leaderboard", onlyPoints:"Only points from {competition} count towards this pool.",
+    noParticipants:"There are no participants in this pool yet.", prediction:"prediction", predictions:"predictions",
+    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID"
+  },
+  de: {
+    notFound:"Diese Tipprunde konnte nicht gefunden werden.", loadError:"Die Daten dieser Tipprunde konnten nicht geladen werden.",
+    noAccess:"Diese Tipprunde existiert nicht oder du hast keinen Zugriff.", leaderboardError:"Die Rangliste der Tipprunde konnte nicht geladen werden.",
+    loading:"Tipprunde wird geladen...", backPools:"Meine Tipprunden", poolLabel:"VOETIQ TIPPRUNDE", inviteCode:"EINLADUNGSCODE",
+    copied:"Kopiert", copyCode:"Code kopieren", participant:"Teilnehmer", participants:"Teilnehmer", competition:"Wettbewerb",
+    pointsSystem:"Punktesystem", predictMatches:"Spiele tippen", inviteFriends:"Freunde einladen",
+    poolLeaderboard:"Tipprunden-Rangliste", onlyPoints:"Für diese Tipprunde zählen nur Punkte aus {competition}.",
+    noParticipants:"In dieser Tipprunde gibt es noch keine Teilnehmer.", prediction:"Tipp", predictions:"Tipps",
+    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID"
+  },
+  es: {
+    notFound:"No se ha podido encontrar este grupo.", loadError:"No se han podido cargar los datos de este grupo.",
+    noAccess:"Este grupo no existe o no tienes acceso.", leaderboardError:"No se ha podido cargar la clasificación del grupo.",
+    loading:"Cargando grupo...", backPools:"Mis grupos", poolLabel:"GRUPO VOETIQ", inviteCode:"CÓDIGO DE INVITACIÓN",
+    copied:"Copiado", copyCode:"Copiar código", participant:"Participante", participants:"Participantes", competition:"Competición",
+    pointsSystem:"Sistema de puntos", predictMatches:"Pronosticar partidos", inviteFriends:"Invitar a amigos",
+    poolLeaderboard:"Clasificación del grupo", onlyPoints:"Solo cuentan para este grupo los puntos de {competition}.",
+    noParticipants:"Todavía no hay participantes en este grupo.", prediction:"pronóstico", predictions:"pronósticos",
+    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo"
+  },
+  fr: {
+    notFound:"Cette ligue est introuvable.", loadError:"Les informations de cette ligue n’ont pas pu être chargées.",
+    noAccess:"Cette ligue n’existe pas ou vous n’y avez pas accès.", leaderboardError:"Le classement de la ligue n’a pas pu être chargé.",
+    loading:"Chargement de la ligue...", backPools:"Mes ligues", poolLabel:"LIGUE VOETIQ", inviteCode:"CODE D’INVITATION",
+    copied:"Copié", copyCode:"Copier le code", participant:"Participant", participants:"Participants", competition:"Compétition",
+    pointsSystem:"Système de points", predictMatches:"Pronostiquer les matchs", inviteFriends:"Inviter des amis",
+    poolLeaderboard:"Classement de la ligue", onlyPoints:"Seuls les points de {competition} comptent pour cette ligue.",
+    noParticipants:"Il n’y a encore aucun participant dans cette ligue.", prediction:"pronostic", predictions:"pronostics",
+    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue"
+  },
+  it: {
+    notFound:"Questo gruppo non è stato trovato.", loadError:"Non è stato possibile caricare i dati di questo gruppo.",
+    noAccess:"Questo gruppo non esiste oppure non hai accesso.", leaderboardError:"Non è stato possibile caricare la classifica del gruppo.",
+    loading:"Caricamento gruppo...", backPools:"I miei gruppi", poolLabel:"GRUPPO VOETIQ", inviteCode:"CODICE D’INVITO",
+    copied:"Copiato", copyCode:"Copia codice", participant:"Partecipante", participants:"Partecipanti", competition:"Competizione",
+    pointsSystem:"Sistema di punti", predictMatches:"Pronostica le partite", inviteFriends:"Invita amici",
+    poolLeaderboard:"Classifica del gruppo", onlyPoints:"Per questo gruppo contano solo i punti di {competition}.",
+    noParticipants:"Non ci sono ancora partecipanti in questo gruppo.", prediction:"pronostico", predictions:"pronostici",
+    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo"
+  },
+  pt: {
+    notFound:"Não foi possível encontrar este grupo.", loadError:"Não foi possível carregar os dados deste grupo.",
+    noAccess:"Este grupo não existe ou não tens acesso.", leaderboardError:"Não foi possível carregar a classificação do grupo.",
+    loading:"A carregar grupo...", backPools:"Os meus grupos", poolLabel:"GRUPO VOETIQ", inviteCode:"CÓDIGO DE CONVITE",
+    copied:"Copiado", copyCode:"Copiar código", participant:"Participante", participants:"Participantes", competition:"Competição",
+    pointsSystem:"Sistema de pontos", predictMatches:"Prever jogos", inviteFriends:"Convidar amigos",
+    poolLeaderboard:"Classificação do grupo", onlyPoints:"Apenas os pontos de {competition} contam para este grupo.",
+    noParticipants:"Ainda não há participantes neste grupo.", prediction:"previsão", predictions:"previsões",
+    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo"
+  }
+};
+
+function isLanguageCode(value: string): value is LanguageCode {
+  return ["nl","en","de","es","fr","it","pt"].includes(value);
+}
+
 const competitions: Record<
   string,
   { name: string; flag: string }
@@ -46,10 +134,29 @@ export default function PoolDetailPage() {
   >([]);
 
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState<LanguageCode>("nl");
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    const savedLanguage = window.localStorage.getItem("voetiq-language");
+    const initialLanguage: LanguageCode =
+      savedLanguage && isLanguageCode(savedLanguage) ? savedLanguage : "nl";
+
+    setLanguage(initialLanguage);
+    document.documentElement.lang = initialLanguage;
+
+    function handleLanguageChange(event: Event) {
+      const customEvent = event as CustomEvent<{ language?: string }>;
+      const nextLanguage = customEvent.detail?.language;
+      if (nextLanguage && isLanguageCode(nextLanguage)) {
+        setLanguage(nextLanguage);
+        document.documentElement.lang = nextLanguage;
+      }
+    }
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+
     const parts = window.location.pathname
       .split("/")
       .filter(Boolean);
@@ -57,13 +164,17 @@ export default function PoolDetailPage() {
     const id = parts[1];
 
     if (!id) {
-      setErrorMessage("Deze poule kon niet worden gevonden.");
+      setErrorMessage(translations[initialLanguage]["notFound"]);
       setLoading(false);
       return;
     }
 
     setPoolId(id);
     loadPool(id);
+
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+    };
   }, []);
 
   async function loadPool(id: string) {
@@ -91,7 +202,7 @@ export default function PoolDetailPage() {
     if (poolError) {
       console.error(poolError);
       setErrorMessage(
-        "De gegevens van deze poule konden niet worden geladen."
+        translations[language]["loadError"]
       );
       setLoading(false);
       return;
@@ -99,7 +210,7 @@ export default function PoolDetailPage() {
 
     if (!poolData) {
       setErrorMessage(
-        "Deze poule bestaat niet of je hebt geen toegang."
+        translations[language]["noAccess"]
       );
       setLoading(false);
       return;
@@ -115,7 +226,7 @@ export default function PoolDetailPage() {
     if (leaderboardError) {
       console.error(leaderboardError);
       setErrorMessage(
-        "Het pouleklassement kon niet worden geladen."
+        translations[language]["leaderboardError"]
       );
       setLoading(false);
       return;
@@ -148,6 +259,15 @@ export default function PoolDetailPage() {
     return `${index + 1}.`;
   }
 
+  const t = (key: TranslationKey) =>
+    translations[language][key] || translations.nl[key];
+
+  const format = (key: TranslationKey, values: Record<string, string>) =>
+    Object.entries(values).reduce(
+      (text, [name, value]) => text.replace(`{${name}}`, value),
+      t(key)
+    );
+
   if (loading) {
     return (
       <>
@@ -166,7 +286,7 @@ export default function PoolDetailPage() {
               margin: "0 auto",
             }}
           >
-            <p>Poule wordt geladen...</p>
+            <p>{t("loading")}</p>
           </div>
         </main>
       </>
@@ -202,7 +322,7 @@ export default function PoolDetailPage() {
               }}
             >
               {errorMessage ||
-                "Deze poule kon niet worden geladen."}
+                t("loadError")}
             </div>
 
             <button
@@ -217,7 +337,7 @@ export default function PoolDetailPage() {
                 cursor: "pointer",
               }}
             >
-              ← Terug naar mijn poules
+              ← {t("backPools")}
             </button>
           </div>
         </main>
@@ -261,7 +381,7 @@ export default function PoolDetailPage() {
               fontSize: "14px",
             }}
           >
-            ← Mijn poules
+            ← {t("backPools")}
           </button>
 
           <section
@@ -295,7 +415,7 @@ export default function PoolDetailPage() {
                     marginBottom: "8px",
                   }}
                 >
-                  VOETIQ POULE
+                  {t("poolLabel")}
                 </div>
 
                 <h1
@@ -336,7 +456,7 @@ export default function PoolDetailPage() {
                     marginBottom: "5px",
                   }}
                 >
-                  UITNODIGINGSCODE
+                  {t("inviteCode")}
                 </div>
 
                 <div
@@ -363,9 +483,7 @@ export default function PoolDetailPage() {
                     cursor: "pointer",
                   }}
                 >
-                  {copied
-                    ? "✓ Gekopieerd"
-                    : "Code kopiëren"}
+                  {copied ? `✓ ${t("copied")}` : t("copyCode")}
                 </button>
               </div>
             </div>
@@ -384,22 +502,20 @@ export default function PoolDetailPage() {
               icon="👥"
               value={leaderboard.length}
               label={
-                leaderboard.length === 1
-                  ? "Deelnemer"
-                  : "Deelnemers"
+                leaderboard.length === 1 ? t("participant") : t("participants")
               }
             />
 
             <StatCard
               icon="⚽"
               value={competition.name}
-              label="Competitie"
+              label={t("competition")}
             />
 
             <StatCard
               icon="🎯"
-              value="10 / 5 / 0"
-              label="Puntensysteem"
+              value="10+ / 2 / 0"
+              label={t("pointsSystem")}
             />
           </div>
 
@@ -427,7 +543,7 @@ export default function PoolDetailPage() {
                 cursor: "pointer",
               }}
             >
-              ⚽ Voorspel wedstrijden
+              ⚽ {t("predictMatches")}
             </button>
 
             <button
@@ -442,7 +558,7 @@ export default function PoolDetailPage() {
                 cursor: "pointer",
               }}
             >
-              🔗 Vrienden uitnodigen
+              🔗 {t("inviteFriends")}
             </button>
           </div>
 
@@ -469,7 +585,7 @@ export default function PoolDetailPage() {
                   fontSize: "25px",
                 }}
               >
-                🏆 Pouleklassement
+                🏆 {t("poolLeaderboard")}
               </h2>
 
               <p
@@ -479,8 +595,7 @@ export default function PoolDetailPage() {
                   fontSize: "14px",
                 }}
               >
-                Alleen punten uit {competition.name} tellen
-                mee voor deze poule.
+                {format("onlyPoints", { competition: competition.name })}
               </p>
             </div>
 
@@ -492,7 +607,7 @@ export default function PoolDetailPage() {
                   color: "#738078",
                 }}
               >
-                Er zijn nog geen deelnemers in deze poule.
+                {t("noParticipants")}
               </div>
             ) : (
               leaderboard.map((player, index) => (
@@ -538,7 +653,7 @@ export default function PoolDetailPage() {
                         marginTop: "3px",
                       }}
                     >
-                      {player.predictions_count} voorspellingen
+                      {player.predictions_count}{" "}{player.predictions_count === 1 ? t("prediction") : t("predictions")}
                     </div>
                   </div>
 
@@ -561,7 +676,7 @@ export default function PoolDetailPage() {
                         fontSize: "11px",
                       }}
                     >
-                      exact
+                      {t("exact")}
                     </div>
                   </div>
 
@@ -584,7 +699,7 @@ export default function PoolDetailPage() {
                         fontSize: "11px",
                       }}
                     >
-                      voorspeld
+                      {t("predicted")}
                     </div>
                   </div>
 
@@ -604,7 +719,7 @@ export default function PoolDetailPage() {
                         fontWeight: 700,
                       }}
                     >
-                      PUNTEN
+                      {t("points")}
                     </div>
                   </div>
                 </div>
@@ -620,7 +735,7 @@ export default function PoolDetailPage() {
               textAlign: "center",
             }}
           >
-            Poule-ID: {poolId}
+            {t("poolId")}: {poolId}
           </div>
         </div>
       </main>
