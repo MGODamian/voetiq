@@ -353,6 +353,22 @@ export default function Ranglijst() {
     loadLeaderboard();
   }, [selectedCompetition, selectedMatchday, language]);
 
+  useEffect(() => {
+    function refreshLeaderboard() {
+      if (document.visibilityState === "visible") {
+        loadLeaderboard();
+      }
+    }
+
+    window.addEventListener("focus", refreshLeaderboard);
+    document.addEventListener("visibilitychange", refreshLeaderboard);
+
+    return () => {
+      window.removeEventListener("focus", refreshLeaderboard);
+      document.removeEventListener("visibilitychange", refreshLeaderboard);
+    };
+  }, [selectedCompetition, selectedMatchday, language]);
+
   async function loadLeaderboard() {
     setLoading(true);
     setErrorMessage("");
