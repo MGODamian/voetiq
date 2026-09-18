@@ -328,6 +328,8 @@ export default function Home() {
               flag={competition.flag}
               name={competition.name}
               description={tr(competition.description)}
+              predictorLabel={predictorLabel}
+              predictNowLabel={predictNowLabel}
               onPlay={() =>
                 openCompetition(competition.code)
               }
@@ -807,11 +809,15 @@ function CompetitionCard({
   flag,
   name,
   description,
+  predictorLabel,
+  predictNowLabel,
   onPlay,
 }: {
   flag: string;
   name: string;
   description: string;
+  predictorLabel: string;
+  predictNowLabel: string;
   onPlay: () => void;
 }) {
   return (
@@ -856,7 +862,7 @@ function CompetitionCard({
               letterSpacing: "0.7px",
             }}
           >
-            {tr("Predictor")}
+            {predictorLabel}
           </div>
 
           <h3
@@ -896,7 +902,7 @@ function CompetitionCard({
           cursor: "pointer",
         }}
       >
-        {tr("Voorspel nu →")}
+        {predictNowLabel}
       </button>
     </article>
   );
