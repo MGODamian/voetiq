@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type Match = {
@@ -74,8 +75,19 @@ const competitions: Competition[] = [
 ];
 
 export default function Wedstrijden() {
+  const searchParams = useSearchParams();
+
+  const competitionFromUrl =
+    searchParams.get("competition")?.toUpperCase() || "DED";
+
+  const validCompetition = competitions.some(
+    (competition) => competition.code === competitionFromUrl
+  )
+    ? competitionFromUrl
+    : "DED";
+
   const [selectedCompetition, setSelectedCompetition] =
-    useState("DED");
+    useState(validCompetition);
 
   const [matches, setMatches] = useState<Match[]>([]);
 
@@ -88,6 +100,10 @@ export default function Wedstrijden() {
 
   const [selectedMatchday, setSelectedMatchday] =
     useState<number | null>(null);
+
+  useEffect(() => {
+    setSelectedCompetition(validCompetition);
+  }, [validCompetition]);
 
   useEffect(() => {
     loadMatches(selectedCompetition);
@@ -141,6 +157,7 @@ export default function Wedstrijden() {
       }
     } catch (error) {
       console.error(error);
+
       setMessage(
         "De wedstrijden konden niet worden opgehaald."
       );
@@ -253,9 +270,7 @@ export default function Wedstrijden() {
 
     if (profileError) {
       console.error(profileError);
-      setMessage(
-        "Je profiel kon niet worden geladen."
-      );
+      setMessage("Je profiel kon niet worden geladen.");
       return;
     }
 
@@ -302,7 +317,9 @@ export default function Wedstrijden() {
     }));
   }
 
-  function changeMatchday(direction: "previous" | "next") {
+  function changeMatchday(
+    direction: "previous" | "next"
+  ) {
     if (currentMatchdayIndex === -1) {
       return;
     }
@@ -328,8 +345,7 @@ export default function Wedstrijden() {
         minHeight: "100vh",
         background: "#f4f7f5",
         color: "#111",
-        fontFamily:
-          "Arial, Helvetica, sans-serif",
+        fontFamily: "Arial, Helvetica, sans-serif",
       }}
     >
       <section
@@ -337,8 +353,7 @@ export default function Wedstrijden() {
           background:
             "linear-gradient(135deg, #03140c 0%, #082b1a 100%)",
           color: "white",
-          padding:
-            "45px 20px 40px",
+          padding: "45px 20px 40px",
         }}
       >
         <div
@@ -352,12 +367,9 @@ export default function Wedstrijden() {
               display: "inline-flex",
               alignItems: "center",
               gap: "8px",
-              padding:
-                "7px 12px",
-              borderRadius:
-                "999px",
-              background:
-                "rgba(46,230,129,0.12)",
+              padding: "7px 12px",
+              borderRadius: "999px",
+              background: "rgba(46,230,129,0.12)",
               border:
                 "1px solid rgba(46,230,129,0.2)",
               color: "#70f0aa",
@@ -382,8 +394,7 @@ export default function Wedstrijden() {
 
           <p
             style={{
-              margin:
-                "10px 0 0",
+              margin: "10px 0 0",
               color: "#a9bbb2",
               fontSize: "16px",
             }}
@@ -397,8 +408,7 @@ export default function Wedstrijden() {
         style={{
           maxWidth: "1200px",
           margin: "0 auto",
-          padding:
-            "30px 20px 60px",
+          padding: "30px 20px 60px",
         }}
       >
         <div
@@ -425,68 +435,59 @@ export default function Wedstrijden() {
                 minWidth: "max-content",
               }}
             >
-              {competitions.map(
-                (competition) => {
-                  const active =
-                    selectedCompetition ===
-                    competition.code;
+              {competitions.map((competition) => {
+                const active =
+                  selectedCompetition ===
+                  competition.code;
 
-                  return (
-                    <button
-                      key={competition.code}
-                      onClick={() =>
-                        setSelectedCompetition(
-                          competition.code
-                        )
-                      }
+                return (
+                  <button
+                    key={competition.code}
+                    onClick={() =>
+                      setSelectedCompetition(
+                        competition.code
+                      )
+                    }
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "11px 15px",
+                      borderRadius: "11px",
+                      border: active
+                        ? "1px solid rgba(46,230,129,0.35)"
+                        : "1px solid transparent",
+                      background: active
+                        ? "#e9faf1"
+                        : "transparent",
+                      color: active
+                        ? "#08763e"
+                        : "#52605a",
+                      fontSize: "14px",
+                      fontWeight: active ? 800 : 600,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    <span
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        padding:
-                          "11px 15px",
-                        borderRadius:
-                          "11px",
-                        border: active
-                          ? "1px solid rgba(46,230,129,0.35)"
-                          : "1px solid transparent",
-                        background: active
-                          ? "#e9faf1"
-                          : "transparent",
-                        color: active
-                          ? "#08763e"
-                          : "#52605a",
-                        fontSize: "14px",
-                        fontWeight:
-                          active
-                            ? 800
-                            : 600,
-                        cursor: "pointer",
-                        whiteSpace:
-                          "nowrap",
+                        fontSize: "19px",
                       }}
                     >
-                      <span
-                        style={{
-                          fontSize: "19px",
-                        }}
-                      >
-                        {competition.flag}
-                      </span>
+                      {competition.flag}
+                    </span>
 
-                      {competition.name}
-                    </button>
-                  );
-                }
-              )}
+                    {competition.name}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns:
-                "minmax(0, 1fr)",
+              gridTemplateColumns: "minmax(0, 1fr)",
               gap: "20px",
             }}
           >
@@ -498,8 +499,7 @@ export default function Wedstrijden() {
                   borderRadius: "20px",
                   padding: "24px",
                   color: "white",
-                  marginBottom:
-                    "20px",
+                  marginBottom: "20px",
                   boxShadow:
                     "0 12px 35px rgba(0,0,0,0.12)",
                 }}
@@ -507,34 +507,22 @@ export default function Wedstrijden() {
                 <div
                   style={{
                     display: "flex",
-                    alignItems:
-                      "center",
+                    alignItems: "center",
                     gap: "13px",
                   }}
                 >
-                  <span
-                    style={{
-                      fontSize: "34px",
-                    }}
-                  >
-                    {
-                      selectedCompetitionData.flag
-                    }
+                  <span style={{ fontSize: "34px" }}>
+                    {selectedCompetitionData.flag}
                   </span>
 
                   <div>
                     <div
                       style={{
-                        color:
-                          "#70f0aa",
-                        fontSize:
-                          "11px",
-                        fontWeight:
-                          800,
-                        textTransform:
-                          "uppercase",
-                        letterSpacing:
-                          "0.8px",
+                        color: "#70f0aa",
+                        fontSize: "11px",
+                        fontWeight: 800,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.8px",
                       }}
                     >
                       Competitie
@@ -542,15 +530,11 @@ export default function Wedstrijden() {
 
                     <h2
                       style={{
-                        margin:
-                          "4px 0 0",
-                        fontSize:
-                          "27px",
+                        margin: "4px 0 0",
+                        fontSize: "27px",
                       }}
                     >
-                      {
-                        selectedCompetitionData.name
-                      }
+                      {selectedCompetitionData.name}
                     </h2>
                   </div>
                 </div>
@@ -559,24 +543,18 @@ export default function Wedstrijden() {
               {loading && (
                 <div
                   style={{
-                    background:
-                      "white",
-                    borderRadius:
-                      "18px",
-                    padding:
-                      "45px",
-                    textAlign:
-                      "center",
+                    background: "white",
+                    borderRadius: "18px",
+                    padding: "45px",
+                    textAlign: "center",
                     boxShadow:
                       "0 8px 25px rgba(0,0,0,0.07)",
                   }}
                 >
                   <div
                     style={{
-                      fontSize:
-                        "30px",
-                      marginBottom:
-                        "10px",
+                      fontSize: "30px",
+                      marginBottom: "10px",
                     }}
                   >
                     ⚽
@@ -584,10 +562,8 @@ export default function Wedstrijden() {
 
                   <div
                     style={{
-                      color:
-                        "#66736c",
-                      fontWeight:
-                        600,
+                      color: "#66736c",
+                      fontWeight: 600,
                     }}
                   >
                     Wedstrijden laden...
@@ -596,28 +572,21 @@ export default function Wedstrijden() {
               )}
 
               {!loading &&
-                availableMatchdays.length ===
-                  0 && (
+                availableMatchdays.length === 0 && (
                   <div
                     style={{
-                      background:
-                        "white",
-                      borderRadius:
-                        "18px",
-                      padding:
-                        "45px 25px",
-                      textAlign:
-                        "center",
+                      background: "white",
+                      borderRadius: "18px",
+                      padding: "45px 25px",
+                      textAlign: "center",
                       boxShadow:
                         "0 8px 25px rgba(0,0,0,0.07)",
                     }}
                   >
                     <div
                       style={{
-                        fontSize:
-                          "35px",
-                        marginBottom:
-                          "10px",
+                        fontSize: "35px",
+                        marginBottom: "10px",
                       }}
                     >
                       📅
@@ -625,8 +594,7 @@ export default function Wedstrijden() {
 
                     <strong
                       style={{
-                        fontSize:
-                          "17px",
+                        fontSize: "17px",
                       }}
                     >
                       Geen komende wedstrijden
@@ -634,77 +602,57 @@ export default function Wedstrijden() {
 
                     <p
                       style={{
-                        color:
-                          "#777",
-                        marginBottom:
-                          0,
+                        color: "#777",
+                        marginBottom: 0,
                       }}
                     >
-                      Er zijn momenteel geen
-                      aankomende wedstrijden
-                      beschikbaar voor deze
+                      Er zijn momenteel geen aankomende
+                      wedstrijden beschikbaar voor deze
                       competitie.
                     </p>
                   </div>
                 )}
 
               {!loading &&
-                availableMatchdays.length >
-                  0 && (
+                availableMatchdays.length > 0 && (
                   <>
                     <div
                       style={{
-                        background:
-                          "white",
-                        borderRadius:
-                          "18px",
-                        padding:
-                          "12px",
-                        display:
-                          "flex",
-                        alignItems:
-                          "center",
+                        background: "white",
+                        borderRadius: "18px",
+                        padding: "12px",
+                        display: "flex",
+                        alignItems: "center",
                         justifyContent:
                           "space-between",
                         gap: "10px",
-                        marginBottom:
-                          "20px",
+                        marginBottom: "20px",
                         boxShadow:
                           "0 8px 25px rgba(0,0,0,0.07)",
                       }}
                     >
                       <button
                         onClick={() =>
-                          changeMatchday(
-                            "previous"
-                          )
+                          changeMatchday("previous")
                         }
                         disabled={
-                          currentMatchdayIndex <=
-                          0
+                          currentMatchdayIndex <= 0
                         }
                         style={{
-                          border:
-                            "none",
+                          border: "none",
                           background:
-                            currentMatchdayIndex <=
-                            0
+                            currentMatchdayIndex <= 0
                               ? "#f1f3f2"
                               : "#e9faf1",
                           color:
-                            currentMatchdayIndex <=
-                            0
+                            currentMatchdayIndex <= 0
                               ? "#a1aaa5"
                               : "#08763e",
-                          borderRadius:
-                            "10px",
-                          padding:
-                            "11px 15px",
-                          fontWeight:
-                            800,
+                          borderRadius: "10px",
+                          padding: "11px 15px",
+                          fontWeight: 800,
                           cursor:
-                            currentMatchdayIndex <=
-                            0
+                            currentMatchdayIndex <= 0
                               ? "default"
                               : "pointer",
                         }}
@@ -714,20 +662,15 @@ export default function Wedstrijden() {
 
                       <div
                         style={{
-                          textAlign:
-                            "center",
+                          textAlign: "center",
                         }}
                       >
                         <div
                           style={{
-                            color:
-                              "#89958e",
-                            fontSize:
-                              "11px",
-                            fontWeight:
-                              800,
-                            textTransform:
-                              "uppercase",
+                            color: "#89958e",
+                            fontSize: "11px",
+                            fontWeight: 800,
+                            textTransform: "uppercase",
                           }}
                         >
                           Speelronde
@@ -735,29 +678,23 @@ export default function Wedstrijden() {
 
                         <strong
                           style={{
-                            fontSize:
-                              "20px",
+                            fontSize: "20px",
                           }}
                         >
-                          {
-                            selectedMatchday
-                          }
+                          {selectedMatchday}
                         </strong>
                       </div>
 
                       <button
                         onClick={() =>
-                          changeMatchday(
-                            "next"
-                          )
+                          changeMatchday("next")
                         }
                         disabled={
                           currentMatchdayIndex ===
                           availableMatchdays.length - 1
                         }
                         style={{
-                          border:
-                            "none",
+                          border: "none",
                           background:
                             currentMatchdayIndex ===
                             availableMatchdays.length - 1
@@ -768,12 +705,9 @@ export default function Wedstrijden() {
                             availableMatchdays.length - 1
                               ? "#a1aaa5"
                               : "#08763e",
-                          borderRadius:
-                            "10px",
-                          padding:
-                            "11px 15px",
-                          fontWeight:
-                            800,
+                          borderRadius: "10px",
+                          padding: "11px 15px",
+                          fontWeight: 800,
                           cursor:
                             currentMatchdayIndex ===
                             availableMatchdays.length - 1
@@ -787,309 +721,202 @@ export default function Wedstrijden() {
 
                     <div
                       style={{
-                        display:
-                          "flex",
-                        flexDirection:
-                          "column",
+                        display: "flex",
+                        flexDirection: "column",
                         gap: "14px",
                       }}
                     >
-                      {currentMatches.map(
-                        (match) => {
-                          const prediction =
-                            predictions[
-                              match.id
-                            ] || {
-                              home: "",
-                              away: "",
-                            };
+                      {currentMatches.map((match) => {
+                        const prediction =
+                          predictions[match.id] || {
+                            home: "",
+                            away: "",
+                          };
 
-                          const date =
-                            new Date(
-                              match.utcDate
-                            );
+                        const date = new Date(
+                          match.utcDate
+                        );
 
-                          return (
+                        return (
+                          <div
+                            key={match.id}
+                            style={{
+                              background: "white",
+                              borderRadius: "18px",
+                              padding: "20px",
+                              boxShadow:
+                                "0 8px 25px rgba(0,0,0,0.07)",
+                            }}
+                          >
                             <div
-                              key={
-                                match.id
-                              }
                               style={{
-                                background:
-                                  "white",
-                                borderRadius:
-                                  "18px",
-                                padding:
-                                  "20px",
-                                boxShadow:
-                                  "0 8px 25px rgba(0,0,0,0.07)",
+                                display: "flex",
+                                justifyContent:
+                                  "space-between",
+                                alignItems: "center",
+                                marginBottom: "18px",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  color: "#849089",
+                                  fontSize: "13px",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {date.toLocaleDateString(
+                                  "nl-NL",
+                                  {
+                                    weekday: "short",
+                                    day: "numeric",
+                                    month: "short",
+                                  }
+                                )}
+                              </span>
+
+                              <span
+                                style={{
+                                  color: "#849089",
+                                  fontSize: "13px",
+                                  fontWeight: 700,
+                                }}
+                              >
+                                {date.toLocaleTimeString(
+                                  "nl-NL",
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  }
+                                )}
+                              </span>
+                            </div>
+
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns:
+                                  "1fr auto 1fr",
+                                alignItems: "center",
+                                gap: "15px",
                               }}
                             >
                               <div
                                 style={{
-                                  display:
-                                    "flex",
-                                  justifyContent:
-                                    "space-between",
-                                  alignItems:
-                                    "center",
-                                  marginBottom:
-                                    "18px",
+                                  textAlign: "right",
+                                  fontWeight: 800,
+                                  fontSize: "16px",
                                 }}
                               >
-                                <span
-                                  style={{
-                                    color:
-                                      "#849089",
-                                    fontSize:
-                                      "13px",
-                                    fontWeight:
-                                      700,
-                                  }}
-                                >
-                                  {date.toLocaleDateString(
-                                    "nl-NL",
-                                    {
-                                      weekday:
-                                        "short",
-                                      day:
-                                        "numeric",
-                                      month:
-                                        "short",
-                                    }
-                                  )}
-                                </span>
-
-                                <span
-                                  style={{
-                                    color:
-                                      "#849089",
-                                    fontSize:
-                                      "13px",
-                                    fontWeight:
-                                      700,
-                                  }}
-                                >
-                                  {date.toLocaleTimeString(
-                                    "nl-NL",
-                                    {
-                                      hour:
-                                        "2-digit",
-                                      minute:
-                                        "2-digit",
-                                    }
-                                  )}
-                                </span>
+                                {match.homeTeam.name}
                               </div>
 
                               <div
                                 style={{
-                                  display:
-                                    "grid",
-                                  gridTemplateColumns:
-                                    "1fr auto 1fr",
-                                  alignItems:
-                                    "center",
-                                  gap: "15px",
+                                  color: "#a0aaa4",
+                                  fontWeight: 900,
+                                  fontSize: "12px",
                                 }}
                               >
-                                <div
-                                  style={{
-                                    textAlign:
-                                      "right",
-                                    fontWeight:
-                                      800,
-                                    fontSize:
-                                      "16px",
-                                  }}
-                                >
-                                  {
-                                    match
-                                      .homeTeam
-                                      .name
-                                  }
-                                </div>
-
-                                <div
-                                  style={{
-                                    color:
-                                      "#a0aaa4",
-                                    fontWeight:
-                                      900,
-                                    fontSize:
-                                      "12px",
-                                  }}
-                                >
-                                  VS
-                                </div>
-
-                                <div
-                                  style={{
-                                    textAlign:
-                                      "left",
-                                    fontWeight:
-                                      800,
-                                    fontSize:
-                                      "16px",
-                                  }}
-                                >
-                                  {
-                                    match
-                                      .awayTeam
-                                      .name
-                                  }
-                                </div>
+                                VS
                               </div>
 
                               <div
                                 style={{
-                                  marginTop:
-                                    "18px",
-                                  paddingTop:
-                                    "18px",
-                                  borderTop:
-                                    "1px solid #edf0ee",
+                                  textAlign: "left",
+                                  fontWeight: 800,
+                                  fontSize: "16px",
                                 }}
                               >
-                                <div
-                                  style={{
-                                    display:
-                                      "flex",
-                                    alignItems:
-                                      "center",
-                                    justifyContent:
-                                      "center",
-                                    gap: "10px",
-                                  }}
-                                >
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    max="20"
-                                    value={
-                                      prediction.home
-                                    }
-                                    onChange={(
-                                      e
-                                    ) =>
-                                      updatePrediction(
-                                        match.id,
-                                        "home",
-                                        e
-                                          .target
-                                          .value
-                                      )
-                                    }
-                                    placeholder="0"
-                                    style={{
-                                      width:
-                                        "60px",
-                                      height:
-                                        "48px",
-                                      border:
-                                        "1px solid #dce3df",
-                                      borderRadius:
-                                        "10px",
-                                      textAlign:
-                                        "center",
-                                      fontSize:
-                                        "20px",
-                                      fontWeight:
-                                        800,
-                                      outline:
-                                        "none",
-                                    }}
-                                  />
-
-                                  <span
-                                    style={{
-                                      fontSize:
-                                        "20px",
-                                      fontWeight:
-                                        800,
-                                      color:
-                                        "#a0aaa4",
-                                    }}
-                                  >
-                                    -
-                                  </span>
-
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    max="20"
-                                    value={
-                                      prediction.away
-                                    }
-                                    onChange={(
-                                      e
-                                    ) =>
-                                      updatePrediction(
-                                        match.id,
-                                        "away",
-                                        e
-                                          .target
-                                          .value
-                                      )
-                                    }
-                                    placeholder="0"
-                                    style={{
-                                      width:
-                                        "60px",
-                                      height:
-                                        "48px",
-                                      border:
-                                        "1px solid #dce3df",
-                                      borderRadius:
-                                        "10px",
-                                      textAlign:
-                                        "center",
-                                      fontSize:
-                                        "20px",
-                                      fontWeight:
-                                        800,
-                                      outline:
-                                        "none",
-                                    }}
-                                  />
-                                </div>
-
-                                <button
-                                  onClick={() =>
-                                    savePrediction(
-                                      match
-                                    )
-                                  }
-                                  style={{
-                                    marginTop:
-                                      "15px",
-                                    width:
-                                      "100%",
-                                    padding:
-                                      "13px",
-                                    background:
-                                      "#0b8f4d",
-                                    color:
-                                      "white",
-                                    border:
-                                      "none",
-                                    borderRadius:
-                                      "10px",
-                                    fontSize:
-                                      "15px",
-                                    fontWeight:
-                                      800,
-                                    cursor:
-                                      "pointer",
-                                  }}
-                                >
-                                  Voorspelling opslaan
-                                </button>
+                                {match.awayTeam.name}
                               </div>
                             </div>
-                          );
-                        }
-                      )}
+
+                            <div
+                              style={{
+                                marginTop: "18px",
+                                paddingTop: "18px",
+                                borderTop:
+                                  "1px solid #edf0ee",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  gap: "10px",
+                                }}
+                              >
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  value={
+                                    prediction.home
+                                  }
+                                  onChange={(e) =>
+                                    updatePrediction(
+                                      match.id,
+                                      "home",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="0"
+                                  style={scoreInputStyle}
+                                />
+
+                                <span
+                                  style={{
+                                    fontSize: "20px",
+                                    fontWeight: 800,
+                                    color: "#a0aaa4",
+                                  }}
+                                >
+                                  -
+                                </span>
+
+                                <input
+                                  type="number"
+                                  min="0"
+                                  max="20"
+                                  value={
+                                    prediction.away
+                                  }
+                                  onChange={(e) =>
+                                    updatePrediction(
+                                      match.id,
+                                      "away",
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="0"
+                                  style={scoreInputStyle}
+                                />
+                              </div>
+
+                              <button
+                                onClick={() =>
+                                  savePrediction(match)
+                                }
+                                style={{
+                                  marginTop: "15px",
+                                  width: "100%",
+                                  padding: "13px",
+                                  background: "#0b8f4d",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "10px",
+                                  fontSize: "15px",
+                                  fontWeight: 800,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                Voorspelling opslaan
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 )}
@@ -1097,20 +924,14 @@ export default function Wedstrijden() {
               {message && (
                 <div
                   style={{
-                    marginTop:
-                      "20px",
-                    padding:
-                      "15px 18px",
-                    background:
-                      "#e9faf1",
+                    marginTop: "20px",
+                    padding: "15px 18px",
+                    background: "#e9faf1",
                     border:
                       "1px solid rgba(11,143,77,0.15)",
-                    borderRadius:
-                      "12px",
-                    color:
-                      "#08763e",
-                    fontWeight:
-                      700,
+                    borderRadius: "12px",
+                    color: "#08763e",
+                    fontWeight: 700,
                   }}
                 >
                   {message}
@@ -1119,14 +940,10 @@ export default function Wedstrijden() {
 
               <p
                 style={{
-                  marginTop:
-                    "30px",
-                  fontSize:
-                    "12px",
-                  color:
-                    "#8a948f",
-                  textAlign:
-                    "center",
+                  marginTop: "30px",
+                  fontSize: "12px",
+                  color: "#8a948f",
+                  textAlign: "center",
                 }}
               >
                 Data provided by football-data.org
@@ -1138,3 +955,14 @@ export default function Wedstrijden() {
     </main>
   );
 }
+
+const scoreInputStyle = {
+  width: "60px",
+  height: "48px",
+  border: "1px solid #dce3df",
+  borderRadius: "10px",
+  textAlign: "center" as const,
+  fontSize: "20px",
+  fontWeight: 800,
+  outline: "none",
+};
