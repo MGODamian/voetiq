@@ -32,6 +32,12 @@ type Competition = {
   flag: string;
 };
 
+type StoredPrediction = {
+  match_id: number;
+  home_score: number;
+  away_score: number;
+};
+
 const competitions: Competition[] = [
   { code: "PL", name: "Premier League", flag: "🏴" },
   { code: "DED", name: "Eredivisie", flag: "🇳🇱" },
@@ -52,6 +58,10 @@ export default function Wedstrijden() {
   const [predictions, setPredictions] = useState<
     Record<number, Prediction>
   >({});
+
+  const [savedMatchIds, setSavedMatchIds] = useState<
+    Set<number>
+  >(new Set());
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -76,13 +86,15 @@ export default function Wedstrijden() {
   }, []);
 
   useEffect(() => {
-    loadMatches(selectedCompetition);
+    loadCompetition(selectedCompetition);
   }, [selectedCompetition]);
 
-  async function loadMatches(competitionCode: string) {
+  async function loadCompetition(competitionCode: string) {
     setLoading(true);
     setMessage("");
     setMatches([]);
+    setPredictions({});
+    setSavedMatchIds(new Set());
     setSelectedMatchday(null);
 
     try {
@@ -99,7 +111,7 @@ export default function Wedstrijden() {
 
       const data = await response.json();
 
-      const upcomingMatches = (data.matches || [])
+      const upcomingMatches: Match[] = (data.matches || [])
         .filter(
           (match: Match) =>
             match.status === "SCHEDULED" ||
@@ -125,14 +137,64 @@ export default function Wedstrijden() {
       if (matchdays.length > 0) {
         setSelectedMatchday(Math.min(...matchdays));
       }
+
+      await loadSavedPredictions(upcomingMatches);
     } catch (error) {
       console.error(error);
+
       setMessage(
         "De wedstrijden konden niet worden opgehaald."
       );
     } finally {
       setLoading(false);
     }
+  }
+
+  async function loadSavedPredictions(
+    upcomingMatches: Match[]
+  ) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user || upcomingMatches.length === 0) {
+      return;
+    }
+
+    const matchIds = upcomingMatches.map(
+      (match) => match.id
+    );
+
+    const { data, error } = await supabase
+      .from("predictions")
+      .select("match_id, home_score, away_score")
+      .eq("user_id", user.id)
+      .in("match_id", matchIds);
+
+    if (error) {
+      console.error(
+        "Kon opgeslagen voorspellingen niet laden:",
+        error
+      );
+      return;
+    }
+
+    const predictionMap: Record<number, Prediction> = {};
+    const storedIds = new Set<number>();
+
+    ((data || []) as StoredPrediction[]).forEach(
+      (prediction) => {
+        predictionMap[prediction.match_id] = {
+          home: String(prediction.home_score),
+          away: String(prediction.away_score),
+        };
+
+        storedIds.add(prediction.match_id);
+      }
+    );
+
+    setPredictions(predictionMap);
+    setSavedMatchIds(storedIds);
   }
 
   const availableMatchdays = useMemo(() => {
@@ -165,15 +227,10 @@ export default function Wedstrijden() {
         competition.code === selectedCompetition
     ) || competitions[1];
 
-  const filledPredictions = currentMatches.filter((match) => {
-    const prediction = predictions[match.id];
-
-    return (
-      prediction &&
-      prediction.home !== "" &&
-      prediction.away !== ""
-    );
-  }).length;
+  const savedPredictionsThisRound =
+    currentMatches.filter((match) =>
+      savedMatchIds.has(match.id)
+    ).length;
 
   function changeCompetition(code: string) {
     setSelectedCompetition(code);
@@ -204,12 +261,11 @@ export default function Wedstrijden() {
   }
 
   async function savePrediction(match: Match) {
-    if (
-      match.status !== "SCHEDULED" &&
-      match.status !== "TIMED"
-    ) {
+    const kickoff = new Date(match.utcDate);
+
+    if (kickoff.getTime() <= Date.now()) {
       setMessage(
-        "Deze wedstrijd is al begonnen. Voorspellen kan niet meer."
+        "Deze wedstrijd is al begonnen. Je voorspelling kan niet meer worden gewijzigd."
       );
       return;
     }
@@ -253,6 +309,35 @@ export default function Wedstrijden() {
       return;
     }
 
+    const matchName = `${match.homeTeam.name} - ${match.awayTeam.name}`;
+
+    if (savedMatchIds.has(match.id)) {
+      const { error } = await supabase
+        .from("predictions")
+        .update({
+          home_score: home,
+          away_score: away,
+        })
+        .eq("user_id", user.id)
+        .eq("match_id", match.id);
+
+      if (error) {
+        console.error(error);
+
+        setMessage(
+          "Er ging iets mis met het wijzigen van je voorspelling."
+        );
+
+        return;
+      }
+
+      setMessage(
+        `Voorspelling gewijzigd: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`
+      );
+
+      return;
+    }
+
     const { data: profile, error: profileError } =
       await supabase
         .from("profiles")
@@ -262,11 +347,13 @@ export default function Wedstrijden() {
 
     if (profileError) {
       console.error(profileError);
-      setMessage("Je profiel kon niet worden geladen.");
+
+      setMessage(
+        "Je profiel kon niet worden geladen."
+      );
+
       return;
     }
-
-    const matchName = `${match.homeTeam.name} - ${match.awayTeam.name}`;
 
     const { error } = await supabase
       .from("predictions")
@@ -284,8 +371,10 @@ export default function Wedstrijden() {
       console.error(error);
 
       if (error.code === "23505") {
+        await loadSavedPredictions(matches);
+
         setMessage(
-          "Je hebt al een voorspelling voor deze wedstrijd."
+          "Deze voorspelling bestond al en is opnieuw geladen."
         );
       } else {
         setMessage(
@@ -296,8 +385,14 @@ export default function Wedstrijden() {
       return;
     }
 
+    setSavedMatchIds((current) => {
+      const next = new Set(current);
+      next.add(match.id);
+      return next;
+    });
+
     setMessage(
-      `Voorspelling opgeslagen voor ${matchName}!`
+      `Voorspelling opgeslagen: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`
     );
   }
 
@@ -318,6 +413,7 @@ export default function Wedstrijden() {
       setSelectedMatchday(
         availableMatchdays[newIndex]
       );
+
       setMessage("");
     }
   }
@@ -544,7 +640,8 @@ export default function Wedstrijden() {
                   fontWeight: 900,
                 }}
               >
-                {filledPredictions} / {currentMatches.length}
+                {savedPredictionsThisRound} /{" "}
+                {currentMatches.length}
               </div>
             </div>
           )}
@@ -577,11 +674,7 @@ export default function Wedstrijden() {
                 📅
               </div>
 
-              <strong
-                style={{
-                  fontSize: "17px",
-                }}
-              >
+              <strong style={{ fontSize: "17px" }}>
                 Geen komende wedstrijden
               </strong>
 
@@ -627,11 +720,7 @@ export default function Wedstrijden() {
                   </button>
                 </div>
 
-                <div
-                  style={{
-                    textAlign: "center",
-                  }}
-                >
+                <div style={{ textAlign: "center" }}>
                   <div
                     style={{
                       color: "#89958e",
@@ -644,20 +733,12 @@ export default function Wedstrijden() {
                     Speelronde
                   </div>
 
-                  <strong
-                    style={{
-                      fontSize: "20px",
-                    }}
-                  >
+                  <strong style={{ fontSize: "20px" }}>
                     {selectedMatchday}
                   </strong>
                 </div>
 
-                <div
-                  style={{
-                    textAlign: "right",
-                  }}
-                >
+                <div style={{ textAlign: "right" }}>
                   <button
                     onClick={() =>
                       changeMatchday("next")
@@ -691,6 +772,8 @@ export default function Wedstrijden() {
                     };
 
                   const date = new Date(match.utcDate);
+                  const isSaved =
+                    savedMatchIds.has(match.id);
 
                   return (
                     <div
@@ -698,7 +781,9 @@ export default function Wedstrijden() {
                       style={{
                         background: "white",
                         borderRadius: "17px",
-                        border: "1px solid #edf1ee",
+                        border: isSaved
+                          ? "1px solid rgba(11,143,77,0.25)"
+                          : "1px solid #edf1ee",
                         overflow: "hidden",
                         boxShadow:
                           "0 7px 24px rgba(0,0,0,0.055)",
@@ -710,7 +795,9 @@ export default function Wedstrijden() {
                           justifyContent: "space-between",
                           alignItems: "center",
                           padding: "11px 18px",
-                          background: "#fafcfb",
+                          background: isSaved
+                            ? "#f3fcf7"
+                            : "#fafcfb",
                           borderBottom:
                             "1px solid #edf1ee",
                           color: "#7d8982",
@@ -729,15 +816,35 @@ export default function Wedstrijden() {
                           )}
                         </span>
 
-                        <span>
-                          {date.toLocaleTimeString(
-                            "nl-NL",
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                          }}
+                        >
+                          {isSaved && (
+                            <span
+                              style={{
+                                color: "#0b8f4d",
+                                fontSize: "11px",
+                                fontWeight: 900,
+                              }}
+                            >
+                              ✓ Voorspeld
+                            </span>
                           )}
-                        </span>
+
+                          <span>
+                            {date.toLocaleTimeString(
+                              "nl-NL",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </div>
                       </div>
 
                       <div
@@ -769,7 +876,6 @@ export default function Wedstrijden() {
                             }}
                           >
                             <input
-                              aria-label={`${match.homeTeam.name} score`}
                               type="number"
                               min="0"
                               max="20"
@@ -781,7 +887,6 @@ export default function Wedstrijden() {
                                   e.target.value
                                 )
                               }
-                              placeholder="0"
                               style={scoreInputStyle}
                             />
 
@@ -795,7 +900,6 @@ export default function Wedstrijden() {
                             </span>
 
                             <input
-                              aria-label={`${match.awayTeam.name} score`}
                               type="number"
                               min="0"
                               max="20"
@@ -807,7 +911,6 @@ export default function Wedstrijden() {
                                   e.target.value
                                 )
                               }
-                              placeholder="0"
                               style={scoreInputStyle}
                             />
                           </div>
@@ -827,7 +930,9 @@ export default function Wedstrijden() {
                             marginTop: "21px",
                             width: "100%",
                             padding: "12px",
-                            background: "#0b8f4d",
+                            background: isSaved
+                              ? "#075f35"
+                              : "#0b8f4d",
                             color: "white",
                             border: "none",
                             borderRadius: "10px",
@@ -836,7 +941,9 @@ export default function Wedstrijden() {
                             cursor: "pointer",
                           }}
                         >
-                          Voorspelling opslaan
+                          {isSaved
+                            ? "Voorspelling wijzigen"
+                            : "Voorspelling opslaan"}
                         </button>
                       </div>
                     </div>
@@ -896,7 +1003,7 @@ function Team({
         display: "flex",
         flexDirection: home ? "row" : "row-reverse",
         alignItems: "center",
-        justifyContent: home ? "flex-end" : "flex-end",
+        justifyContent: "flex-end",
         gap: "13px",
         minWidth: 0,
       }}
@@ -938,13 +1045,7 @@ function Team({
             }}
           />
         ) : (
-          <span
-            style={{
-              fontSize: "20px",
-            }}
-          >
-            ⚽
-          </span>
+          <span style={{ fontSize: "20px" }}>⚽</span>
         )}
       </div>
     </div>
