@@ -67,12 +67,16 @@ export async function POST(request: Request) {
     const supabasePublishableKey =
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
+    const supabaseSecretKey =
+      process.env.SUPABASE_SECRET_KEY;
+
     const footballToken =
       process.env.FOOTBALL_DATA_API_TOKEN;
 
     if (
       !supabaseUrl ||
       !supabasePublishableKey ||
+      !supabaseSecretKey ||
       !footballToken
     ) {
       return NextResponse.json(
@@ -81,15 +85,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createClient(
+    // Deze client gebruiken we ALLEEN om te controleren
+    // welke gebruiker bij het access token hoort.
+    const authClient = createClient(
       supabaseUrl,
       supabasePublishableKey,
       {
-        global: {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
         auth: {
           persistSession: false,
           autoRefreshToken: false,
@@ -100,7 +101,7 @@ export async function POST(request: Request) {
     const {
       data: { user },
       error: userError,
-    } = await supabase.auth.getUser(accessToken);
+    } = await authClient.auth.getUser(accessToken);
 
     if (userError || !user) {
       return NextResponse.json(
@@ -109,6 +110,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Controleer de wedstrijd rechtstreeks bij football-data.
     const footballResponse = await fetch(
       `https://api.football-data.org/v4/matches/${matchId}`,
       {
@@ -120,6 +122,11 @@ export async function POST(request: Request) {
     );
 
     if (!footballResponse.ok) {
+      console.error(
+        "Football-data controle mislukt:",
+        footballResponse.status
+      );
+
       return NextResponse.json(
         {
           error:
@@ -136,17 +143,29 @@ export async function POST(request: Request) {
       match.competition.code !== competition
     ) {
       return NextResponse.json(
-        { error: "Wedstrijd en competitie komen niet overeen." },
+        {
+          error:
+            "Wedstrijd en competitie komen niet overeen.",
+        },
         { status: 400 }
       );
     }
 
     const kickoff = new Date(match.utcDate);
 
-    if (
-      Number.isNaN(kickoff.getTime()) ||
-      kickoff.getTime() <= Date.now()
-    ) {
+    if (Number.isNaN(kickoff.getTime())) {
+      return NextResponse.json(
+        {
+          error:
+            "De aftraptijd van deze wedstrijd is ongeldig.",
+        },
+        { status: 500 }
+      );
+    }
+
+    // BELANGRIJK:
+    // De deadline wordt op de server gecontroleerd.
+    if (kickoff.getTime() <= Date.now()) {
       return NextResponse.json(
         {
           error:
@@ -169,8 +188,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // Secret/server client.
+    // Deze key komt NOOIT in de browser terecht.
+    const adminClient = createClient(
+      supabaseUrl,
+      supabaseSecretKey,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
+
     const { data: profile, error: profileError } =
-      await supabase
+      await adminClient
         .from("profiles")
         .select("username")
         .eq("id", user.id)
@@ -180,7 +212,10 @@ export async function POST(request: Request) {
       console.error(profileError);
 
       return NextResponse.json(
-        { error: "Je profiel kon niet worden geladen." },
+        {
+          error:
+            "Je profiel kon niet worden geladen.",
+        },
         { status: 500 }
       );
     }
@@ -188,13 +223,15 @@ export async function POST(request: Request) {
     const matchName =
       `${match.homeTeam.name} - ${match.awayTeam.name}`;
 
-    const { data: existingPrediction, error: existingError } =
-      await supabase
-        .from("predictions")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("match_id", matchId)
-        .maybeSingle();
+    const {
+      data: existingPrediction,
+      error: existingError,
+    } = await adminClient
+      .from("predictions")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("match_id", matchId)
+      .maybeSingle();
 
     if (existingError) {
       console.error(existingError);
@@ -209,17 +246,18 @@ export async function POST(request: Request) {
     }
 
     if (existingPrediction) {
-      const { error } = await supabase
-        .from("predictions")
-        .update({
-          home_score: home,
-          away_score: away,
-        })
-        .eq("id", existingPrediction.id)
-        .eq("user_id", user.id);
+      const { error: updateError } =
+        await adminClient
+          .from("predictions")
+          .update({
+            home_score: home,
+            away_score: away,
+          })
+          .eq("id", existingPrediction.id)
+          .eq("user_id", user.id);
 
-      if (error) {
-        console.error(error);
+      if (updateError) {
+        console.error(updateError);
 
         return NextResponse.json(
           {
@@ -233,21 +271,25 @@ export async function POST(request: Request) {
       return NextResponse.json({
         success: true,
         action: "updated",
-        message: `Voorspelling gewijzigd: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`,
+        message:
+          `Voorspelling gewijzigd: ` +
+          `${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`,
       });
     }
 
-    const { error: insertError } = await supabase
-      .from("predictions")
-      .insert({
-        user_id: user.id,
-        user_email: user.email || "",
-        player_name: profile?.username || "Speler",
-        match_id: matchId,
-        match_name: matchName,
-        home_score: home,
-        away_score: away,
-      });
+    const { error: insertError } =
+      await adminClient
+        .from("predictions")
+        .insert({
+          user_id: user.id,
+          user_email: user.email || "",
+          player_name:
+            profile?.username || "Speler",
+          match_id: matchId,
+          match_name: matchName,
+          home_score: home,
+          away_score: away,
+        });
 
     if (insertError) {
       console.error(insertError);
@@ -264,7 +306,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       action: "created",
-      message: `Voorspelling opgeslagen: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`,
+      message:
+        `Voorspelling opgeslagen: ` +
+        `${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`,
     });
   } catch (error) {
     console.error(error);
