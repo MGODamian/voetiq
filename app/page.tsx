@@ -55,10 +55,29 @@ export default function Home() {
 
   const [username, setUsername] = useState("");
   const [userLoading, setUserLoading] = useState(true);
+  const [language, setLanguage] = useState("nl");
 
   useEffect(() => {
     loadUser();
+
+    const savedLanguage = window.localStorage.getItem("voetiq-language") || "nl";
+    setLanguage(savedLanguage);
+
+    function handleLanguageChange(event: Event) {
+      const customEvent = event as CustomEvent<{ language: string }>;
+      setLanguage(customEvent.detail?.language || "nl");
+    }
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+    };
   }, []);
+
+  function tr(text: string) {
+    return translateHome(language, text);
+  }
 
   async function loadUser() {
     try {
@@ -156,7 +175,7 @@ export default function Home() {
               letterSpacing: "0.8px",
             }}
           >
-            ⚽ DE VOETBAL VOORSPELLINGSGAME
+            ⚽ {tr("DE VOETBAL VOORSPELLINGSGAME")}
           </div>
 
           <h1
@@ -179,7 +198,7 @@ export default function Home() {
               letterSpacing: "-1px",
             }}
           >
-            Voorspel. Scoor. Klim.
+            {tr("Voorspel. Scoor. Klim.")}
           </h2>
 
           <p
@@ -191,8 +210,7 @@ export default function Home() {
               lineHeight: 1.7,
             }}
           >
-            Voorspel echte voetbalwedstrijden, verdien punten
-            en neem het op tegen andere voetbalfans.
+            {tr("Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.")}
           </p>
 
           {!userLoading && username && (
@@ -203,7 +221,7 @@ export default function Home() {
                 fontSize: "14px",
               }}
             >
-              Welkom terug,{" "}
+              {tr("Welkom terug")},{" "}
               <strong style={{ color: "#42e985" }}>
                 {username}
               </strong>
@@ -228,8 +246,8 @@ export default function Home() {
               style={primaryButtonStyle}
             >
               {username
-                ? "Begin met voorspellen →"
-                : "Begin gratis →"}
+                ? tr("Begin met voorspellen →")
+                : tr("Begin gratis →")}
             </button>
 
             {!username && !userLoading && (
@@ -237,7 +255,7 @@ export default function Home() {
                 onClick={() => router.push("/inloggen")}
                 style={secondaryButtonStyle}
               >
-                Inloggen
+                {tr("Inloggen")}
               </button>
             )}
 
@@ -246,7 +264,7 @@ export default function Home() {
                 onClick={() => router.push("/ranglijst")}
                 style={secondaryButtonStyle}
               >
-                🏆 Bekijk ranglijst
+                🏆 {tr("Bekijk ranglijst")}
               </button>
             )}
           </div>
@@ -265,17 +283,17 @@ export default function Home() {
           >
             <HeroStat
               value="10 → 32+"
-              label="Meer goals = meer punten"
+              label={tr("Meer goals = meer punten")}
             />
 
             <HeroStat
               value="-2"
-              label="Per doelpunt afwijking"
+              label={tr("Per doelpunt afwijking")}
             />
 
             <HeroStat
               value="100%"
-              label="Gratis spelen"
+              label={tr("Gratis spelen")}
             />
           </div>
         </div>
@@ -290,9 +308,9 @@ export default function Home() {
         }}
       >
         <SectionHeading
-          eyebrow="Kies je competitie"
-          title="Populaire competities"
-          description="Kies een competitie en begin direct met het voorspellen van wedstrijden."
+          eyebrow={tr("Kies je competitie")}
+          title={tr("Populaire competities")}
+          description={tr("Kies een competitie en begin direct met het voorspellen van wedstrijden.")}
         />
 
         <div
@@ -309,7 +327,7 @@ export default function Home() {
               key={competition.code}
               flag={competition.flag}
               name={competition.name}
-              description={competition.description}
+              description={tr(competition.description)}
               onPlay={() =>
                 openCompetition(competition.code)
               }
@@ -334,7 +352,7 @@ export default function Home() {
               cursor: "pointer",
             }}
           >
-            Bekijk alle wedstrijden →
+            {tr("Bekijk alle wedstrijden →")}
           </button>
         </div>
       </section>
@@ -356,9 +374,9 @@ export default function Home() {
           }}
         >
           <SectionHeading
-            eyebrow="Simpel en gratis"
-            title="Hoe werkt VoetIQ?"
-            description="Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is."
+            eyebrow={tr("Simpel en gratis")}
+            title={tr("Hoe werkt VoetIQ?")}
+            description={tr("Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.")}
           />
 
           <div
@@ -373,29 +391,29 @@ export default function Home() {
             <StepCard
               number="01"
               icon="👤"
-              title="Maak een account"
-              text="Registreer gratis en maak je eigen VoetIQ-profiel."
+              title={tr("Maak een account")}
+              text={tr("Registreer gratis en maak je eigen VoetIQ-profiel.")}
             />
 
             <StepCard
               number="02"
               icon="⚽"
-              title="Voorspel"
-              text="Vul jouw voorspelling in voor aankomende voetbalwedstrijden."
+              title={tr("Voorspel")}
+              text={tr("Vul jouw voorspelling in voor aankomende voetbalwedstrijden.")}
             />
 
             <StepCard
               number="03"
               icon="⭐"
-              title="Verdien punten"
-              text="Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient."
+              title={tr("Verdien punten")}
+              text={tr("Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.")}
             />
 
             <StepCard
               number="04"
               icon="🏆"
-              title="Klim omhoog"
-              text="Vergelijk je score met andere spelers op de ranglijst."
+              title={tr("Klim omhoog")}
+              text={tr("Vergelijk je score met andere spelers op de ranglijst.")}
             />
           </div>
         </div>
@@ -437,7 +455,7 @@ export default function Home() {
                 letterSpacing: "1px",
               }}
             >
-              Puntentelling
+              {tr("Puntentelling")}
             </div>
 
             <h2
@@ -447,7 +465,7 @@ export default function Home() {
                 fontWeight: 950,
               }}
             >
-              Iedere voorspelling telt.
+              {tr("Iedere voorspelling telt.")}
             </h2>
 
             <p
@@ -458,9 +476,7 @@ export default function Home() {
                 fontSize: "14px",
               }}
             >
-              Hoe nauwkeuriger jouw voorspelling, hoe meer
-              punten je verdient. Een moeilijke hoge score die
-              je exact voorspelt kan dus veel opleveren.
+              {tr("Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.")}
             </p>
 
             <div
@@ -473,25 +489,25 @@ export default function Home() {
               <PointsRow
                 icon="🎯"
                 points="10 + goals × 2"
-                text="Exact goed: meer goals betekent meer punten"
+                text={tr("Exact goed: meer goals betekent meer punten")}
               />
 
               <PointsRow
                 icon="📉"
-                points="-2 punten"
-                text="Per doelpunt dat je van de echte uitslag af zit"
+                points={tr("-2 punten")}
+                text={tr("Per doelpunt dat je van de echte uitslag af zit")}
               />
 
               <PointsRow
                 icon="🔥"
-                points="32 punten"
-                text="Voorbeeld: 6-5 exact voorspeld"
+                points={tr("32 punten")}
+                text={tr("Voorbeeld: 6-5 exact voorspeld")}
               />
 
               <PointsRow
                 icon="❌"
-                points="0 punten"
-                text="Verkeerde winnaar of verkeerd gelijkspel"
+                points={tr("0 punten")}
+                text={tr("Verkeerde winnaar of verkeerd gelijkspel")}
               />
             </div>
           </div>
@@ -515,7 +531,7 @@ export default function Home() {
                 letterSpacing: "1px",
               }}
             >
-              Ranglijsten
+              {tr("Ranglijsten")}
             </div>
 
             <h2
@@ -525,7 +541,7 @@ export default function Home() {
                 fontWeight: 950,
               }}
             >
-              Wie heeft de meeste voetbal-IQ?
+              {tr("Wie heeft de meeste voetbal-IQ?")}
             </h2>
 
             <p
@@ -536,8 +552,7 @@ export default function Home() {
                 fontSize: "14px",
               }}
             >
-              Verzamel punten, volg je prestaties en probeer
-              steeds hoger op de VoetIQ-ranglijst te komen.
+              {tr("Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.")}
             </p>
 
             <button
@@ -547,7 +562,7 @@ export default function Home() {
                 marginTop: "27px",
               }}
             >
-              🏆 Bekijk de ranglijst →
+              🏆 {tr("Bekijk de ranglijst →")}
             </button>
           </div>
         </div>
@@ -581,7 +596,7 @@ export default function Home() {
               fontWeight: 950,
             }}
           >
-            Speel tegen je vrienden
+            {tr("Speel tegen je vrienden")}
           </h2>
 
           <p
@@ -593,9 +608,7 @@ export default function Home() {
               fontSize: "14px",
             }}
           >
-            Maak een eigen poule, nodig je vrienden uit en
-            strijd samen om de hoogste plek op jullie eigen
-            ranglijst.
+            {tr("Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.")}
           </p>
 
           <button
@@ -605,7 +618,7 @@ export default function Home() {
               marginTop: "22px",
             }}
           >
-            👥 Bekijk poules →
+            👥 {tr("Bekijk poules →")}
           </button>
         </div>
       </section>
@@ -636,7 +649,7 @@ export default function Home() {
               letterSpacing: "-1px",
             }}
           >
-            Klaar om jouw voetbal-IQ te testen?
+            {tr("Klaar om jouw voetbal-IQ te testen?")}
           </h2>
 
           <p
@@ -646,8 +659,7 @@ export default function Home() {
               lineHeight: 1.65,
             }}
           >
-            Doe mee, voorspel wedstrijden en kijk hoe hoog jij
-            op de ranglijst kunt komen.
+            {tr("Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.")}
           </p>
 
           <button
@@ -662,8 +674,8 @@ export default function Home() {
             }}
           >
             {username
-              ? "Ga naar wedstrijden →"
-              : "Maak gratis een account →"}
+              ? tr("Ga naar wedstrijden →")
+              : tr("Maak gratis een account →")}
           </button>
         </div>
       </section>
@@ -717,22 +729,22 @@ export default function Home() {
             }}
           >
             <FooterButton
-              label="Wedstrijden"
+              label={tr("Wedstrijden")}
               onClick={() => router.push("/wedstrijden")}
             />
 
             <FooterButton
-              label="Ranglijst"
+              label={tr("Ranglijst")}
               onClick={() => router.push("/ranglijst")}
             />
 
             <FooterButton
-              label="Voorwaarden"
+              label={tr("Voorwaarden")}
               onClick={() => router.push("/voorwaarden")}
             />
 
             <FooterButton
-              label="Privacy"
+              label={tr("Privacy")}
               onClick={() => router.push("/privacy")}
             />
           </div>
@@ -844,7 +856,7 @@ function CompetitionCard({
               letterSpacing: "0.7px",
             }}
           >
-            Predictor
+            {tr("Predictor")}
           </div>
 
           <h3
@@ -884,7 +896,7 @@ function CompetitionCard({
           cursor: "pointer",
         }}
       >
-        Voorspel nu →
+        {tr("Voorspel nu →")}
       </button>
     </article>
   );
@@ -1050,6 +1062,48 @@ function FooterButton({
     </button>
   );
 }
+
+
+type HomeLanguage = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+const homeTranslations: Record<HomeLanguage, Record<string, string>> = {
+  nl: {},
+  en: {
+    "DE VOETBAL VOORSPELLINGSGAME":"THE FOOTBALL PREDICTION GAME","Voorspel. Scoor. Klim.":"Predict. Score. Climb.","Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.":"Predict real football matches, earn points and compete with other football fans.","Welkom terug":"Welcome back","Begin met voorspellen →":"Start predicting →","Begin gratis →":"Start for free →","Inloggen":"Log in","Bekijk ranglijst":"View leaderboard","Meer goals = meer punten":"More goals = more points","Per doelpunt afwijking":"Per goal difference","Gratis spelen":"Free to play","Kies je competitie":"Choose your competition","Populaire competities":"Popular competitions","Kies een competitie en begin direct met het voorspellen van wedstrijden.":"Choose a competition and start predicting matches right away.","Bekijk alle wedstrijden →":"View all matches →","Simpel en gratis":"Simple and free","Hoe werkt VoetIQ?":"How does VoetIQ work?","Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.":"Choose matches, predict the score and earn more points the more accurate your prediction is.","Maak een account":"Create an account","Registreer gratis en maak je eigen VoetIQ-profiel.":"Sign up for free and create your own VoetIQ profile.","Voorspel":"Predict","Vul jouw voorspelling in voor aankomende voetbalwedstrijden.":"Enter your prediction for upcoming football matches.","Verdien punten":"Earn points","Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.":"The more accurate your prediction, the more points you earn.","Klim omhoog":"Climb the rankings","Vergelijk je score met andere spelers op de ranglijst.":"Compare your score with other players on the leaderboard.","Puntentelling":"Scoring","Iedere voorspelling telt.":"Every prediction counts.","Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.":"The more accurate your prediction, the more points you earn. Predicting a difficult high-scoring result exactly can therefore earn you a lot.","Exact goed: meer goals betekent meer punten":"Exact score: more goals means more points","-2 punten":"-2 points","Per doelpunt dat je van de echte uitslag af zit":"For each goal your prediction differs from the actual score","32 punten":"32 points","Voorbeeld: 6-5 exact voorspeld":"Example: exact 6-5 prediction","0 punten":"0 points","Verkeerde winnaar of verkeerd gelijkspel":"Wrong winner or incorrectly predicted draw","Ranglijsten":"Leaderboards","Wie heeft de meeste voetbal-IQ?":"Who has the highest football IQ?","Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.":"Collect points, track your performance and climb the VoetIQ leaderboard.","Bekijk de ranglijst →":"View the leaderboard →","Speel tegen je vrienden":"Play against your friends","Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.":"Create your own pool, invite your friends and compete for the top spot on your own leaderboard.","Bekijk poules →":"View pools →","Klaar om jouw voetbal-IQ te testen?":"Ready to test your football IQ?","Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.":"Join in, predict matches and see how high you can climb on the leaderboard.","Ga naar wedstrijden →":"Go to matches →","Maak gratis een account →":"Create a free account →","Wedstrijden":"Matches","Ranglijst":"Leaderboard","Voorwaarden":"Terms","Privacy":"Privacy","Predictor":"Predictor","Voorspel nu →":"Predict now →",
+    "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.":"Predict matches featuring Ajax, PSV, Feyenoord and the rest of the Eredivisie.","Test je voetbalkennis in één van de grootste competities ter wereld.":"Test your football knowledge in one of the world's biggest leagues.","Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.":"Predict matches from Spain's top football league.","Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.":"Compete with other predictors on matches from Germany.","Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.":"Predict matches involving the biggest clubs in Italian football.","Voorspel de grootste Europese wedstrijden en verdien punten.":"Predict Europe's biggest matches and earn points."
+  },
+  de: {
+    "DE VOETBAL VOORSPELLINGSGAME":"DAS FUSSBALL-TIPPSPIEL","Voorspel. Scoor. Klim.":"Tippen. Punkten. Aufsteigen.","Voorspel echte voetbalwedstrijden, verdien punten en neem het op tegen andere voetbalfans.":"Tippe echte Fußballspiele, sammle Punkte und tritt gegen andere Fußballfans an.","Welkom terug":"Willkommen zurück","Begin met voorspellen →":"Jetzt tippen →","Begin gratis →":"Kostenlos starten →","Inloggen":"Anmelden","Bekijk ranglijst":"Rangliste ansehen","Meer goals = meer punten":"Mehr Tore = mehr Punkte","Per doelpunt afwijking":"Pro Tor Abweichung","Gratis spelen":"Kostenlos spielen","Kies je competitie":"Wähle deinen Wettbewerb","Populaire competities":"Beliebte Wettbewerbe","Kies een competitie en begin direct met het voorspellen van wedstrijden.":"Wähle einen Wettbewerb und tippe direkt die nächsten Spiele.","Bekijk alle wedstrijden →":"Alle Spiele ansehen →","Simpel en gratis":"Einfach und kostenlos","Hoe werkt VoetIQ?":"Wie funktioniert VoetIQ?","Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is.":"Wähle Spiele aus, tippe das Ergebnis und sammle umso mehr Punkte, je genauer dein Tipp ist.","Maak een account":"Konto erstellen","Registreer gratis en maak je eigen VoetIQ-profiel.":"Registriere dich kostenlos und erstelle dein eigenes VoetIQ-Profil.","Voorspel":"Tippen","Vul jouw voorspelling in voor aankomende voetbalwedstrijden.":"Gib deinen Tipp für kommende Fußballspiele ab.","Verdien punten":"Punkte sammeln","Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient.":"Je genauer dein Tipp, desto mehr Punkte bekommst du.","Klim omhoog":"Aufsteigen","Vergelijk je score met andere spelers op de ranglijst.":"Vergleiche deine Punkte mit anderen Spielern in der Rangliste.","Puntentelling":"Punktesystem","Iedere voorspelling telt.":"Jeder Tipp zählt.","Hoe nauwkeuriger jouw voorspelling, hoe meer punten je verdient. Een moeilijke hoge score die je exact voorspelt kan dus veel opleveren.":"Je genauer dein Tipp, desto mehr Punkte bekommst du. Ein exakt getipptes torreiches Ergebnis kann daher besonders viele Punkte bringen.","Exact goed: meer goals betekent meer punten":"Exakter Tipp: Mehr Tore bedeuten mehr Punkte","-2 punten":"-2 Punkte","Per doelpunt dat je van de echte uitslag af zit":"Für jedes Tor Abweichung vom tatsächlichen Ergebnis","32 punten":"32 Punkte","Voorbeeld: 6-5 exact voorspeld":"Beispiel: 6:5 exakt getippt","0 punten":"0 Punkte","Verkeerde winnaar of verkeerd gelijkspel":"Falscher Sieger oder fälschlich auf Unentschieden getippt","Ranglijsten":"Ranglisten","Wie heeft de meeste voetbal-IQ?":"Wer hat den höchsten Fußball-IQ?","Verzamel punten, volg je prestaties en probeer steeds hoger op de VoetIQ-ranglijst te komen.":"Sammle Punkte, verfolge deine Leistung und steige in der VoetIQ-Rangliste immer weiter auf.","Bekijk de ranglijst →":"Rangliste ansehen →","Speel tegen je vrienden":"Spiele gegen deine Freunde","Maak een eigen poule, nodig je vrienden uit en strijd samen om de hoogste plek op jullie eigen ranglijst.":"Erstelle eine eigene Tipprunde, lade deine Freunde ein und kämpft um Platz eins in eurer Rangliste.","Bekijk poules →":"Tipprunden ansehen →","Klaar om jouw voetbal-IQ te testen?":"Bereit, deinen Fußball-IQ zu testen?","Doe mee, voorspel wedstrijden en kijk hoe hoog jij op de ranglijst kunt komen.":"Mach mit, tippe Spiele und finde heraus, wie weit du in der Rangliste nach oben kommst.","Ga naar wedstrijden →":"Zu den Spielen →","Maak gratis een account →":"Kostenloses Konto erstellen →","Wedstrijden":"Spiele","Ranglijst":"Rangliste","Voorwaarden":"Nutzungsbedingungen","Privacy":"Datenschutz","Predictor":"Tippspiel","Voorspel nu →":"Jetzt tippen →",
+    "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de rest van de Eredivisie.":"Tippe Spiele von Ajax, PSV, Feyenoord und den übrigen Teams der Eredivisie.","Test je voetbalkennis in één van de grootste competities ter wereld.":"Teste dein Fußballwissen in einer der größten Ligen der Welt.","Voorspel de wedstrijden uit de hoogste Spaanse voetbalcompetitie.":"Tippe die Spiele der höchsten spanischen Fußballliga.","Neem het op tegen andere voorspellers met wedstrijden uit Duitsland.":"Tritt bei Spielen aus Deutschland gegen andere Tipper an.","Doe voorspellingen voor de grootste clubs uit het Italiaanse voetbal.":"Tippe die Spiele der größten Vereine im italienischen Fußball.","Voorspel de grootste Europese wedstrijden en verdien punten.":"Tippe die größten europäischen Spiele und sammle Punkte."
+  },
+  es: {}, fr: {}, it: {}, pt: {}
+};
+
+const fallbackTranslations: Record<Exclude<HomeLanguage, "nl" | "en" | "de">, Record<string, string>> = {
+  es: {
+    "DE VOETBAL VOORSPELLINGSGAME":"EL JUEGO DE PRONÓSTICOS DE FÚTBOL","Voorspel. Scoor. Klim.":"Pronostica. Puntúa. Sube.","Welkom terug":"Bienvenido de nuevo","Begin met voorspellen →":"Empezar a pronosticar →","Begin gratis →":"Empezar gratis →","Inloggen":"Iniciar sesión","Bekijk ranglijst":"Ver clasificación","Meer goals = meer punten":"Más goles = más puntos","Per doelpunt afwijking":"Por cada gol de diferencia","Gratis spelen":"Jugar gratis","Kies je competitie":"Elige tu competición","Populaire competities":"Competiciones populares","Bekijk alle wedstrijden →":"Ver todos los partidos →","Simpel en gratis":"Fácil y gratis","Hoe werkt VoetIQ?":"¿Cómo funciona VoetIQ?","Maak een account":"Crea una cuenta","Voorspel":"Pronostica","Verdien punten":"Gana puntos","Klim omhoog":"Sube en la clasificación","Puntentelling":"Sistema de puntos","Iedere voorspelling telt.":"Cada pronóstico cuenta.","Ranglijsten":"Clasificaciones","Wie heeft de meeste voetbal-IQ?":"¿Quién tiene el mayor IQ futbolístico?","Bekijk de ranglijst →":"Ver la clasificación →","Speel tegen je vrienden":"Juega contra tus amigos","Bekijk poules →":"Ver grupos →","Klaar om jouw voetbal-IQ te testen?":"¿Listo para poner a prueba tu IQ futbolístico?","Ga naar wedstrijden →":"Ir a los partidos →","Maak gratis een account →":"Crear una cuenta gratis →","Wedstrijden":"Partidos","Ranglijst":"Clasificación","Voorwaarden":"Términos","Privacy":"Privacidad","Predictor":"Pronósticos","Voorspel nu →":"Pronosticar ahora →","-2 punten":"-2 puntos","32 punten":"32 puntos","0 punten":"0 puntos"
+  },
+  fr: {
+    "DE VOETBAL VOORSPELLINGSGAME":"LE JEU DE PRONOSTICS FOOTBALL","Voorspel. Scoor. Klim.":"Pronostiquez. Marquez. Grimpez.","Welkom terug":"Bon retour","Begin met voorspellen →":"Commencer à pronostiquer →","Begin gratis →":"Commencer gratuitement →","Inloggen":"Se connecter","Bekijk ranglijst":"Voir le classement","Meer goals = meer punten":"Plus de buts = plus de points","Per doelpunt afwijking":"Par but d'écart","Gratis spelen":"Jouer gratuitement","Kies je competitie":"Choisissez votre compétition","Populaire competities":"Compétitions populaires","Bekijk alle wedstrijden →":"Voir tous les matchs →","Simpel en gratis":"Simple et gratuit","Hoe werkt VoetIQ?":"Comment fonctionne VoetIQ ?","Maak een account":"Créer un compte","Voorspel":"Pronostiquez","Verdien punten":"Gagnez des points","Klim omhoog":"Grimpez au classement","Puntentelling":"Système de points","Iedere voorspelling telt.":"Chaque pronostic compte.","Ranglijsten":"Classements","Wie heeft de meeste voetbal-IQ?":"Qui a le meilleur QI football ?","Bekijk de ranglijst →":"Voir le classement →","Speel tegen je vrienden":"Jouez contre vos amis","Bekijk poules →":"Voir les ligues →","Klaar om jouw voetbal-IQ te testen?":"Prêt à tester votre QI football ?","Ga naar wedstrijden →":"Voir les matchs →","Maak gratis een account →":"Créer un compte gratuit →","Wedstrijden":"Matchs","Ranglijst":"Classement","Voorwaarden":"Conditions","Privacy":"Confidentialité","Predictor":"Pronostics","Voorspel nu →":"Pronostiquer →","-2 punten":"-2 points","32 punten":"32 points","0 punten":"0 point"
+  },
+  it: {
+    "DE VOETBAL VOORSPELLINGSGAME":"IL GIOCO DEI PRONOSTICI DI CALCIO","Voorspel. Scoor. Klim.":"Pronostica. Segna. Sali.","Welkom terug":"Bentornato","Begin met voorspellen →":"Inizia a pronosticare →","Begin gratis →":"Inizia gratis →","Inloggen":"Accedi","Bekijk ranglijst":"Vedi classifica","Meer goals = meer punten":"Più gol = più punti","Per doelpunt afwijking":"Per ogni gol di differenza","Gratis spelen":"Gioca gratis","Kies je competitie":"Scegli la competizione","Populaire competities":"Competizioni popolari","Bekijk alle wedstrijden →":"Vedi tutte le partite →","Simpel en gratis":"Semplice e gratuito","Hoe werkt VoetIQ?":"Come funziona VoetIQ?","Maak een account":"Crea un account","Voorspel":"Pronostica","Verdien punten":"Guadagna punti","Klim omhoog":"Sali in classifica","Puntentelling":"Sistema di punteggio","Iedere voorspelling telt.":"Ogni pronostico conta.","Ranglijsten":"Classifiche","Wie heeft de meeste voetbal-IQ?":"Chi ha il QI calcistico più alto?","Bekijk de ranglijst →":"Vedi la classifica →","Speel tegen je vrienden":"Gioca contro i tuoi amici","Bekijk poules →":"Vedi i gruppi →","Klaar om jouw voetbal-IQ te testen?":"Pronto a mettere alla prova il tuo QI calcistico?","Ga naar wedstrijden →":"Vai alle partite →","Maak gratis een account →":"Crea un account gratuito →","Wedstrijden":"Partite","Ranglijst":"Classifica","Voorwaarden":"Termini","Privacy":"Privacy","Predictor":"Pronostici","Voorspel nu →":"Pronostica ora →","-2 punten":"-2 punti","32 punten":"32 punti","0 punten":"0 punti"
+  },
+  pt: {
+    "DE VOETBAL VOORSPELLINGSGAME":"O JOGO DE PALPITES DE FUTEBOL","Voorspel. Scoor. Klim.":"Prevê. Pontua. Sobe.","Welkom terug":"Bem-vindo de volta","Begin met voorspellen →":"Começar a prever →","Begin gratis →":"Começar grátis →","Inloggen":"Iniciar sessão","Bekijk ranglijst":"Ver classificação","Meer goals = meer punten":"Mais golos = mais pontos","Per doelpunt afwijking":"Por cada golo de diferença","Gratis spelen":"Jogar grátis","Kies je competitie":"Escolhe a competição","Populaire competities":"Competições populares","Bekijk alle wedstrijden →":"Ver todos os jogos →","Simpel en gratis":"Simples e grátis","Hoe werkt VoetIQ?":"Como funciona o VoetIQ?","Maak een account":"Criar uma conta","Voorspel":"Prevê","Verdien punten":"Ganha pontos","Klim omhoog":"Sobe na classificação","Puntentelling":"Sistema de pontos","Iedere voorspelling telt.":"Cada palpite conta.","Ranglijsten":"Classificações","Wie heeft de meeste voetbal-IQ?":"Quem tem o maior QI futebolístico?","Bekijk de ranglijst →":"Ver a classificação →","Speel tegen je vrienden":"Joga contra os teus amigos","Bekijk poules →":"Ver grupos →","Klaar om jouw voetbal-IQ te testen?":"Pronto para testar o teu QI futebolístico?","Ga naar wedstrijden →":"Ir para os jogos →","Maak gratis een account →":"Criar uma conta grátis →","Wedstrijden":"Jogos","Ranglijst":"Classificação","Voorwaarden":"Termos","Privacy":"Privacidade","Predictor":"Palpites","Voorspel nu →":"Prever agora →","-2 punten":"-2 pontos","32 punten":"32 pontos","0 punten":"0 pontos"
+  }
+};
+Object.assign(homeTranslations.es, fallbackTranslations.es);
+Object.assign(homeTranslations.fr, fallbackTranslations.fr);
+Object.assign(homeTranslations.it, fallbackTranslations.it);
+Object.assign(homeTranslations.pt, fallbackTranslations.pt);
+
+function translateHome(language: string, text: string) {
+  if (language === "nl") return text;
+  const lang = language as HomeLanguage;
+  return homeTranslations[lang]?.[text] || homeTranslations.en[text] || text;
+}
+
 
 const primaryButtonStyle = {
   padding: "14px 24px",
