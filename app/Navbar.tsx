@@ -132,7 +132,11 @@ export default function Navbar() {
               boxShadow: "0 25px 70px rgba(0,0,0,0.5)",
             }}
           >
-            <Link href="/" onClick={closeMenu} style={menuItemStyle}>
+            <Link
+              href="/"
+              onClick={closeMenu}
+              style={menuItemStyle}
+            >
               🏠
               <span>Home</span>
             </Link>
@@ -144,6 +148,15 @@ export default function Navbar() {
             >
               ⚽
               <span>Wedstrijden</span>
+            </Link>
+
+            <Link
+              href="/poules"
+              onClick={closeMenu}
+              style={menuItemStyle}
+            >
+              🏟️
+              <span>Poules</span>
             </Link>
 
             <Link
