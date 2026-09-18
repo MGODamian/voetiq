@@ -38,6 +38,254 @@ type StoredPrediction = {
   away_score: number;
 };
 
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+type TranslationKey =
+  | "matches"
+  | "subtitle"
+  | "competition"
+  | "filled"
+  | "loading"
+  | "noUpcoming"
+  | "noUpcomingDescription"
+  | "previous"
+  | "matchday"
+  | "next"
+  | "predicted"
+  | "predictionClosed"
+  | "saving"
+  | "changePrediction"
+  | "savePrediction"
+  | "matchesLoadFailed"
+  | "completeScore"
+  | "validScore"
+  | "loginRequired"
+  | "predictionSaveFailed"
+  | "predictionSaved"
+  | "predictionSaveError";
+
+const localeByLanguage: Record<LanguageCode, string> = {
+  nl: "nl-NL",
+  en: "en-GB",
+  de: "de-DE",
+  es: "es-ES",
+  fr: "fr-FR",
+  it: "it-IT",
+  pt: "pt-PT",
+};
+
+const translations: Record<
+  LanguageCode,
+  Record<TranslationKey, string>
+> = {
+  nl: {
+    matches: "Wedstrijden",
+    subtitle: "Voorspel de uitslagen en verdien punten.",
+    competition: "Competitie",
+    filled: "Ingevuld",
+    loading: "Wedstrijden laden...",
+    noUpcoming: "Geen komende wedstrijden",
+    noUpcomingDescription:
+      "Er zijn momenteel geen aankomende wedstrijden beschikbaar voor deze competitie.",
+    previous: "Vorige",
+    matchday: "Speelronde",
+    next: "Volgende",
+    predicted: "Voorspeld",
+    predictionClosed: "Voorspelling gesloten",
+    saving: "Opslaan...",
+    changePrediction: "Voorspelling wijzigen",
+    savePrediction: "Voorspelling opslaan",
+    matchesLoadFailed: "De wedstrijden konden niet worden opgehaald.",
+    completeScore: "Vul eerst een volledige uitslag in.",
+    validScore: "Vul een geldige uitslag in van 0 t/m 20.",
+    loginRequired: "Je moet ingelogd zijn om een voorspelling op te slaan.",
+    predictionSaveFailed: "Je voorspelling kon niet worden opgeslagen.",
+    predictionSaved: "Je voorspelling is opgeslagen.",
+    predictionSaveError:
+      "Er ging iets mis bij het opslaan van je voorspelling.",
+  },
+  en: {
+    matches: "Matches",
+    subtitle: "Predict the scores and earn points.",
+    competition: "Competition",
+    filled: "Completed",
+    loading: "Loading matches...",
+    noUpcoming: "No upcoming matches",
+    noUpcomingDescription:
+      "There are currently no upcoming matches available for this competition.",
+    previous: "Previous",
+    matchday: "Matchday",
+    next: "Next",
+    predicted: "Predicted",
+    predictionClosed: "Prediction closed",
+    saving: "Saving...",
+    changePrediction: "Change prediction",
+    savePrediction: "Save prediction",
+    matchesLoadFailed: "The matches could not be loaded.",
+    completeScore: "Enter a complete score first.",
+    validScore: "Enter a valid score from 0 to 20.",
+    loginRequired: "You must be logged in to save a prediction.",
+    predictionSaveFailed: "Your prediction could not be saved.",
+    predictionSaved: "Your prediction has been saved.",
+    predictionSaveError: "Something went wrong while saving your prediction.",
+  },
+  de: {
+    matches: "Spiele",
+    subtitle: "Tippe die Ergebnisse und sammle Punkte.",
+    competition: "Wettbewerb",
+    filled: "Ausgefüllt",
+    loading: "Spiele werden geladen...",
+    noUpcoming: "Keine kommenden Spiele",
+    noUpcomingDescription:
+      "Für diesen Wettbewerb sind derzeit keine kommenden Spiele verfügbar.",
+    previous: "Zurück",
+    matchday: "Spieltag",
+    next: "Weiter",
+    predicted: "Getippt",
+    predictionClosed: "Tippabgabe geschlossen",
+    saving: "Speichern...",
+    changePrediction: "Tipp ändern",
+    savePrediction: "Tipp speichern",
+    matchesLoadFailed: "Die Spiele konnten nicht geladen werden.",
+    completeScore: "Gib zuerst ein vollständiges Ergebnis ein.",
+    validScore: "Gib ein gültiges Ergebnis von 0 bis 20 ein.",
+    loginRequired: "Du musst angemeldet sein, um einen Tipp zu speichern.",
+    predictionSaveFailed: "Dein Tipp konnte nicht gespeichert werden.",
+    predictionSaved: "Dein Tipp wurde gespeichert.",
+    predictionSaveError: "Beim Speichern deines Tipps ist etwas schiefgelaufen.",
+  },
+  es: {
+    matches: "Partidos",
+    subtitle: "Pronostica los resultados y gana puntos.",
+    competition: "Competición",
+    filled: "Completados",
+    loading: "Cargando partidos...",
+    noUpcoming: "No hay próximos partidos",
+    noUpcomingDescription:
+      "Actualmente no hay próximos partidos disponibles para esta competición.",
+    previous: "Anterior",
+    matchday: "Jornada",
+    next: "Siguiente",
+    predicted: "Pronosticado",
+    predictionClosed: "Pronóstico cerrado",
+    saving: "Guardando...",
+    changePrediction: "Cambiar pronóstico",
+    savePrediction: "Guardar pronóstico",
+    matchesLoadFailed: "No se han podido cargar los partidos.",
+    completeScore: "Introduce primero un resultado completo.",
+    validScore: "Introduce un resultado válido entre 0 y 20.",
+    loginRequired: "Debes iniciar sesión para guardar un pronóstico.",
+    predictionSaveFailed: "No se ha podido guardar tu pronóstico.",
+    predictionSaved: "Tu pronóstico se ha guardado.",
+    predictionSaveError: "Se ha producido un error al guardar tu pronóstico.",
+  },
+  fr: {
+    matches: "Matchs",
+    subtitle: "Pronostiquez les scores et gagnez des points.",
+    competition: "Compétition",
+    filled: "Complétés",
+    loading: "Chargement des matchs...",
+    noUpcoming: "Aucun match à venir",
+    noUpcomingDescription:
+      "Aucun match à venir n’est actuellement disponible pour cette compétition.",
+    previous: "Précédent",
+    matchday: "Journée",
+    next: "Suivant",
+    predicted: "Pronostiqué",
+    predictionClosed: "Pronostic fermé",
+    saving: "Enregistrement...",
+    changePrediction: "Modifier le pronostic",
+    savePrediction: "Enregistrer le pronostic",
+    matchesLoadFailed: "Les matchs n’ont pas pu être chargés.",
+    completeScore: "Saisissez d’abord un score complet.",
+    validScore: "Saisissez un score valide compris entre 0 et 20.",
+    loginRequired:
+      "Vous devez être connecté pour enregistrer un pronostic.",
+    predictionSaveFailed: "Votre pronostic n’a pas pu être enregistré.",
+    predictionSaved: "Votre pronostic a été enregistré.",
+    predictionSaveError:
+      "Une erreur s’est produite lors de l’enregistrement de votre pronostic.",
+  },
+  it: {
+    matches: "Partite",
+    subtitle: "Pronostica i risultati e guadagna punti.",
+    competition: "Competizione",
+    filled: "Completati",
+    loading: "Caricamento delle partite...",
+    noUpcoming: "Nessuna partita in programma",
+    noUpcomingDescription:
+      "Al momento non ci sono prossime partite disponibili per questa competizione.",
+    previous: "Precedente",
+    matchday: "Giornata",
+    next: "Successiva",
+    predicted: "Pronosticato",
+    predictionClosed: "Pronostico chiuso",
+    saving: "Salvataggio...",
+    changePrediction: "Modifica pronostico",
+    savePrediction: "Salva pronostico",
+    matchesLoadFailed: "Non è stato possibile caricare le partite.",
+    completeScore: "Inserisci prima un risultato completo.",
+    validScore: "Inserisci un risultato valido da 0 a 20.",
+    loginRequired: "Devi accedere per salvare un pronostico.",
+    predictionSaveFailed: "Non è stato possibile salvare il tuo pronostico.",
+    predictionSaved: "Il tuo pronostico è stato salvato.",
+    predictionSaveError:
+      "Si è verificato un errore durante il salvataggio del pronostico.",
+  },
+  pt: {
+    matches: "Jogos",
+    subtitle: "Prevê os resultados e ganha pontos.",
+    competition: "Competição",
+    filled: "Preenchidos",
+    loading: "A carregar jogos...",
+    noUpcoming: "Sem próximos jogos",
+    noUpcomingDescription:
+      "De momento, não existem próximos jogos disponíveis para esta competição.",
+    previous: "Anterior",
+    matchday: "Jornada",
+    next: "Seguinte",
+    predicted: "Previsto",
+    predictionClosed: "Previsão encerrada",
+    saving: "A guardar...",
+    changePrediction: "Alterar previsão",
+    savePrediction: "Guardar previsão",
+    matchesLoadFailed: "Não foi possível carregar os jogos.",
+    completeScore: "Introduz primeiro um resultado completo.",
+    validScore: "Introduz um resultado válido entre 0 e 20.",
+    loginRequired: "Tens de iniciar sessão para guardar uma previsão.",
+    predictionSaveFailed: "Não foi possível guardar a tua previsão.",
+    predictionSaved: "A tua previsão foi guardada.",
+    predictionSaveError: "Ocorreu um erro ao guardar a tua previsão.",
+  },
+};
+
+function isLanguageCode(value: string): value is LanguageCode {
+  return ["nl", "en", "de", "es", "fr", "it", "pt"].includes(value);
+}
+
+
+function translateServerMessage(
+  message: unknown,
+  language: LanguageCode
+): string {
+  if (typeof message !== "string" || message.trim() === "") {
+    return "";
+  }
+
+  const knownMessages: Record<string, TranslationKey> = {
+    "Je voorspelling is opgeslagen.": "predictionSaved",
+    "Je voorspelling kon niet worden opgeslagen.": "predictionSaveFailed",
+    "Je moet ingelogd zijn om een voorspelling op te slaan.": "loginRequired",
+    "Vul eerst een volledige uitslag in.": "completeScore",
+    "Vul een geldige uitslag in van 0 t/m 20.": "validScore",
+  };
+
+  const key = knownMessages[message];
+
+  return key ? translations[language][key] : message;
+}
+
 const competitions: Competition[] = [
   { code: "PL", name: "Premier League", flag: "🏴" },
   { code: "DED", name: "Eredivisie", flag: "🇳🇱" },
@@ -128,11 +376,31 @@ export default function Wedstrijden() {
 
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState<LanguageCode>("nl");
 
   const [selectedMatchday, setSelectedMatchday] =
     useState<number | null>(null);
 
   useEffect(() => {
+    const savedLanguage = window.localStorage.getItem("voetiq-language");
+    const initialLanguage: LanguageCode =
+      savedLanguage && isLanguageCode(savedLanguage) ? savedLanguage : "nl";
+
+    setLanguage(initialLanguage);
+    document.documentElement.lang = initialLanguage;
+
+    function handleLanguageChange(event: Event) {
+      const customEvent = event as CustomEvent<{ language?: string }>;
+      const nextLanguage = customEvent.detail?.language;
+
+      if (nextLanguage && isLanguageCode(nextLanguage)) {
+        setLanguage(nextLanguage);
+        document.documentElement.lang = nextLanguage;
+      }
+    }
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+
     const params = new URLSearchParams(
       window.location.search
     );
@@ -148,6 +416,10 @@ export default function Wedstrijden() {
     if (isValidCompetition) {
       setSelectedCompetition(competitionFromUrl);
     }
+
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -218,7 +490,7 @@ export default function Wedstrijden() {
       console.error(error);
 
       setMessage(
-        "De wedstrijden konden niet worden opgehaald."
+        t("matchesLoadFailed")
       );
     } finally {
       setLoading(false);
@@ -387,7 +659,7 @@ export default function Wedstrijden() {
       prediction.away === ""
     ) {
       setMessage(
-        "Vul eerst een volledige uitslag in."
+        t("completeScore")
       );
       return;
     }
@@ -409,7 +681,7 @@ export default function Wedstrijden() {
       away > 20
     ) {
       setMessage(
-        "Vul een geldige uitslag in van 0 t/m 20."
+        t("validScore")
       );
       return;
     }
@@ -421,7 +693,7 @@ export default function Wedstrijden() {
 
     if (!session) {
       setMessage(
-        "Je moet ingelogd zijn om een voorspelling op te slaan."
+        t("loginRequired")
       );
       return;
     }
@@ -455,8 +727,8 @@ export default function Wedstrijden() {
 
       if (!response.ok) {
         setMessage(
-          result.error ||
-            "Je voorspelling kon niet worden opgeslagen."
+          translateServerMessage(result.error, language) ||
+            t("predictionSaveFailed")
         );
         return;
       }
@@ -473,14 +745,14 @@ export default function Wedstrijden() {
       );
 
       setMessage(
-        result.message ||
-          "Je voorspelling is opgeslagen."
+        translateServerMessage(result.message, language) ||
+          t("predictionSaved")
       );
     } catch (error) {
       console.error(error);
 
       setMessage(
-        "Er ging iets mis bij het opslaan van je voorspelling."
+        t("predictionSaveError")
       );
     } finally {
       setSavingMatchId(null);
@@ -513,6 +785,11 @@ export default function Wedstrijden() {
       setMessage("");
     }
   }
+
+  const t = (key: TranslationKey) =>
+    translations[language][key] || translations.nl[key];
+
+  const locale = localeByLanguage[language];
 
   return (
     <main
@@ -575,7 +852,7 @@ export default function Wedstrijden() {
                 "-1.5px",
             }}
           >
-            Wedstrijden
+            {t("matches")}
           </h1>
 
           <p
@@ -586,8 +863,7 @@ export default function Wedstrijden() {
               fontSize: "15px",
             }}
           >
-            Voorspel de uitslagen en
-            verdien punten.
+            {t("subtitle")}
           </p>
         </div>
       </section>
@@ -744,7 +1020,7 @@ export default function Wedstrijden() {
                     "0.9px",
                 }}
               >
-                Competitie
+                {t("competition")}
               </div>
 
               <h2
@@ -791,7 +1067,7 @@ export default function Wedstrijden() {
                       "uppercase",
                   }}
                 >
-                  Ingevuld
+                  {t("filled")}
                 </div>
 
                 <div
@@ -828,9 +1104,7 @@ export default function Wedstrijden() {
               ⚽
             </div>
 
-            <strong>
-              Wedstrijden laden...
-            </strong>
+            <strong>{t("loading")}</strong>
           </div>
         )}
 
@@ -854,8 +1128,7 @@ export default function Wedstrijden() {
                     "17px",
                 }}
               >
-                Geen komende
-                wedstrijden
+                {t("noUpcoming")}
               </strong>
 
               <p
@@ -866,11 +1139,7 @@ export default function Wedstrijden() {
                     "8px 0 0",
                 }}
               >
-                Er zijn momenteel
-                geen aankomende
-                wedstrijden
-                beschikbaar voor
-                deze competitie.
+                {t("noUpcomingDescription")}
               </p>
             </div>
           )}
@@ -913,7 +1182,7 @@ export default function Wedstrijden() {
                         0
                     )}
                   >
-                    ← Vorige
+                    ← {t("previous")}
                   </button>
                 </div>
 
@@ -937,7 +1206,7 @@ export default function Wedstrijden() {
                         "0.6px",
                     }}
                   >
-                    Speelronde
+                    {t("matchday")}
                   </div>
 
                   <strong
@@ -975,7 +1244,7 @@ export default function Wedstrijden() {
                           1
                     )}
                   >
-                    Volgende →
+                    {t("next")} →
                   </button>
                 </div>
               </div>
@@ -1091,13 +1360,13 @@ export default function Wedstrijden() {
                                     900,
                                 }}
                               >
-                                ✓ Voorspeld
+                                ✓ {t("predicted")}
                               </span>
                             )}
 
                             <span>
                               {date.toLocaleTimeString(
-                                "nl-NL",
+                                locale,
                                 {
                                   hour:
                                     "2-digit",
