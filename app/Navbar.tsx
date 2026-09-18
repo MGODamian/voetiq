@@ -81,12 +81,11 @@ export default function Navbar() {
               active={isActive("/ranglijst")}
             />
 
-            <a
-              href="/#hoe-werkt-het"
-              className="nav-link"
-            >
-              Hoe werkt het?
-            </a>
+            <NavLink
+              href="/hoe-werkt-het"
+              label="Hoe werkt het?"
+              active={isActive("/hoe-werkt-het")}
+            />
           </nav>
 
           <div className="desktop-account">
@@ -171,12 +170,12 @@ export default function Navbar() {
               Ranglijst
             </Link>
 
-            <a
-              href="/#hoe-werkt-het"
+            <Link
+              href="/hoe-werkt-het"
               onClick={() => setMobileOpen(false)}
             >
               Hoe werkt het?
-            </a>
+            </Link>
 
             <div className="mobile-divider" />
 
