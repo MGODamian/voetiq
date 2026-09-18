@@ -16,18 +16,19 @@ type Competition = {
   code: string;
   name: string;
   icon: string;
+  matchdays?: number;
 };
 
 const competitions: Competition[] = [
   { code: "ALL", name: "Algemeen", icon: "🌍" },
-  { code: "DED", name: "Eredivisie", icon: "🇳🇱" },
-  { code: "PL", name: "Premier League", icon: "🏴" },
-  { code: "PD", name: "La Liga", icon: "🇪🇸" },
-  { code: "BL1", name: "Bundesliga", icon: "🇩🇪" },
-  { code: "SA", name: "Serie A", icon: "🇮🇹" },
-  { code: "FL1", name: "Ligue 1", icon: "🇫🇷" },
-  { code: "PPL", name: "Primeira Liga", icon: "🇵🇹" },
-  { code: "CL", name: "Champions League", icon: "🏆" },
+  { code: "DED", name: "Eredivisie", icon: "🇳🇱", matchdays: 34 },
+  { code: "PL", name: "Premier League", icon: "🏴", matchdays: 38 },
+  { code: "PD", name: "La Liga", icon: "🇪🇸", matchdays: 38 },
+  { code: "BL1", name: "Bundesliga", icon: "🇩🇪", matchdays: 34 },
+  { code: "SA", name: "Serie A", icon: "🇮🇹", matchdays: 38 },
+  { code: "FL1", name: "Ligue 1", icon: "🇫🇷", matchdays: 34 },
+  { code: "PPL", name: "Primeira Liga", icon: "🇵🇹", matchdays: 34 },
+  { code: "CL", name: "Champions League", icon: "🏆", matchdays: 8 },
 ];
 
 export default function Ranglijst() {
@@ -35,18 +36,21 @@ export default function Ranglijst() {
   const [selectedCompetition, setSelectedCompetition] =
     useState("ALL");
 
+  const [selectedMatchday, setSelectedMatchday] =
+    useState<number | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    loadLeaderboard(selectedCompetition);
-  }, [selectedCompetition]);
+    loadLeaderboard();
+  }, [selectedCompetition, selectedMatchday]);
 
-  async function loadLeaderboard(competitionCode: string) {
+  async function loadLeaderboard() {
     setLoading(true);
     setErrorMessage("");
 
-    if (competitionCode === "ALL") {
+    if (selectedCompetition === "ALL") {
       const { data, error } =
         await supabase.rpc("get_leaderboard");
 
@@ -75,30 +79,67 @@ export default function Ranglijst() {
       return;
     }
 
+    if (selectedMatchday !== null) {
+      const { data, error } = await supabase.rpc(
+        "get_matchday_leaderboard",
+        {
+          selected_competition: selectedCompetition,
+          selected_matchday: selectedMatchday,
+        }
+      );
+
+      if (error) {
+        console.error(
+          "Speelronderanglijst fout:",
+          error
+        );
+
+        setErrorMessage(
+          "De ranglijst van deze speelronde kon niet worden geladen."
+        );
+
+        setLoading(false);
+        return;
+      }
+
+      setPlayers(mapCompetitionPlayers(data));
+      setLoading(false);
+      return;
+    }
+
     const { data, error } = await supabase.rpc(
       "get_competition_leaderboard",
       {
-        selected_competition: competitionCode,
+        selected_competition: selectedCompetition,
       }
     );
 
     if (error) {
       console.error("Competitieranglijst fout:", error);
+
       setErrorMessage(
         "De ranglijst van deze competitie kon niet worden geladen."
       );
+
       setLoading(false);
       return;
     }
 
-    const leaderboard: Player[] = (data || []).map(
+    setPlayers(mapCompetitionPlayers(data));
+    setLoading(false);
+  }
+
+  function mapCompetitionPlayers(data: unknown) {
+    const rows = Array.isArray(data) ? data : [];
+
+    return rows.map(
       (player: {
         user_id: string;
         username: string;
         total_points: number;
         predictions_count: number;
         exact_scores: number;
-      }) => ({
+      }): Player => ({
         user_id: player.user_id,
         username: player.username,
         total_points:
@@ -109,9 +150,11 @@ export default function Ranglijst() {
           Number(player.exact_scores) || 0,
       })
     );
+  }
 
-    setPlayers(leaderboard);
-    setLoading(false);
+  function selectCompetition(code: string) {
+    setSelectedCompetition(code);
+    setSelectedMatchday(null);
   }
 
   const selected =
@@ -119,6 +162,17 @@ export default function Ranglijst() {
       (competition) =>
         competition.code === selectedCompetition
     ) || competitions[0];
+
+  const matchdayOptions =
+    selected.matchdays && selectedCompetition !== "ALL"
+      ? Array.from(
+          { length: selected.matchdays },
+          (_, index) => index + 1
+        )
+      : [];
+
+  const isCompetition =
+    selectedCompetition !== "ALL";
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-green-950 via-green-900 to-gray-950 text-white">
@@ -154,7 +208,7 @@ export default function Ranglijst() {
                 <button
                   key={competition.code}
                   onClick={() =>
-                    setSelectedCompetition(
+                    selectCompetition(
                       competition.code
                     )
                   }
@@ -175,6 +229,47 @@ export default function Ranglijst() {
           </div>
         </div>
 
+        {isCompetition && (
+          <div className="mx-auto mb-7 max-w-4xl">
+            <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-green-300">
+              Kies totaal of speelronde
+            </p>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() =>
+                  setSelectedMatchday(null)
+                }
+                className={`shrink-0 rounded-xl border px-5 py-3 text-sm font-black transition ${
+                  selectedMatchday === null
+                    ? "border-green-400 bg-green-500 text-green-950"
+                    : "border-white/10 bg-white/5 text-green-100/70 hover:bg-white/10"
+                }`}
+              >
+                🏆 Totaal
+              </button>
+
+              <div className="flex flex-1 gap-2 overflow-x-auto pb-2">
+                {matchdayOptions.map((matchday) => (
+                  <button
+                    key={matchday}
+                    onClick={() =>
+                      setSelectedMatchday(matchday)
+                    }
+                    className={`shrink-0 rounded-xl border px-4 py-3 text-sm font-bold transition ${
+                      selectedMatchday === matchday
+                        ? "border-green-400 bg-green-500 text-green-950"
+                        : "border-white/10 bg-white/5 text-green-100/70 hover:border-green-400/30 hover:bg-white/10 hover:text-white"
+                    }`}
+                  >
+                    Ronde {matchday}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="mx-auto mb-4 max-w-4xl">
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-5 py-4">
             <div>
@@ -184,13 +279,22 @@ export default function Ranglijst() {
 
               <h2 className="mt-1 text-xl font-black">
                 {selected.icon} {selected.name}
+
+                {selectedMatchday !== null && (
+                  <span className="text-green-300">
+                    {" "}
+                    · Speelronde {selectedMatchday}
+                  </span>
+                )}
               </h2>
             </div>
 
             <div className="text-sm text-green-100/60">
               {selectedCompetition === "ALL"
                 ? "Punten uit alle competities"
-                : `Alleen punten uit ${selected.name}`}
+                : selectedMatchday === null
+                ? `Alle punten uit ${selected.name}`
+                : `Alleen speelronde ${selectedMatchday}`}
             </div>
           </div>
         </div>
@@ -236,11 +340,7 @@ export default function Ranglijst() {
               </p>
 
               <button
-                onClick={() =>
-                  loadLeaderboard(
-                    selectedCompetition
-                  )
-                }
+                onClick={loadLeaderboard}
                 className="mt-4 rounded-lg bg-green-600 px-5 py-2 font-semibold text-white transition hover:bg-green-500"
               >
                 Opnieuw proberen
@@ -312,8 +412,7 @@ export default function Ranglijst() {
 
                     <div className="text-center">
                       <div className="font-black text-white">
-                        {player.predictions_count ||
-                          0}
+                        {player.predictions_count || 0}
                       </div>
 
                       <div className="mt-1 text-[10px] text-green-100/40">
@@ -340,7 +439,9 @@ export default function Ranglijst() {
           <p className="text-sm leading-6 text-green-100/60">
             {selectedCompetition === "ALL"
               ? "💡 Dit klassement telt je punten uit alle VoetIQ-competities bij elkaar op."
-              : `💡 In dit klassement tellen alleen je voorspellingen uit ${selected.name} mee.`}
+              : selectedMatchday === null
+              ? `💡 In dit klassement tellen alle voorspellingen uit ${selected.name} mee.`
+              : `💡 Dit klassement telt alleen voorspellingen uit ${selected.name}, speelronde ${selectedMatchday}.`}
           </p>
         </div>
       </section>
