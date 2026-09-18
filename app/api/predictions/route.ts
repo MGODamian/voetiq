@@ -85,6 +85,8 @@ export async function POST(request: Request) {
       );
     }
 
+    // Client om te controleren welke gebruiker
+    // bij het access token hoort.
     const authClient = createClient(
       supabaseUrl,
       supabasePublishableKey,
@@ -108,6 +110,8 @@ export async function POST(request: Request) {
       );
     }
 
+    // Wedstrijd rechtstreeks controleren
+    // bij football-data.
     const footballResponse = await fetch(
       `https://api.football-data.org/v4/matches/${matchId}`,
       {
@@ -160,6 +164,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Deadline wordt altijd op de server gecontroleerd.
     if (kickoff.getTime() <= Date.now()) {
       return NextResponse.json(
         {
@@ -183,6 +188,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Speelronde uit football-data.
+    const matchday =
+      typeof match.matchday === "number"
+        ? match.matchday
+        : null;
+
+    // Secret/server client.
+    // Deze key komt nooit in de browser terecht.
     const adminClient = createClient(
       supabaseUrl,
       supabaseSecretKey,
@@ -194,12 +207,14 @@ export async function POST(request: Request) {
       }
     );
 
-    const { data: profile, error: profileError } =
-      await adminClient
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .maybeSingle();
+    const {
+      data: profile,
+      error: profileError,
+    } = await adminClient
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .maybeSingle();
 
     if (profileError) {
       console.error(profileError);
@@ -238,6 +253,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Bestaande voorspelling wijzigen.
     if (existingPrediction) {
       const { error: updateError } =
         await adminClient
@@ -246,6 +262,7 @@ export async function POST(request: Request) {
             home_score: home,
             away_score: away,
             competition_code: competition,
+            matchday: matchday,
           })
           .eq("id", existingPrediction.id)
           .eq("user_id", user.id);
@@ -271,6 +288,7 @@ export async function POST(request: Request) {
       });
     }
 
+    // Nieuwe voorspelling opslaan.
     const { error: insertError } =
       await adminClient
         .from("predictions")
@@ -284,6 +302,7 @@ export async function POST(request: Request) {
           home_score: home,
           away_score: away,
           competition_code: competition,
+          matchday: matchday,
         });
 
     if (insertError) {
