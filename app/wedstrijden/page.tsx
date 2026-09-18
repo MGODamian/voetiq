@@ -49,6 +49,65 @@ const competitions: Competition[] = [
   { code: "CL", name: "Champions League", flag: "🏆" },
 ];
 
+const competitionThemes: Record<
+  string,
+  {
+    hero: string;
+    card: string;
+    accent: string;
+    glow: string;
+  }
+> = {
+  DED: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(38,103,255,0.55) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,181,255,0.24) 0%, transparent 28%), linear-gradient(135deg, #03132f 0%, #082d73 55%, #0757c9 100%)",
+    card: "linear-gradient(135deg, #071d45 0%, #0a4ba8 100%)",
+    accent: "#8ac5ff",
+    glow: "rgba(31,112,255,0.30)",
+  },
+  PL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(216,0,255,0.35) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,255,209,0.18) 0%, transparent 28%), linear-gradient(135deg, #170020 0%, #37003c 55%, #5b075f 100%)",
+    card: "linear-gradient(135deg, #24002b 0%, #52005c 100%)",
+    accent: "#ef8cff",
+    glow: "rgba(181,36,202,0.28)",
+  },
+  PD: {
+    hero: "radial-gradient(circle at 82% 20%, rgba(255,126,38,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,43,43,0.22) 0%, transparent 28%), linear-gradient(135deg, #1b0808 0%, #641616 55%, #a52b12 100%)",
+    card: "linear-gradient(135deg, #3b0c0c 0%, #9a2915 100%)",
+    accent: "#ffad78",
+    glow: "rgba(231,76,35,0.27)",
+  },
+  BL1: {
+    hero: "radial-gradient(circle at 80% 20%, rgba(255,70,70,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,255,255,0.09) 0%, transparent 28%), linear-gradient(135deg, #190404 0%, #650909 55%, #a20e0e 100%)",
+    card: "linear-gradient(135deg, #3d0606 0%, #9e1010 100%)",
+    accent: "#ff8b8b",
+    glow: "rgba(220,25,25,0.27)",
+  },
+  SA: {
+    hero: "radial-gradient(circle at 80% 20%, rgba(36,131,255,0.45) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(72,205,255,0.18) 0%, transparent 28%), linear-gradient(135deg, #041326 0%, #073c78 55%, #0967b5 100%)",
+    card: "linear-gradient(135deg, #062a55 0%, #0874bd 100%)",
+    accent: "#8bd1ff",
+    glow: "rgba(28,126,219,0.27)",
+  },
+  FL1: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(216,255,0,0.22) 0%, transparent 30%), radial-gradient(circle at 15% 80%, rgba(39,82,255,0.22) 0%, transparent 28%), linear-gradient(135deg, #071124 0%, #101f4b 55%, #19327b 100%)",
+    card: "linear-gradient(135deg, #0c1837 0%, #1c3474 100%)",
+    accent: "#d8ff49",
+    glow: "rgba(97,119,255,0.24)",
+  },
+  PPL: {
+    hero: "radial-gradient(circle at 82% 20%, rgba(225,32,50,0.34) 0%, transparent 31%), radial-gradient(circle at 15% 80%, rgba(31,190,102,0.25) 0%, transparent 28%), linear-gradient(135deg, #061a11 0%, #0a5130 55%, #12693f 100%)",
+    card: "linear-gradient(135deg, #082f1d 0%, #12653d 100%)",
+    accent: "#76ecad",
+    glow: "rgba(26,166,91,0.25)",
+  },
+  CL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(93,110,255,0.42) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(42,58,180,0.30) 0%, transparent 30%), linear-gradient(135deg, #030514 0%, #0b1240 55%, #171e68 100%)",
+    card: "linear-gradient(135deg, #070b2b 0%, #192365 100%)",
+    accent: "#aeb7ff",
+    glow: "rgba(76,91,220,0.28)",
+  },
+};
+
 export default function Wedstrijden() {
   const [selectedCompetition, setSelectedCompetition] =
     useState("DED");
@@ -265,6 +324,10 @@ export default function Wedstrijden() {
         selectedCompetition
     ) || competitions[1];
 
+  const activeTheme =
+    competitionThemes[selectedCompetition] ||
+    competitionThemes.DED;
+
   const savedPredictionsThisRound =
     currentMatches.filter((match) =>
       savedMatchIds.has(match.id)
@@ -463,8 +526,10 @@ export default function Wedstrijden() {
     >
       <section
         style={{
-          background:
-            "linear-gradient(135deg, #03140c 0%, #0a2b1b 100%)",
+          background: activeTheme.hero,
+          position: "relative",
+          overflow: "hidden",
+          boxShadow: `inset 0 -50px 80px ${activeTheme.glow}`,
           color: "white",
           padding:
             "48px 20px 44px",
@@ -486,10 +551,10 @@ export default function Wedstrijden() {
               borderRadius:
                 "999px",
               background:
-                "rgba(46,230,129,0.12)",
+                "rgba(255,255,255,0.10)",
               border:
-                "1px solid rgba(46,230,129,0.2)",
-              color: "#70f0aa",
+                "1px solid rgba(255,255,255,0.18)",
+              color: activeTheme.accent,
               fontSize: "11px",
               fontWeight: 900,
               letterSpacing:
@@ -517,7 +582,7 @@ export default function Wedstrijden() {
             style={{
               margin:
                 "10px 0 0",
-              color: "#a9bbb2",
+              color: "rgba(255,255,255,0.72)",
               fontSize: "15px",
             }}
           >
@@ -621,15 +686,14 @@ export default function Wedstrijden() {
 
         <div
           style={{
-            background:
-              "linear-gradient(135deg, #082b1a, #104b2d)",
+            background: activeTheme.card,
             borderRadius: "18px",
             padding:
               "22px 24px",
             color: "white",
             marginBottom: "16px",
             boxShadow:
-              "0 10px 30px rgba(0,0,0,0.1)",
+              `0 12px 34px ${activeTheme.glow}`,
             display: "flex",
             justifyContent:
               "space-between",
@@ -670,7 +734,7 @@ export default function Wedstrijden() {
               <div
                 style={{
                   color:
-                    "#70f0aa",
+                    activeTheme.accent,
                   fontSize:
                     "10px",
                   fontWeight: 900,
