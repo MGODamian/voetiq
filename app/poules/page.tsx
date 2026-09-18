@@ -14,6 +14,111 @@ type Pool = {
   created_at: string;
 };
 
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+type TranslationKey =
+  | "playTogether" | "pools" | "intro" | "createPool" | "createDescription"
+  | "poolName" | "poolNamePlaceholder" | "competition" | "creating" | "createButton"
+  | "joinPool" | "joinDescription" | "inviteCode" | "joining" | "joinButton"
+  | "myPools" | "loadingPools" | "noPools" | "viewPool" | "loadError"
+  | "nameTooShort" | "createError" | "created" | "inviteRequired" | "joinError" | "joined";
+
+const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
+  nl: {
+    playTogether:"SPEEL SAMEN", pools:"Poules", intro:"Maak een poule met vrienden en ontdek wie écht het meeste verstand van voetbal heeft.",
+    createPool:"Poule maken", createDescription:"Start je eigen competitie en nodig je vrienden uit.", poolName:"Naam van de poule",
+    poolNamePlaceholder:"Bijv. Damian & Friends", competition:"Competitie", creating:"Poule maken...", createButton:"Poule aanmaken",
+    joinPool:"Poule joinen", joinDescription:"Heb je een uitnodigingscode gekregen? Vul hem hieronder in.", inviteCode:"Uitnodigingscode",
+    joining:"Bezig met joinen...", joinButton:"Deelnemen aan poule", myPools:"Mijn poules", loadingPools:"Je poules worden geladen...",
+    noPools:"Je zit nog niet in een poule. Maak er hierboven één of join met een code.", viewPool:"Bekijk poule",
+    loadError:"Je poules konden niet worden geladen.", nameTooShort:"Geef je poule een naam van minimaal 2 tekens.",
+    createError:"De poule kon niet worden aangemaakt.", created:"Poule succesvol aangemaakt!", inviteRequired:"Vul eerst een uitnodigingscode in.",
+    joinError:"Je kon niet deelnemen aan deze poule.", joined:"Je bent toegevoegd aan de poule!"
+  },
+  en: {
+    playTogether:"PLAY TOGETHER", pools:"Pools", intro:"Create a pool with friends and find out who really knows football best.",
+    createPool:"Create a pool", createDescription:"Start your own competition and invite your friends.", poolName:"Pool name",
+    poolNamePlaceholder:"e.g. Damian & Friends", competition:"Competition", creating:"Creating pool...", createButton:"Create pool",
+    joinPool:"Join a pool", joinDescription:"Received an invitation code? Enter it below.", inviteCode:"Invitation code",
+    joining:"Joining...", joinButton:"Join pool", myPools:"My pools", loadingPools:"Loading your pools...",
+    noPools:"You haven't joined a pool yet. Create one above or join with a code.", viewPool:"View pool",
+    loadError:"Your pools could not be loaded.", nameTooShort:"Give your pool a name of at least 2 characters.",
+    createError:"The pool could not be created.", created:"Pool created successfully!", inviteRequired:"Enter an invitation code first.",
+    joinError:"You could not join this pool.", joined:"You have joined the pool!"
+  },
+  de: {
+    playTogether:"GEMEINSAM SPIELEN", pools:"Tipprunden", intro:"Erstelle eine Tipprunde mit Freunden und findet heraus, wer sich wirklich am besten mit Fußball auskennt.",
+    createPool:"Tipprunde erstellen", createDescription:"Starte deinen eigenen Wettbewerb und lade deine Freunde ein.", poolName:"Name der Tipprunde",
+    poolNamePlaceholder:"z. B. Damian & Friends", competition:"Wettbewerb", creating:"Tipprunde wird erstellt...", createButton:"Tipprunde erstellen",
+    joinPool:"Tipprunde beitreten", joinDescription:"Du hast einen Einladungscode erhalten? Gib ihn unten ein.", inviteCode:"Einladungscode",
+    joining:"Beitritt läuft...", joinButton:"Tipprunde beitreten", myPools:"Meine Tipprunden", loadingPools:"Deine Tipprunden werden geladen...",
+    noPools:"Du bist noch in keiner Tipprunde. Erstelle oben eine oder tritt mit einem Code bei.", viewPool:"Tipprunde ansehen",
+    loadError:"Deine Tipprunden konnten nicht geladen werden.", nameTooShort:"Gib deiner Tipprunde einen Namen mit mindestens 2 Zeichen.",
+    createError:"Die Tipprunde konnte nicht erstellt werden.", created:"Tipprunde erfolgreich erstellt!", inviteRequired:"Gib zuerst einen Einladungscode ein.",
+    joinError:"Du konntest dieser Tipprunde nicht beitreten.", joined:"Du bist der Tipprunde beigetreten!"
+  },
+  es: {
+    playTogether:"JUEGA CON AMIGOS", pools:"Grupos", intro:"Crea un grupo con tus amigos y descubre quién sabe realmente más de fútbol.",
+    createPool:"Crear un grupo", createDescription:"Crea tu propia competición e invita a tus amigos.", poolName:"Nombre del grupo",
+    poolNamePlaceholder:"p. ej. Damian & Friends", competition:"Competición", creating:"Creando grupo...", createButton:"Crear grupo",
+    joinPool:"Unirse a un grupo", joinDescription:"¿Has recibido un código de invitación? Introdúcelo a continuación.", inviteCode:"Código de invitación",
+    joining:"Uniéndote...", joinButton:"Unirse al grupo", myPools:"Mis grupos", loadingPools:"Cargando tus grupos...",
+    noPools:"Todavía no perteneces a ningún grupo. Crea uno arriba o únete con un código.", viewPool:"Ver grupo",
+    loadError:"No se han podido cargar tus grupos.", nameTooShort:"Pon a tu grupo un nombre de al menos 2 caracteres.",
+    createError:"No se ha podido crear el grupo.", created:"¡Grupo creado correctamente!", inviteRequired:"Introduce primero un código de invitación.",
+    joinError:"No has podido unirte a este grupo.", joined:"¡Te has unido al grupo!"
+  },
+  fr: {
+    playTogether:"JOUEZ ENSEMBLE", pools:"Ligues", intro:"Créez une ligue avec vos amis et découvrez qui s’y connaît vraiment le mieux en football.",
+    createPool:"Créer une ligue", createDescription:"Créez votre propre compétition et invitez vos amis.", poolName:"Nom de la ligue",
+    poolNamePlaceholder:"ex. Damian & Friends", competition:"Compétition", creating:"Création de la ligue...", createButton:"Créer la ligue",
+    joinPool:"Rejoindre une ligue", joinDescription:"Vous avez reçu un code d’invitation ? Saisissez-le ci-dessous.", inviteCode:"Code d’invitation",
+    joining:"Connexion en cours...", joinButton:"Rejoindre la ligue", myPools:"Mes ligues", loadingPools:"Chargement de vos ligues...",
+    noPools:"Vous n’avez encore rejoint aucune ligue. Créez-en une ci-dessus ou rejoignez-en une avec un code.", viewPool:"Voir la ligue",
+    loadError:"Vos ligues n’ont pas pu être chargées.", nameTooShort:"Donnez à votre ligue un nom d’au moins 2 caractères.",
+    createError:"La ligue n’a pas pu être créée.", created:"Ligue créée avec succès !", inviteRequired:"Saisissez d’abord un code d’invitation.",
+    joinError:"Vous n’avez pas pu rejoindre cette ligue.", joined:"Vous avez rejoint la ligue !"
+  },
+  it: {
+    playTogether:"GIOCA INSIEME", pools:"Gruppi", intro:"Crea un gruppo con i tuoi amici e scopri chi ne sa davvero di più di calcio.",
+    createPool:"Crea un gruppo", createDescription:"Crea la tua competizione e invita i tuoi amici.", poolName:"Nome del gruppo",
+    poolNamePlaceholder:"es. Damian & Friends", competition:"Competizione", creating:"Creazione gruppo...", createButton:"Crea gruppo",
+    joinPool:"Unisciti a un gruppo", joinDescription:"Hai ricevuto un codice d’invito? Inseriscilo qui sotto.", inviteCode:"Codice d’invito",
+    joining:"Accesso in corso...", joinButton:"Unisciti al gruppo", myPools:"I miei gruppi", loadingPools:"Caricamento dei tuoi gruppi...",
+    noPools:"Non fai ancora parte di un gruppo. Creane uno qui sopra oppure unisciti con un codice.", viewPool:"Visualizza gruppo",
+    loadError:"Non è stato possibile caricare i tuoi gruppi.", nameTooShort:"Dai al gruppo un nome di almeno 2 caratteri.",
+    createError:"Non è stato possibile creare il gruppo.", created:"Gruppo creato con successo!", inviteRequired:"Inserisci prima un codice d’invito.",
+    joinError:"Non è stato possibile unirti a questo gruppo.", joined:"Ti sei unito al gruppo!"
+  },
+  pt: {
+    playTogether:"JOGA EM CONJUNTO", pools:"Grupos", intro:"Cria um grupo com os teus amigos e descobre quem percebe realmente mais de futebol.",
+    createPool:"Criar um grupo", createDescription:"Cria a tua própria competição e convida os teus amigos.", poolName:"Nome do grupo",
+    poolNamePlaceholder:"ex.: Damian & Friends", competition:"Competição", creating:"A criar grupo...", createButton:"Criar grupo",
+    joinPool:"Entrar num grupo", joinDescription:"Recebeste um código de convite? Introduz-o abaixo.", inviteCode:"Código de convite",
+    joining:"A entrar...", joinButton:"Entrar no grupo", myPools:"Os meus grupos", loadingPools:"A carregar os teus grupos...",
+    noPools:"Ainda não estás em nenhum grupo. Cria um acima ou entra com um código.", viewPool:"Ver grupo",
+    loadError:"Não foi possível carregar os teus grupos.", nameTooShort:"Dá ao teu grupo um nome com pelo menos 2 caracteres.",
+    createError:"Não foi possível criar o grupo.", created:"Grupo criado com sucesso!", inviteRequired:"Introduz primeiro um código de convite.",
+    joinError:"Não foi possível entrar neste grupo.", joined:"Entraste no grupo!"
+  }
+};
+
+function isLanguageCode(value: string): value is LanguageCode {
+  return ["nl","en","de","es","fr","it","pt"].includes(value);
+}
+
+function translateServerMessage(message: unknown, language: LanguageCode): string {
+  if (typeof message !== "string" || !message.trim()) return "";
+  const known: Record<string, TranslationKey> = {
+    "De poule kon niet worden aangemaakt.":"createError",
+    "Je kon niet deelnemen aan deze poule.":"joinError",
+    "Vul eerst een uitnodigingscode in.":"inviteRequired"
+  };
+  const key=known[message];
+  return key ? translations[language][key] : message;
+}
+
 const competitions = [
   { code: "DED", name: "Eredivisie", flag: "🇳🇱" },
   { code: "PL", name: "Premier League", flag: "🏴" },
@@ -34,6 +139,7 @@ export default function PoulesPage() {
   const [inviteCode, setInviteCode] = useState("");
 
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState<LanguageCode>("nl");
   const [creating, setCreating] = useState(false);
   const [joining, setJoining] = useState(false);
 
@@ -41,7 +147,29 @@ export default function PoulesPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
+    const savedLanguage = window.localStorage.getItem("voetiq-language");
+    const initialLanguage: LanguageCode =
+      savedLanguage && isLanguageCode(savedLanguage) ? savedLanguage : "nl";
+
+    setLanguage(initialLanguage);
+    document.documentElement.lang = initialLanguage;
+
+    function handleLanguageChange(event: Event) {
+      const customEvent = event as CustomEvent<{ language?: string }>;
+      const nextLanguage = customEvent.detail?.language;
+
+      if (nextLanguage && isLanguageCode(nextLanguage)) {
+        setLanguage(nextLanguage);
+        document.documentElement.lang = nextLanguage;
+      }
+    }
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
     loadPools();
+
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+    };
   }, []);
 
   async function getCurrentUser() {
@@ -58,7 +186,7 @@ export default function PoulesPage() {
     const user = await getCurrentUser();
 
     if (!user) {
-      router.push("/inloggen");
+      router.push("/login");
       return;
     }
 
@@ -71,7 +199,7 @@ export default function PoulesPage() {
     if (membershipError) {
       console.error(membershipError);
       setErrorMessage(
-        "Je poules konden niet worden geladen."
+        t("loadError")
       );
       setLoading(false);
       return;
@@ -99,7 +227,7 @@ export default function PoulesPage() {
     if (error) {
       console.error(error);
       setErrorMessage(
-        "Je poules konden niet worden geladen."
+        t("loadError")
       );
     } else {
       setPools(data || []);
@@ -114,7 +242,7 @@ export default function PoulesPage() {
 
     if (poolName.trim().length < 2) {
       setErrorMessage(
-        "Geef je poule een naam van minimaal 2 tekens."
+        t("nameTooShort")
       );
       return;
     }
@@ -132,14 +260,14 @@ export default function PoulesPage() {
     if (error) {
       console.error(error);
       setErrorMessage(
-        error.message || "De poule kon niet worden aangemaakt."
+        translateServerMessage(error.message, language) || t("createError")
       );
       setCreating(false);
       return;
     }
 
     setPoolName("");
-    setMessage("Poule succesvol aangemaakt! 🎉");
+    setMessage(`${t("created")} 🎉`);
     setCreating(false);
 
     await loadPools();
@@ -155,7 +283,7 @@ export default function PoulesPage() {
 
     if (!inviteCode.trim()) {
       setErrorMessage(
-        "Vul eerst een uitnodigingscode in."
+        t("inviteRequired")
       );
       return;
     }
@@ -172,14 +300,14 @@ export default function PoulesPage() {
     if (error) {
       console.error(error);
       setErrorMessage(
-        error.message || "Je kon niet deelnemen aan deze poule."
+        translateServerMessage(error.message, language) || t("joinError")
       );
       setJoining(false);
       return;
     }
 
     setInviteCode("");
-    setMessage("Je bent toegevoegd aan de poule! ⚽");
+    setMessage(`${t("joined")} ⚽`);
     setJoining(false);
 
     await loadPools();
@@ -200,6 +328,9 @@ export default function PoulesPage() {
       }
     );
   }
+
+  const t = (key: TranslationKey) =>
+    translations[language][key] || translations.nl[key];
 
   return (
     <>
@@ -235,7 +366,7 @@ export default function PoulesPage() {
                 marginBottom: "12px",
               }}
             >
-              SPEEL SAMEN
+              {t("playTogether")}
             </div>
 
             <h1
@@ -245,7 +376,7 @@ export default function PoulesPage() {
                 color: "#10251a",
               }}
             >
-              VoetIQ Poules
+              VoetIQ {t("pools")}
             </h1>
 
             <p
@@ -255,8 +386,7 @@ export default function PoulesPage() {
                 marginTop: "10px",
               }}
             >
-              Maak een poule met vrienden en ontdek wie
-              écht het meeste verstand van voetbal heeft.
+              {t("intro")}
             </p>
           </div>
 
@@ -323,7 +453,7 @@ export default function PoulesPage() {
                   color: "#10251a",
                 }}
               >
-                Poule maken
+                {t("createPool")}
               </h2>
 
               <p
@@ -332,8 +462,7 @@ export default function PoulesPage() {
                   marginBottom: "22px",
                 }}
               >
-                Start je eigen competitie en nodig je
-                vrienden uit.
+                {t("createDescription")}
               </p>
 
               <label
@@ -343,7 +472,7 @@ export default function PoulesPage() {
                   marginBottom: "7px",
                 }}
               >
-                Naam van de poule
+                {t("poolName")}
               </label>
 
               <input
@@ -351,7 +480,7 @@ export default function PoulesPage() {
                 onChange={(event) =>
                   setPoolName(event.target.value)
                 }
-                placeholder="Bijv. Damian & Friends"
+                placeholder={t("poolNamePlaceholder")}
                 maxLength={50}
                 style={{
                   width: "100%",
@@ -371,7 +500,7 @@ export default function PoulesPage() {
                   marginBottom: "7px",
                 }}
               >
-                Competitie
+                {t("competition")}
               </label>
 
               <select
@@ -415,7 +544,7 @@ export default function PoulesPage() {
                 }}
               >
                 {creating
-                  ? "Poule maken..."
+                  ? "{t("createPool")}..."
                   : "Poule aanmaken →"}
               </button>
             </section>
@@ -444,7 +573,7 @@ export default function PoulesPage() {
                   margin: "0 0 8px",
                 }}
               >
-                Poule joinen
+                {t("joinPool")}
               </h2>
 
               <p
@@ -453,8 +582,7 @@ export default function PoulesPage() {
                   marginBottom: "22px",
                 }}
               >
-                Heb je een uitnodigingscode gekregen?
-                Vul hem hieronder in.
+                {t("joinDescription")}
               </p>
 
               <label
@@ -464,7 +592,7 @@ export default function PoulesPage() {
                   marginBottom: "7px",
                 }}
               >
-                Uitnodigingscode
+                {t("inviteCode")}
               </label>
 
               <input
@@ -505,9 +633,7 @@ export default function PoulesPage() {
                   cursor: "pointer",
                 }}
               >
-                {joining
-                  ? "Bezig met joinen..."
-                  : "Deelnemen aan poule →"}
+                {joining ? t("joining") : `${t("joinButton")} →`}
               </button>
             </section>
           </div>
@@ -520,11 +646,11 @@ export default function PoulesPage() {
                 fontSize: "27px",
               }}
             >
-              Mijn poules
+              {t("myPools")}
             </h2>
 
             {loading ? (
-              <p>Je poules worden geladen...</p>
+              <p>{t("loadingPools")}</p>
             ) : pools.length === 0 ? (
               <div
                 style={{
@@ -535,8 +661,7 @@ export default function PoulesPage() {
                   color: "#68756d",
                 }}
               >
-                Je zit nog niet in een poule. Maak er
-                hierboven één of join met een code.
+                {t("noPools")}
               </div>
             ) : (
               <div
@@ -603,7 +728,7 @@ export default function PoulesPage() {
                           fontWeight: 800,
                         }}
                       >
-                        Bekijk poule →
+                        {t("viewPool")} →
                       </div>
                     </button>
                   );
