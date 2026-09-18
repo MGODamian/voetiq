@@ -63,6 +63,10 @@ export default function Wedstrijden() {
     Set<number>
   >(new Set());
 
+  const [savingMatchId, setSavingMatchId] = useState<
+    number | null
+  >(null);
+
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -70,7 +74,9 @@ export default function Wedstrijden() {
     useState<number | null>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(
+      window.location.search
+    );
 
     const competitionFromUrl =
       params.get("competition")?.toUpperCase() || "DED";
@@ -89,7 +95,9 @@ export default function Wedstrijden() {
     loadCompetition(selectedCompetition);
   }, [selectedCompetition]);
 
-  async function loadCompetition(competitionCode: string) {
+  async function loadCompetition(
+    competitionCode: string
+  ) {
     setLoading(true);
     setMessage("");
     setMatches([]);
@@ -106,12 +114,16 @@ export default function Wedstrijden() {
       );
 
       if (!response.ok) {
-        throw new Error("Kon wedstrijden niet ophalen");
+        throw new Error(
+          "Kon wedstrijden niet ophalen"
+        );
       }
 
       const data = await response.json();
 
-      const upcomingMatches: Match[] = (data.matches || [])
+      const upcomingMatches: Match[] = (
+        data.matches || []
+      )
         .filter(
           (match: Match) =>
             match.status === "SCHEDULED" ||
@@ -135,10 +147,14 @@ export default function Wedstrijden() {
         );
 
       if (matchdays.length > 0) {
-        setSelectedMatchday(Math.min(...matchdays));
+        setSelectedMatchday(
+          Math.min(...matchdays)
+        );
       }
 
-      await loadSavedPredictions(upcomingMatches);
+      await loadSavedPredictions(
+        upcomingMatches
+      );
     } catch (error) {
       console.error(error);
 
@@ -167,7 +183,9 @@ export default function Wedstrijden() {
 
     const { data, error } = await supabase
       .from("predictions")
-      .select("match_id, home_score, away_score")
+      .select(
+        "match_id, home_score, away_score"
+      )
       .eq("user_id", user.id)
       .in("match_id", matchIds);
 
@@ -179,17 +197,27 @@ export default function Wedstrijden() {
       return;
     }
 
-    const predictionMap: Record<number, Prediction> = {};
+    const predictionMap: Record<
+      number,
+      Prediction
+    > = {};
+
     const storedIds = new Set<number>();
 
     ((data || []) as StoredPrediction[]).forEach(
       (prediction) => {
         predictionMap[prediction.match_id] = {
-          home: String(prediction.home_score),
-          away: String(prediction.away_score),
+          home: String(
+            prediction.home_score
+          ),
+          away: String(
+            prediction.away_score
+          ),
         };
 
-        storedIds.add(prediction.match_id);
+        storedIds.add(
+          prediction.match_id
+        );
       }
     );
 
@@ -201,12 +229,18 @@ export default function Wedstrijden() {
     return Array.from(
       new Set(
         matches
-          .map((match: Match) => match.matchday)
+          .map(
+            (match: Match) =>
+              match.matchday
+          )
           .filter(
             (
-              matchday: number | undefined
+              matchday:
+                | number
+                | undefined
             ): matchday is number =>
-              typeof matchday === "number"
+              typeof matchday ===
+              "number"
           )
       )
     ).sort((a, b) => a - b);
@@ -214,17 +248,21 @@ export default function Wedstrijden() {
 
   const currentMatchdayIndex =
     selectedMatchday !== null
-      ? availableMatchdays.indexOf(selectedMatchday)
+      ? availableMatchdays.indexOf(
+          selectedMatchday
+        )
       : -1;
 
   const currentMatches = matches.filter(
-    (match) => match.matchday === selectedMatchday
+    (match) =>
+      match.matchday === selectedMatchday
   );
 
   const selectedCompetitionData =
     competitions.find(
       (competition) =>
-        competition.code === selectedCompetition
+        competition.code ===
+        selectedCompetition
     ) || competitions[1];
 
   const savedPredictionsThisRound =
@@ -232,11 +270,19 @@ export default function Wedstrijden() {
       savedMatchIds.has(match.id)
     ).length;
 
-  function changeCompetition(code: string) {
+  function changeCompetition(
+    code: string
+  ) {
     setSelectedCompetition(code);
 
-    const url = new URL(window.location.href);
-    url.searchParams.set("competition", code);
+    const url = new URL(
+      window.location.href
+    );
+
+    url.searchParams.set(
+      "competition",
+      code
+    );
 
     window.history.replaceState(
       {},
@@ -253,47 +299,43 @@ export default function Wedstrijden() {
     setPredictions((current) => ({
       ...current,
       [matchId]: {
-        home: current[matchId]?.home || "",
-        away: current[matchId]?.away || "",
+        home:
+          current[matchId]?.home || "",
+        away:
+          current[matchId]?.away || "",
         [type]: value,
       },
     }));
   }
 
-  async function savePrediction(match: Match) {
-    const kickoff = new Date(match.utcDate);
-
-    if (kickoff.getTime() <= Date.now()) {
-      setMessage(
-        "Deze wedstrijd is al begonnen. Je voorspelling kan niet meer worden gewijzigd."
-      );
+  async function savePrediction(
+    match: Match
+  ) {
+    if (savingMatchId !== null) {
       return;
     }
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      setMessage(
-        "Je moet ingelogd zijn om een voorspelling op te slaan."
-      );
-      return;
-    }
-
-    const prediction = predictions[match.id];
+    const prediction =
+      predictions[match.id];
 
     if (
       !prediction ||
       prediction.home === "" ||
       prediction.away === ""
     ) {
-      setMessage("Vul eerst een volledige uitslag in.");
+      setMessage(
+        "Vul eerst een volledige uitslag in."
+      );
       return;
     }
 
-    const home = Number(prediction.home);
-    const away = Number(prediction.away);
+    const home = Number(
+      prediction.home
+    );
+
+    const away = Number(
+      prediction.away
+    );
 
     if (
       !Number.isInteger(home) ||
@@ -309,97 +351,87 @@ export default function Wedstrijden() {
       return;
     }
 
-    const matchName = `${match.homeTeam.name} - ${match.awayTeam.name}`;
+    const {
+      data: { session },
+    } =
+      await supabase.auth.getSession();
 
-    if (savedMatchIds.has(match.id)) {
-      const { error } = await supabase
-        .from("predictions")
-        .update({
-          home_score: home,
-          away_score: away,
-        })
-        .eq("user_id", user.id)
-        .eq("match_id", match.id);
+    if (!session) {
+      setMessage(
+        "Je moet ingelogd zijn om een voorspelling op te slaan."
+      );
+      return;
+    }
 
-      if (error) {
-        console.error(error);
+    setSavingMatchId(match.id);
+    setMessage("");
 
+    try {
+      const response = await fetch(
+        "/api/predictions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            accessToken:
+              session.access_token,
+            matchId: match.id,
+            competition:
+              selectedCompetition,
+            homeScore: home,
+            awayScore: away,
+          }),
+        }
+      );
+
+      const result =
+        await response.json();
+
+      if (!response.ok) {
         setMessage(
-          "Er ging iets mis met het wijzigen van je voorspelling."
+          result.error ||
+            "Je voorspelling kon niet worden opgeslagen."
         );
-
         return;
       }
 
-      setMessage(
-        `Voorspelling gewijzigd: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`
+      setSavedMatchIds(
+        (current) => {
+          const next =
+            new Set(current);
+
+          next.add(match.id);
+
+          return next;
+        }
       );
 
-      return;
-    }
-
-    const { data: profile, error: profileError } =
-      await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .maybeSingle();
-
-    if (profileError) {
-      console.error(profileError);
-
       setMessage(
-        "Je profiel kon niet worden geladen."
+        result.message ||
+          "Je voorspelling is opgeslagen."
       );
-
-      return;
-    }
-
-    const { error } = await supabase
-      .from("predictions")
-      .insert({
-        user_id: user.id,
-        user_email: user.email || "",
-        player_name: profile?.username || "Speler",
-        match_id: match.id,
-        match_name: matchName,
-        home_score: home,
-        away_score: away,
-      });
-
-    if (error) {
+    } catch (error) {
       console.error(error);
 
-      if (error.code === "23505") {
-        await loadSavedPredictions(matches);
-
-        setMessage(
-          "Deze voorspelling bestond al en is opnieuw geladen."
-        );
-      } else {
-        setMessage(
-          "Er ging iets mis met het opslaan van je voorspelling."
-        );
-      }
-
-      return;
+      setMessage(
+        "Er ging iets mis bij het opslaan van je voorspelling."
+      );
+    } finally {
+      setSavingMatchId(null);
     }
-
-    setSavedMatchIds((current) => {
-      const next = new Set(current);
-      next.add(match.id);
-      return next;
-    });
-
-    setMessage(
-      `Voorspelling opgeslagen: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`
-    );
   }
 
   function changeMatchday(
     direction: "previous" | "next"
   ) {
-    if (currentMatchdayIndex === -1) return;
+    if (
+      currentMatchdayIndex === -1
+    ) {
+      return;
+    }
 
     const newIndex =
       direction === "previous"
@@ -408,7 +440,8 @@ export default function Wedstrijden() {
 
     if (
       newIndex >= 0 &&
-      newIndex < availableMatchdays.length
+      newIndex <
+        availableMatchdays.length
     ) {
       setSelectedMatchday(
         availableMatchdays[newIndex]
@@ -424,7 +457,8 @@ export default function Wedstrijden() {
         minHeight: "100vh",
         background: "#f3f6f4",
         color: "#111",
-        fontFamily: "Arial, Helvetica, sans-serif",
+        fontFamily:
+          "Arial, Helvetica, sans-serif",
       }}
     >
       <section
@@ -432,7 +466,8 @@ export default function Wedstrijden() {
           background:
             "linear-gradient(135deg, #03140c 0%, #0a2b1b 100%)",
           color: "white",
-          padding: "48px 20px 44px",
+          padding:
+            "48px 20px 44px",
         }}
       >
         <div
@@ -443,19 +478,24 @@ export default function Wedstrijden() {
         >
           <div
             style={{
-              display: "inline-flex",
+              display:
+                "inline-flex",
               alignItems: "center",
               gap: "7px",
               padding: "7px 12px",
-              borderRadius: "999px",
-              background: "rgba(46,230,129,0.12)",
+              borderRadius:
+                "999px",
+              background:
+                "rgba(46,230,129,0.12)",
               border:
                 "1px solid rgba(46,230,129,0.2)",
               color: "#70f0aa",
               fontSize: "11px",
               fontWeight: 900,
-              letterSpacing: "0.4px",
-              marginBottom: "15px",
+              letterSpacing:
+                "0.4px",
+              marginBottom:
+                "15px",
             }}
           >
             ⚽ VOETIQ MATCH CENTER
@@ -466,7 +506,8 @@ export default function Wedstrijden() {
               margin: 0,
               fontSize: "42px",
               fontWeight: 900,
-              letterSpacing: "-1.5px",
+              letterSpacing:
+                "-1.5px",
             }}
           >
             Wedstrijden
@@ -474,12 +515,14 @@ export default function Wedstrijden() {
 
           <p
             style={{
-              margin: "10px 0 0",
+              margin:
+                "10px 0 0",
               color: "#a9bbb2",
               fontSize: "15px",
             }}
           >
-            Voorspel de uitslagen en verdien punten.
+            Voorspel de uitslagen en
+            verdien punten.
           </p>
         </div>
       </section>
@@ -488,7 +531,8 @@ export default function Wedstrijden() {
         style={{
           maxWidth: "1050px",
           margin: "0 auto",
-          padding: "28px 20px 70px",
+          padding:
+            "28px 20px 70px",
         }}
       >
         <div
@@ -499,52 +543,79 @@ export default function Wedstrijden() {
             boxShadow:
               "0 8px 28px rgba(0,0,0,0.06)",
             overflowX: "auto",
-            marginBottom: "18px",
+            marginBottom:
+              "18px",
           }}
         >
           <div
             style={{
               display: "flex",
               gap: "6px",
-              minWidth: "max-content",
+              minWidth:
+                "max-content",
             }}
           >
-            {competitions.map((competition) => {
-              const active =
-                selectedCompetition === competition.code;
+            {competitions.map(
+              (competition) => {
+                const active =
+                  selectedCompetition ===
+                  competition.code;
 
-              return (
-                <button
-                  key={competition.code}
-                  onClick={() =>
-                    changeCompetition(competition.code)
-                  }
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "7px",
-                    padding: "10px 13px",
-                    borderRadius: "10px",
-                    border: active
-                      ? "1px solid rgba(11,143,77,0.18)"
-                      : "1px solid transparent",
-                    background: active
-                      ? "#e9faf1"
-                      : "transparent",
-                    color: active
-                      ? "#08763e"
-                      : "#52605a",
-                    fontSize: "13px",
-                    fontWeight: active ? 800 : 600,
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <span>{competition.flag}</span>
-                  {competition.name}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={
+                      competition.code
+                    }
+                    onClick={() =>
+                      changeCompetition(
+                        competition.code
+                      )
+                    }
+                    style={{
+                      display:
+                        "flex",
+                      alignItems:
+                        "center",
+                      gap: "7px",
+                      padding:
+                        "10px 13px",
+                      borderRadius:
+                        "10px",
+                      border: active
+                        ? "1px solid rgba(11,143,77,0.18)"
+                        : "1px solid transparent",
+                      background:
+                        active
+                          ? "#e9faf1"
+                          : "transparent",
+                      color: active
+                        ? "#08763e"
+                        : "#52605a",
+                      fontSize:
+                        "13px",
+                      fontWeight:
+                        active
+                          ? 800
+                          : 600,
+                      cursor:
+                        "pointer",
+                      whiteSpace:
+                        "nowrap",
+                    }}
+                  >
+                    <span>
+                      {
+                        competition.flag
+                      }
+                    </span>
+
+                    {
+                      competition.name
+                    }
+                  </button>
+                );
+              }
+            )}
           </div>
         </div>
 
@@ -553,13 +624,15 @@ export default function Wedstrijden() {
             background:
               "linear-gradient(135deg, #082b1a, #104b2d)",
             borderRadius: "18px",
-            padding: "22px 24px",
+            padding:
+              "22px 24px",
             color: "white",
             marginBottom: "16px",
             boxShadow:
               "0 10px 30px rgba(0,0,0,0.1)",
             display: "flex",
-            justifyContent: "space-between",
+            justifyContent:
+              "space-between",
             alignItems: "center",
             gap: "20px",
             flexWrap: "wrap",
@@ -576,25 +649,35 @@ export default function Wedstrijden() {
               style={{
                 width: "48px",
                 height: "48px",
-                borderRadius: "13px",
-                background: "rgba(255,255,255,0.08)",
+                borderRadius:
+                  "13px",
+                background:
+                  "rgba(255,255,255,0.08)",
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "center",
                 fontSize: "25px",
               }}
             >
-              {selectedCompetitionData.flag}
+              {
+                selectedCompetitionData.flag
+              }
             </div>
 
             <div>
               <div
                 style={{
-                  color: "#70f0aa",
-                  fontSize: "10px",
+                  color:
+                    "#70f0aa",
+                  fontSize:
+                    "10px",
                   fontWeight: 900,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.9px",
+                  textTransform:
+                    "uppercase",
+                  letterSpacing:
+                    "0.9px",
                 }}
               >
                 Competitie
@@ -602,49 +685,71 @@ export default function Wedstrijden() {
 
               <h2
                 style={{
-                  margin: "3px 0 0",
-                  fontSize: "25px",
+                  margin:
+                    "3px 0 0",
+                  fontSize:
+                    "25px",
                 }}
               >
-                {selectedCompetitionData.name}
+                {
+                  selectedCompetitionData.name
+                }
               </h2>
             </div>
           </div>
 
-          {!loading && currentMatches.length > 0 && (
-            <div
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                border:
-                  "1px solid rgba(255,255,255,0.08)",
-                borderRadius: "12px",
-                padding: "10px 15px",
-                textAlign: "center",
-              }}
-            >
+          {!loading &&
+            currentMatches.length >
+              0 && (
               <div
                 style={{
-                  color: "#70f0aa",
-                  fontSize: "10px",
-                  fontWeight: 900,
-                  textTransform: "uppercase",
+                  background:
+                    "rgba(255,255,255,0.08)",
+                  border:
+                    "1px solid rgba(255,255,255,0.08)",
+                  borderRadius:
+                    "12px",
+                  padding:
+                    "10px 15px",
+                  textAlign:
+                    "center",
                 }}
               >
-                Ingevuld
-              </div>
+                <div
+                  style={{
+                    color:
+                      "#70f0aa",
+                    fontSize:
+                      "10px",
+                    fontWeight:
+                      900,
+                    textTransform:
+                      "uppercase",
+                  }}
+                >
+                  Ingevuld
+                </div>
 
-              <div
-                style={{
-                  marginTop: "3px",
-                  fontSize: "17px",
-                  fontWeight: 900,
-                }}
-              >
-                {savedPredictionsThisRound} /{" "}
-                {currentMatches.length}
+                <div
+                  style={{
+                    marginTop:
+                      "3px",
+                    fontSize:
+                      "17px",
+                    fontWeight:
+                      900,
+                  }}
+                >
+                  {
+                    savedPredictionsThisRound
+                  }{" "}
+                  /{" "}
+                  {
+                    currentMatches.length
+                  }
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
 
         {loading && (
@@ -652,56 +757,78 @@ export default function Wedstrijden() {
             <div
               style={{
                 fontSize: "32px",
-                marginBottom: "10px",
+                marginBottom:
+                  "10px",
               }}
             >
               ⚽
             </div>
 
-            <strong>Wedstrijden laden...</strong>
+            <strong>
+              Wedstrijden laden...
+            </strong>
           </div>
         )}
 
         {!loading &&
-          availableMatchdays.length === 0 && (
+          availableMatchdays.length ===
+            0 && (
             <div style={emptyCardStyle}>
               <div
                 style={{
                   fontSize: "34px",
-                  marginBottom: "10px",
+                  marginBottom:
+                    "10px",
                 }}
               >
                 📅
               </div>
 
-              <strong style={{ fontSize: "17px" }}>
-                Geen komende wedstrijden
+              <strong
+                style={{
+                  fontSize:
+                    "17px",
+                }}
+              >
+                Geen komende
+                wedstrijden
               </strong>
 
               <p
                 style={{
-                  color: "#78827d",
-                  margin: "8px 0 0",
+                  color:
+                    "#78827d",
+                  margin:
+                    "8px 0 0",
                 }}
               >
-                Er zijn momenteel geen aankomende wedstrijden
-                beschikbaar voor deze competitie.
+                Er zijn momenteel
+                geen aankomende
+                wedstrijden
+                beschikbaar voor
+                deze competitie.
               </p>
             </div>
           )}
 
         {!loading &&
-          availableMatchdays.length > 0 && (
+          availableMatchdays.length >
+            0 && (
             <>
               <div
                 style={{
-                  background: "white",
-                  borderRadius: "15px",
+                  background:
+                    "white",
+                  borderRadius:
+                    "15px",
                   padding: "10px",
                   display: "grid",
-                  gridTemplateColumns: "1fr auto 1fr",
-                  alignItems: "center",
-                  marginBottom: "15px",
+                  gridTemplateColumns:
+                    "1fr auto 1fr",
+                  alignItems:
+                    "center",
+                  marginBottom:
+                    "15px",
                   boxShadow:
                     "0 6px 22px rgba(0,0,0,0.055)",
                 }}
@@ -709,47 +836,79 @@ export default function Wedstrijden() {
                 <div>
                   <button
                     onClick={() =>
-                      changeMatchday("previous")
+                      changeMatchday(
+                        "previous"
+                      )
                     }
-                    disabled={currentMatchdayIndex <= 0}
+                    disabled={
+                      currentMatchdayIndex <=
+                      0
+                    }
                     style={navigationButtonStyle(
-                      currentMatchdayIndex <= 0
+                      currentMatchdayIndex <=
+                        0
                     )}
                   >
                     ← Vorige
                   </button>
                 </div>
 
-                <div style={{ textAlign: "center" }}>
+                <div
+                  style={{
+                    textAlign:
+                      "center",
+                  }}
+                >
                   <div
                     style={{
-                      color: "#89958e",
-                      fontSize: "10px",
-                      fontWeight: 900,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.6px",
+                      color:
+                        "#89958e",
+                      fontSize:
+                        "10px",
+                      fontWeight:
+                        900,
+                      textTransform:
+                        "uppercase",
+                      letterSpacing:
+                        "0.6px",
                     }}
                   >
                     Speelronde
                   </div>
 
-                  <strong style={{ fontSize: "20px" }}>
-                    {selectedMatchday}
+                  <strong
+                    style={{
+                      fontSize:
+                        "20px",
+                    }}
+                  >
+                    {
+                      selectedMatchday
+                    }
                   </strong>
                 </div>
 
-                <div style={{ textAlign: "right" }}>
+                <div
+                  style={{
+                    textAlign:
+                      "right",
+                  }}
+                >
                   <button
                     onClick={() =>
-                      changeMatchday("next")
+                      changeMatchday(
+                        "next"
+                      )
                     }
                     disabled={
                       currentMatchdayIndex ===
-                      availableMatchdays.length - 1
+                      availableMatchdays.length -
+                        1
                     }
                     style={navigationButtonStyle(
                       currentMatchdayIndex ===
-                        availableMatchdays.length - 1
+                        availableMatchdays.length -
+                          1
                     )}
                   >
                     Volgende →
@@ -760,195 +919,317 @@ export default function Wedstrijden() {
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
+                  flexDirection:
+                    "column",
                   gap: "12px",
                 }}
               >
-                {currentMatches.map((match) => {
-                  const prediction =
-                    predictions[match.id] || {
-                      home: "",
-                      away: "",
-                    };
+                {currentMatches.map(
+                  (match) => {
+                    const prediction =
+                      predictions[
+                        match.id
+                      ] || {
+                        home: "",
+                        away: "",
+                      };
 
-                  const date = new Date(match.utcDate);
-                  const isSaved =
-                    savedMatchIds.has(match.id);
+                    const date =
+                      new Date(
+                        match.utcDate
+                      );
 
-                  return (
-                    <div
-                      key={match.id}
-                      style={{
-                        background: "white",
-                        borderRadius: "17px",
-                        border: isSaved
-                          ? "1px solid rgba(11,143,77,0.25)"
-                          : "1px solid #edf1ee",
-                        overflow: "hidden",
-                        boxShadow:
-                          "0 7px 24px rgba(0,0,0,0.055)",
-                      }}
-                    >
+                    const isSaved =
+                      savedMatchIds.has(
+                        match.id
+                      );
+
+                    const isSaving =
+                      savingMatchId ===
+                      match.id;
+
+                    const locked =
+                      date.getTime() <=
+                      Date.now();
+
+                    return (
                       <div
+                        key={match.id}
                         style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          padding: "11px 18px",
-                          background: isSaved
-                            ? "#f3fcf7"
-                            : "#fafcfb",
-                          borderBottom:
-                            "1px solid #edf1ee",
-                          color: "#7d8982",
-                          fontSize: "12px",
-                          fontWeight: 700,
+                          background:
+                            "white",
+                          borderRadius:
+                            "17px",
+                          border:
+                            isSaved
+                              ? "1px solid rgba(11,143,77,0.25)"
+                              : "1px solid #edf1ee",
+                          overflow:
+                            "hidden",
+                          boxShadow:
+                            "0 7px 24px rgba(0,0,0,0.055)",
                         }}
                       >
-                        <span>
-                          {date.toLocaleDateString(
-                            "nl-NL",
-                            {
-                              weekday: "short",
-                              day: "numeric",
-                              month: "short",
-                            }
-                          )}
-                        </span>
-
                         <div
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "12px",
+                            display:
+                              "flex",
+                            justifyContent:
+                              "space-between",
+                            alignItems:
+                              "center",
+                            padding:
+                              "11px 18px",
+                            background:
+                              isSaved
+                                ? "#f3fcf7"
+                                : "#fafcfb",
+                            borderBottom:
+                              "1px solid #edf1ee",
+                            color:
+                              "#7d8982",
+                            fontSize:
+                              "12px",
+                            fontWeight:
+                              700,
                           }}
                         >
-                          {isSaved && (
-                            <span
-                              style={{
-                                color: "#0b8f4d",
-                                fontSize: "11px",
-                                fontWeight: 900,
-                              }}
-                            >
-                              ✓ Voorspeld
-                            </span>
-                          )}
-
                           <span>
-                            {date.toLocaleTimeString(
+                            {date.toLocaleDateString(
                               "nl-NL",
                               {
-                                hour: "2-digit",
-                                minute: "2-digit",
+                                weekday:
+                                  "short",
+                                day: "numeric",
+                                month:
+                                  "short",
                               }
                             )}
                           </span>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          padding: "23px 22px 21px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns:
-                              "minmax(0,1fr) 150px minmax(0,1fr)",
-                            alignItems: "center",
-                            gap: "18px",
-                          }}
-                        >
-                          <Team
-                            name={match.homeTeam.name}
-                            crest={match.homeTeam.crest}
-                            side="home"
-                          />
 
                           <div
                             style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              gap: "8px",
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              gap: "12px",
                             }}
                           >
-                            <input
-                              type="number"
-                              min="0"
-                              max="20"
-                              value={prediction.home}
-                              onChange={(e) =>
-                                updatePrediction(
-                                  match.id,
-                                  "home",
-                                  e.target.value
-                                )
+                            {isSaved && (
+                              <span
+                                style={{
+                                  color:
+                                    "#0b8f4d",
+                                  fontSize:
+                                    "11px",
+                                  fontWeight:
+                                    900,
+                                }}
+                              >
+                                ✓ Voorspeld
+                              </span>
+                            )}
+
+                            <span>
+                              {date.toLocaleTimeString(
+                                "nl-NL",
+                                {
+                                  hour:
+                                    "2-digit",
+                                  minute:
+                                    "2-digit",
+                                }
+                              )}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            padding:
+                              "23px 22px 21px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                "grid",
+                              gridTemplateColumns:
+                                "minmax(0,1fr) 150px minmax(0,1fr)",
+                              alignItems:
+                                "center",
+                              gap: "18px",
+                            }}
+                          >
+                            <Team
+                              name={
+                                match
+                                  .homeTeam
+                                  .name
                               }
-                              style={scoreInputStyle}
+                              crest={
+                                match
+                                  .homeTeam
+                                  .crest
+                              }
+                              side="home"
                             />
 
-                            <span
+                            <div
                               style={{
-                                fontWeight: 900,
-                                color: "#9ca7a1",
+                                display:
+                                  "flex",
+                                justifyContent:
+                                  "center",
+                                alignItems:
+                                  "center",
+                                gap: "8px",
                               }}
                             >
-                              -
-                            </span>
+                              <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                disabled={
+                                  locked
+                                }
+                                value={
+                                  prediction.home
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  updatePrediction(
+                                    match.id,
+                                    "home",
+                                    e
+                                      .target
+                                      .value
+                                  )
+                                }
+                                style={{
+                                  ...scoreInputStyle,
+                                  opacity:
+                                    locked
+                                      ? 0.6
+                                      : 1,
+                                }}
+                              />
 
-                            <input
-                              type="number"
-                              min="0"
-                              max="20"
-                              value={prediction.away}
-                              onChange={(e) =>
-                                updatePrediction(
-                                  match.id,
-                                  "away",
-                                  e.target.value
-                                )
+                              <span
+                                style={{
+                                  fontWeight:
+                                    900,
+                                  color:
+                                    "#9ca7a1",
+                                }}
+                              >
+                                -
+                              </span>
+
+                              <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                disabled={
+                                  locked
+                                }
+                                value={
+                                  prediction.away
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  updatePrediction(
+                                    match.id,
+                                    "away",
+                                    e
+                                      .target
+                                      .value
+                                  )
+                                }
+                                style={{
+                                  ...scoreInputStyle,
+                                  opacity:
+                                    locked
+                                      ? 0.6
+                                      : 1,
+                                }}
+                              />
+                            </div>
+
+                            <Team
+                              name={
+                                match
+                                  .awayTeam
+                                  .name
                               }
-                              style={scoreInputStyle}
+                              crest={
+                                match
+                                  .awayTeam
+                                  .crest
+                              }
+                              side="away"
                             />
                           </div>
 
-                          <Team
-                            name={match.awayTeam.name}
-                            crest={match.awayTeam.crest}
-                            side="away"
-                          />
+                          <button
+                            onClick={() =>
+                              savePrediction(
+                                match
+                              )
+                            }
+                            disabled={
+                              isSaving ||
+                              locked
+                            }
+                            style={{
+                              marginTop:
+                                "21px",
+                              width: "100%",
+                              padding:
+                                "12px",
+                              background:
+                                locked
+                                  ? "#aeb8b2"
+                                  : isSaved
+                                    ? "#075f35"
+                                    : "#0b8f4d",
+                              color:
+                                "white",
+                              border:
+                                "none",
+                              borderRadius:
+                                "10px",
+                              fontSize:
+                                "14px",
+                              fontWeight:
+                                800,
+                              cursor:
+                                locked ||
+                                isSaving
+                                  ? "default"
+                                  : "pointer",
+                              opacity:
+                                isSaving
+                                  ? 0.75
+                                  : 1,
+                            }}
+                          >
+                            {locked
+                              ? "Voorspelling gesloten"
+                              : isSaving
+                                ? "Opslaan..."
+                                : isSaved
+                                  ? "Voorspelling wijzigen"
+                                  : "Voorspelling opslaan"}
+                          </button>
                         </div>
-
-                        <button
-                          onClick={() =>
-                            savePrediction(match)
-                          }
-                          style={{
-                            marginTop: "21px",
-                            width: "100%",
-                            padding: "12px",
-                            background: isSaved
-                              ? "#075f35"
-                              : "#0b8f4d",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "10px",
-                            fontSize: "14px",
-                            fontWeight: 800,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {isSaved
-                            ? "Voorspelling wijzigen"
-                            : "Voorspelling opslaan"}
-                        </button>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             </>
           )}
@@ -957,11 +1238,14 @@ export default function Wedstrijden() {
           <div
             style={{
               marginTop: "18px",
-              padding: "14px 17px",
-              background: "#e9faf1",
+              padding:
+                "14px 17px",
+              background:
+                "#e9faf1",
               border:
                 "1px solid rgba(11,143,77,0.15)",
-              borderRadius: "12px",
+              borderRadius:
+                "12px",
               color: "#08763e",
               fontWeight: 700,
               fontSize: "14px",
@@ -979,7 +1263,8 @@ export default function Wedstrijden() {
             textAlign: "center",
           }}
         >
-          Data provided by football-data.org
+          Data provided by
+          football-data.org
         </p>
       </section>
     </main>
@@ -1001,16 +1286,21 @@ function Team({
     <div
       style={{
         display: "flex",
-        flexDirection: home ? "row" : "row-reverse",
+        flexDirection: home
+          ? "row"
+          : "row-reverse",
         alignItems: "center",
-        justifyContent: "flex-end",
+        justifyContent:
+          "flex-end",
         gap: "13px",
         minWidth: 0,
       }}
     >
       <div
         style={{
-          textAlign: home ? "right" : "left",
+          textAlign: home
+            ? "right"
+            : "left",
           fontWeight: 800,
           fontSize: "15px",
           lineHeight: 1.25,
@@ -1026,12 +1316,15 @@ function Team({
           flexShrink: 0,
           borderRadius: "12px",
           background: "#f6f8f7",
-          border: "1px solid #edf0ee",
+          border:
+            "1px solid #edf0ee",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
+          justifyContent:
+            "center",
           padding: "7px",
-          boxSizing: "border-box",
+          boxSizing:
+            "border-box",
         }}
       >
         {crest ? (
@@ -1041,11 +1334,18 @@ function Team({
             style={{
               width: "100%",
               height: "100%",
-              objectFit: "contain",
+              objectFit:
+                "contain",
             }}
           />
         ) : (
-          <span style={{ fontSize: "20px" }}>⚽</span>
+          <span
+            style={{
+              fontSize: "20px",
+            }}
+          >
+            ⚽
+          </span>
         )}
       </div>
     </div>
@@ -1055,10 +1355,13 @@ function Team({
 const scoreInputStyle = {
   width: "55px",
   height: "52px",
-  boxSizing: "border-box" as const,
-  border: "1px solid #dce3df",
+  boxSizing:
+    "border-box" as const,
+  border:
+    "1px solid #dce3df",
   borderRadius: "11px",
-  textAlign: "center" as const,
+  textAlign:
+    "center" as const,
   fontSize: "20px",
   fontWeight: 900,
   outline: "none",
@@ -1069,18 +1372,28 @@ const emptyCardStyle = {
   background: "white",
   borderRadius: "17px",
   padding: "45px 25px",
-  textAlign: "center" as const,
-  boxShadow: "0 7px 24px rgba(0,0,0,0.055)",
+  textAlign:
+    "center" as const,
+  boxShadow:
+    "0 7px 24px rgba(0,0,0,0.055)",
 };
 
-function navigationButtonStyle(disabled: boolean) {
+function navigationButtonStyle(
+  disabled: boolean
+) {
   return {
     border: "none",
-    background: disabled ? "#f1f3f2" : "#e9faf1",
-    color: disabled ? "#a1aaa5" : "#08763e",
+    background: disabled
+      ? "#f1f3f2"
+      : "#e9faf1",
+    color: disabled
+      ? "#a1aaa5"
+      : "#08763e",
     borderRadius: "9px",
     padding: "10px 14px",
     fontWeight: 800,
-    cursor: disabled ? "default" : "pointer",
+    cursor: disabled
+      ? "default"
+      : "pointer",
   };
 }
