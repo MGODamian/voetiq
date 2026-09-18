@@ -328,8 +328,8 @@ export default function Home() {
               flag={competition.flag}
               name={competition.name}
               description={tr(competition.description)}
-              predictorLabel={predictorLabel}
-              predictNowLabel={predictNowLabel}
+              predictorLabel={tr("Predictor")}
+              predictNowLabel={tr("Voorspel nu →")}
               onPlay={() =>
                 openCompetition(competition.code)
               }
