@@ -58,7 +58,7 @@ export default function PoulesPage() {
     const user = await getCurrentUser();
 
     if (!user) {
-      router.push("/login");
+      router.push("/inloggen");
       return;
     }
 
