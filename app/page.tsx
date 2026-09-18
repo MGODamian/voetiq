@@ -264,13 +264,13 @@ export default function Home() {
             }}
           >
             <HeroStat
-              value="10"
-              label="Punten voor exact"
+              value="10 → 32+"
+              label="Meer goals = meer punten"
             />
 
             <HeroStat
-              value="5"
-              label="Punten voor juiste uitslag"
+              value="-2"
+              label="Per doelpunt afwijking"
             />
 
             <HeroStat
@@ -358,7 +358,7 @@ export default function Home() {
           <SectionHeading
             eyebrow="Simpel en gratis"
             title="Hoe werkt VoetIQ?"
-            description="Je hebt geen ingewikkelde regels nodig. Kies wedstrijden, voorspel de uitslag en verdien punten."
+            description="Kies wedstrijden, voorspel de score en verdien meer punten naarmate jouw voorspelling nauwkeuriger is."
           />
 
           <div
@@ -388,7 +388,7 @@ export default function Home() {
               number="03"
               icon="⭐"
               title="Verdien punten"
-              text="Ontvang punten wanneer jouw voorspellingen goed zijn."
+              text="Hoe nauwkeuriger je voorspelling, hoe meer punten je verdient."
             />
 
             <StepCard
@@ -459,7 +459,8 @@ export default function Home() {
               }}
             >
               Hoe nauwkeuriger jouw voorspelling, hoe meer
-              punten je verdient.
+              punten je verdient. Een moeilijke hoge score die
+              je exact voorspelt kan dus veel opleveren.
             </p>
 
             <div
@@ -471,20 +472,26 @@ export default function Home() {
             >
               <PointsRow
                 icon="🎯"
-                points="10 punten"
-                text="Exacte uitslag"
+                points="10 + goals × 2"
+                text="Exact goed: meer goals betekent meer punten"
               />
 
               <PointsRow
-                icon="✅"
-                points="5 punten"
-                text="Juiste winnaar of gelijkspel"
+                icon="📉"
+                points="-2 punten"
+                text="Per doelpunt dat je van de echte uitslag af zit"
+              />
+
+              <PointsRow
+                icon="🔥"
+                points="32 punten"
+                text="Voorbeeld: 6-5 exact voorspeld"
               />
 
               <PointsRow
                 icon="❌"
                 points="0 punten"
-                text="Onjuiste voorspelling"
+                text="Verkeerde winnaar of verkeerd gelijkspel"
               />
             </div>
           </div>
@@ -574,7 +581,7 @@ export default function Home() {
               fontWeight: 950,
             }}
           >
-            Speel straks tegen je vrienden
+            Speel tegen je vrienden
           </h2>
 
           <p
@@ -586,27 +593,20 @@ export default function Home() {
               fontSize: "14px",
             }}
           >
-            We werken aan privéleagues waarin je vrienden
-            kunt uitnodigen en samen een eigen ranglijst kunt
-            bijhouden.
+            Maak een eigen poule, nodig je vrienden uit en
+            strijd samen om de hoogste plek op jullie eigen
+            ranglijst.
           </p>
 
-          <div
+          <button
+            onClick={() => router.push("/poules")}
             style={{
-              display: "inline-block",
-              marginTop: "20px",
-              padding: "7px 12px",
-              borderRadius: "999px",
-              background: "rgba(46,230,129,0.08)",
-              color: "#42e985",
-              fontSize: "11px",
-              fontWeight: 900,
-              textTransform: "uppercase",
-              letterSpacing: "0.8px",
+              ...secondaryButtonStyle,
+              marginTop: "22px",
             }}
           >
-            Binnenkort beschikbaar
-          </div>
+            👥 Bekijk poules →
+          </button>
         </div>
       </section>
 
