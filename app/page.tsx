@@ -159,11 +159,15 @@ export default function Home() {
       console.error(error);
 
       if (error.code === "23505") {
-        setMessage("Je hebt al een voorspelling voor deze wedstrijd.");
+        setMessage(
+          "Je hebt al een voorspelling voor deze wedstrijd."
+        );
         return;
       }
 
-      setMessage("Er ging iets mis bij het opslaan van je voorspelling.");
+      setMessage(
+        "Er ging iets mis bij het opslaan van je voorspelling."
+      );
       return;
     }
 
@@ -185,164 +189,247 @@ export default function Home() {
       style={{
         minHeight: "100vh",
         background:
-          "radial-gradient(circle at top, rgba(46,230,129,0.08), transparent 35%), #020e09",
+          "radial-gradient(circle at 50% 0%, rgba(46,230,129,0.10), transparent 32%), #020d08",
         color: "white",
       }}
     >
       <Navbar />
 
-      <div
+      {/* HERO */}
+      <section
         style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          padding: "45px 20px 60px",
+          position: "relative",
+          overflow: "hidden",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        <section
+        <div
           style={{
+            position: "absolute",
+            inset: 0,
+            background:
+              "radial-gradient(circle at 50% 40%, rgba(46,230,129,0.12), transparent 38%)",
+            pointerEvents: "none",
+          }}
+        />
+
+        <div
+          style={{
+            position: "relative",
+            maxWidth: "1200px",
+            margin: "0 auto",
+            padding: "75px 20px 55px",
             textAlign: "center",
-            marginBottom: "40px",
           }}
         >
           <div
             style={{
-              display: "inline-block",
-              padding: "7px 12px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "7px",
+              padding: "7px 13px",
               borderRadius: "999px",
               background: "rgba(46,230,129,0.08)",
-              border: "1px solid rgba(46,230,129,0.14)",
-              color: "#2ee681",
+              border: "1px solid rgba(46,230,129,0.15)",
+              color: "#5cf19b",
               fontSize: "12px",
-              fontWeight: 800,
-              marginBottom: "15px",
+              fontWeight: 900,
+              letterSpacing: "0.7px",
             }}
           >
-            ⚽ VOORSPEL. SCOOR. WIN.
+            ⚽ VOORSPEL. SCOOR. KLIM.
           </div>
 
           <h1
             style={{
-              margin: 0,
-              fontSize: "clamp(34px, 6vw, 60px)",
-              lineHeight: 1,
+              margin: "20px 0 0",
+              fontSize: "clamp(52px, 8vw, 86px)",
+              lineHeight: 0.95,
               fontWeight: 950,
-              letterSpacing: "-2px",
+              letterSpacing: "-4px",
             }}
           >
-            Voet<span style={{ color: "#2ee681" }}>IQ</span>
+            Voet<span style={{ color: "#42e985" }}>IQ</span>
           </h1>
 
           <p
             style={{
-              maxWidth: "650px",
-              margin: "18px auto 0",
-              color: "#9fb6a8",
-              fontSize: "16px",
-              lineHeight: 1.6,
+              maxWidth: "660px",
+              margin: "22px auto 0",
+              color: "#a5baae",
+              fontSize: "clamp(15px, 2vw, 18px)",
+              lineHeight: 1.65,
             }}
           >
-            Voorspel echte voetbalwedstrijden, verdien punten en klim omhoog
-            op de ranglijst.
+            Voorspel echte voetbalwedstrijden, verdien punten
+            en daag je vrienden uit.
           </p>
-        </section>
 
-        <section
-          style={{
-            maxWidth: "650px",
-            margin: "0 auto 35px",
-            padding: "18px 20px",
-            borderRadius: "16px",
-            background: "rgba(255,255,255,0.035)",
-            border: "1px solid rgba(75,255,153,0.10)",
-            textAlign: "center",
-          }}
-        >
-          {userLoading ? (
+          {!userLoading && username && (
             <div
               style={{
-                color: "#8fa79a",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "7px",
+                marginTop: "18px",
+                color: "#c6f6d9",
                 fontSize: "14px",
+                fontWeight: 700,
               }}
             >
-              Account laden...
-            </div>
-          ) : username ? (
-            <>
-              <div
-                style={{
-                  color: "#2ee681",
-                  fontSize: "13px",
-                  fontWeight: 800,
-                  marginBottom: "4px",
-                }}
-              >
-                👤 Je bent ingelogd
-              </div>
-
-              <div
-                style={{
-                  color: "white",
-                  fontSize: "18px",
-                  fontWeight: 900,
-                }}
-              >
+              👤 Welkom terug,{" "}
+              <strong style={{ color: "#42e985" }}>
                 {username}
-              </div>
-            </>
-          ) : (
-            <>
-              <div
-                style={{
-                  color: "#9fb6a8",
-                  fontSize: "14px",
-                  marginBottom: "10px",
-                }}
-              >
-                Je bent niet ingelogd.
-              </div>
+              </strong>
+            </div>
+          )}
 
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              gap: "12px",
+              marginTop: "28px",
+            }}
+          >
+            <button
+              onClick={() => router.push("/wedstrijden")}
+              style={{
+                padding: "14px 23px",
+                border: "none",
+                borderRadius: "11px",
+                background: "#42e985",
+                color: "#021108",
+                fontSize: "14px",
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              Begin met voorspellen →
+            </button>
+
+            <button
+              onClick={() => router.push("/ranglijst")}
+              style={{
+                padding: "14px 23px",
+                borderRadius: "11px",
+                border: "1px solid rgba(255,255,255,0.15)",
+                background: "rgba(255,255,255,0.035)",
+                color: "white",
+                fontSize: "14px",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              🏆 Bekijk ranglijst
+            </button>
+          </div>
+
+          {!userLoading && !username && (
+            <p
+              style={{
+                margin: "16px 0 0",
+                color: "#71897b",
+                fontSize: "13px",
+              }}
+            >
+              Nog geen account?{" "}
               <button
-                onClick={() => router.push("/inloggen")}
+                onClick={() => router.push("/registreren")}
                 style={{
+                  padding: 0,
                   border: "none",
-                  borderRadius: "10px",
-                  padding: "10px 16px",
-                  background: "#2ee681",
-                  color: "#03150b",
-                  fontWeight: 900,
+                  background: "transparent",
+                  color: "#42e985",
+                  fontWeight: 800,
                   cursor: "pointer",
                 }}
               >
-                Inloggen
+                Gratis registreren
               </button>
-            </>
+            </p>
           )}
-        </section>
 
+          <div
+            style={{
+              maxWidth: "760px",
+              margin: "42px auto 0",
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(180px, 1fr))",
+              borderTop: "1px solid rgba(255,255,255,0.07)",
+              paddingTop: "25px",
+              gap: "15px",
+            }}
+          >
+            <HeroFeature
+              icon="⚽"
+              title="Echte wedstrijden"
+              text="Voorspel echte voetbalduels"
+            />
+
+            <HeroFeature
+              icon="🏆"
+              title="Ranglijsten"
+              text="Klim boven andere spelers"
+            />
+
+            <HeroFeature
+              icon="🌍"
+              title="Topcompetities"
+              text="Voorspel meerdere competities"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* CONTENT */}
+      <div
+        style={{
+          maxWidth: "1200px",
+          margin: "0 auto",
+          padding: "48px 20px 60px",
+        }}
+      >
         <section>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "end",
+              flexWrap: "wrap",
               gap: "15px",
-              marginBottom: "18px",
+              marginBottom: "20px",
             }}
           >
             <div>
+              <div
+                style={{
+                  color: "#42e985",
+                  fontSize: "11px",
+                  fontWeight: 900,
+                  letterSpacing: "1px",
+                  textTransform: "uppercase",
+                  marginBottom: "7px",
+                }}
+              >
+                Voorspel nu
+              </div>
+
               <h2
                 style={{
                   margin: 0,
-                  fontSize: "25px",
-                  fontWeight: 900,
+                  fontSize: "28px",
+                  fontWeight: 950,
                 }}
               >
-                Wedstrijden
+                Aankomende wedstrijden
               </h2>
 
               <p
                 style={{
-                  margin: "6px 0 0",
+                  margin: "7px 0 0",
                   color: "#789183",
                   fontSize: "13px",
                 }}
@@ -350,12 +437,26 @@ export default function Home() {
                 Voorspel de uitslag en verdien punten.
               </p>
             </div>
+
+            <button
+              onClick={() => router.push("/wedstrijden")}
+              style={{
+                padding: 0,
+                border: "none",
+                background: "transparent",
+                color: "#42e985",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              Bekijk alle wedstrijden →
+            </button>
           </div>
 
           {loadingMatches ? (
             <div
               style={{
-                padding: "30px",
+                padding: "40px",
                 textAlign: "center",
                 color: "#8fa79a",
               }}
@@ -365,10 +466,11 @@ export default function Home() {
           ) : matches.length === 0 ? (
             <div
               style={{
-                padding: "30px",
+                padding: "35px",
                 textAlign: "center",
                 color: "#8fa79a",
                 background: "rgba(255,255,255,0.03)",
+                border: "1px solid rgba(255,255,255,0.06)",
                 borderRadius: "16px",
               }}
             >
@@ -394,7 +496,8 @@ export default function Home() {
                       borderRadius: "18px",
                       background:
                         "linear-gradient(145deg, rgba(8,36,24,0.96), rgba(4,21,13,0.96))",
-                      border: "1px solid rgba(75,255,153,0.10)",
+                      border:
+                        "1px solid rgba(75,255,153,0.10)",
                     }}
                   >
                     <div
@@ -469,7 +572,10 @@ export default function Home() {
                         max="20"
                         value={homeScores[match.id] ?? ""}
                         onChange={(e) =>
-                          updateHomeScore(match.id, e.target.value)
+                          updateHomeScore(
+                            match.id,
+                            e.target.value
+                          )
                         }
                         style={scoreInputStyle}
                         aria-label={`Score ${match.homeTeam.name}`}
@@ -490,7 +596,10 @@ export default function Home() {
                         max="20"
                         value={awayScores[match.id] ?? ""}
                         onChange={(e) =>
-                          updateAwayScore(match.id, e.target.value)
+                          updateAwayScore(
+                            match.id,
+                            e.target.value
+                          )
                         }
                         style={scoreInputStyle}
                         aria-label={`Score ${match.awayTeam.name}`}
@@ -505,7 +614,7 @@ export default function Home() {
                         padding: "12px",
                         border: "none",
                         borderRadius: "11px",
-                        background: "#2ee681",
+                        background: "#42e985",
                         color: "#03150b",
                         fontWeight: 900,
                         cursor: "pointer",
@@ -540,8 +649,42 @@ export default function Home() {
 
         <section
           style={{
+            marginTop: "45px",
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: "15px",
+          }}
+        >
+          <InfoCard
+            icon="📈"
+            title="Klim in de ranglijst"
+            text="Verdien punten met je voorspellingen en vergelijk jezelf met andere voetbalfans."
+          />
+
+          <InfoCard
+            icon="👥"
+            title="Speel met vrienden"
+            text="Binnenkort kun je eigen leagues maken en vrienden uitdagen."
+          />
+
+          <InfoCard
+            icon="⭐"
+            title="Echte competities"
+            text="Voorspel wedstrijden uit verschillende grote voetbalcompetities."
+          />
+
+          <InfoCard
+            icon="📱"
+            title="Altijd en overal"
+            text="VoetIQ werkt op computer, tablet en telefoon."
+          />
+        </section>
+
+        <section
+          style={{
             maxWidth: "700px",
-            margin: "55px auto 0",
+            margin: "45px auto 0",
             padding: "25px",
             borderRadius: "18px",
             background: "rgba(255,255,255,0.025)",
@@ -567,24 +710,133 @@ export default function Home() {
               lineHeight: 1.5,
             }}
           >
-            <div>🎯 <strong style={{ color: "white" }}>10 punten</strong> — exacte uitslag goed</div>
-            <div>✅ <strong style={{ color: "white" }}>5 punten</strong> — winnaar/gelijkspel goed</div>
-            <div>❌ <strong style={{ color: "white" }}>0 punten</strong> — voorspelling fout</div>
+            <div>
+              🎯{" "}
+              <strong style={{ color: "white" }}>
+                10 punten
+              </strong>{" "}
+              — exacte uitslag goed
+            </div>
+
+            <div>
+              ✅{" "}
+              <strong style={{ color: "white" }}>
+                5 punten
+              </strong>{" "}
+              — winnaar/gelijkspel goed
+            </div>
+
+            <div>
+              ❌{" "}
+              <strong style={{ color: "white" }}>
+                0 punten
+              </strong>{" "}
+              — voorspelling fout
+            </div>
           </div>
         </section>
 
         <footer
           style={{
             marginTop: "60px",
+            paddingTop: "25px",
+            borderTop: "1px solid rgba(255,255,255,0.05)",
             textAlign: "center",
             color: "#52675b",
             fontSize: "12px",
           }}
         >
-          Data provided by football-data.org
+          © 2026 VoetIQ · Data provided by football-data.org
         </footer>
       </div>
     </main>
+  );
+}
+
+function HeroFeature({
+  icon,
+  title,
+  text,
+}: {
+  icon: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div>
+      <div style={{ fontSize: "22px" }}>{icon}</div>
+
+      <div
+        style={{
+          marginTop: "7px",
+          fontSize: "14px",
+          fontWeight: 900,
+        }}
+      >
+        {title}
+      </div>
+
+      <div
+        style={{
+          marginTop: "3px",
+          color: "#71887b",
+          fontSize: "12px",
+        }}
+      >
+        {text}
+      </div>
+    </div>
+  );
+}
+
+function InfoCard({
+  icon,
+  title,
+  text,
+}: {
+  icon: string;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div
+      style={{
+        padding: "22px",
+        borderRadius: "17px",
+        background:
+          "linear-gradient(145deg, rgba(8,31,21,0.9), rgba(3,18,11,0.9))",
+        border: "1px solid rgba(75,255,153,0.09)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "23px",
+          marginBottom: "13px",
+        }}
+      >
+        {icon}
+      </div>
+
+      <div
+        style={{
+          fontSize: "15px",
+          fontWeight: 900,
+        }}
+      >
+        {title}
+      </div>
+
+      <p
+        style={{
+          margin: "7px 0 0",
+          color: "#82998c",
+          fontSize: "13px",
+          lineHeight: 1.55,
+        }}
+      >
+        {text}
+      </p>
+    </div>
   );
 }
 
