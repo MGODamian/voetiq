@@ -5,14 +5,22 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Navbar from "./Navbar";
 
+type Team = {
+  name: string;
+  shortName?: string;
+  crest?: string;
+};
+
+type Competition = {
+  name?: string;
+  emblem?: string;
+};
+
 type Match = {
   id: number;
-  homeTeam: {
-    name: string;
-  };
-  awayTeam: {
-    name: string;
-  };
+  homeTeam: Team;
+  awayTeam: Team;
+  competition?: Competition;
   utcDate: string;
 };
 
@@ -295,32 +303,14 @@ export default function Home() {
           >
             <button
               onClick={() => router.push("/wedstrijden")}
-              style={{
-                padding: "14px 23px",
-                border: "none",
-                borderRadius: "11px",
-                background: "#42e985",
-                color: "#021108",
-                fontSize: "14px",
-                fontWeight: 900,
-                cursor: "pointer",
-              }}
+              style={primaryButtonStyle}
             >
               Begin met voorspellen →
             </button>
 
             <button
               onClick={() => router.push("/ranglijst")}
-              style={{
-                padding: "14px 23px",
-                borderRadius: "11px",
-                border: "1px solid rgba(255,255,255,0.15)",
-                background: "rgba(255,255,255,0.035)",
-                color: "white",
-                fontSize: "14px",
-                fontWeight: 800,
-                cursor: "pointer",
-              }}
+              style={secondaryButtonStyle}
             >
               🏆 Bekijk ranglijst
             </button>
@@ -384,7 +374,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CONTENT */}
+      {/* WEDSTRIJDEN */}
       <div
         style={{
           maxWidth: "1200px",
@@ -400,7 +390,7 @@ export default function Home() {
               alignItems: "end",
               flexWrap: "wrap",
               gap: "15px",
-              marginBottom: "20px",
+              marginBottom: "22px",
             }}
           >
             <div>
@@ -481,150 +471,21 @@ export default function Home() {
               style={{
                 display: "grid",
                 gridTemplateColumns:
-                  "repeat(auto-fit, minmax(280px, 1fr))",
+                  "repeat(auto-fit, minmax(320px, 1fr))",
                 gap: "16px",
               }}
             >
-              {matches.map((match) => {
-                const date = new Date(match.utcDate);
-
-                return (
-                  <div
-                    key={match.id}
-                    style={{
-                      padding: "20px",
-                      borderRadius: "18px",
-                      background:
-                        "linear-gradient(145deg, rgba(8,36,24,0.96), rgba(4,21,13,0.96))",
-                      border:
-                        "1px solid rgba(75,255,153,0.10)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        color: "#789183",
-                        fontSize: "12px",
-                        textAlign: "center",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      {date.toLocaleDateString("nl-NL", {
-                        day: "numeric",
-                        month: "long",
-                      })}{" "}
-                      •{" "}
-                      {date.toLocaleTimeString("nl-NL", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr auto 1fr",
-                        alignItems: "center",
-                        gap: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          textAlign: "right",
-                          fontWeight: 800,
-                          fontSize: "14px",
-                        }}
-                      >
-                        {match.homeTeam.name}
-                      </div>
-
-                      <div
-                        style={{
-                          color: "#60776a",
-                          fontWeight: 900,
-                        }}
-                      >
-                        -
-                      </div>
-
-                      <div
-                        style={{
-                          textAlign: "left",
-                          fontWeight: 800,
-                          fontSize: "14px",
-                        }}
-                      >
-                        {match.awayTeam.name}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: "8px",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <input
-                        type="number"
-                        min="0"
-                        max="20"
-                        value={homeScores[match.id] ?? ""}
-                        onChange={(e) =>
-                          updateHomeScore(
-                            match.id,
-                            e.target.value
-                          )
-                        }
-                        style={scoreInputStyle}
-                        aria-label={`Score ${match.homeTeam.name}`}
-                      />
-
-                      <span
-                        style={{
-                          color: "#60776a",
-                          fontWeight: 900,
-                        }}
-                      >
-                        -
-                      </span>
-
-                      <input
-                        type="number"
-                        min="0"
-                        max="20"
-                        value={awayScores[match.id] ?? ""}
-                        onChange={(e) =>
-                          updateAwayScore(
-                            match.id,
-                            e.target.value
-                          )
-                        }
-                        style={scoreInputStyle}
-                        aria-label={`Score ${match.awayTeam.name}`}
-                      />
-                    </div>
-
-                    <button
-                      onClick={() => savePrediction(match)}
-                      style={{
-                        width: "100%",
-                        marginTop: "16px",
-                        padding: "12px",
-                        border: "none",
-                        borderRadius: "11px",
-                        background: "#42e985",
-                        color: "#03150b",
-                        fontWeight: 900,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Voorspelling opslaan
-                    </button>
-                  </div>
-                );
-              })}
+              {matches.map((match) => (
+                <MatchCard
+                  key={match.id}
+                  match={match}
+                  homeScore={homeScores[match.id] ?? ""}
+                  awayScore={awayScores[match.id] ?? ""}
+                  updateHomeScore={updateHomeScore}
+                  updateAwayScore={updateAwayScore}
+                  savePrediction={savePrediction}
+                />
+              ))}
             </div>
           )}
         </section>
@@ -753,6 +614,312 @@ export default function Home() {
   );
 }
 
+function MatchCard({
+  match,
+  homeScore,
+  awayScore,
+  updateHomeScore,
+  updateAwayScore,
+  savePrediction,
+}: {
+  match: Match;
+  homeScore: string;
+  awayScore: string;
+  updateHomeScore: (matchId: number, value: string) => void;
+  updateAwayScore: (matchId: number, value: string) => void;
+  savePrediction: (match: Match) => void;
+}) {
+  const date = new Date(match.utcDate);
+
+  return (
+    <article
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        padding: "18px",
+        borderRadius: "18px",
+        background:
+          "linear-gradient(145deg, rgba(8,36,24,0.98), rgba(3,18,11,0.98))",
+        border: "1px solid rgba(75,255,153,0.11)",
+        boxShadow: "0 12px 35px rgba(0,0,0,0.16)",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          width: "150px",
+          height: "150px",
+          borderRadius: "999px",
+          background: "rgba(46,230,129,0.04)",
+          filter: "blur(15px)",
+          top: "-90px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          pointerEvents: "none",
+        }}
+      />
+
+      {/* Competition + time */}
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "10px",
+          paddingBottom: "14px",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "7px",
+            minWidth: 0,
+          }}
+        >
+          {match.competition?.emblem && (
+            <img
+              src={match.competition.emblem}
+              alt=""
+              style={{
+                width: "18px",
+                height: "18px",
+                objectFit: "contain",
+              }}
+            />
+          )}
+
+          <span
+            style={{
+              color: "#a6bbae",
+              fontSize: "11px",
+              fontWeight: 800,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {match.competition?.name || "Voetbal"}
+          </span>
+        </div>
+
+        <span
+          style={{
+            flexShrink: 0,
+            color: "#71897b",
+            fontSize: "11px",
+          }}
+        >
+          {date.toLocaleDateString("nl-NL", {
+            day: "numeric",
+            month: "short",
+          })}{" "}
+          •{" "}
+          {date.toLocaleTimeString("nl-NL", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </span>
+      </div>
+
+      {/* Teams */}
+      <div
+        style={{
+          position: "relative",
+          display: "grid",
+          gridTemplateColumns: "1fr 42px 1fr",
+          alignItems: "start",
+          gap: "8px",
+          marginTop: "22px",
+        }}
+      >
+        <TeamDisplay
+          team={match.homeTeam}
+          align="right"
+        />
+
+        <div
+          style={{
+            paddingTop: "23px",
+            textAlign: "center",
+            color: "#526b5d",
+            fontSize: "12px",
+            fontWeight: 900,
+          }}
+        >
+          VS
+        </div>
+
+        <TeamDisplay
+          team={match.awayTeam}
+          align="left"
+        />
+      </div>
+
+      {/* Prediction */}
+      <div
+        style={{
+          marginTop: "23px",
+          padding: "16px",
+          borderRadius: "14px",
+          background: "rgba(0,0,0,0.14)",
+          border: "1px solid rgba(255,255,255,0.04)",
+        }}
+      >
+        <div
+          style={{
+            marginBottom: "11px",
+            color: "#789183",
+            textAlign: "center",
+            fontSize: "10px",
+            fontWeight: 900,
+            textTransform: "uppercase",
+            letterSpacing: "0.8px",
+          }}
+        >
+          Jouw voorspelling
+        </div>
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <input
+            type="number"
+            min="0"
+            max="20"
+            value={homeScore}
+            onChange={(event) =>
+              updateHomeScore(match.id, event.target.value)
+            }
+            style={scoreInputStyle}
+            aria-label={`Score ${match.homeTeam.name}`}
+          />
+
+          <span
+            style={{
+              color: "#70877a",
+              fontWeight: 900,
+            }}
+          >
+            -
+          </span>
+
+          <input
+            type="number"
+            min="0"
+            max="20"
+            value={awayScore}
+            onChange={(event) =>
+              updateAwayScore(match.id, event.target.value)
+            }
+            style={scoreInputStyle}
+            aria-label={`Score ${match.awayTeam.name}`}
+          />
+        </div>
+      </div>
+
+      <button
+        onClick={() => savePrediction(match)}
+        style={{
+          width: "100%",
+          marginTop: "13px",
+          padding: "12px",
+          border: "none",
+          borderRadius: "10px",
+          background: "#42e985",
+          color: "#021108",
+          fontSize: "13px",
+          fontWeight: 900,
+          cursor: "pointer",
+        }}
+      >
+        Voorspelling opslaan
+      </button>
+    </article>
+  );
+}
+
+function TeamDisplay({
+  team,
+  align,
+}: {
+  team: Team;
+  align: "left" | "right";
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems:
+          align === "right" ? "flex-end" : "flex-start",
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          width: "54px",
+          height: "54px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: "10px",
+        }}
+      >
+        {team.crest ? (
+          <img
+            src={team.crest}
+            alt={`${team.name} logo`}
+            style={{
+              maxWidth: "50px",
+              maxHeight: "50px",
+              width: "auto",
+              height: "auto",
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: "46px",
+              height: "46px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.05)",
+              color: "#789183",
+              fontSize: "20px",
+            }}
+          >
+            ⚽
+          </div>
+        )}
+      </div>
+
+      <div
+        style={{
+          maxWidth: "100%",
+          color: "white",
+          fontSize: "13px",
+          lineHeight: 1.3,
+          fontWeight: 900,
+          textAlign: align,
+        }}
+      >
+        {team.shortName || team.name}
+      </div>
+    </div>
+  );
+}
+
 function HeroFeature({
   icon,
   title,
@@ -840,16 +1007,38 @@ function InfoCard({
   );
 }
 
+const primaryButtonStyle = {
+  padding: "14px 23px",
+  border: "none",
+  borderRadius: "11px",
+  background: "#42e985",
+  color: "#021108",
+  fontSize: "14px",
+  fontWeight: 900,
+  cursor: "pointer",
+};
+
+const secondaryButtonStyle = {
+  padding: "14px 23px",
+  borderRadius: "11px",
+  border: "1px solid rgba(255,255,255,0.15)",
+  background: "rgba(255,255,255,0.035)",
+  color: "white",
+  fontSize: "14px",
+  fontWeight: 800,
+  cursor: "pointer",
+};
+
 const scoreInputStyle = {
-  width: "52px",
-  height: "46px",
+  width: "58px",
+  height: "50px",
   boxSizing: "border-box" as const,
   textAlign: "center" as const,
   borderRadius: "10px",
-  border: "1px solid rgba(75,255,153,0.14)",
-  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(75,255,153,0.18)",
+  background: "rgba(255,255,255,0.055)",
   color: "white",
-  fontSize: "18px",
+  fontSize: "20px",
   fontWeight: 900,
   outline: "none",
 };
