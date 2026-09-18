@@ -152,6 +152,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Echte aftraptijd van football-data.
     const kickoff = new Date(match.utcDate);
 
     if (Number.isNaN(kickoff.getTime())) {
@@ -263,6 +264,11 @@ export async function POST(request: Request) {
             away_score: away,
             competition_code: competition,
             matchday: matchday,
+
+            // NIEUW:
+            // Aftraptijd opslaan zodat /api/score
+            // toekomstige wedstrijden kan overslaan.
+            kickoff_at: kickoff.toISOString(),
           })
           .eq("id", existingPrediction.id)
           .eq("user_id", user.id);
@@ -303,6 +309,10 @@ export async function POST(request: Request) {
           away_score: away,
           competition_code: competition,
           matchday: matchday,
+
+          // NIEUW:
+          // Aftraptijd opslaan.
+          kickoff_at: kickoff.toISOString(),
         });
 
     if (insertError) {
