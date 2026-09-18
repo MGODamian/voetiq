@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type Match = {
@@ -75,19 +74,8 @@ const competitions: Competition[] = [
 ];
 
 export default function Wedstrijden() {
-  const searchParams = useSearchParams();
-
-  const competitionFromUrl =
-    searchParams.get("competition")?.toUpperCase() || "DED";
-
-  const validCompetition = competitions.some(
-    (competition) => competition.code === competitionFromUrl
-  )
-    ? competitionFromUrl
-    : "DED";
-
   const [selectedCompetition, setSelectedCompetition] =
-    useState(validCompetition);
+    useState("DED");
 
   const [matches, setMatches] = useState<Match[]>([]);
 
@@ -102,8 +90,20 @@ export default function Wedstrijden() {
     useState<number | null>(null);
 
   useEffect(() => {
-    setSelectedCompetition(validCompetition);
-  }, [validCompetition]);
+    const params = new URLSearchParams(window.location.search);
+
+    const competitionFromUrl =
+      params.get("competition")?.toUpperCase() || "DED";
+
+    const isValidCompetition = competitions.some(
+      (competition) =>
+        competition.code === competitionFromUrl
+    );
+
+    if (isValidCompetition) {
+      setSelectedCompetition(competitionFromUrl);
+    }
+  }, []);
 
   useEffect(() => {
     loadMatches(selectedCompetition);
@@ -437,8 +437,7 @@ export default function Wedstrijden() {
             >
               {competitions.map((competition) => {
                 const active =
-                  selectedCompetition ===
-                  competition.code;
+                  selectedCompetition === competition.code;
 
                 return (
                   <button
@@ -484,68 +483,93 @@ export default function Wedstrijden() {
             </div>
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr)",
-              gap: "20px",
-            }}
-          >
-            <div>
+          <div>
+            <div
+              style={{
+                background:
+                  "linear-gradient(135deg, #0a2a1b, #0b3b25)",
+                borderRadius: "20px",
+                padding: "24px",
+                color: "white",
+                marginBottom: "20px",
+                boxShadow:
+                  "0 12px 35px rgba(0,0,0,0.12)",
+              }}
+            >
               <div
                 style={{
-                  background:
-                    "linear-gradient(135deg, #0a2a1b, #0b3b25)",
-                  borderRadius: "20px",
-                  padding: "24px",
-                  color: "white",
-                  marginBottom: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "13px",
+                }}
+              >
+                <span style={{ fontSize: "34px" }}>
+                  {selectedCompetitionData.flag}
+                </span>
+
+                <div>
+                  <div
+                    style={{
+                      color: "#70f0aa",
+                      fontSize: "11px",
+                      fontWeight: 800,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.8px",
+                    }}
+                  >
+                    Competitie
+                  </div>
+
+                  <h2
+                    style={{
+                      margin: "4px 0 0",
+                      fontSize: "27px",
+                    }}
+                  >
+                    {selectedCompetitionData.name}
+                  </h2>
+                </div>
+              </div>
+            </div>
+
+            {loading && (
+              <div
+                style={{
+                  background: "white",
+                  borderRadius: "18px",
+                  padding: "45px",
+                  textAlign: "center",
                   boxShadow:
-                    "0 12px 35px rgba(0,0,0,0.12)",
+                    "0 8px 25px rgba(0,0,0,0.07)",
                 }}
               >
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "13px",
+                    fontSize: "30px",
+                    marginBottom: "10px",
                   }}
                 >
-                  <span style={{ fontSize: "34px" }}>
-                    {selectedCompetitionData.flag}
-                  </span>
+                  ⚽
+                </div>
 
-                  <div>
-                    <div
-                      style={{
-                        color: "#70f0aa",
-                        fontSize: "11px",
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.8px",
-                      }}
-                    >
-                      Competitie
-                    </div>
-
-                    <h2
-                      style={{
-                        margin: "4px 0 0",
-                        fontSize: "27px",
-                      }}
-                    >
-                      {selectedCompetitionData.name}
-                    </h2>
-                  </div>
+                <div
+                  style={{
+                    color: "#66736c",
+                    fontWeight: 600,
+                  }}
+                >
+                  Wedstrijden laden...
                 </div>
               </div>
+            )}
 
-              {loading && (
+            {!loading &&
+              availableMatchdays.length === 0 && (
                 <div
                   style={{
                     background: "white",
                     borderRadius: "18px",
-                    padding: "45px",
+                    padding: "45px 25px",
                     textAlign: "center",
                     boxShadow:
                       "0 8px 25px rgba(0,0,0,0.07)",
@@ -553,402 +577,359 @@ export default function Wedstrijden() {
                 >
                   <div
                     style={{
-                      fontSize: "30px",
+                      fontSize: "35px",
                       marginBottom: "10px",
                     }}
                   >
-                    ⚽
+                    📅
                   </div>
 
-                  <div
+                  <strong
                     style={{
-                      color: "#66736c",
-                      fontWeight: 600,
+                      fontSize: "17px",
                     }}
                   >
-                    Wedstrijden laden...
-                  </div>
+                    Geen komende wedstrijden
+                  </strong>
+
+                  <p
+                    style={{
+                      color: "#777",
+                      marginBottom: 0,
+                    }}
+                  >
+                    Er zijn momenteel geen aankomende
+                    wedstrijden beschikbaar voor deze
+                    competitie.
+                  </p>
                 </div>
               )}
 
-              {!loading &&
-                availableMatchdays.length === 0 && (
+            {!loading &&
+              availableMatchdays.length > 0 && (
+                <>
                   <div
                     style={{
                       background: "white",
                       borderRadius: "18px",
-                      padding: "45px 25px",
-                      textAlign: "center",
+                      padding: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: "10px",
+                      marginBottom: "20px",
                       boxShadow:
                         "0 8px 25px rgba(0,0,0,0.07)",
                     }}
                   >
-                    <div
+                    <button
+                      onClick={() =>
+                        changeMatchday("previous")
+                      }
+                      disabled={currentMatchdayIndex <= 0}
                       style={{
-                        fontSize: "35px",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      📅
-                    </div>
-
-                    <strong
-                      style={{
-                        fontSize: "17px",
-                      }}
-                    >
-                      Geen komende wedstrijden
-                    </strong>
-
-                    <p
-                      style={{
-                        color: "#777",
-                        marginBottom: 0,
-                      }}
-                    >
-                      Er zijn momenteel geen aankomende
-                      wedstrijden beschikbaar voor deze
-                      competitie.
-                    </p>
-                  </div>
-                )}
-
-              {!loading &&
-                availableMatchdays.length > 0 && (
-                  <>
-                    <div
-                      style={{
-                        background: "white",
-                        borderRadius: "18px",
-                        padding: "12px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent:
-                          "space-between",
-                        gap: "10px",
-                        marginBottom: "20px",
-                        boxShadow:
-                          "0 8px 25px rgba(0,0,0,0.07)",
-                      }}
-                    >
-                      <button
-                        onClick={() =>
-                          changeMatchday("previous")
-                        }
-                        disabled={
+                        border: "none",
+                        background:
                           currentMatchdayIndex <= 0
-                        }
-                        style={{
-                          border: "none",
-                          background:
-                            currentMatchdayIndex <= 0
-                              ? "#f1f3f2"
-                              : "#e9faf1",
-                          color:
-                            currentMatchdayIndex <= 0
-                              ? "#a1aaa5"
-                              : "#08763e",
-                          borderRadius: "10px",
-                          padding: "11px 15px",
-                          fontWeight: 800,
-                          cursor:
-                            currentMatchdayIndex <= 0
-                              ? "default"
-                              : "pointer",
-                        }}
-                      >
-                        ← Vorige
-                      </button>
+                            ? "#f1f3f2"
+                            : "#e9faf1",
+                        color:
+                          currentMatchdayIndex <= 0
+                            ? "#a1aaa5"
+                            : "#08763e",
+                        borderRadius: "10px",
+                        padding: "11px 15px",
+                        fontWeight: 800,
+                        cursor:
+                          currentMatchdayIndex <= 0
+                            ? "default"
+                            : "pointer",
+                      }}
+                    >
+                      ← Vorige
+                    </button>
 
+                    <div
+                      style={{
+                        textAlign: "center",
+                      }}
+                    >
                       <div
                         style={{
-                          textAlign: "center",
+                          color: "#89958e",
+                          fontSize: "11px",
+                          fontWeight: 800,
+                          textTransform: "uppercase",
                         }}
                       >
-                        <div
-                          style={{
-                            color: "#89958e",
-                            fontSize: "11px",
-                            fontWeight: 800,
-                            textTransform: "uppercase",
-                          }}
-                        >
-                          Speelronde
-                        </div>
-
-                        <strong
-                          style={{
-                            fontSize: "20px",
-                          }}
-                        >
-                          {selectedMatchday}
-                        </strong>
+                        Speelronde
                       </div>
 
-                      <button
-                        onClick={() =>
-                          changeMatchday("next")
-                        }
-                        disabled={
-                          currentMatchdayIndex ===
-                          availableMatchdays.length - 1
-                        }
+                      <strong
                         style={{
-                          border: "none",
-                          background:
-                            currentMatchdayIndex ===
-                            availableMatchdays.length - 1
-                              ? "#f1f3f2"
-                              : "#e9faf1",
-                          color:
-                            currentMatchdayIndex ===
-                            availableMatchdays.length - 1
-                              ? "#a1aaa5"
-                              : "#08763e",
-                          borderRadius: "10px",
-                          padding: "11px 15px",
-                          fontWeight: 800,
-                          cursor:
-                            currentMatchdayIndex ===
-                            availableMatchdays.length - 1
-                              ? "default"
-                              : "pointer",
+                          fontSize: "20px",
                         }}
                       >
-                        Volgende →
-                      </button>
+                        {selectedMatchday}
+                      </strong>
                     </div>
 
-                    <div
+                    <button
+                      onClick={() =>
+                        changeMatchday("next")
+                      }
+                      disabled={
+                        currentMatchdayIndex ===
+                        availableMatchdays.length - 1
+                      }
                       style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "14px",
+                        border: "none",
+                        background:
+                          currentMatchdayIndex ===
+                          availableMatchdays.length - 1
+                            ? "#f1f3f2"
+                            : "#e9faf1",
+                        color:
+                          currentMatchdayIndex ===
+                          availableMatchdays.length - 1
+                            ? "#a1aaa5"
+                            : "#08763e",
+                        borderRadius: "10px",
+                        padding: "11px 15px",
+                        fontWeight: 800,
+                        cursor:
+                          currentMatchdayIndex ===
+                          availableMatchdays.length - 1
+                            ? "default"
+                            : "pointer",
                       }}
                     >
-                      {currentMatches.map((match) => {
-                        const prediction =
-                          predictions[match.id] || {
-                            home: "",
-                            away: "",
-                          };
+                      Volgende →
+                    </button>
+                  </div>
 
-                        const date = new Date(
-                          match.utcDate
-                        );
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "14px",
+                    }}
+                  >
+                    {currentMatches.map((match) => {
+                      const prediction =
+                        predictions[match.id] || {
+                          home: "",
+                          away: "",
+                        };
 
-                        return (
+                      const date = new Date(match.utcDate);
+
+                      return (
+                        <div
+                          key={match.id}
+                          style={{
+                            background: "white",
+                            borderRadius: "18px",
+                            padding: "20px",
+                            boxShadow:
+                              "0 8px 25px rgba(0,0,0,0.07)",
+                          }}
+                        >
                           <div
-                            key={match.id}
                             style={{
-                              background: "white",
-                              borderRadius: "18px",
-                              padding: "20px",
-                              boxShadow:
-                                "0 8px 25px rgba(0,0,0,0.07)",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              marginBottom: "18px",
+                            }}
+                          >
+                            <span
+                              style={{
+                                color: "#849089",
+                                fontSize: "13px",
+                                fontWeight: 700,
+                              }}
+                            >
+                              {date.toLocaleDateString(
+                                "nl-NL",
+                                {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "short",
+                                }
+                              )}
+                            </span>
+
+                            <span
+                              style={{
+                                color: "#849089",
+                                fontSize: "13px",
+                                fontWeight: 700,
+                              }}
+                            >
+                              {date.toLocaleTimeString(
+                                "nl-NL",
+                                {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                }
+                              )}
+                            </span>
+                          </div>
+
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns:
+                                "1fr auto 1fr",
+                              alignItems: "center",
+                              gap: "15px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                textAlign: "right",
+                                fontWeight: 800,
+                                fontSize: "16px",
+                              }}
+                            >
+                              {match.homeTeam.name}
+                            </div>
+
+                            <div
+                              style={{
+                                color: "#a0aaa4",
+                                fontWeight: 900,
+                                fontSize: "12px",
+                              }}
+                            >
+                              VS
+                            </div>
+
+                            <div
+                              style={{
+                                textAlign: "left",
+                                fontWeight: 800,
+                                fontSize: "16px",
+                              }}
+                            >
+                              {match.awayTeam.name}
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              marginTop: "18px",
+                              paddingTop: "18px",
+                              borderTop:
+                                "1px solid #edf0ee",
                             }}
                           >
                             <div
                               style={{
                                 display: "flex",
-                                justifyContent:
-                                  "space-between",
                                 alignItems: "center",
-                                marginBottom: "18px",
+                                justifyContent: "center",
+                                gap: "10px",
                               }}
                             >
-                              <span
-                                style={{
-                                  color: "#849089",
-                                  fontSize: "13px",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {date.toLocaleDateString(
-                                  "nl-NL",
-                                  {
-                                    weekday: "short",
-                                    day: "numeric",
-                                    month: "short",
-                                  }
-                                )}
-                              </span>
-
-                              <span
-                                style={{
-                                  color: "#849089",
-                                  fontSize: "13px",
-                                  fontWeight: 700,
-                                }}
-                              >
-                                {date.toLocaleTimeString(
-                                  "nl-NL",
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  }
-                                )}
-                              </span>
-                            </div>
-
-                            <div
-                              style={{
-                                display: "grid",
-                                gridTemplateColumns:
-                                  "1fr auto 1fr",
-                                alignItems: "center",
-                                gap: "15px",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  textAlign: "right",
-                                  fontWeight: 800,
-                                  fontSize: "16px",
-                                }}
-                              >
-                                {match.homeTeam.name}
-                              </div>
-
-                              <div
-                                style={{
-                                  color: "#a0aaa4",
-                                  fontWeight: 900,
-                                  fontSize: "12px",
-                                }}
-                              >
-                                VS
-                              </div>
-
-                              <div
-                                style={{
-                                  textAlign: "left",
-                                  fontWeight: 800,
-                                  fontSize: "16px",
-                                }}
-                              >
-                                {match.awayTeam.name}
-                              </div>
-                            </div>
-
-                            <div
-                              style={{
-                                marginTop: "18px",
-                                paddingTop: "18px",
-                                borderTop:
-                                  "1px solid #edf0ee",
-                              }}
-                            >
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  gap: "10px",
-                                }}
-                              >
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="20"
-                                  value={
-                                    prediction.home
-                                  }
-                                  onChange={(e) =>
-                                    updatePrediction(
-                                      match.id,
-                                      "home",
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder="0"
-                                  style={scoreInputStyle}
-                                />
-
-                                <span
-                                  style={{
-                                    fontSize: "20px",
-                                    fontWeight: 800,
-                                    color: "#a0aaa4",
-                                  }}
-                                >
-                                  -
-                                </span>
-
-                                <input
-                                  type="number"
-                                  min="0"
-                                  max="20"
-                                  value={
-                                    prediction.away
-                                  }
-                                  onChange={(e) =>
-                                    updatePrediction(
-                                      match.id,
-                                      "away",
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder="0"
-                                  style={scoreInputStyle}
-                                />
-                              </div>
-
-                              <button
-                                onClick={() =>
-                                  savePrediction(match)
+                              <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                value={prediction.home}
+                                onChange={(e) =>
+                                  updatePrediction(
+                                    match.id,
+                                    "home",
+                                    e.target.value
+                                  )
                                 }
+                                placeholder="0"
+                                style={scoreInputStyle}
+                              />
+
+                              <span
                                 style={{
-                                  marginTop: "15px",
-                                  width: "100%",
-                                  padding: "13px",
-                                  background: "#0b8f4d",
-                                  color: "white",
-                                  border: "none",
-                                  borderRadius: "10px",
-                                  fontSize: "15px",
+                                  fontSize: "20px",
                                   fontWeight: 800,
-                                  cursor: "pointer",
+                                  color: "#a0aaa4",
                                 }}
                               >
-                                Voorspelling opslaan
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
+                                -
+                              </span>
 
-              {message && (
-                <div
-                  style={{
-                    marginTop: "20px",
-                    padding: "15px 18px",
-                    background: "#e9faf1",
-                    border:
-                      "1px solid rgba(11,143,77,0.15)",
-                    borderRadius: "12px",
-                    color: "#08763e",
-                    fontWeight: 700,
-                  }}
-                >
-                  {message}
-                </div>
+                              <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                value={prediction.away}
+                                onChange={(e) =>
+                                  updatePrediction(
+                                    match.id,
+                                    "away",
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="0"
+                                style={scoreInputStyle}
+                              />
+                            </div>
+
+                            <button
+                              onClick={() =>
+                                savePrediction(match)
+                              }
+                              style={{
+                                marginTop: "15px",
+                                width: "100%",
+                                padding: "13px",
+                                background: "#0b8f4d",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "10px",
+                                fontSize: "15px",
+                                fontWeight: 800,
+                                cursor: "pointer",
+                              }}
+                            >
+                              Voorspelling opslaan
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
               )}
 
-              <p
+            {message && (
+              <div
                 style={{
-                  marginTop: "30px",
-                  fontSize: "12px",
-                  color: "#8a948f",
-                  textAlign: "center",
+                  marginTop: "20px",
+                  padding: "15px 18px",
+                  background: "#e9faf1",
+                  border:
+                    "1px solid rgba(11,143,77,0.15)",
+                  borderRadius: "12px",
+                  color: "#08763e",
+                  fontWeight: 700,
                 }}
               >
-                Data provided by football-data.org
-              </p>
-            </div>
+                {message}
+              </div>
+            )}
+
+            <p
+              style={{
+                marginTop: "30px",
+                fontSize: "12px",
+                color: "#8a948f",
+                textAlign: "center",
+              }}
+            >
+              Data provided by football-data.org
+            </p>
           </div>
         </div>
       </section>
