@@ -35,14 +35,14 @@ type TranslationKey =
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   nl: {
-    notFound:translations[initialLanguage]["notFound"], loadError:translations[language]["loadError"],
-    noAccess:translations[language]["noAccess"], leaderboardError:translations[language]["leaderboardError"],
-    loading:"Poule wordt geladen...", backPools:"Mijn poules", poolLabel:"{t("poolLabel")}", inviteCode:"{t("inviteCode")}",
+    notFound:"Deze poule kon niet worden gevonden.", loadError:"De gegevens van deze poule konden niet worden geladen.",
+    noAccess:"Deze poule bestaat niet of je hebt geen toegang.", leaderboardError:"Het pouleklassement kon niet worden geladen.",
+    loading:"Poule wordt geladen...", backPools:"Mijn poules", poolLabel:"VOETIQ POULE", inviteCode:"UITNODIGINGSCODE",
     copied:"Gekopieerd", copyCode:"Code kopiëren", participant:"Deelnemer", participants:"Deelnemers", competition:"Competitie",
     pointsSystem:"Puntensysteem", predictMatches:"Voorspel wedstrijden", inviteFriends:"Vrienden uitnodigen",
     poolLeaderboard:"Pouleklassement", onlyPoints:"Alleen punten uit {competition} tellen mee voor deze poule.",
-    noParticipants:"{t("noParticipants")}", prediction:"voorspelling", predictions:"voorspellingen",
-    exact:"exact", predicted:"voorspeld", points:"{t("points")}", poolId:"Poule-ID"
+    noParticipants:"Er zijn nog geen deelnemers in deze poule.", prediction:"voorspelling", predictions:"voorspellingen",
+    exact:"exact", predicted:"voorspeld", points:"PUNTEN", poolId:"Poule-ID"
   },
   en: {
     notFound:"This pool could not be found.", loadError:"The details for this pool could not be loaded.",
@@ -164,7 +164,7 @@ export default function PoolDetailPage() {
     const id = parts[1];
 
     if (!id) {
-      setErrorMessage(translations[initialLanguage]["notFound"]);
+      setErrorMessage(translations[initialLanguage].notFound);
       setLoading(false);
       return;
     }
