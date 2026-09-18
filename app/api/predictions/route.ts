@@ -85,8 +85,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Deze client gebruiken we ALLEEN om te controleren
-    // welke gebruiker bij het access token hoort.
     const authClient = createClient(
       supabaseUrl,
       supabasePublishableKey,
@@ -110,7 +108,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Controleer de wedstrijd rechtstreeks bij football-data.
     const footballResponse = await fetch(
       `https://api.football-data.org/v4/matches/${matchId}`,
       {
@@ -163,8 +160,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // BELANGRIJK:
-    // De deadline wordt op de server gecontroleerd.
     if (kickoff.getTime() <= Date.now()) {
       return NextResponse.json(
         {
@@ -188,8 +183,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Secret/server client.
-    // Deze key komt NOOIT in de browser terecht.
     const adminClient = createClient(
       supabaseUrl,
       supabaseSecretKey,
@@ -252,6 +245,7 @@ export async function POST(request: Request) {
           .update({
             home_score: home,
             away_score: away,
+            competition_code: competition,
           })
           .eq("id", existingPrediction.id)
           .eq("user_id", user.id);
@@ -289,6 +283,7 @@ export async function POST(request: Request) {
           match_name: matchName,
           home_score: home,
           away_score: away,
+          competition_code: competition,
         });
 
     if (insertError) {
