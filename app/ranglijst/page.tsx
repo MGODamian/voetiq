@@ -19,6 +19,23 @@ type Competition = {
   matchdays?: number;
 };
 
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+const ui = {
+  nl: {general:"Algemeen", title:"Ranglijst", subtitle:"Bekijk wie de meeste punten heeft verzameld met zijn voetbalvoorspellingen.", choose:"Kies een klassement", chooseRound:"Kies totaal of speelronde", total:"Totaal", round:"Ronde", matchday:"Speelronde", current:"Huidig klassement", allCompetitions:"Punten uit alle competities", allFrom:"Alle punten uit", onlyRound:"Alleen speelronde", player:"Speler", exact:"Exact", predicted:"Voorspeld", points:"Punten", loading:"Ranglijst laden...", retry:"Opnieuw proberen", empty:"Er zijn nog geen spelers op deze ranglijst.", leader:"Leider van het klassement", predictions:"voorspellingen", allTip:"💡 Dit klassement telt je punten uit alle VoetIQ-competities bij elkaar op.", compTip:"💡 In dit klassement tellen alle voorspellingen uit {competition} mee.", roundTip:"💡 Dit klassement telt alleen voorspellingen uit {competition}, speelronde {round}.", generalError:ui[language].generalError, roundError:ui[language].roundError, compError:ui[language].compError},
+  en: {general:"Overall", title:"Leaderboard", subtitle:"See who has earned the most points with their football predictions.", choose:"Choose a leaderboard", chooseRound:"Choose overall or matchday", total:"Overall", round:"Matchday", matchday:"Matchday", current:"Current leaderboard", allCompetitions:"Points from all competitions", allFrom:"All points from", onlyRound:"Matchday only", player:"Player", exact:"Exact", predicted:"Predicted", points:"Points", loading:"Loading leaderboard...", retry:"Try again", empty:"There are no players on this leaderboard yet.", leader:"Leaderboard leader", predictions:"predictions", allTip:"💡 This leaderboard combines your points from all VoetIQ competitions.", compTip:"💡 All predictions from {competition} count towards this leaderboard.", roundTip:"💡 This leaderboard only counts predictions from {competition}, matchday {round}.", generalError:"The overall leaderboard could not be loaded.", roundError:"The leaderboard for this matchday could not be loaded.", compError:"The leaderboard for this competition could not be loaded."},
+  de: {general:"Gesamt", title:"Rangliste", subtitle:"Sieh, wer mit seinen Fußballtipps die meisten Punkte gesammelt hat.", choose:"Rangliste auswählen", chooseRound:"Gesamt oder Spieltag wählen", total:"Gesamt", round:"Spieltag", matchday:"Spieltag", current:"Aktuelle Rangliste", allCompetitions:"Punkte aus allen Wettbewerben", allFrom:"Alle Punkte aus", onlyRound:"Nur Spieltag", player:"Spieler", exact:"Exakt", predicted:"Getippt", points:"Punkte", loading:"Rangliste wird geladen...", retry:"Erneut versuchen", empty:"Noch keine Spieler in dieser Rangliste.", leader:"Führender der Rangliste", predictions:"Tipps", allTip:"💡 Diese Rangliste addiert deine Punkte aus allen VoetIQ-Wettbewerben.", compTip:"💡 In dieser Rangliste zählen alle Tipps aus {competition}.", roundTip:"💡 Diese Rangliste zählt nur Tipps aus {competition}, Spieltag {round}.", generalError:"Die Gesamtrangliste konnte nicht geladen werden.", roundError:"Die Rangliste dieses Spieltags konnte nicht geladen werden.", compError:"Die Rangliste dieses Wettbewerbs konnte nicht geladen werden."},
+  es: {general:"General", title:"Clasificación", subtitle:"Descubre quién ha conseguido más puntos con sus pronósticos de fútbol.", choose:"Elige una clasificación", chooseRound:"Elige total o jornada", total:"Total", round:"Jornada", matchday:"Jornada", current:"Clasificación actual", allCompetitions:"Puntos de todas las competiciones", allFrom:"Todos los puntos de", onlyRound:"Solo jornada", player:"Jugador", exact:"Exactos", predicted:"Pronósticos", points:"Puntos", loading:"Cargando clasificación...", retry:"Intentar de nuevo", empty:"Todavía no hay jugadores en esta clasificación.", leader:"Líder de la clasificación", predictions:"pronósticos", allTip:"💡 Esta clasificación suma tus puntos de todas las competiciones de VoetIQ.", compTip:"💡 En esta clasificación cuentan todos los pronósticos de {competition}.", roundTip:"💡 Esta clasificación solo cuenta los pronósticos de {competition}, jornada {round}.", generalError:"No se ha podido cargar la clasificación general.", roundError:"No se ha podido cargar la clasificación de esta jornada.", compError:"No se ha podido cargar la clasificación de esta competición."},
+  fr: {general:"Général", title:"Classement", subtitle:"Découvrez qui a obtenu le plus de points grâce à ses pronostics de football.", choose:"Choisir un classement", chooseRound:"Choisir le total ou la journée", total:"Total", round:"Journée", matchday:"Journée", current:"Classement actuel", allCompetitions:"Points de toutes les compétitions", allFrom:"Tous les points de", onlyRound:"Journée uniquement", player:"Joueur", exact:"Exacts", predicted:"Pronostics", points:"Points", loading:"Chargement du classement...", retry:"Réessayer", empty:"Il n’y a encore aucun joueur dans ce classement.", leader:"Leader du classement", predictions:"pronostics", allTip:"💡 Ce classement additionne vos points de toutes les compétitions VoetIQ.", compTip:"💡 Tous les pronostics de {competition} comptent dans ce classement.", roundTip:"💡 Ce classement compte uniquement les pronostics de {competition}, journée {round}.", generalError:"Le classement général n’a pas pu être chargé.", roundError:"Le classement de cette journée n’a pas pu être chargé.", compError:"Le classement de cette compétition n’a pas pu être chargé."},
+  it: {general:"Generale", title:"Classifica", subtitle:"Scopri chi ha conquistato più punti con i propri pronostici calcistici.", choose:"Scegli una classifica", chooseRound:"Scegli totale o giornata", total:"Totale", round:"Giornata", matchday:"Giornata", current:"Classifica attuale", allCompetitions:"Punti di tutte le competizioni", allFrom:"Tutti i punti di", onlyRound:"Solo giornata", player:"Giocatore", exact:"Esatti", predicted:"Pronostici", points:"Punti", loading:"Caricamento classifica...", retry:"Riprova", empty:"Non ci sono ancora giocatori in questa classifica.", leader:"Leader della classifica", predictions:"pronostici", allTip:"💡 Questa classifica somma i tuoi punti di tutte le competizioni VoetIQ.", compTip:"💡 In questa classifica contano tutti i pronostici di {competition}.", roundTip:"💡 Questa classifica conta solo i pronostici di {competition}, giornata {round}.", generalError:"Non è stato possibile caricare la classifica generale.", roundError:"Non è stato possibile caricare la classifica di questa giornata.", compError:"Non è stato possibile caricare la classifica di questa competizione."},
+  pt: {general:"Geral", title:"Classificação", subtitle:"Vê quem conquistou mais pontos com as suas previsões de futebol.", choose:"Escolhe uma classificação", chooseRound:"Escolhe total ou jornada", total:"Total", round:"Jornada", matchday:"Jornada", current:"Classificação atual", allCompetitions:"Pontos de todas as competições", allFrom:"Todos os pontos de", onlyRound:"Apenas jornada", player:"Jogador", exact:"Exatos", predicted:"Previsões", points:"Pontos", loading:"A carregar classificação...", retry:"Tentar novamente", empty:"Ainda não há jogadores nesta classificação.", leader:"Líder da classificação", predictions:"previsões", allTip:"💡 Esta classificação soma os teus pontos de todas as competições VoetIQ.", compTip:"💡 Nesta classificação contam todas as previsões de {competition}.", roundTip:"💡 Esta classificação conta apenas as previsões de {competition}, jornada {round}.", generalError:"Não foi possível carregar a classificação geral.", roundError:"Não foi possível carregar a classificação desta jornada.", compError:"Não foi possível carregar a classificação desta competição."}
+} satisfies Record<LanguageCode, Record<string,string>>;
+
+function isLanguageCode(value: string): value is LanguageCode {
+  return ["nl","en","de","es","fr","it","pt"].includes(value);
+}
+
 const competitions: Competition[] = [
   { code: "ALL", name: "Algemeen", icon: "🌍" },
   { code: "DED", name: "Eredivisie", icon: "🇳🇱", matchdays: 34 },
@@ -40,7 +57,27 @@ export default function Ranglijst() {
     useState<number | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState<LanguageCode>("nl");
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("voetiq-language");
+    const initial: LanguageCode = saved && isLanguageCode(saved) ? saved : "nl";
+    setLanguage(initial);
+    document.documentElement.lang = initial;
+
+    function handleLanguageChange(event: Event) {
+      const customEvent = event as CustomEvent<{ language?: string }>;
+      const next = customEvent.detail?.language;
+      if (next && isLanguageCode(next)) {
+        setLanguage(next);
+        document.documentElement.lang = next;
+      }
+    }
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+    return () => window.removeEventListener("voetiq-language-change", handleLanguageChange);
+  }, []);
 
   useEffect(() => {
     loadLeaderboard();
@@ -57,7 +94,7 @@ export default function Ranglijst() {
       if (error) {
         console.error("Ranglijst fout:", error);
         setErrorMessage(
-          "De algemene ranglijst kon niet worden geladen."
+          ui[language].generalError
         );
         setLoading(false);
         return;
@@ -95,7 +132,7 @@ export default function Ranglijst() {
         );
 
         setErrorMessage(
-          "De ranglijst van deze speelronde kon niet worden geladen."
+          ui[language].roundError
         );
 
         setLoading(false);
@@ -118,7 +155,7 @@ export default function Ranglijst() {
       console.error("Competitieranglijst fout:", error);
 
       setErrorMessage(
-        "De ranglijst van deze competitie kon niet worden geladen."
+        ui[language].compError
       );
 
       setLoading(false);
@@ -157,6 +194,8 @@ export default function Ranglijst() {
     setSelectedMatchday(null);
   }
 
+  const t = ui[language];
+
   const selected =
     competitions.find(
       (competition) =>
@@ -185,18 +224,17 @@ export default function Ranglijst() {
           </div>
 
           <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
-            Ranglijst
+            {t.title}
           </h1>
 
           <p className="mx-auto mt-3 max-w-xl text-green-100/70">
-            Bekijk wie de meeste punten heeft verzameld
-            met zijn voetbalvoorspellingen.
+            {t.subtitle}
           </p>
         </div>
 
         <div className="mx-auto mb-7 max-w-6xl">
           <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-green-300">
-            Kies een klassement
+            {t.choose}
           </p>
 
           <div className="flex flex-wrap justify-center gap-2">
@@ -222,7 +260,7 @@ export default function Ranglijst() {
                     {competition.icon}
                   </span>
 
-                  {competition.name}
+                  {competition.code === "ALL" ? t.general : competition.name}
                 </button>
               );
             })}
@@ -232,7 +270,7 @@ export default function Ranglijst() {
         {isCompetition && (
           <div className="mx-auto mb-7 max-w-4xl">
             <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-green-300">
-              Kies totaal of speelronde
+              {t.chooseRound}
             </p>
 
             <div className="flex items-center gap-3">
@@ -246,7 +284,7 @@ export default function Ranglijst() {
                     : "border-white/10 bg-white/5 text-green-100/70 hover:bg-white/10"
                 }`}
               >
-                🏆 Totaal
+                🏆 {t.total}
               </button>
 
               <div className="flex flex-1 gap-2 overflow-x-auto pb-2">
@@ -262,7 +300,7 @@ export default function Ranglijst() {
                         : "border-white/10 bg-white/5 text-green-100/70 hover:border-green-400/30 hover:bg-white/10 hover:text-white"
                     }`}
                   >
-                    Ronde {matchday}
+                    {t.round} {matchday}
                   </button>
                 ))}
               </div>
@@ -278,7 +316,7 @@ export default function Ranglijst() {
               </p>
 
               <h2 className="mt-1 text-xl font-black">
-                {selected.icon} {selected.name}
+                {selected.icon} {selected.code === "ALL" ? t.general : selected.name}
 
                 {selectedMatchday !== null && (
                   <span className="text-green-300">
@@ -291,10 +329,10 @@ export default function Ranglijst() {
 
             <div className="text-sm text-green-100/60">
               {selectedCompetition === "ALL"
-                ? "Punten uit alle competities"
+                ? t.allCompetitions
                 : selectedMatchday === null
-                ? `Alle punten uit ${selected.name}`
-                : `Alleen speelronde ${selectedMatchday}`}
+                ? `${t.allFrom} ${selected.name}`
+                : `${t.onlyRound} ${selectedMatchday}`}
             </div>
           </div>
         </div>
@@ -308,28 +346,28 @@ export default function Ranglijst() {
             }`}
           >
             <span>#</span>
-            <span>Speler</span>
+            <span>{t.player}</span>
 
             {selectedCompetition !== "ALL" && (
               <>
                 <span className="text-center">
-                  Exact
+                  {t.exact}
                 </span>
 
                 <span className="text-center">
-                  Voorspeld
+                  {t.predicted}
                 </span>
               </>
             )}
 
             <span className="text-right">
-              Punten
+              {t.points}
             </span>
           </div>
 
           {loading && (
             <div className="px-6 py-12 text-center text-green-100/70">
-              Ranglijst laden...
+              {t.title} laden...
             </div>
           )}
 
@@ -343,7 +381,7 @@ export default function Ranglijst() {
                 onClick={loadLeaderboard}
                 className="mt-4 rounded-lg bg-green-600 px-5 py-2 font-semibold text-white transition hover:bg-green-500"
               >
-                Opnieuw proberen
+                {t.retry}
               </button>
             </div>
           )}
@@ -352,8 +390,7 @@ export default function Ranglijst() {
             !errorMessage &&
             players.length === 0 && (
               <div className="px-6 py-12 text-center text-green-100/70">
-                Er zijn nog geen spelers op deze
-                ranglijst.
+                {t.empty}
               </div>
             )}
 
@@ -393,7 +430,7 @@ export default function Ranglijst() {
 
                   {index === 0 && (
                     <p className="mt-1 text-xs font-medium text-yellow-300">
-                      Leider van het klassement
+                      {t.leader}
                     </p>
                   )}
                 </div>
@@ -406,7 +443,7 @@ export default function Ranglijst() {
                       </div>
 
                       <div className="mt-1 text-[10px] text-green-100/40">
-                        exact
+                        {t.exact.toLowerCase()}
                       </div>
                     </div>
 
@@ -416,7 +453,7 @@ export default function Ranglijst() {
                       </div>
 
                       <div className="mt-1 text-[10px] text-green-100/40">
-                        voorspellingen
+                        {t.predictions}
                       </div>
                     </div>
                   </>
@@ -428,7 +465,7 @@ export default function Ranglijst() {
                   </span>
 
                   <span className="ml-1 text-sm text-green-100/60">
-                    punten
+                    {t.points.toLowerCase()}
                   </span>
                 </div>
               </div>
@@ -438,10 +475,10 @@ export default function Ranglijst() {
         <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
           <p className="text-sm leading-6 text-green-100/60">
             {selectedCompetition === "ALL"
-              ? "💡 Dit klassement telt je punten uit alle VoetIQ-competities bij elkaar op."
+              ? t.allTip
               : selectedMatchday === null
-              ? `💡 In dit klassement tellen alle voorspellingen uit ${selected.name} mee.`
-              : `💡 Dit klassement telt alleen voorspellingen uit ${selected.name}, speelronde ${selectedMatchday}.`}
+              ? t.compTip.replace("{competition}", selected.name)
+              : t.roundTip.replace("{competition}", selected.name).replace("{round}", String(selectedMatchday))}
           </p>
         </div>
       </section>
