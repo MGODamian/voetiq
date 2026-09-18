@@ -12,6 +12,67 @@ const competitions = [
   "CL",
 ];
 
+type Prediction = {
+  id: number;
+  home_score: number;
+  away_score: number;
+};
+
+function getOutcome(
+  home: number,
+  away: number
+): "home" | "draw" | "away" {
+  if (home > away) return "home";
+  if (home < away) return "away";
+  return "draw";
+}
+
+function calculatePoints(
+  predictedHome: number,
+  predictedAway: number,
+  actualHome: number,
+  actualAway: number
+) {
+  const predictedOutcome = getOutcome(
+    predictedHome,
+    predictedAway
+  );
+
+  const actualOutcome = getOutcome(
+    actualHome,
+    actualAway
+  );
+
+  // Verkeerde winnaar / gelijkspel verkeerd = 0 punten.
+  if (predictedOutcome !== actualOutcome) {
+    return 0;
+  }
+
+  // Maximale score wordt bepaald door de echte uitslag.
+  // 0-0 = 10
+  // 1-0 = 12
+  // 1-1 = 14
+  // 2-1 = 16
+  // 6-5 = 32
+  const totalGoals =
+    actualHome + actualAway;
+
+  const maximumPoints =
+    10 + totalGoals * 2;
+
+  // Verschil per team optellen.
+  const goalDifference =
+    Math.abs(predictedHome - actualHome) +
+    Math.abs(predictedAway - actualAway);
+
+  // Per doelpunt afwijking gaan er 2 punten af.
+  const calculatedPoints =
+    maximumPoints - goalDifference * 2;
+
+  // Bij de juiste wedstrijduitkomst altijd minimaal 2.
+  return Math.max(2, calculatedPoints);
+}
+
 export async function GET() {
   const footballToken =
     process.env.FOOTBALL_DATA_API_TOKEN;
@@ -104,13 +165,15 @@ export async function GET() {
             finishedMatches: 0,
             updatedPredictions: 0,
             success: false,
-            error: `Football-data status ${response.status}`,
+            error:
+              `Football-data status ${response.status}`,
           });
 
           continue;
         }
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
         const finishedMatches = (
           data.matches || []
@@ -132,35 +195,71 @@ export async function GET() {
           const actualAwayScore =
             match.score.fullTime.away;
 
+          /*
+           * Eerst alle voorspellingen voor
+           * deze wedstrijd ophalen.
+           */
           const {
-            data: updated,
-            error,
+            data: predictions,
+            error: predictionsError,
           } = await supabase
             .from("predictions")
-            .update({
-              actual_home_score:
-                actualHomeScore,
-              actual_away_score:
-                actualAwayScore,
-            })
-            .eq("match_id", match.id)
-            .is(
-              "actual_home_score",
-              null
+            .select(
+              "id, home_score, away_score"
             )
-            .select("id");
+            .eq("match_id", match.id);
 
-          if (error) {
+          if (predictionsError) {
             console.error(
-              `Fout bij wedstrijd ${match.id}:`,
-              error
+              `Kon voorspellingen voor wedstrijd ${match.id} niet laden:`,
+              predictionsError
             );
 
             continue;
           }
 
-          updatedForCompetition +=
-            updated?.length || 0;
+          /*
+           * Punten voor iedere speler
+           * afzonderlijk berekenen.
+           */
+          for (
+            const prediction of
+              (predictions || []) as Prediction[]
+          ) {
+            const points =
+              calculatePoints(
+                prediction.home_score,
+                prediction.away_score,
+                actualHomeScore,
+                actualAwayScore
+              );
+
+            const { error: updateError } =
+              await supabase
+                .from("predictions")
+                .update({
+                  actual_home_score:
+                    actualHomeScore,
+                  actual_away_score:
+                    actualAwayScore,
+                  points,
+                })
+                .eq(
+                  "id",
+                  prediction.id
+                );
+
+            if (updateError) {
+              console.error(
+                `Kon voorspelling ${prediction.id} niet bijwerken:`,
+                updateError
+              );
+
+              continue;
+            }
+
+            updatedForCompetition++;
+          }
         }
 
         totalFinishedMatches +=
