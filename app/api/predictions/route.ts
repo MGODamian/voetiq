@@ -1,0 +1,280 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+const allowedCompetitions = [
+  "PL",
+  "DED",
+  "PD",
+  "BL1",
+  "SA",
+  "FL1",
+  "PPL",
+  "CL",
+];
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+
+    const {
+      accessToken,
+      matchId,
+      competition,
+      homeScore,
+      awayScore,
+    } = body;
+
+    if (
+      !accessToken ||
+      !matchId ||
+      !competition ||
+      homeScore === undefined ||
+      awayScore === undefined
+    ) {
+      return NextResponse.json(
+        { error: "Niet alle gegevens zijn ingevuld." },
+        { status: 400 }
+      );
+    }
+
+    if (!allowedCompetitions.includes(competition)) {
+      return NextResponse.json(
+        { error: "Ongeldige competitie." },
+        { status: 400 }
+      );
+    }
+
+    const home = Number(homeScore);
+    const away = Number(awayScore);
+
+    if (
+      !Number.isInteger(home) ||
+      !Number.isInteger(away) ||
+      home < 0 ||
+      away < 0 ||
+      home > 20 ||
+      away > 20
+    ) {
+      return NextResponse.json(
+        { error: "Ongeldige voorspelling." },
+        { status: 400 }
+      );
+    }
+
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    const supabasePublishableKey =
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+    const footballToken =
+      process.env.FOOTBALL_DATA_API_TOKEN;
+
+    if (
+      !supabaseUrl ||
+      !supabasePublishableKey ||
+      !footballToken
+    ) {
+      return NextResponse.json(
+        { error: "Serverconfiguratie ontbreekt." },
+        { status: 500 }
+      );
+    }
+
+    const supabase = createClient(
+      supabaseUrl,
+      supabasePublishableKey,
+      {
+        global: {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(accessToken);
+
+    if (userError || !user) {
+      return NextResponse.json(
+        { error: "Je bent niet ingelogd." },
+        { status: 401 }
+      );
+    }
+
+    const footballResponse = await fetch(
+      `https://api.football-data.org/v4/matches/${matchId}`,
+      {
+        headers: {
+          "X-Auth-Token": footballToken,
+        },
+        cache: "no-store",
+      }
+    );
+
+    if (!footballResponse.ok) {
+      return NextResponse.json(
+        {
+          error:
+            "De wedstrijd kon niet worden gecontroleerd.",
+        },
+        { status: 502 }
+      );
+    }
+
+    const match = await footballResponse.json();
+
+    if (
+      !match.competition ||
+      match.competition.code !== competition
+    ) {
+      return NextResponse.json(
+        { error: "Wedstrijd en competitie komen niet overeen." },
+        { status: 400 }
+      );
+    }
+
+    const kickoff = new Date(match.utcDate);
+
+    if (
+      Number.isNaN(kickoff.getTime()) ||
+      kickoff.getTime() <= Date.now()
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "De wedstrijd is al begonnen. Je voorspelling staat op slot.",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (
+      match.status !== "SCHEDULED" &&
+      match.status !== "TIMED"
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Deze wedstrijd is niet meer beschikbaar om te voorspellen.",
+        },
+        { status: 403 }
+      );
+    }
+
+    const { data: profile, error: profileError } =
+      await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+
+    if (profileError) {
+      console.error(profileError);
+
+      return NextResponse.json(
+        { error: "Je profiel kon niet worden geladen." },
+        { status: 500 }
+      );
+    }
+
+    const matchName =
+      `${match.homeTeam.name} - ${match.awayTeam.name}`;
+
+    const { data: existingPrediction, error: existingError } =
+      await supabase
+        .from("predictions")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("match_id", matchId)
+        .maybeSingle();
+
+    if (existingError) {
+      console.error(existingError);
+
+      return NextResponse.json(
+        {
+          error:
+            "Je bestaande voorspelling kon niet worden gecontroleerd.",
+        },
+        { status: 500 }
+      );
+    }
+
+    if (existingPrediction) {
+      const { error } = await supabase
+        .from("predictions")
+        .update({
+          home_score: home,
+          away_score: away,
+        })
+        .eq("id", existingPrediction.id)
+        .eq("user_id", user.id);
+
+      if (error) {
+        console.error(error);
+
+        return NextResponse.json(
+          {
+            error:
+              "Je voorspelling kon niet worden gewijzigd.",
+          },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        action: "updated",
+        message: `Voorspelling gewijzigd: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`,
+      });
+    }
+
+    const { error: insertError } = await supabase
+      .from("predictions")
+      .insert({
+        user_id: user.id,
+        user_email: user.email || "",
+        player_name: profile?.username || "Speler",
+        match_id: matchId,
+        match_name: matchName,
+        home_score: home,
+        away_score: away,
+      });
+
+    if (insertError) {
+      console.error(insertError);
+
+      return NextResponse.json(
+        {
+          error:
+            "Je voorspelling kon niet worden opgeslagen.",
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      action: "created",
+      message: `Voorspelling opgeslagen: ${match.homeTeam.name} ${home} - ${away} ${match.awayTeam.name}`,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return NextResponse.json(
+      {
+        error:
+          "Er ging iets mis bij het verwerken van je voorspelling.",
+      },
+      { status: 500 }
+    );
+  }
+}
