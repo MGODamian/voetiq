@@ -10,9 +10,11 @@ type Match = {
   matchday?: number;
   homeTeam: {
     name: string;
+    crest?: string;
   };
   awayTeam: {
     name: string;
+    crest?: string;
   };
   competition: {
     name: string;
@@ -31,46 +33,14 @@ type Competition = {
 };
 
 const competitions: Competition[] = [
-  {
-    code: "PL",
-    name: "Premier League",
-    flag: "🏴",
-  },
-  {
-    code: "DED",
-    name: "Eredivisie",
-    flag: "🇳🇱",
-  },
-  {
-    code: "PD",
-    name: "La Liga",
-    flag: "🇪🇸",
-  },
-  {
-    code: "BL1",
-    name: "Bundesliga",
-    flag: "🇩🇪",
-  },
-  {
-    code: "SA",
-    name: "Serie A",
-    flag: "🇮🇹",
-  },
-  {
-    code: "FL1",
-    name: "Ligue 1",
-    flag: "🇫🇷",
-  },
-  {
-    code: "PPL",
-    name: "Primeira Liga",
-    flag: "🇵🇹",
-  },
-  {
-    code: "CL",
-    name: "Champions League",
-    flag: "🏆",
-  },
+  { code: "PL", name: "Premier League", flag: "🏴" },
+  { code: "DED", name: "Eredivisie", flag: "🇳🇱" },
+  { code: "PD", name: "La Liga", flag: "🇪🇸" },
+  { code: "BL1", name: "Bundesliga", flag: "🇩🇪" },
+  { code: "SA", name: "Serie A", flag: "🇮🇹" },
+  { code: "FL1", name: "Ligue 1", flag: "🇫🇷" },
+  { code: "PPL", name: "Primeira Liga", flag: "🇵🇹" },
+  { code: "CL", name: "Champions League", flag: "🏆" },
 ];
 
 export default function Wedstrijden() {
@@ -157,7 +127,6 @@ export default function Wedstrijden() {
       }
     } catch (error) {
       console.error(error);
-
       setMessage(
         "De wedstrijden konden niet worden opgehaald."
       );
@@ -195,6 +164,29 @@ export default function Wedstrijden() {
       (competition) =>
         competition.code === selectedCompetition
     ) || competitions[1];
+
+  const filledPredictions = currentMatches.filter((match) => {
+    const prediction = predictions[match.id];
+
+    return (
+      prediction &&
+      prediction.home !== "" &&
+      prediction.away !== ""
+    );
+  }).length;
+
+  function changeCompetition(code: string) {
+    setSelectedCompetition(code);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("competition", code);
+
+    window.history.replaceState(
+      {},
+      "",
+      `${url.pathname}${url.search}`
+    );
+  }
 
   function updatePrediction(
     matchId: number,
@@ -307,22 +299,12 @@ export default function Wedstrijden() {
     setMessage(
       `Voorspelling opgeslagen voor ${matchName}!`
     );
-
-    setPredictions((current) => ({
-      ...current,
-      [match.id]: {
-        home: "",
-        away: "",
-      },
-    }));
   }
 
   function changeMatchday(
     direction: "previous" | "next"
   ) {
-    if (currentMatchdayIndex === -1) {
-      return;
-    }
+    if (currentMatchdayIndex === -1) return;
 
     const newIndex =
       direction === "previous"
@@ -336,6 +318,7 @@ export default function Wedstrijden() {
       setSelectedMatchday(
         availableMatchdays[newIndex]
       );
+      setMessage("");
     }
   }
 
@@ -343,7 +326,7 @@ export default function Wedstrijden() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#f4f7f5",
+        background: "#f3f6f4",
         color: "#111",
         fontFamily: "Arial, Helvetica, sans-serif",
       }}
@@ -351,14 +334,14 @@ export default function Wedstrijden() {
       <section
         style={{
           background:
-            "linear-gradient(135deg, #03140c 0%, #082b1a 100%)",
+            "linear-gradient(135deg, #03140c 0%, #0a2b1b 100%)",
           color: "white",
-          padding: "45px 20px 40px",
+          padding: "48px 20px 44px",
         }}
       >
         <div
           style={{
-            maxWidth: "1200px",
+            maxWidth: "1050px",
             margin: "0 auto",
           }}
         >
@@ -366,15 +349,16 @@ export default function Wedstrijden() {
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: "8px",
+              gap: "7px",
               padding: "7px 12px",
               borderRadius: "999px",
               background: "rgba(46,230,129,0.12)",
               border:
                 "1px solid rgba(46,230,129,0.2)",
               color: "#70f0aa",
-              fontSize: "12px",
-              fontWeight: 800,
+              fontSize: "11px",
+              fontWeight: 900,
+              letterSpacing: "0.4px",
               marginBottom: "15px",
             }}
           >
@@ -396,554 +380,606 @@ export default function Wedstrijden() {
             style={{
               margin: "10px 0 0",
               color: "#a9bbb2",
-              fontSize: "16px",
+              fontSize: "15px",
             }}
           >
-            Kies je competitie en voorspel de wedstrijden.
+            Voorspel de uitslagen en verdien punten.
           </p>
         </div>
       </section>
 
       <section
         style={{
-          maxWidth: "1200px",
+          maxWidth: "1050px",
           margin: "0 auto",
-          padding: "30px 20px 60px",
+          padding: "28px 20px 70px",
         }}
       >
         <div
           style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "20px",
+            background: "white",
+            borderRadius: "16px",
+            padding: "10px",
+            boxShadow:
+              "0 8px 28px rgba(0,0,0,0.06)",
+            overflowX: "auto",
+            marginBottom: "18px",
           }}
         >
           <div
             style={{
-              background: "white",
-              borderRadius: "18px",
-              padding: "12px",
-              boxShadow:
-                "0 8px 25px rgba(0,0,0,0.07)",
-              overflowX: "auto",
+              display: "flex",
+              gap: "6px",
+              minWidth: "max-content",
+            }}
+          >
+            {competitions.map((competition) => {
+              const active =
+                selectedCompetition === competition.code;
+
+              return (
+                <button
+                  key={competition.code}
+                  onClick={() =>
+                    changeCompetition(competition.code)
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "7px",
+                    padding: "10px 13px",
+                    borderRadius: "10px",
+                    border: active
+                      ? "1px solid rgba(11,143,77,0.18)"
+                      : "1px solid transparent",
+                    background: active
+                      ? "#e9faf1"
+                      : "transparent",
+                    color: active
+                      ? "#08763e"
+                      : "#52605a",
+                    fontSize: "13px",
+                    fontWeight: active ? 800 : 600,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <span>{competition.flag}</span>
+                  {competition.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div
+          style={{
+            background:
+              "linear-gradient(135deg, #082b1a, #104b2d)",
+            borderRadius: "18px",
+            padding: "22px 24px",
+            color: "white",
+            marginBottom: "16px",
+            boxShadow:
+              "0 10px 30px rgba(0,0,0,0.1)",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: "20px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "13px",
             }}
           >
             <div
               style={{
+                width: "48px",
+                height: "48px",
+                borderRadius: "13px",
+                background: "rgba(255,255,255,0.08)",
                 display: "flex",
-                gap: "7px",
-                minWidth: "max-content",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "25px",
               }}
             >
-              {competitions.map((competition) => {
-                const active =
-                  selectedCompetition === competition.code;
+              {selectedCompetitionData.flag}
+            </div>
 
-                return (
-                  <button
-                    key={competition.code}
-                    onClick={() =>
-                      setSelectedCompetition(
-                        competition.code
-                      )
-                    }
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                      padding: "11px 15px",
-                      borderRadius: "11px",
-                      border: active
-                        ? "1px solid rgba(46,230,129,0.35)"
-                        : "1px solid transparent",
-                      background: active
-                        ? "#e9faf1"
-                        : "transparent",
-                      color: active
-                        ? "#08763e"
-                        : "#52605a",
-                      fontSize: "14px",
-                      fontWeight: active ? 800 : 600,
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "19px",
-                      }}
-                    >
-                      {competition.flag}
-                    </span>
+            <div>
+              <div
+                style={{
+                  color: "#70f0aa",
+                  fontSize: "10px",
+                  fontWeight: 900,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.9px",
+                }}
+              >
+                Competitie
+              </div>
 
-                    {competition.name}
-                  </button>
-                );
-              })}
+              <h2
+                style={{
+                  margin: "3px 0 0",
+                  fontSize: "25px",
+                }}
+              >
+                {selectedCompetitionData.name}
+              </h2>
             </div>
           </div>
 
-          <div>
+          {!loading && currentMatches.length > 0 && (
             <div
               style={{
-                background:
-                  "linear-gradient(135deg, #0a2a1b, #0b3b25)",
-                borderRadius: "20px",
-                padding: "24px",
-                color: "white",
-                marginBottom: "20px",
-                boxShadow:
-                  "0 12px 35px rgba(0,0,0,0.12)",
+                background: "rgba(255,255,255,0.08)",
+                border:
+                  "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "12px",
+                padding: "10px 15px",
+                textAlign: "center",
               }}
             >
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "13px",
+                  color: "#70f0aa",
+                  fontSize: "10px",
+                  fontWeight: 900,
+                  textTransform: "uppercase",
                 }}
               >
-                <span style={{ fontSize: "34px" }}>
-                  {selectedCompetitionData.flag}
-                </span>
+                Ingevuld
+              </div>
 
-                <div>
-                  <div
-                    style={{
-                      color: "#70f0aa",
-                      fontSize: "11px",
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.8px",
-                    }}
-                  >
-                    Competitie
-                  </div>
-
-                  <h2
-                    style={{
-                      margin: "4px 0 0",
-                      fontSize: "27px",
-                    }}
-                  >
-                    {selectedCompetitionData.name}
-                  </h2>
-                </div>
+              <div
+                style={{
+                  marginTop: "3px",
+                  fontSize: "17px",
+                  fontWeight: 900,
+                }}
+              >
+                {filledPredictions} / {currentMatches.length}
               </div>
             </div>
+          )}
+        </div>
 
-            {loading && (
+        {loading && (
+          <div style={emptyCardStyle}>
+            <div
+              style={{
+                fontSize: "32px",
+                marginBottom: "10px",
+              }}
+            >
+              ⚽
+            </div>
+
+            <strong>Wedstrijden laden...</strong>
+          </div>
+        )}
+
+        {!loading &&
+          availableMatchdays.length === 0 && (
+            <div style={emptyCardStyle}>
+              <div
+                style={{
+                  fontSize: "34px",
+                  marginBottom: "10px",
+                }}
+              >
+                📅
+              </div>
+
+              <strong
+                style={{
+                  fontSize: "17px",
+                }}
+              >
+                Geen komende wedstrijden
+              </strong>
+
+              <p
+                style={{
+                  color: "#78827d",
+                  margin: "8px 0 0",
+                }}
+              >
+                Er zijn momenteel geen aankomende wedstrijden
+                beschikbaar voor deze competitie.
+              </p>
+            </div>
+          )}
+
+        {!loading &&
+          availableMatchdays.length > 0 && (
+            <>
               <div
                 style={{
                   background: "white",
-                  borderRadius: "18px",
-                  padding: "45px",
-                  textAlign: "center",
+                  borderRadius: "15px",
+                  padding: "10px",
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto 1fr",
+                  alignItems: "center",
+                  marginBottom: "15px",
                   boxShadow:
-                    "0 8px 25px rgba(0,0,0,0.07)",
+                    "0 6px 22px rgba(0,0,0,0.055)",
                 }}
               >
-                <div
-                  style={{
-                    fontSize: "30px",
-                    marginBottom: "10px",
-                  }}
-                >
-                  ⚽
+                <div>
+                  <button
+                    onClick={() =>
+                      changeMatchday("previous")
+                    }
+                    disabled={currentMatchdayIndex <= 0}
+                    style={navigationButtonStyle(
+                      currentMatchdayIndex <= 0
+                    )}
+                  >
+                    ← Vorige
+                  </button>
                 </div>
 
                 <div
                   style={{
-                    color: "#66736c",
-                    fontWeight: 600,
-                  }}
-                >
-                  Wedstrijden laden...
-                </div>
-              </div>
-            )}
-
-            {!loading &&
-              availableMatchdays.length === 0 && (
-                <div
-                  style={{
-                    background: "white",
-                    borderRadius: "18px",
-                    padding: "45px 25px",
                     textAlign: "center",
-                    boxShadow:
-                      "0 8px 25px rgba(0,0,0,0.07)",
                   }}
                 >
                   <div
                     style={{
-                      fontSize: "35px",
-                      marginBottom: "10px",
+                      color: "#89958e",
+                      fontSize: "10px",
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.6px",
                     }}
                   >
-                    📅
+                    Speelronde
                   </div>
 
                   <strong
                     style={{
-                      fontSize: "17px",
+                      fontSize: "20px",
                     }}
                   >
-                    Geen komende wedstrijden
+                    {selectedMatchday}
                   </strong>
-
-                  <p
-                    style={{
-                      color: "#777",
-                      marginBottom: 0,
-                    }}
-                  >
-                    Er zijn momenteel geen aankomende
-                    wedstrijden beschikbaar voor deze
-                    competitie.
-                  </p>
                 </div>
-              )}
 
-            {!loading &&
-              availableMatchdays.length > 0 && (
-                <>
-                  <div
-                    style={{
-                      background: "white",
-                      borderRadius: "18px",
-                      padding: "12px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "10px",
-                      marginBottom: "20px",
-                      boxShadow:
-                        "0 8px 25px rgba(0,0,0,0.07)",
-                    }}
+                <div
+                  style={{
+                    textAlign: "right",
+                  }}
+                >
+                  <button
+                    onClick={() =>
+                      changeMatchday("next")
+                    }
+                    disabled={
+                      currentMatchdayIndex ===
+                      availableMatchdays.length - 1
+                    }
+                    style={navigationButtonStyle(
+                      currentMatchdayIndex ===
+                        availableMatchdays.length - 1
+                    )}
                   >
-                    <button
-                      onClick={() =>
-                        changeMatchday("previous")
-                      }
-                      disabled={currentMatchdayIndex <= 0}
-                      style={{
-                        border: "none",
-                        background:
-                          currentMatchdayIndex <= 0
-                            ? "#f1f3f2"
-                            : "#e9faf1",
-                        color:
-                          currentMatchdayIndex <= 0
-                            ? "#a1aaa5"
-                            : "#08763e",
-                        borderRadius: "10px",
-                        padding: "11px 15px",
-                        fontWeight: 800,
-                        cursor:
-                          currentMatchdayIndex <= 0
-                            ? "default"
-                            : "pointer",
-                      }}
-                    >
-                      ← Vorige
-                    </button>
+                    Volgende →
+                  </button>
+                </div>
+              </div>
 
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                }}
+              >
+                {currentMatches.map((match) => {
+                  const prediction =
+                    predictions[match.id] || {
+                      home: "",
+                      away: "",
+                    };
+
+                  const date = new Date(match.utcDate);
+
+                  return (
                     <div
+                      key={match.id}
                       style={{
-                        textAlign: "center",
+                        background: "white",
+                        borderRadius: "17px",
+                        border: "1px solid #edf1ee",
+                        overflow: "hidden",
+                        boxShadow:
+                          "0 7px 24px rgba(0,0,0,0.055)",
                       }}
                     >
                       <div
                         style={{
-                          color: "#89958e",
-                          fontSize: "11px",
-                          fontWeight: 800,
-                          textTransform: "uppercase",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          padding: "11px 18px",
+                          background: "#fafcfb",
+                          borderBottom:
+                            "1px solid #edf1ee",
+                          color: "#7d8982",
+                          fontSize: "12px",
+                          fontWeight: 700,
                         }}
                       >
-                        Speelronde
+                        <span>
+                          {date.toLocaleDateString(
+                            "nl-NL",
+                            {
+                              weekday: "short",
+                              day: "numeric",
+                              month: "short",
+                            }
+                          )}
+                        </span>
+
+                        <span>
+                          {date.toLocaleTimeString(
+                            "nl-NL",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )}
+                        </span>
                       </div>
 
-                      <strong
+                      <div
                         style={{
-                          fontSize: "20px",
+                          padding: "23px 22px 21px",
                         }}
                       >
-                        {selectedMatchday}
-                      </strong>
-                    </div>
-
-                    <button
-                      onClick={() =>
-                        changeMatchday("next")
-                      }
-                      disabled={
-                        currentMatchdayIndex ===
-                        availableMatchdays.length - 1
-                      }
-                      style={{
-                        border: "none",
-                        background:
-                          currentMatchdayIndex ===
-                          availableMatchdays.length - 1
-                            ? "#f1f3f2"
-                            : "#e9faf1",
-                        color:
-                          currentMatchdayIndex ===
-                          availableMatchdays.length - 1
-                            ? "#a1aaa5"
-                            : "#08763e",
-                        borderRadius: "10px",
-                        padding: "11px 15px",
-                        fontWeight: 800,
-                        cursor:
-                          currentMatchdayIndex ===
-                          availableMatchdays.length - 1
-                            ? "default"
-                            : "pointer",
-                      }}
-                    >
-                      Volgende →
-                    </button>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "14px",
-                    }}
-                  >
-                    {currentMatches.map((match) => {
-                      const prediction =
-                        predictions[match.id] || {
-                          home: "",
-                          away: "",
-                        };
-
-                      const date = new Date(match.utcDate);
-
-                      return (
                         <div
-                          key={match.id}
                           style={{
-                            background: "white",
-                            borderRadius: "18px",
-                            padding: "20px",
-                            boxShadow:
-                              "0 8px 25px rgba(0,0,0,0.07)",
+                            display: "grid",
+                            gridTemplateColumns:
+                              "minmax(0,1fr) 150px minmax(0,1fr)",
+                            alignItems: "center",
+                            gap: "18px",
                           }}
                         >
+                          <Team
+                            name={match.homeTeam.name}
+                            crest={match.homeTeam.crest}
+                            side="home"
+                          />
+
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-between",
+                              justifyContent: "center",
                               alignItems: "center",
-                              marginBottom: "18px",
+                              gap: "8px",
                             }}
                           >
-                            <span
-                              style={{
-                                color: "#849089",
-                                fontSize: "13px",
-                                fontWeight: 700,
-                              }}
-                            >
-                              {date.toLocaleDateString(
-                                "nl-NL",
-                                {
-                                  weekday: "short",
-                                  day: "numeric",
-                                  month: "short",
-                                }
-                              )}
-                            </span>
-
-                            <span
-                              style={{
-                                color: "#849089",
-                                fontSize: "13px",
-                                fontWeight: 700,
-                              }}
-                            >
-                              {date.toLocaleTimeString(
-                                "nl-NL",
-                                {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }
-                              )}
-                            </span>
-                          </div>
-
-                          <div
-                            style={{
-                              display: "grid",
-                              gridTemplateColumns:
-                                "1fr auto 1fr",
-                              alignItems: "center",
-                              gap: "15px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                textAlign: "right",
-                                fontWeight: 800,
-                                fontSize: "16px",
-                              }}
-                            >
-                              {match.homeTeam.name}
-                            </div>
-
-                            <div
-                              style={{
-                                color: "#a0aaa4",
-                                fontWeight: 900,
-                                fontSize: "12px",
-                              }}
-                            >
-                              VS
-                            </div>
-
-                            <div
-                              style={{
-                                textAlign: "left",
-                                fontWeight: 800,
-                                fontSize: "16px",
-                              }}
-                            >
-                              {match.awayTeam.name}
-                            </div>
-                          </div>
-
-                          <div
-                            style={{
-                              marginTop: "18px",
-                              paddingTop: "18px",
-                              borderTop:
-                                "1px solid #edf0ee",
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                gap: "10px",
-                              }}
-                            >
-                              <input
-                                type="number"
-                                min="0"
-                                max="20"
-                                value={prediction.home}
-                                onChange={(e) =>
-                                  updatePrediction(
-                                    match.id,
-                                    "home",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="0"
-                                style={scoreInputStyle}
-                              />
-
-                              <span
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: 800,
-                                  color: "#a0aaa4",
-                                }}
-                              >
-                                -
-                              </span>
-
-                              <input
-                                type="number"
-                                min="0"
-                                max="20"
-                                value={prediction.away}
-                                onChange={(e) =>
-                                  updatePrediction(
-                                    match.id,
-                                    "away",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="0"
-                                style={scoreInputStyle}
-                              />
-                            </div>
-
-                            <button
-                              onClick={() =>
-                                savePrediction(match)
+                            <input
+                              aria-label={`${match.homeTeam.name} score`}
+                              type="number"
+                              min="0"
+                              max="20"
+                              value={prediction.home}
+                              onChange={(e) =>
+                                updatePrediction(
+                                  match.id,
+                                  "home",
+                                  e.target.value
+                                )
                               }
+                              placeholder="0"
+                              style={scoreInputStyle}
+                            />
+
+                            <span
                               style={{
-                                marginTop: "15px",
-                                width: "100%",
-                                padding: "13px",
-                                background: "#0b8f4d",
-                                color: "white",
-                                border: "none",
-                                borderRadius: "10px",
-                                fontSize: "15px",
-                                fontWeight: 800,
-                                cursor: "pointer",
+                                fontWeight: 900,
+                                color: "#9ca7a1",
                               }}
                             >
-                              Voorspelling opslaan
-                            </button>
+                              -
+                            </span>
+
+                            <input
+                              aria-label={`${match.awayTeam.name} score`}
+                              type="number"
+                              min="0"
+                              max="20"
+                              value={prediction.away}
+                              onChange={(e) =>
+                                updatePrediction(
+                                  match.id,
+                                  "away",
+                                  e.target.value
+                                )
+                              }
+                              placeholder="0"
+                              style={scoreInputStyle}
+                            />
                           </div>
+
+                          <Team
+                            name={match.awayTeam.name}
+                            crest={match.awayTeam.crest}
+                            side="away"
+                          />
                         </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
 
-            {message && (
-              <div
-                style={{
-                  marginTop: "20px",
-                  padding: "15px 18px",
-                  background: "#e9faf1",
-                  border:
-                    "1px solid rgba(11,143,77,0.15)",
-                  borderRadius: "12px",
-                  color: "#08763e",
-                  fontWeight: 700,
-                }}
-              >
-                {message}
+                        <button
+                          onClick={() =>
+                            savePrediction(match)
+                          }
+                          style={{
+                            marginTop: "21px",
+                            width: "100%",
+                            padding: "12px",
+                            background: "#0b8f4d",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "10px",
+                            fontSize: "14px",
+                            fontWeight: 800,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Voorspelling opslaan
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
+            </>
+          )}
 
-            <p
-              style={{
-                marginTop: "30px",
-                fontSize: "12px",
-                color: "#8a948f",
-                textAlign: "center",
-              }}
-            >
-              Data provided by football-data.org
-            </p>
+        {message && (
+          <div
+            style={{
+              marginTop: "18px",
+              padding: "14px 17px",
+              background: "#e9faf1",
+              border:
+                "1px solid rgba(11,143,77,0.15)",
+              borderRadius: "12px",
+              color: "#08763e",
+              fontWeight: 700,
+              fontSize: "14px",
+            }}
+          >
+            {message}
           </div>
-        </div>
+        )}
+
+        <p
+          style={{
+            marginTop: "28px",
+            fontSize: "11px",
+            color: "#929b96",
+            textAlign: "center",
+          }}
+        >
+          Data provided by football-data.org
+        </p>
       </section>
     </main>
   );
 }
 
+function Team({
+  name,
+  crest,
+  side,
+}: {
+  name: string;
+  crest?: string;
+  side: "home" | "away";
+}) {
+  const home = side === "home";
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: home ? "row" : "row-reverse",
+        alignItems: "center",
+        justifyContent: home ? "flex-end" : "flex-end",
+        gap: "13px",
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          textAlign: home ? "right" : "left",
+          fontWeight: 800,
+          fontSize: "15px",
+          lineHeight: 1.25,
+        }}
+      >
+        {name}
+      </div>
+
+      <div
+        style={{
+          width: "48px",
+          height: "48px",
+          flexShrink: 0,
+          borderRadius: "12px",
+          background: "#f6f8f7",
+          border: "1px solid #edf0ee",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "7px",
+          boxSizing: "border-box",
+        }}
+      >
+        {crest ? (
+          <img
+            src={crest}
+            alt={`${name} logo`}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "contain",
+            }}
+          />
+        ) : (
+          <span
+            style={{
+              fontSize: "20px",
+            }}
+          >
+            ⚽
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const scoreInputStyle = {
-  width: "60px",
-  height: "48px",
+  width: "55px",
+  height: "52px",
+  boxSizing: "border-box" as const,
   border: "1px solid #dce3df",
-  borderRadius: "10px",
+  borderRadius: "11px",
   textAlign: "center" as const,
   fontSize: "20px",
-  fontWeight: 800,
+  fontWeight: 900,
   outline: "none",
+  background: "#fbfcfb",
 };
+
+const emptyCardStyle = {
+  background: "white",
+  borderRadius: "17px",
+  padding: "45px 25px",
+  textAlign: "center" as const,
+  boxShadow: "0 7px 24px rgba(0,0,0,0.055)",
+};
+
+function navigationButtonStyle(disabled: boolean) {
+  return {
+    border: "none",
+    background: disabled ? "#f1f3f2" : "#e9faf1",
+    color: disabled ? "#a1aaa5" : "#08763e",
+    borderRadius: "9px",
+    padding: "10px 14px",
+    fontWeight: 800,
+    cursor: disabled ? "default" : "pointer",
+  };
+}
