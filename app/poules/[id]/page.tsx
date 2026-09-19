@@ -55,7 +55,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Points system", predictMatches:"Predict matches", inviteFriends:"Invite friends",
     poolLeaderboard:"Pool leaderboard", onlyPoints:"Only points from {competition} count towards this pool.",
     noParticipants:"There are no participants in this pool yet.", prediction:"prediction", predictions:"predictions",
-    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID", tabLeaderboard:"Leaderboard", tabPredictions:"Predictions", tabParticipants:"Participants", predictionsTitle:"Predictions", predictionsIntro:"View or make your predictions for matches that count towards this pool.", participantsTitle:"Participants", participantsIntro:"See everyone who is taking part in this pool."
+    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID"
   },
   de: {
     notFound:"Diese Tipprunde konnte nicht gefunden werden.", loadError:"Die Daten dieser Tipprunde konnten nicht geladen werden.",
@@ -65,7 +65,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Punktesystem", predictMatches:"Spiele tippen", inviteFriends:"Freunde einladen",
     poolLeaderboard:"Tipprunden-Rangliste", onlyPoints:"Für diese Tipprunde zählen nur Punkte aus {competition}.",
     noParticipants:"In dieser Tipprunde gibt es noch keine Teilnehmer.", prediction:"Tipp", predictions:"Tipps",
-    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID", tabLeaderboard:"Rangliste", tabPredictions:"Tipps", tabParticipants:"Teilnehmer", predictionsTitle:"Tipps", predictionsIntro:"Sieh dir deine Tipps für Spiele an oder gib neue Tipps ab, die für diese Tipprunde zählen.", participantsTitle:"Teilnehmer", participantsIntro:"Sieh dir alle Teilnehmer dieser Tipprunde an."
+    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID"
   },
   es: {
     notFound:"No se ha podido encontrar este grupo.", loadError:"No se han podido cargar los datos de este grupo.",
@@ -75,7 +75,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema de puntos", predictMatches:"Pronosticar partidos", inviteFriends:"Invitar a amigos",
     poolLeaderboard:"Clasificación del grupo", onlyPoints:"Solo cuentan para este grupo los puntos de {competition}.",
     noParticipants:"Todavía no hay participantes en este grupo.", prediction:"pronóstico", predictions:"pronósticos",
-    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo", tabLeaderboard:"Clasificación", tabPredictions:"Pronósticos", tabParticipants:"Participantes", predictionsTitle:"Pronósticos", predictionsIntro:"Consulta o realiza tus pronósticos para los partidos que cuentan para este grupo.", participantsTitle:"Participantes", participantsIntro:"Consulta quién participa en este grupo."
+    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo"
   },
   fr: {
     notFound:"Cette ligue est introuvable.", loadError:"Les informations de cette ligue n’ont pas pu être chargées.",
@@ -85,7 +85,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Système de points", predictMatches:"Pronostiquer les matchs", inviteFriends:"Inviter des amis",
     poolLeaderboard:"Classement de la ligue", onlyPoints:"Seuls les points de {competition} comptent pour cette ligue.",
     noParticipants:"Il n’y a encore aucun participant dans cette ligue.", prediction:"pronostic", predictions:"pronostics",
-    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue", tabLeaderboard:"Classement", tabPredictions:"Pronostics", tabParticipants:"Participants", predictionsTitle:"Pronostics", predictionsIntro:"Consultez ou faites vos pronostics pour les matchs qui comptent pour cette ligue.", participantsTitle:"Participants", participantsIntro:"Découvrez tous les participants de cette ligue."
+    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue"
   },
   it: {
     notFound:"Questo gruppo non è stato trovato.", loadError:"Non è stato possibile caricare i dati di questo gruppo.",
@@ -95,7 +95,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema di punti", predictMatches:"Pronostica le partite", inviteFriends:"Invita amici",
     poolLeaderboard:"Classifica del gruppo", onlyPoints:"Per questo gruppo contano solo i punti di {competition}.",
     noParticipants:"Non ci sono ancora partecipanti in questo gruppo.", prediction:"pronostico", predictions:"pronostici",
-    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo", tabLeaderboard:"Classifica", tabPredictions:"Pronostici", tabParticipants:"Partecipanti", predictionsTitle:"Pronostici", predictionsIntro:"Visualizza o inserisci i pronostici per le partite valide per questo gruppo.", participantsTitle:"Partecipanti", participantsIntro:"Scopri chi partecipa a questo gruppo."
+    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo"
   },
   pt: {
     notFound:"Não foi possível encontrar este grupo.", loadError:"Não foi possível carregar os dados deste grupo.",
@@ -105,7 +105,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema de pontos", predictMatches:"Prever jogos", inviteFriends:"Convidar amigos",
     poolLeaderboard:"Classificação do grupo", onlyPoints:"Apenas os pontos de {competition} contam para este grupo.",
     noParticipants:"Ainda não há participantes neste grupo.", prediction:"previsão", predictions:"previsões",
-    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo", tabLeaderboard:"Classificação", tabPredictions:"Previsões", tabParticipants:"Participantes", predictionsTitle:"Previsões", predictionsIntro:"Vê ou faz as tuas previsões para os jogos que contam para este grupo.", participantsTitle:"Participantes", participantsIntro:"Vê quem participa neste grupo."
+    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo"
   }
 };
 
