@@ -193,6 +193,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     pools: "Pools",
     leaderboard: "Leaderboard",
     achievements: "Achievements",
+    challenges: "Challenges",
     howItWorks: "How does it work?",
     profile: "My profile",
     logout: "Log out",
