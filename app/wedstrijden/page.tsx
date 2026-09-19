@@ -64,7 +64,10 @@ type TranslationKey =
   | "loginRequired"
   | "predictionSaveFailed"
   | "predictionSaved"
-  | "predictionSaveError";
+  | "predictionSaveError"
+  | "premiumRequired"
+  | "unlockPremium"
+  | "premiumOnly";
 
 const localeByLanguage: Record<LanguageCode, string> = {
   nl: "nl-NL",
@@ -105,6 +108,9 @@ const translations: Record<
     predictionSaved: "Je voorspelling is opgeslagen.",
     predictionSaveError:
       "Er ging iets mis bij het opslaan van je voorspelling.",
+    premiumRequired: "Voor Champions League-voorspellingen heb je VoetIQ Premium nodig.",
+    unlockPremium: "Ontgrendel met VoetIQ Premium",
+    premiumOnly: "Alleen met Premium",
   },
   en: {
     matches: "Matches",
@@ -130,6 +136,9 @@ const translations: Record<
     predictionSaveFailed: "Your prediction could not be saved.",
     predictionSaved: "Your prediction has been saved.",
     predictionSaveError: "Something went wrong while saving your prediction.",
+    premiumRequired: "You need VoetIQ Premium to predict Champions League matches.",
+    unlockPremium: "Unlock with VoetIQ Premium",
+    premiumOnly: "Premium only",
   },
   de: {
     matches: "Spiele",
@@ -155,6 +164,9 @@ const translations: Record<
     predictionSaveFailed: "Dein Tipp konnte nicht gespeichert werden.",
     predictionSaved: "Dein Tipp wurde gespeichert.",
     predictionSaveError: "Beim Speichern deines Tipps ist etwas schiefgelaufen.",
+    premiumRequired: "Für Champions-League-Tipps benötigst du VoetIQ Premium.",
+    unlockPremium: "Mit VoetIQ Premium freischalten",
+    premiumOnly: "Nur mit Premium",
   },
   es: {
     matches: "Partidos",
@@ -180,6 +192,9 @@ const translations: Record<
     predictionSaveFailed: "No se ha podido guardar tu pronóstico.",
     predictionSaved: "Tu pronóstico se ha guardado.",
     predictionSaveError: "Se ha producido un error al guardar tu pronóstico.",
+    premiumRequired: "Necesitas VoetIQ Premium para pronosticar la Champions League.",
+    unlockPremium: "Desbloquear con VoetIQ Premium",
+    premiumOnly: "Solo con Premium",
   },
   fr: {
     matches: "Matchs",
@@ -207,6 +222,9 @@ const translations: Record<
     predictionSaved: "Votre pronostic a été enregistré.",
     predictionSaveError:
       "Une erreur s’est produite lors de l’enregistrement de votre pronostic.",
+    premiumRequired: "VoetIQ Premium est nécessaire pour pronostiquer la Champions League.",
+    unlockPremium: "Débloquer avec VoetIQ Premium",
+    premiumOnly: "Premium uniquement",
   },
   it: {
     matches: "Partite",
@@ -233,6 +251,9 @@ const translations: Record<
     predictionSaved: "Il tuo pronostico è stato salvato.",
     predictionSaveError:
       "Si è verificato un errore durante il salvataggio del pronostico.",
+    premiumRequired: "Serve VoetIQ Premium per pronosticare la Champions League.",
+    unlockPremium: "Sblocca con VoetIQ Premium",
+    premiumOnly: "Solo Premium",
   },
   pt: {
     matches: "Jogos",
@@ -258,6 +279,9 @@ const translations: Record<
     predictionSaveFailed: "Não foi possível guardar a tua previsão.",
     predictionSaved: "A tua previsão foi guardada.",
     predictionSaveError: "Ocorreu um erro ao guardar a tua previsão.",
+    premiumRequired: "Precisas do VoetIQ Premium para prever jogos da Champions League.",
+    unlockPremium: "Desbloquear com VoetIQ Premium",
+    premiumOnly: "Apenas Premium",
   },
 };
 
@@ -416,6 +440,8 @@ export default function Wedstrijden() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState<LanguageCode>("nl");
+  const [isPremium, setIsPremium] = useState(false);
+  const [premiumLoading, setPremiumLoading] = useState(true);
 
   const [selectedMatchday, setSelectedMatchday] =
     useState<number | null>(null);
@@ -459,6 +485,45 @@ export default function Wedstrijden() {
     return () => {
       window.removeEventListener("voetiq-language-change", handleLanguageChange);
     };
+  }, []);
+
+  useEffect(() => {
+    async function loadPremiumStatus() {
+      try {
+        setPremiumLoading(true);
+
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          setIsPremium(false);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("is_premium, premium_expires_at")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error || !data) {
+          console.error("Kon Premium-status niet laden:", error);
+          setIsPremium(false);
+          return;
+        }
+
+        const premiumNotExpired =
+          !data.premium_expires_at ||
+          new Date(data.premium_expires_at).getTime() > Date.now();
+
+        setIsPremium(data.is_premium === true && premiumNotExpired);
+      } finally {
+        setPremiumLoading(false);
+      }
+    }
+
+    loadPremiumStatus();
   }, []);
 
   useEffect(() => {
@@ -686,6 +751,11 @@ export default function Wedstrijden() {
     match: Match
   ) {
     if (savingMatchId !== null) {
+      return;
+    }
+
+    if (selectedCompetition === "CL" && !isPremium) {
+      setMessage(t("premiumRequired"));
       return;
     }
 
@@ -1096,6 +1166,11 @@ export default function Wedstrijden() {
                 {
                   selectedCompetitionData.name
                 }
+                {selectedCompetition === "CL" && !premiumLoading && !isPremium && (
+                  <span style={{ marginLeft: "10px", fontSize: "12px", color: activeTheme.accent }}>
+                    🔒 {t("premiumOnly")}
+                  </span>
+                )}
               </h2>
             </div>
           </div>
@@ -1349,6 +1424,13 @@ export default function Wedstrijden() {
                       date.getTime() <=
                       Date.now();
 
+                    const premiumLocked =
+                      selectedCompetition === "CL" &&
+                      !premiumLoading &&
+                      !isPremium;
+
+                    const predictionLocked = locked || premiumLocked;
+
                     return (
                       <div
                         key={match.id}
@@ -1488,7 +1570,7 @@ export default function Wedstrijden() {
                                 min="0"
                                 max="20"
                                 disabled={
-                                  locked
+                                  predictionLocked
                                 }
                                 value={
                                   prediction.home
@@ -1510,7 +1592,7 @@ export default function Wedstrijden() {
                                   border: `1px solid ${activeTheme.border}`,
                                   color: "white",
                                   opacity:
-                                    locked
+                                    predictionLocked
                                       ? 0.6
                                       : 1,
                                 }}
@@ -1532,7 +1614,7 @@ export default function Wedstrijden() {
                                 min="0"
                                 max="20"
                                 disabled={
-                                  locked
+                                  predictionLocked
                                 }
                                 value={
                                   prediction.away
@@ -1554,7 +1636,7 @@ export default function Wedstrijden() {
                                   border: `1px solid ${activeTheme.border}`,
                                   color: "white",
                                   opacity:
-                                    locked
+                                    predictionLocked
                                       ? 0.6
                                       : 1,
                                 }}
@@ -1585,7 +1667,7 @@ export default function Wedstrijden() {
                             }
                             disabled={
                               isSaving ||
-                              locked
+                              predictionLocked
                             }
                             style={{
                               marginTop:
@@ -1594,7 +1676,7 @@ export default function Wedstrijden() {
                               padding:
                                 "12px",
                               background:
-                                locked
+                                predictionLocked
                                   ? "#aeb8b2"
                                   : isSaved
                                     ? "#075f35"
@@ -1610,7 +1692,7 @@ export default function Wedstrijden() {
                               fontWeight:
                                 800,
                               cursor:
-                                locked ||
+                                predictionLocked ||
                                 isSaving
                                   ? "default"
                                   : "pointer",
@@ -1620,14 +1702,37 @@ export default function Wedstrijden() {
                                   : 1,
                             }}
                           >
-                            {locked
-                              ? "Voorspelling gesloten"
-                              : isSaving
-                                ? "Opslaan..."
-                                : isSaved
-                                  ? "Voorspelling wijzigen"
-                                  : "Voorspelling opslaan"}
+                            {premiumLocked
+                              ? `🔒 ${t("premiumOnly")}`
+                              : locked
+                                ? t("predictionClosed")
+                                : isSaving
+                                  ? t("saving")
+                                  : isSaved
+                                    ? t("changePrediction")
+                                    : t("savePrediction")}
                           </button>
+
+                          {premiumLocked && (
+                            <button
+                              type="button"
+                              onClick={() => router.push("/premium")}
+                              style={{
+                                marginTop: "10px",
+                                width: "100%",
+                                padding: "12px",
+                                background: activeTheme.accent,
+                                color: "#050814",
+                                border: "none",
+                                borderRadius: "10px",
+                                fontSize: "14px",
+                                fontWeight: 900,
+                                cursor: "pointer",
+                              }}
+                            >
+                              👑 {t("unlockPremium")}
+                            </button>
+                          )}
                         </div>
                       </div>
                     );
