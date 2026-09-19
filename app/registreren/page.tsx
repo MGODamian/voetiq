@@ -1,4 +1,4 @@
-"use client";
+  "use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -362,6 +362,10 @@ export default function RegistrerenPage() {
   const t = ui[language];
 
   function getSafeRedirect() {
+    if (typeof window === "undefined") {
+      return "/";
+    }
+
     const params = new URLSearchParams(window.location.search);
     const requestedRedirect = params.get("redirect");
 
