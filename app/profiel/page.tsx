@@ -180,6 +180,96 @@ const profileUi = {
   }
 } satisfies Record<LanguageCode, Record<string, any>>;
 
+const activityUi: Record<LanguageCode, {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  noActivity: string;
+  exact: (match: string, points: number) => string;
+  correct: (match: string, points: number) => string;
+  played: (match: string) => string;
+  achievement: (name: string) => string;
+  promotion: (rank: string) => string;
+}> = {
+  nl: {
+    eyebrow: "Activiteit",
+    title: "Jouw laatste activiteit",
+    intro: "Je nieuwste resultaten, mijlpalen en promoties op één plek.",
+    noActivity: "Nog geen activiteit om te tonen.",
+    exact: (match, points) => `Exacte score bij ${match} · +${points} punten`,
+    correct: (match, points) => `Juiste uitslag bij ${match} · +${points} punten`,
+    played: (match) => `Uitslag verwerkt voor ${match}`,
+    achievement: (name) => `Achievement behaald: ${name}`,
+    promotion: (rank) => `Gepromoveerd naar ${rank}`,
+  },
+  en: {
+    eyebrow: "Activity",
+    title: "Your latest activity",
+    intro: "Your newest results, milestones and promotions in one place.",
+    noActivity: "No activity to show yet.",
+    exact: (match, points) => `Exact score for ${match} · +${points} points`,
+    correct: (match, points) => `Correct result for ${match} · +${points} points`,
+    played: (match) => `Result processed for ${match}`,
+    achievement: (name) => `Achievement unlocked: ${name}`,
+    promotion: (rank) => `Promoted to ${rank}`,
+  },
+  de: {
+    eyebrow: "Aktivität",
+    title: "Deine neuesten Aktivitäten",
+    intro: "Deine neuesten Ergebnisse, Meilensteine und Aufstiege auf einen Blick.",
+    noActivity: "Noch keine Aktivität vorhanden.",
+    exact: (match, points) => `Exaktes Ergebnis bei ${match} · +${points} Punkte`,
+    correct: (match, points) => `Richtiger Ausgang bei ${match} · +${points} Punkte`,
+    played: (match) => `Ergebnis für ${match} verarbeitet`,
+    achievement: (name) => `Erfolg freigeschaltet: ${name}`,
+    promotion: (rank) => `Aufgestiegen zu ${rank}`,
+  },
+  es: {
+    eyebrow: "Actividad",
+    title: "Tu actividad reciente",
+    intro: "Tus resultados, hitos y ascensos más recientes en un solo lugar.",
+    noActivity: "Aún no hay actividad para mostrar.",
+    exact: (match, points) => `Marcador exacto en ${match} · +${points} puntos`,
+    correct: (match, points) => `Resultado correcto en ${match} · +${points} puntos`,
+    played: (match) => `Resultado procesado para ${match}`,
+    achievement: (name) => `Logro desbloqueado: ${name}`,
+    promotion: (rank) => `Ascenso a ${rank}`,
+  },
+  fr: {
+    eyebrow: "Activité",
+    title: "Ton activité récente",
+    intro: "Tes derniers résultats, étapes et promotions au même endroit.",
+    noActivity: "Aucune activité à afficher pour le moment.",
+    exact: (match, points) => `Score exact pour ${match} · +${points} points`,
+    correct: (match, points) => `Bon résultat pour ${match} · +${points} points`,
+    played: (match) => `Résultat traité pour ${match}`,
+    achievement: (name) => `Succès débloqué : ${name}`,
+    promotion: (rank) => `Promotion vers ${rank}`,
+  },
+  it: {
+    eyebrow: "Attività",
+    title: "Le tue attività recenti",
+    intro: "I tuoi ultimi risultati, traguardi e promozioni in un unico posto.",
+    noActivity: "Nessuna attività da mostrare.",
+    exact: (match, points) => `Risultato esatto in ${match} · +${points} punti`,
+    correct: (match, points) => `Esito corretto in ${match} · +${points} punti`,
+    played: (match) => `Risultato elaborato per ${match}`,
+    achievement: (name) => `Obiettivo sbloccato: ${name}`,
+    promotion: (rank) => `Promosso a ${rank}`,
+  },
+  pt: {
+    eyebrow: "Atividade",
+    title: "A tua atividade recente",
+    intro: "Os teus resultados, marcos e promoções mais recentes num só lugar.",
+    noActivity: "Ainda não há atividade para mostrar.",
+    exact: (match, points) => `Resultado exato em ${match} · +${points} pontos`,
+    correct: (match, points) => `Resultado correto em ${match} · +${points} pontos`,
+    played: (match) => `Resultado processado para ${match}`,
+    achievement: (name) => `Conquista desbloqueada: ${name}`,
+    promotion: (rank) => `Promovido a ${rank}`,
+  },
+};
+
 const footballRanks: FootballRank[] = [
   { min: 0, max: 49, icon: "🟤", names: { nl:"Straatvoetballer", en:"Street Footballer", de:"Straßenfußballer", es:"Futbolista callejero", fr:"Footballeur de rue", it:"Calciatore di strada", pt:"Futebolista de rua" } },
   { min: 50, max: 99, icon: "🟢", names: { nl:"Jeugdspeler", en:"Youth Player", de:"Jugendspieler", es:"Jugador juvenil", fr:"Joueur junior", it:"Giocatore giovanile", pt:"Jogador juvenil" } },
@@ -372,6 +462,57 @@ export default function ProfielPage() {
   const pointsNeeded = nextFootballRank ? Math.max(0, nextFootballRank.min - totalPoints) : 0;
   const rui = rankUi[language];
   const t = profileUi[language];
+  const aui = activityUi[language];
+
+  const isCorrectResult = (prediction: Prediction) => {
+    if (
+      prediction.actual_home_score === null ||
+      prediction.actual_away_score === null
+    ) {
+      return false;
+    }
+
+    const predicted =
+      prediction.home_score === prediction.away_score
+        ? "draw"
+        : prediction.home_score > prediction.away_score
+          ? "home"
+          : "away";
+
+    const actual =
+      prediction.actual_home_score === prediction.actual_away_score
+        ? "draw"
+        : prediction.actual_home_score > prediction.actual_away_score
+          ? "home"
+          : "away";
+
+    return predicted === actual;
+  };
+
+  const activityItems = predictions
+    .filter(
+      (prediction) =>
+        prediction.actual_home_score !== null &&
+        prediction.actual_away_score !== null
+    )
+    .slice(0, 5)
+    .map((prediction) => {
+      const exact =
+        prediction.home_score === prediction.actual_home_score &&
+        prediction.away_score === prediction.actual_away_score;
+      const correct = isCorrectResult(prediction);
+
+      return {
+        id: `prediction-${prediction.id}`,
+        icon: exact ? "🎯" : correct ? "✅" : "⚽",
+        title: exact
+          ? aui.exact(prediction.match_name, prediction.points || 0)
+          : correct
+            ? aui.correct(prediction.match_name, prediction.points || 0)
+            : aui.played(prediction.match_name),
+        date: prediction.created_at,
+      };
+    });
 
   const totalPredictions = predictions.length;
 
@@ -693,6 +834,47 @@ export default function ProfielPage() {
                     {nextFootballRank ? rui.needed(pointsNeeded) : rui.highest}
                   </p>
                 </div>
+              </section>
+
+              <section className="mt-8 rounded-3xl border border-green-400/10 bg-white/[0.035] p-6 sm:p-7">
+                <div className="mb-5">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
+                    {aui.eyebrow}
+                  </p>
+                  <h2 className="mt-1 text-2xl font-black">
+                    {aui.title}
+                  </h2>
+                  <p className="mt-1 text-sm text-green-100/50">
+                    {aui.intro}
+                  </p>
+                </div>
+
+                {activityItems.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-black/10 px-5 py-8 text-center text-sm text-green-100/50">
+                    {aui.noActivity}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {activityItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-4"
+                      >
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-500/10 text-xl ring-1 ring-green-400/10">
+                          {item.icon}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-white">
+                            {item.title}
+                          </p>
+                          <p className="mt-1 text-xs text-green-100/35">
+                            {formatDate(item.date)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </section>
 
               <section className="mt-8">
