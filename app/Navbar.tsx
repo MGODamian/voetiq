@@ -12,6 +12,7 @@ type NavbarTranslation = {
   matches: string;
   pools: string;
   leaderboard: string;
+  achievements: string;
   howItWorks: string;
   profile: string;
   logout: string;
@@ -42,6 +43,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     matches: "Wedstrijden",
     pools: "Poules",
     leaderboard: "Ranglijst",
+    achievements: "Achievements",
     howItWorks: "Hoe werkt het?",
     profile: "Mijn profiel",
     logout: "Uitloggen",
@@ -55,6 +57,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     matches: "Matches",
     pools: "Pools",
     leaderboard: "Leaderboard",
+    achievements: "Achievements",
     howItWorks: "How does it work?",
     profile: "My profile",
     logout: "Log out",
@@ -68,6 +71,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     matches: "Spiele",
     pools: "Tipprunden",
     leaderboard: "Rangliste",
+    achievements: "Erfolge",
     howItWorks: "Wie funktioniert es?",
     profile: "Mein Profil",
     logout: "Abmelden",
@@ -81,6 +85,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     matches: "Partidos",
     pools: "Grupos",
     leaderboard: "Clasificación",
+    achievements: "Logros",
     howItWorks: "¿Cómo funciona?",
     profile: "Mi perfil",
     logout: "Cerrar sesión",
@@ -94,6 +99,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     matches: "Matchs",
     pools: "Ligues",
     leaderboard: "Classement",
+    achievements: "Succès",
     howItWorks: "Comment ça marche ?",
     profile: "Mon profil",
     logout: "Se déconnecter",
@@ -107,6 +113,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     matches: "Partite",
     pools: "Gruppi",
     leaderboard: "Classifica",
+    achievements: "Obiettivi",
     howItWorks: "Come funziona?",
     profile: "Il mio profilo",
     logout: "Esci",
@@ -120,6 +127,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     matches: "Jogos",
     pools: "Grupos",
     leaderboard: "Classificação",
+    achievements: "Conquistas",
     howItWorks: "Como funciona?",
     profile: "O meu perfil",
     logout: "Terminar sessão",
@@ -253,6 +261,14 @@ export default function Navbar() {
               active={isActive("/ranglijst")}
             />
 
+            {loggedIn && (
+              <NavLink
+                href="/achievements"
+                label={`🏅 ${t.achievements}`}
+                active={isActive("/achievements")}
+              />
+            )}
+
             <NavLink
               href="/hoe-werkt-het"
               label={t.howItWorks}
@@ -362,6 +378,12 @@ export default function Navbar() {
             <Link href="/ranglijst" onClick={() => setMobileOpen(false)}>
               {t.leaderboard}
             </Link>
+
+            {loggedIn && (
+              <Link href="/achievements" onClick={() => setMobileOpen(false)}>
+                🏅 {t.achievements}
+              </Link>
+            )}
 
             <Link
               href="/hoe-werkt-het"
