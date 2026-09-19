@@ -251,6 +251,35 @@ export default function PoolDetailPage() {
     }
   }
 
+  async function inviteFriends() {
+    if (!pool) return;
+
+    const inviteUrl = `${window.location.origin}/poules/join/${encodeURIComponent(
+      pool.invite_code
+    )}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: pool.name,
+          text: `Doe mee met mijn VoetIQ-poule "${pool.name}"!`,
+          url: inviteUrl,
+        });
+        return;
+      }
+
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+      console.error(error);
+    }
+  }
+
   function getMedal(index: number) {
     if (index === 0) return "🥇";
     if (index === 1) return "🥈";
@@ -547,7 +576,7 @@ export default function PoolDetailPage() {
             </button>
 
             <button
-              onClick={copyInviteCode}
+              onClick={inviteFriends}
               style={{
                 border: "1px solid #d6dfd9",
                 borderRadius: "11px",
