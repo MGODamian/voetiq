@@ -1241,7 +1241,8 @@ export default function Wedstrijden() {
                     }
                     style={navigationButtonStyle(
                       currentMatchdayIndex <=
-                        0
+                        0,
+                        activeTheme
                     )}
                   >
                     ← {t("previous")}
@@ -1303,7 +1304,8 @@ export default function Wedstrijden() {
                     style={navigationButtonStyle(
                       currentMatchdayIndex ===
                         availableMatchdays.length -
-                          1
+                          1,
+                          activeTheme
                     )}
                   >
                     {t("next")} →
