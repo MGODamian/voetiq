@@ -339,7 +339,7 @@ export default function PoulesPage() {
       <main
         style={{
           minHeight: "100vh",
-          background: "#f4f7f5",
+          background: "radial-gradient(circle at 50% 0%, rgba(15, 122, 70, 0.20) 0%, transparent 32%), linear-gradient(180deg, #00170e 0%, #00110a 48%, #000d08 100%)",
           padding: "40px 20px 80px",
         }}
       >
@@ -373,7 +373,7 @@ export default function PoulesPage() {
               style={{
                 margin: 0,
                 fontSize: "42px",
-                color: "#10251a",
+                color: "white",
               }}
             >
               VoetIQ {t("pools")}
@@ -381,7 +381,7 @@ export default function PoulesPage() {
 
             <p
               style={{
-                color: "#617067",
+                color: "#a9bbb0",
                 fontSize: "17px",
                 marginTop: "10px",
               }}
@@ -641,7 +641,7 @@ export default function PoulesPage() {
           <section>
             <h2
               style={{
-                color: "#10251a",
+                color: "white",
                 marginBottom: "18px",
                 fontSize: "27px",
               }}
@@ -650,7 +650,7 @@ export default function PoulesPage() {
             </h2>
 
             {loading ? (
-              <p>{t("loadingPools")}</p>
+              <p style={{ color: "#a9bbb0" }}>{t("loadingPools")}</p>
             ) : pools.length === 0 ? (
               <div
                 style={{
