@@ -669,7 +669,7 @@ export default function PoolDetailPage() {
 
           <section
             style={{
-              background: (competitionThemes[pool.competition_code] || competitionThemes.DED).hero,
+              background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
               color: "white",
               borderRadius: "24px",
               padding: "32px",
@@ -859,10 +859,10 @@ export default function PoolDetailPage() {
           {activeTab === "leaderboard" && (
           <section
             style={{
-              background: "white",
+              background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
               borderRadius: "20px",
               overflow: "hidden",
-              border: "1px solid #e3e9e5",
+              border: "1px solid rgba(80,190,130,0.20)",
               boxShadow:
                 "0 8px 30px rgba(0,0,0,0.04)",
             }}
@@ -870,13 +870,13 @@ export default function PoolDetailPage() {
             <div
               style={{
                 padding: "22px 24px",
-                borderBottom: "1px solid #e8eeea",
+                borderBottom: "1px solid rgba(255,255,255,0.08)",
               }}
             >
               <h2
                 style={{
                   margin: 0,
-                  color: "#10251a",
+                  color: "white",
                   fontSize: "25px",
                 }}
               >
@@ -886,7 +886,7 @@ export default function PoolDetailPage() {
               <p
                 style={{
                   margin: "6px 0 0",
-                  color: "#738078",
+                  color: "#a9bbb0",
                   fontSize: "14px",
                 }}
               >
@@ -918,7 +918,7 @@ export default function PoolDetailPage() {
                     borderBottom:
                       index === leaderboard.length - 1
                         ? "none"
-                        : "1px solid #edf1ee",
+                        : "1px solid rgba(255,255,255,0.08)",
                   }}
                 >
                   <div
