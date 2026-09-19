@@ -7,6 +7,29 @@ import { supabase } from "@/lib/supabase";
 
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
+type NotificationItem = {
+  id: string;
+  icon: string;
+  text: string;
+  createdAt: string;
+};
+
+const notificationCopy: Record<LanguageCode, {
+  title: string;
+  empty: string;
+  markRead: string;
+  points: (points: number, match: string) => string;
+  exact: (match: string) => string;
+}> = {
+  nl: { title:"Meldingen", empty:"Je hebt nog geen meldingen.", markRead:"Alles gelezen", points:(p,m)=>`+${p} punten verdiend bij ${m}`, exact:m=>`Exacte score voorspeld bij ${m}` },
+  en: { title:"Notifications", empty:"You don't have any notifications yet.", markRead:"Mark all read", points:(p,m)=>`Earned +${p} points for ${m}`, exact:m=>`Exact score predicted for ${m}` },
+  de: { title:"Benachrichtigungen", empty:"Du hast noch keine Benachrichtigungen.", markRead:"Alle gelesen", points:(p,m)=>`+${p} Punkte bei ${m} verdient`, exact:m=>`Exaktes Ergebnis bei ${m} getippt` },
+  es: { title:"Notificaciones", empty:"Aún no tienes notificaciones.", markRead:"Marcar todo como leído", points:(p,m)=>`Has ganado +${p} puntos en ${m}`, exact:m=>`Marcador exacto pronosticado en ${m}` },
+  fr: { title:"Notifications", empty:"Tu n’as encore aucune notification.", markRead:"Tout marquer comme lu", points:(p,m)=>`+${p} points gagnés pour ${m}`, exact:m=>`Score exact pronostiqué pour ${m}` },
+  it: { title:"Notifiche", empty:"Non hai ancora notifiche.", markRead:"Segna tutto come letto", points:(p,m)=>`+${p} punti guadagnati in ${m}`, exact:m=>`Risultato esatto pronosticato in ${m}` },
+  pt: { title:"Notificações", empty:"Ainda não tens notificações.", markRead:"Marcar tudo como lido", points:(p,m)=>`+${p} pontos ganhos em ${m}`, exact:m=>`Resultado exato previsto em ${m}` },
+};
+
 type PromotionCopy = {
   title: string;
   promoted: string;
@@ -193,8 +216,12 @@ export default function Navbar() {
   const [promotionRankIndex, setPromotionRankIndex] = useState<number | null>(null);
   const [promotionPoints, setPromotionPoints] = useState(0);
   const [promotionUserId, setPromotionUserId] = useState("");
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [readNotificationIds, setReadNotificationIds] = useState<string[]>([]);
 
   const languageRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   const t = translations[language];
   const currentLanguage =
@@ -220,9 +247,12 @@ export default function Navbar() {
 
       if (session?.user) {
         void checkPromotion(session.user.id);
+        void loadNotifications(session.user.id);
       } else {
         setPromotionRankIndex(null);
         setPromotionUserId("");
+        setNotifications([]);
+        setReadNotificationIds([]);
       }
     });
 
@@ -238,6 +268,13 @@ export default function Navbar() {
         !languageRef.current.contains(event.target as Node)
       ) {
         setLanguageOpen(false);
+      }
+
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target as Node)
+      ) {
+        setNotificationsOpen(false);
       }
     }
 
@@ -256,7 +293,78 @@ export default function Navbar() {
     setLoggedIn(!!user);
 
     if (user) {
-      await checkPromotion(user.id);
+      await Promise.all([
+        checkPromotion(user.id),
+        loadNotifications(user.id),
+      ]);
+    }
+  }
+
+  async function loadNotifications(userId: string) {
+    const { data, error } = await supabase
+      .from("predictions")
+      .select("id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at")
+      .eq("user_id", userId)
+      .not("actual_home_score", "is", null)
+      .not("actual_away_score", "is", null)
+      .order("created_at", { ascending: false })
+      .limit(8);
+
+    if (error) {
+      console.error("Kon meldingen niet laden:", error);
+      return;
+    }
+
+    const copy = notificationCopy[language];
+    const items: NotificationItem[] = [];
+
+    for (const row of data || []) {
+      const points = Number(row.points || 0);
+      const exact =
+        row.home_score === row.actual_home_score &&
+        row.away_score === row.actual_away_score;
+
+      if (exact) {
+        items.push({
+          id: `exact-${row.id}`,
+          icon: "🎯",
+          text: copy.exact(row.match_name),
+          createdAt: row.created_at,
+        });
+      }
+
+      if (points > 0) {
+        items.push({
+          id: `points-${row.id}`,
+          icon: "⚽",
+          text: copy.points(points, row.match_name),
+          createdAt: row.created_at,
+        });
+      }
+    }
+
+    setNotifications(items.slice(0, 8));
+
+    const stored = window.localStorage.getItem(`voetiq-read-notifications-${userId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) setReadNotificationIds(parsed);
+      } catch {
+        setReadNotificationIds([]);
+      }
+    }
+  }
+
+  function markAllNotificationsRead() {
+    const ids = notifications.map((item) => item.id);
+    setReadNotificationIds(ids);
+
+    if (promotionUserId) {
+      window.localStorage.setItem(
+        `voetiq-read-notifications-${promotionUserId}`,
+        JSON.stringify(ids)
+      );
     }
   }
 
@@ -377,6 +485,60 @@ export default function Navbar() {
           </nav>
 
           <div className="desktop-account">
+            {loggedIn && (
+              <div className="notification-picker" ref={notificationRef}>
+                <button
+                  type="button"
+                  className="notification-button"
+                  onClick={() => setNotificationsOpen((current) => !current)}
+                  aria-label={notificationCopy[language].title}
+                  aria-expanded={notificationsOpen}
+                >
+                  <span>🔔</span>
+                  {notifications.filter((item) => !readNotificationIds.includes(item.id)).length > 0 && (
+                    <span className="notification-count">
+                      {Math.min(9, notifications.filter((item) => !readNotificationIds.includes(item.id)).length)}
+                    </span>
+                  )}
+                </button>
+
+                {notificationsOpen && (
+                  <div className="notification-dropdown">
+                    <div className="notification-header">
+                      <strong>{notificationCopy[language].title}</strong>
+                      {notifications.length > 0 && (
+                        <button type="button" onClick={markAllNotificationsRead}>
+                          {notificationCopy[language].markRead}
+                        </button>
+                      )}
+                    </div>
+
+                    {notifications.length === 0 ? (
+                      <div className="notification-empty">
+                        {notificationCopy[language].empty}
+                      </div>
+                    ) : (
+                      <div className="notification-list">
+                        {notifications.map((item) => (
+                          <div
+                            key={item.id}
+                            className={
+                              readNotificationIds.includes(item.id)
+                                ? "notification-item"
+                                : "notification-item unread"
+                            }
+                          >
+                            <span className="notification-icon">{item.icon}</span>
+                            <span>{item.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="language-picker" ref={languageRef}>
               <button
                 type="button"
@@ -492,6 +654,21 @@ export default function Navbar() {
               {t.howItWorks}
             </Link>
 
+            {loggedIn && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNotificationsOpen(true);
+                  setMobileOpen(false);
+                }}
+              >
+                🔔 {notificationCopy[language].title}
+                {notifications.filter((item) => !readNotificationIds.includes(item.id)).length > 0
+                  ? ` (${notifications.filter((item) => !readNotificationIds.includes(item.id)).length})`
+                  : ""}
+              </button>
+            )}
+
             <div className="mobile-divider" />
 
             <div className="mobile-language-title">
@@ -550,6 +727,37 @@ export default function Navbar() {
           </div>
         )}
       </header>
+
+      {loggedIn && notificationsOpen && (
+        <div className="mobile-notification-panel">
+          <div className="notification-header">
+            <strong>{notificationCopy[language].title}</strong>
+            <div className="mobile-notification-actions">
+              {notifications.length > 0 && (
+                <button type="button" onClick={markAllNotificationsRead}>
+                  {notificationCopy[language].markRead}
+                </button>
+              )}
+              <button type="button" onClick={() => setNotificationsOpen(false)}>✕</button>
+            </div>
+          </div>
+          {notifications.length === 0 ? (
+            <div className="notification-empty">{notificationCopy[language].empty}</div>
+          ) : (
+            <div className="notification-list">
+              {notifications.map((item) => (
+                <div
+                  key={`mobile-${item.id}`}
+                  className={readNotificationIds.includes(item.id) ? "notification-item" : "notification-item unread"}
+                >
+                  <span className="notification-icon">{item.icon}</span>
+                  <span>{item.text}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {promotionRankIndex !== null && (
         <div className="promotion-overlay" role="dialog" aria-modal="true">
@@ -675,6 +883,117 @@ export default function Navbar() {
           align-items: center;
           gap: 8px;
           white-space: nowrap;
+        }
+
+        .notification-picker {
+          position: relative;
+        }
+
+        .notification-button {
+          position: relative;
+          width: 39px;
+          height: 39px;
+          display: grid;
+          place-items: center;
+          border: 1px solid rgba(255,255,255,0.12);
+          background: rgba(255,255,255,0.05);
+          border-radius: 9px;
+          cursor: pointer;
+          font-size: 16px;
+        }
+
+        .notification-count {
+          position: absolute;
+          top: -5px;
+          right: -5px;
+          min-width: 18px;
+          height: 18px;
+          padding: 0 4px;
+          display: grid;
+          place-items: center;
+          border-radius: 999px;
+          background: #2ee681;
+          color: #052c1b;
+          font-size: 10px;
+          font-weight: 950;
+          box-shadow: 0 0 0 3px #04160e;
+        }
+
+        .notification-dropdown,
+        .mobile-notification-panel {
+          color: #eef8f2;
+          background: #061b11;
+          border: 1px solid rgba(46,230,129,0.18);
+          box-shadow: 0 22px 60px rgba(0,0,0,0.45);
+        }
+
+        .notification-dropdown {
+          position: absolute;
+          top: calc(100% + 10px);
+          right: 0;
+          width: min(390px, 88vw);
+          border-radius: 15px;
+          overflow: hidden;
+        }
+
+        .notification-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 14px 15px;
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+
+        .notification-header button {
+          border: 0;
+          background: transparent;
+          color: #55ed98;
+          font-size: 11px;
+          font-weight: 900;
+          cursor: pointer;
+        }
+
+        .notification-list {
+          max-height: 380px;
+          overflow-y: auto;
+        }
+
+        .notification-item {
+          display: grid;
+          grid-template-columns: 30px 1fr;
+          gap: 9px;
+          padding: 13px 15px;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          color: #b9c9c0;
+          font-size: 12px;
+          line-height: 1.45;
+        }
+
+        .notification-item.unread {
+          background: rgba(46,230,129,0.07);
+          color: #f2fff7;
+        }
+
+        .notification-icon {
+          font-size: 18px;
+        }
+
+        .notification-empty {
+          padding: 28px 18px;
+          text-align: center;
+          color: #8fa79a;
+          font-size: 12px;
+        }
+
+        .mobile-notification-panel {
+          display: none;
+        }
+
+        .mobile-notification-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
         }
 
         .language-picker {
@@ -981,6 +1300,18 @@ export default function Navbar() {
 
           .mobile-menu-button {
             display: flex;
+          }
+
+          .mobile-notification-panel {
+            display: block;
+            position: fixed;
+            z-index: 1500;
+            top: 76px;
+            left: 16px;
+            right: 16px;
+            max-height: 70vh;
+            overflow: hidden;
+            border-radius: 15px;
           }
 
           .mobile-menu {
