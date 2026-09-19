@@ -147,6 +147,7 @@ type NavbarTranslation = {
   leaderboard: string;
   achievements: string;
   challenges: string;
+  premium: string;
   howItWorks: string;
   profile: string;
   logout: string;
@@ -179,6 +180,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Ranglijst",
     achievements: "Achievements",
     challenges: "Challenges",
+    premium: "Premium",
     howItWorks: "Hoe werkt het?",
     profile: "Mijn profiel",
     logout: "Uitloggen",
@@ -194,6 +196,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Leaderboard",
     achievements: "Achievements",
     challenges: "Challenges",
+    premium: "Premium",
     howItWorks: "How does it work?",
     profile: "My profile",
     logout: "Log out",
@@ -209,6 +212,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Rangliste",
     achievements: "Erfolge",
     challenges: "Challenges",
+    premium: "Premium",
     howItWorks: "Wie funktioniert es?",
     profile: "Mein Profil",
     logout: "Abmelden",
@@ -224,6 +228,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Clasificación",
     achievements: "Logros",
     challenges: "Desafíos",
+    premium: "Premium",
     howItWorks: "¿Cómo funciona?",
     profile: "Mi perfil",
     logout: "Cerrar sesión",
@@ -239,6 +244,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Classement",
     achievements: "Succès",
     challenges: "Défis",
+    premium: "Premium",
     howItWorks: "Comment ça marche ?",
     profile: "Mon profil",
     logout: "Se déconnecter",
@@ -254,6 +260,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Classifica",
     achievements: "Obiettivi",
     challenges: "Sfide",
+    premium: "Premium",
     howItWorks: "Come funziona?",
     profile: "Il mio profilo",
     logout: "Esci",
@@ -269,6 +276,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Classificação",
     achievements: "Conquistas",
     challenges: "Desafios",
+    premium: "Premium",
     howItWorks: "Como funciona?",
     profile: "O meu perfil",
     logout: "Terminar sessão",
@@ -736,6 +744,11 @@ export default function Navbar() {
                   label={`🔥 ${t.challenges}`}
                   active={isActive("/challenges")}
                 />
+                <NavLink
+                  href="/premium"
+                  label={`👑 ${t.premium}`}
+                  active={isActive("/premium")}
+                />
               </>
             )}
 
@@ -912,6 +925,9 @@ export default function Navbar() {
                 </Link>
                 <Link href="/challenges" onClick={() => setMobileOpen(false)}>
                   🔥 {t.challenges}
+                </Link>
+                <Link href="/premium" onClick={() => setMobileOpen(false)}>
+                  👑 {t.premium}
                 </Link>
               </>
             )}
