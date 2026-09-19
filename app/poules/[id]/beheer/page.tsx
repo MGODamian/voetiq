@@ -33,6 +33,7 @@ export default function PoolManagePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [regeneratingCode, setRegeneratingCode] = useState(false);
+  const [deletingPool, setDeletingPool] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -164,6 +165,39 @@ export default function PoolManagePage() {
 
     setMessage("✓ Nieuwe uitnodigingscode aangemaakt.");
     setRegeneratingCode(false);
+  }
+
+  async function deletePool() {
+    if (!pool) return;
+
+    const confirmed = window.confirm(
+      `Weet je zeker dat je "${pool.name}" permanent wilt verwijderen?\n\nDeze actie kan niet ongedaan worden gemaakt.`
+    );
+
+    if (!confirmed) return;
+
+    const confirmedAgain = window.confirm(
+      "Laatste controle: de poule wordt definitief verwijderd. Doorgaan?"
+    );
+
+    if (!confirmedAgain) return;
+
+    setDeletingPool(true);
+    setError("");
+    setMessage("");
+
+    const { error: deleteError } = await supabase.rpc("delete_pool", {
+      requested_pool_id: pool.id,
+    });
+
+    if (deleteError) {
+      console.error(deleteError);
+      setError(deleteError.message || "De poule kon niet worden verwijderd.");
+      setDeletingPool(false);
+      return;
+    }
+
+    router.replace("/poules");
   }
 
   return (
@@ -488,6 +522,54 @@ export default function PoolManagePage() {
                   {regeneratingCode
                     ? "Nieuwe code maken..."
                     : "🔄 Uitnodigingscode vernieuwen"}
+                </button>
+              </section>
+
+              <section
+                style={{
+                  background: "linear-gradient(145deg, #241011 0%, #120708 100%)",
+                  border: "1px solid rgba(255,95,95,0.24)",
+                  borderRadius: "20px",
+                  padding: "24px",
+                  marginTop: "18px",
+                }}
+              >
+                <h2
+                  style={{
+                    margin: "0 0 6px",
+                    fontSize: "22px",
+                    color: "#ffb4b4",
+                  }}
+                >
+                  🗑️ Poule verwijderen
+                </h2>
+
+                <p
+                  style={{
+                    margin: "0 0 18px",
+                    color: "#c99b9b",
+                    fontSize: "14px",
+                    lineHeight: 1.55,
+                  }}
+                >
+                  Verwijder deze poule permanent. De poule verdwijnt voor alle
+                  deelnemers en deze actie kan niet ongedaan worden gemaakt.
+                </p>
+
+                <button
+                  onClick={deletePool}
+                  disabled={deletingPool}
+                  style={{
+                    border: "1px solid rgba(255,95,95,0.30)",
+                    borderRadius: "11px",
+                    padding: "12px 18px",
+                    background: deletingPool ? "#35191a" : "#7d2024",
+                    color: deletingPool ? "#a87979" : "white",
+                    fontWeight: 900,
+                    cursor: deletingPool ? "default" : "pointer",
+                  }}
+                >
+                  {deletingPool ? "Poule verwijderen..." : "🗑️ Poule verwijderen"}
                 </button>
               </section>
             </>
