@@ -725,16 +725,18 @@ export default function Navbar() {
             />
 
             {loggedIn && (
-              <NavLink
-                href="/achievements"
-                label={`🏅 ${t.achievements}`}
-                active={isActive("/achievements")}
-              />
-              <NavLink
-                href="/challenges"
-                label={`🔥 ${t.challenges}`}
-                active={isActive("/challenges")}
-              />
+              <>
+                <NavLink
+                  href="/achievements"
+                  label={`🏅 ${t.achievements}`}
+                  active={isActive("/achievements")}
+                />
+                <NavLink
+                  href="/challenges"
+                  label={`🔥 ${t.challenges}`}
+                  active={isActive("/challenges")}
+                />
+              </>
             )}
 
             <NavLink
