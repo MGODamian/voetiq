@@ -1137,8 +1137,8 @@ export default function PoolDetailPage() {
                                 display: "flex",
                                 justifyContent: "space-between",
                                 padding: "10px 15px",
-                                background: isSaved ? "#f3fcf7" : "#fafcfb",
-                                color: "#7d8982",
+                                background: "#06271a",
+                                color: "#b7c9bf",
                                 fontSize: "12px",
                                 fontWeight: 700,
                               }}
@@ -1206,13 +1206,11 @@ export default function PoolDetailPage() {
                               <button
                                 onClick={() => togglePoolPredictions(match)}
                                 style={{
-                                  border: hasStarted
-                                    ? "1px solid #b9dfc9"
-                                    : "1px solid #e2e7e4",
+                                  border: "1px solid rgba(65,229,139,0.16)",
                                   borderRadius: "9px",
                                   padding: "9px 13px",
-                                  background: hasStarted ? "#edf9f2" : "#f6f8f7",
-                                  color: hasStarted ? "#08783e" : "#7b8780",
+                                  background: hasStarted ? "#0b3523" : "#06271a",
+                                  color: hasStarted ? "#41e58b" : "#a9bbb0",
                                   fontWeight: 800,
                                   cursor: "pointer",
                                 }}
@@ -1228,8 +1226,8 @@ export default function PoolDetailPage() {
                             {isOpen && (
                               <div
                                 style={{
-                                  borderTop: "1px solid #e8eeea",
-                                  background: "#fbfdfc",
+                                  borderTop: "1px solid rgba(65,229,139,0.12)",
+                                  background: "#06271a",
                                   padding: "15px",
                                 }}
                               >
@@ -1278,7 +1276,7 @@ export default function PoolDetailPage() {
                                         </strong>
                                         <span
                                           style={{
-                                            color: "#7d8982",
+                                            color: "#b7c9bf",
                                             fontSize: "12px",
                                             minWidth: "54px",
                                             textAlign: "right",
@@ -1411,8 +1409,8 @@ function PoolTeam({
           height: "40px",
           flexShrink: 0,
           borderRadius: "10px",
-          background: "#f6f8f7",
-          border: "1px solid #edf0ee",
+          background: "#0b3523",
+          border: "1px solid rgba(65,229,139,0.12)",
           display: "grid",
           placeItems: "center",
           padding: "6px",
@@ -1436,8 +1434,8 @@ function PoolTeam({
 function poolNavigationButton(disabled: boolean) {
   return {
     border: "none",
-    background: disabled ? "#ecefed" : "#e9faf1",
-    color: disabled ? "#a1aaa5" : "#08763e",
+    background: disabled ? "#06271a" : "#0b3523",
+    color: disabled ? "#6f8177" : "#41e58b",
     borderRadius: "9px",
     padding: "9px 12px",
     fontWeight: 800,
