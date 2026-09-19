@@ -305,6 +305,10 @@ const competitionThemes: Record<
     card: string;
     accent: string;
     glow: string;
+    page: string;
+    surface: string;
+    surfaceSoft: string;
+    border: string;
   }
 > = {
   DED: {
@@ -312,48 +316,80 @@ const competitionThemes: Record<
     card: "linear-gradient(135deg, #071d45 0%, #0a4ba8 100%)",
     accent: "#8ac5ff",
     glow: "rgba(31,112,255,0.30)",
+    page: "#030b18",
+    surface: "#07172b",
+    surfaceSoft: "#0a2039",
+    border: "rgba(138,197,255,0.16)",
   },
   PL: {
     hero: "radial-gradient(circle at 82% 18%, rgba(216,0,255,0.35) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,255,209,0.18) 0%, transparent 28%), linear-gradient(135deg, #170020 0%, #37003c 55%, #5b075f 100%)",
     card: "linear-gradient(135deg, #24002b 0%, #52005c 100%)",
     accent: "#ef8cff",
     glow: "rgba(181,36,202,0.28)",
+    page: "#0d0612",
+    surface: "#1b0b22",
+    surfaceSoft: "#25102e",
+    border: "rgba(239,140,255,0.15)",
   },
   PD: {
     hero: "radial-gradient(circle at 82% 20%, rgba(255,126,38,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,43,43,0.22) 0%, transparent 28%), linear-gradient(135deg, #1b0808 0%, #641616 55%, #a52b12 100%)",
     card: "linear-gradient(135deg, #3b0c0c 0%, #9a2915 100%)",
     accent: "#ffad78",
     glow: "rgba(231,76,35,0.27)",
+    page: "#130707",
+    surface: "#251010",
+    surfaceSoft: "#321414",
+    border: "rgba(255,173,120,0.15)",
   },
   BL1: {
     hero: "radial-gradient(circle at 80% 20%, rgba(255,70,70,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,255,255,0.09) 0%, transparent 28%), linear-gradient(135deg, #190404 0%, #650909 55%, #a20e0e 100%)",
     card: "linear-gradient(135deg, #3d0606 0%, #9e1010 100%)",
     accent: "#ff8b8b",
     glow: "rgba(220,25,25,0.27)",
+    page: "#120505",
+    surface: "#260909",
+    surfaceSoft: "#330d0d",
+    border: "rgba(255,139,139,0.15)",
   },
   SA: {
     hero: "radial-gradient(circle at 80% 20%, rgba(36,131,255,0.45) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(72,205,255,0.18) 0%, transparent 28%), linear-gradient(135deg, #041326 0%, #073c78 55%, #0967b5 100%)",
     card: "linear-gradient(135deg, #062a55 0%, #0874bd 100%)",
     accent: "#8bd1ff",
     glow: "rgba(28,126,219,0.27)",
+    page: "#04101b",
+    surface: "#071d31",
+    surfaceSoft: "#092843",
+    border: "rgba(139,209,255,0.15)",
   },
   FL1: {
     hero: "radial-gradient(circle at 82% 18%, rgba(216,255,0,0.22) 0%, transparent 30%), radial-gradient(circle at 15% 80%, rgba(39,82,255,0.22) 0%, transparent 28%), linear-gradient(135deg, #071124 0%, #101f4b 55%, #19327b 100%)",
     card: "linear-gradient(135deg, #0c1837 0%, #1c3474 100%)",
     accent: "#d8ff49",
     glow: "rgba(97,119,255,0.24)",
+    page: "#050a16",
+    surface: "#0a1328",
+    surfaceSoft: "#101d3b",
+    border: "rgba(216,255,73,0.13)",
   },
   PPL: {
     hero: "radial-gradient(circle at 82% 20%, rgba(225,32,50,0.34) 0%, transparent 31%), radial-gradient(circle at 15% 80%, rgba(31,190,102,0.25) 0%, transparent 28%), linear-gradient(135deg, #061a11 0%, #0a5130 55%, #12693f 100%)",
     card: "linear-gradient(135deg, #082f1d 0%, #12653d 100%)",
     accent: "#76ecad",
     glow: "rgba(26,166,91,0.25)",
+    page: "#04110b",
+    surface: "#082218",
+    surfaceSoft: "#0b3020",
+    border: "rgba(118,236,173,0.14)",
   },
   CL: {
     hero: "radial-gradient(circle at 82% 18%, rgba(93,110,255,0.42) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(42,58,180,0.30) 0%, transparent 30%), linear-gradient(135deg, #030514 0%, #0b1240 55%, #171e68 100%)",
     card: "linear-gradient(135deg, #070b2b 0%, #192365 100%)",
     accent: "#aeb7ff",
     glow: "rgba(76,91,220,0.28)",
+    page: "#03040d",
+    surface: "#080b1d",
+    surfaceSoft: "#0d1230",
+    border: "rgba(174,183,255,0.14)",
   },
 };
 
@@ -798,8 +834,8 @@ export default function Wedstrijden() {
     <main
       style={{
         minHeight: "100vh",
-        background: "#f3f6f4",
-        color: "#111",
+        background: activeTheme.page,
+        color: "white",
         fontFamily:
           "Arial, Helvetica, sans-serif",
       }}
@@ -903,11 +939,12 @@ export default function Wedstrijden() {
       >
         <div
           style={{
-            background: "white",
+            background: activeTheme.surface,
+            border: `1px solid ${activeTheme.border}`,
             borderRadius: "16px",
             padding: "10px",
             boxShadow:
-              "0 8px 28px rgba(0,0,0,0.06)",
+              `0 8px 28px ${activeTheme.glow}`,
             overflowX: "auto",
             marginBottom:
               "18px",
@@ -1118,7 +1155,7 @@ export default function Wedstrijden() {
         </div>
 
         {loading && (
-          <div style={emptyCardStyle}>
+          <div style={{...emptyCardStyle, background: activeTheme.surface, border: `1px solid ${activeTheme.border}`, color: "white"}}>
             <div
               style={{
                 fontSize: "32px",
@@ -1136,7 +1173,7 @@ export default function Wedstrijden() {
         {!loading &&
           availableMatchdays.length ===
             0 && (
-            <div style={emptyCardStyle}>
+            <div style={{...emptyCardStyle, background: activeTheme.surface, border: `1px solid ${activeTheme.border}`, color: "white"}}>
               <div
                 style={{
                   fontSize: "34px",
@@ -1188,7 +1225,7 @@ export default function Wedstrijden() {
                   marginBottom:
                     "15px",
                   boxShadow:
-                    "0 6px 22px rgba(0,0,0,0.055)",
+                    `0 6px 22px ${activeTheme.glow}`,
                 }}
               >
                 <div>
@@ -1325,7 +1362,7 @@ export default function Wedstrijden() {
                           overflow:
                             "hidden",
                           boxShadow:
-                            "0 7px 24px rgba(0,0,0,0.055)",
+                            `0 7px 24px ${activeTheme.glow}`,
                         }}
                       >
                         <div
@@ -1432,6 +1469,7 @@ export default function Wedstrijden() {
                                   .crest
                               }
                               side="home"
+                              theme={activeTheme}
                             />
 
                             <div
@@ -1529,6 +1567,7 @@ export default function Wedstrijden() {
                                   .crest
                               }
                               side="away"
+                              theme={activeTheme}
                             />
                           </div>
 
@@ -1604,7 +1643,7 @@ export default function Wedstrijden() {
                 "1px solid rgba(11,143,77,0.15)",
               borderRadius:
                 "12px",
-              color: "#08763e",
+              color: activeTheme.accent,
               fontWeight: 700,
               fontSize: "14px",
             }}
@@ -1617,7 +1656,7 @@ export default function Wedstrijden() {
           style={{
             marginTop: "28px",
             fontSize: "11px",
-            color: "#929b96",
+            color: "rgba(255,255,255,0.38)",
             textAlign: "center",
           }}
         >
@@ -1633,10 +1672,12 @@ function Team({
   name,
   crest,
   side,
+  theme,
 }: {
   name: string;
   crest?: string;
   side: "home" | "away";
+  theme: { surfaceSoft: string; border: string };
 }) {
   const home = side === "home";
 
@@ -1673,9 +1714,9 @@ function Team({
           height: "48px",
           flexShrink: 0,
           borderRadius: "12px",
-          background: "#f6f8f7",
+          background: theme.surfaceSoft,
           border:
-            "1px solid #edf0ee",
+            `1px solid ${theme.border}`,
           display: "flex",
           alignItems: "center",
           justifyContent:
@@ -1723,11 +1764,12 @@ const scoreInputStyle = {
   fontSize: "20px",
   fontWeight: 900,
   outline: "none",
-  background: "#fbfcfb",
+  background: "rgba(255,255,255,0.06)",
+  color: "white",
 };
 
 const emptyCardStyle = {
-  background: "white",
+  background: "#07172b",
   borderRadius: "17px",
   padding: "45px 25px",
   textAlign:
@@ -1737,16 +1779,17 @@ const emptyCardStyle = {
 };
 
 function navigationButtonStyle(
-  disabled: boolean
+  disabled: boolean,
+  theme: { surfaceSoft: string; border: string; accent: string }
 ) {
   return {
-    border: "none",
+    border: `1px solid ${theme.border}`,
     background: disabled
-      ? "#f1f3f2"
-      : "#e9faf1",
+      ? "rgba(255,255,255,0.04)"
+      : theme.surfaceSoft,
     color: disabled
-      ? "#a1aaa5"
-      : "#08763e",
+      ? "rgba(255,255,255,0.28)"
+      : theme.accent,
     borderRadius: "9px",
     padding: "10px 14px",
     fontWeight: 800,
