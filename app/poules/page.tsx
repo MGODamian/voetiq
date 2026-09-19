@@ -431,7 +431,9 @@ export default function PoulesPage() {
           >
             <section
               style={{
-                background: "white",
+                background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
+                color: "white",
+                border: "1px solid rgba(65,229,139,0.10)",
                 borderRadius: "20px",
                 padding: "26px",
                 boxShadow:
@@ -450,7 +452,7 @@ export default function PoulesPage() {
               <h2
                 style={{
                   margin: "0 0 8px",
-                  color: "#10251a",
+                  color: "white",
                 }}
               >
                 {t("createPool")}
@@ -458,7 +460,7 @@ export default function PoulesPage() {
 
               <p
                 style={{
-                  color: "#6b776f",
+                  color: "#b7c9bf",
                   marginBottom: "22px",
                 }}
               >
@@ -469,6 +471,7 @@ export default function PoulesPage() {
                 style={{
                   display: "block",
                   fontWeight: 700,
+                  color: "#eaf5ef",
                   marginBottom: "7px",
                 }}
               >
@@ -497,6 +500,7 @@ export default function PoulesPage() {
                 style={{
                   display: "block",
                   fontWeight: 700,
+                  color: "#eaf5ef",
                   marginBottom: "7px",
                 }}
               >
@@ -687,8 +691,9 @@ export default function PoulesPage() {
                       }
                       style={{
                         textAlign: "left",
-                        background: "white",
-                        border: "1px solid #e3e9e5",
+                        background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
+                        color: "white",
+                        border: "1px solid rgba(65,229,139,0.10)",
                         borderRadius: "16px",
                         padding: "20px",
                         cursor: "pointer",
@@ -706,7 +711,7 @@ export default function PoulesPage() {
                         style={{
                           margin: "9px 0 5px",
                           fontSize: "19px",
-                          color: "#10251a",
+                          color: "white",
                         }}
                       >
                         {pool.name}
@@ -714,7 +719,7 @@ export default function PoulesPage() {
 
                       <div
                         style={{
-                          color: "#69766e",
+                          color: "#b7c9bf",
                           fontSize: "14px",
                         }}
                       >
@@ -724,7 +729,7 @@ export default function PoulesPage() {
                       <div
                         style={{
                           marginTop: "16px",
-                          color: "#08783e",
+                          color: "#41e58b",
                           fontWeight: 800,
                         }}
                       >
