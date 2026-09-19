@@ -942,14 +942,21 @@ export default function PoolDetailPage() {
                   </div>
 
                   <div>
-                    <div
+                    <button
+                      onClick={() => router.push(`/speler/${player.user_id}`)}
                       style={{
-                        color: "#10251a",
+                        border: 0,
+                        background: "transparent",
+                        color: "#41e58b",
                         fontWeight: 900,
+                        padding: 0,
+                        cursor: "pointer",
+                        textAlign: "left",
+                        fontSize: "inherit",
                       }}
                     >
                       {player.username}
-                    </div>
+                    </button>
 
                     <div
                       style={{
@@ -1349,7 +1356,7 @@ export default function PoolDetailPage() {
               {leaderboard.map((player, index) => (
                 <div key={player.user_id} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "17px 24px", borderBottom: index === leaderboard.length - 1 ? "none" : "1px solid #edf1ee" }}>
                   <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#e9f8ef", color: "#41e58b", display: "grid", placeItems: "center", fontWeight: 900 }}>{player.username.slice(0, 1).toUpperCase()}</div>
-                  <div style={{ flex: 1 }}><div style={{ color: "#10251a", fontWeight: 900 }}>{player.username}</div><div style={{ color: "#849088", fontSize: "12px", marginTop: "3px" }}>{player.predictions_count} {player.predictions_count === 1 ? t("prediction") : t("predictions")}</div></div>
+                  <div style={{ flex: 1 }}><button onClick={() => router.push(`/speler/${player.user_id}`)} style={{ border: 0, background: "transparent", color: "#41e58b", fontWeight: 900, padding: 0, cursor: "pointer", textAlign: "left", fontSize: "inherit" }}>{player.username}</button><div style={{ color: "#849088", fontSize: "12px", marginTop: "3px" }}>{player.predictions_count} {player.predictions_count === 1 ? t("prediction") : t("predictions")}</div></div>
                   <div style={{ color: "#41e58b", fontWeight: 900 }}>{player.total_points} {t("points").toLowerCase()}</div>
                 </div>
               ))}
