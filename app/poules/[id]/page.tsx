@@ -213,6 +213,7 @@ export default function PoolDetailPage() {
   const router = useRouter();
 
   const [poolId, setPoolId] = useState("");
+  const [currentUserId, setCurrentUserId] = useState("");
   const [pool, setPool] = useState<Pool | null>(null);
   const [leaderboard, setLeaderboard] = useState<
     LeaderboardPlayer[]
@@ -287,6 +288,8 @@ export default function PoolDetailPage() {
       router.push("/inloggen");
       return;
     }
+
+    setCurrentUserId(user.id);
 
     const { data: poolData, error: poolError } =
       await supabase
@@ -832,6 +835,23 @@ export default function PoolDetailPage() {
             >
               🔗 {copied ? "Uitnodigingslink gekopieerd!" : t("inviteFriends")}
             </button>
+
+            {currentUserId === pool.owner_id && (
+              <button
+                onClick={() => router.push(`/poules/${pool.id}/beheer`)}
+                style={{
+                  border: "1px solid rgba(80,190,130,0.25)",
+                  borderRadius: "11px",
+                  padding: "13px 18px",
+                  background: "#0b3523",
+                  color: "white",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                }}
+              >
+                ⚙️ Poule beheren
+              </button>
+            )}
           </div>
 
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "18px" }}>
