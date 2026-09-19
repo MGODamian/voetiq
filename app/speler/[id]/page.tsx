@@ -14,10 +14,30 @@ type PublicProfile = {
   correct_results: number;
 };
 
+type CompetitionStats = {
+  competition_code: string;
+  total_points: number;
+  predictions_count: number;
+  exact_scores: number;
+  correct_results: number;
+};
+
+const competitionInfo: Record<string, { name: string; icon: string }> = {
+  DED: { name: "Eredivisie", icon: "🇳🇱" },
+  PL: { name: "Premier League", icon: "🏴" },
+  PD: { name: "La Liga", icon: "🇪🇸" },
+  BL1: { name: "Bundesliga", icon: "🇩🇪" },
+  SA: { name: "Serie A", icon: "🇮🇹" },
+  FL1: { name: "Ligue 1", icon: "🇫🇷" },
+  PPL: { name: "Primeira Liga", icon: "🇵🇹" },
+  CL: { name: "Champions League", icon: "🏆" },
+};
+
 export default function PublicPlayerProfilePage() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [competitions, setCompetitions] = useState<CompetitionStats[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -38,21 +58,23 @@ export default function PublicPlayerProfilePage() {
     setLoading(true);
     setError("");
 
-    const { data, error: profileError } = await supabase.rpc(
-      "get_public_profile",
-      {
+    const [profileResult, competitionResult] = await Promise.all([
+      supabase.rpc("get_public_profile", {
         requested_user_id: userId,
-      }
-    );
+      }),
+      supabase.rpc("get_public_profile_competitions", {
+        requested_user_id: userId,
+      }),
+    ]);
 
-    if (profileError) {
-      console.error(profileError);
+    if (profileResult.error) {
+      console.error(profileResult.error);
       setError("Het spelersprofiel kon niet worden geladen.");
       setLoading(false);
       return;
     }
 
-    const player = data?.[0] as PublicProfile | undefined;
+    const player = profileResult.data?.[0] as PublicProfile | undefined;
 
     if (!player) {
       setError("Deze speler heeft nog geen openbaar VoetIQ-profiel.");
@@ -60,7 +82,28 @@ export default function PublicPlayerProfilePage() {
       return;
     }
 
-    setProfile(player);
+    if (competitionResult.error) {
+      console.error(competitionResult.error);
+    }
+
+    const competitionRows = (
+      (competitionResult.data || []) as CompetitionStats[]
+    ).map((competition) => ({
+      ...competition,
+      total_points: Number(competition.total_points) || 0,
+      predictions_count: Number(competition.predictions_count) || 0,
+      exact_scores: Number(competition.exact_scores) || 0,
+      correct_results: Number(competition.correct_results) || 0,
+    }));
+
+    setProfile({
+      ...player,
+      total_points: Number(player.total_points) || 0,
+      predictions_count: Number(player.predictions_count) || 0,
+      exact_scores: Number(player.exact_scores) || 0,
+      correct_results: Number(player.correct_results) || 0,
+    });
+    setCompetitions(competitionRows);
     setLoading(false);
   }
 
@@ -238,7 +281,12 @@ export default function PublicPlayerProfilePage() {
                 />
               </div>
 
-              <section style={cardStyle}>
+              <section
+                style={{
+                  ...cardStyle,
+                  marginBottom: "18px",
+                }}
+              >
                 <h2
                   style={{
                     margin: "0 0 18px",
@@ -263,6 +311,138 @@ export default function PublicPlayerProfilePage() {
                   value={String(profile.exact_scores)}
                   last
                 />
+              </section>
+
+              <section style={cardStyle}>
+                <div style={{ marginBottom: "18px" }}>
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: "22px",
+                    }}
+                  >
+                    🏟️ Prestaties per competitie
+                  </h2>
+
+                  <p
+                    style={{
+                      margin: "7px 0 0",
+                      color: "#a9bbb0",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Bekijk waar {profile.username} zijn punten heeft verdiend.
+                  </p>
+                </div>
+
+                {competitions.length === 0 ? (
+                  <div
+                    style={{
+                      padding: "18px 0 4px",
+                      color: "#a9bbb0",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Nog geen competitiegegevens beschikbaar.
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(240px, 1fr))",
+                      gap: "12px",
+                    }}
+                  >
+                    {competitions.map((competition) => {
+                      const info =
+                        competitionInfo[competition.competition_code] || {
+                          name: competition.competition_code,
+                          icon: "⚽",
+                        };
+
+                      const percentage =
+                        competition.predictions_count > 0
+                          ? Math.round(
+                              (competition.correct_results /
+                                competition.predictions_count) *
+                                100
+                            )
+                          : 0;
+
+                      return (
+                        <div
+                          key={competition.competition_code}
+                          style={{
+                            background:
+                              "linear-gradient(145deg, rgba(11,53,35,0.78) 0%, rgba(0,23,14,0.92) 100%)",
+                            border:
+                              "1px solid rgba(65,229,139,0.14)",
+                            borderRadius: "16px",
+                            padding: "18px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                              marginBottom: "16px",
+                            }}
+                          >
+                            <span style={{ fontSize: "24px" }}>
+                              {info.icon}
+                            </span>
+
+                            <strong
+                              style={{
+                                fontSize: "16px",
+                                color: "white",
+                              }}
+                            >
+                              {info.name}
+                            </strong>
+                          </div>
+
+                          <div
+                            style={{
+                              fontSize: "27px",
+                              fontWeight: 900,
+                              color: "#41e58b",
+                              marginBottom: "3px",
+                            }}
+                          >
+                            {competition.total_points}
+                          </div>
+
+                          <div
+                            style={{
+                              color: "#a9bbb0",
+                              fontSize: "12px",
+                              marginBottom: "15px",
+                            }}
+                          >
+                            punten
+                          </div>
+
+                          <MiniStat
+                            label="Voorspellingen"
+                            value={competition.predictions_count}
+                          />
+                          <MiniStat
+                            label="Exacte scores"
+                            value={competition.exact_scores}
+                          />
+                          <MiniStat
+                            label="Juiste uitslagen"
+                            value={`${competition.correct_results} (${percentage}%)`}
+                            last
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </section>
             </>
           )}
@@ -357,6 +537,49 @@ function StatRow({
         style={{
           color: "#41e58b",
           fontSize: "16px",
+        }}
+      >
+        {value}
+      </strong>
+    </div>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  last = false,
+}: {
+  label: string;
+  value: string | number;
+  last?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "14px",
+        padding: "9px 0",
+        borderBottom: last
+          ? "none"
+          : "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <span
+        style={{
+          color: "#a9bbb0",
+          fontSize: "12px",
+        }}
+      >
+        {label}
+      </span>
+
+      <strong
+        style={{
+          color: "white",
+          fontSize: "13px",
         }}
       >
         {value}
