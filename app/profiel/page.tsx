@@ -88,8 +88,8 @@ type FootballRank = {
 
 const profileUi = {
   nl: {
-    profileNotFound:profileUi[language].profileNotFound, unknownError:profileUi[language].unknownError,
-    loading:"{t.loading}", retry:"{t.retry}", myProfile:"{t.myProfile}", leaderboardRank:"Rang", ofPlayers:(n:number)=>`van ${n} spelers`,
+    profileNotFound:"Er is geen profiel gevonden voor dit account.", unknownError:"Onbekende fout bij het laden van je profiel.",
+    loading:"Profiel laden...", retry:"Opnieuw proberen", myProfile:"Mijn profiel", leaderboardRank:"Rang", ofPlayers:(n:number)=>`van ${n} spelers`,
     points:"Punten", predictions:"Voorspellingen", exact:"Exact", accuracy:"Accuracy",
     performance:"Performance", yourPredictions:"Jouw voorspellingen", performanceIntro:"Bekijk hoe je presteert als voorspeller.",
     exactScores:"Exacte scores", exactDesc:"Precies goed voorspeld", correctResults:"Juiste uitslagen", correctDesc:"Winst, verlies of gelijk",
