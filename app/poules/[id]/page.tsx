@@ -1026,7 +1026,7 @@ export default function PoolDetailPage() {
           {activeTab === "predictions" && (
             <section
               style={{
-                background: "white",
+                background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
                 borderRadius: "20px",
                 border: "1px solid #e3e9e5",
                 overflow: "hidden",
@@ -1129,7 +1129,7 @@ export default function PoolDetailPage() {
                                 : "1px solid #e8eeea",
                               borderRadius: "15px",
                               overflow: "hidden",
-                              background: "white",
+                              background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
                             }}
                           >
                             <div
@@ -1259,7 +1259,7 @@ export default function PoolDetailPage() {
                                           gridTemplateColumns: "1fr auto auto",
                                           gap: "14px",
                                           alignItems: "center",
-                                          background: "white",
+                                          background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
                                           border: "1px solid #e7ece9",
                                           borderRadius: "10px",
                                           padding: "10px 12px",
@@ -1333,7 +1333,7 @@ export default function PoolDetailPage() {
           )}
 
           {activeTab === "participants" && (
-            <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
+            <section style={{ background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)", borderRadius: "20px", border: "1px solid #e3e9e5", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
               <div style={{ padding: "22px 24px", borderBottom: "1px solid #e8eeea" }}>
                 <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>👥 {"Deelnemers"}</h2>
                 <p style={{ margin: "6px 0 0", color: "#738078", fontSize: "14px" }}>{"Bekijk de deelnemers van deze poule."}</p>
