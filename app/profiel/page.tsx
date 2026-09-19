@@ -391,7 +391,7 @@ export default function ProfielPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#031c12_0%,#052a1b_50%,#031c12_100%)] text-white">
+    <main className="min-h-screen bg-[linear-gradient(180deg,#07110e_0%,#091713_50%,#050a08_100%)] text-white">
       <Navbar />
 
       <section className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
