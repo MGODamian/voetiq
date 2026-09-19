@@ -39,6 +39,12 @@ type ProfileRank = {
   total_players: number;
 };
 
+type CompetitionRank = {
+  competition_code: string;
+  rank: number;
+  total_players: number;
+};
+
 const competitionInfo: Record<string, { name: string; icon: string }> = {
   DED: { name: "Eredivisie", icon: "🇳🇱" },
   PL: { name: "Premier League", icon: "🏴" },
@@ -57,6 +63,7 @@ export default function PublicPlayerProfilePage() {
   const [competitions, setCompetitions] = useState<CompetitionStats[]>([]);
   const [recentPredictions, setRecentPredictions] = useState<RecentPrediction[]>([]);
   const [profileRank, setProfileRank] = useState<ProfileRank | null>(null);
+  const [competitionRanks, setCompetitionRanks] = useState<CompetitionRank[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -77,7 +84,13 @@ export default function PublicPlayerProfilePage() {
     setLoading(true);
     setError("");
 
-    const [profileResult, competitionResult, recentResult, rankResult] = await Promise.all([
+    const [
+      profileResult,
+      competitionResult,
+      recentResult,
+      rankResult,
+      competitionRankResult,
+    ] = await Promise.all([
       supabase.rpc("get_public_profile", {
         requested_user_id: userId,
       }),
@@ -88,6 +101,9 @@ export default function PublicPlayerProfilePage() {
         requested_user_id: userId,
       }),
       supabase.rpc("get_public_profile_rank", {
+        requested_user_id: userId,
+      }),
+      supabase.rpc("get_public_profile_competition_ranks", {
         requested_user_id: userId,
       }),
     ]);
@@ -117,6 +133,10 @@ export default function PublicPlayerProfilePage() {
 
     if (rankResult.error) {
       console.error(rankResult.error);
+    }
+
+    if (competitionRankResult.error) {
+      console.error(competitionRankResult.error);
     }
 
     const competitionRows = (
@@ -163,6 +183,14 @@ export default function PublicPlayerProfilePage() {
             total_players: Number(rankRow.total_players) || 0,
           }
         : null
+    );
+
+    setCompetitionRanks(
+      ((competitionRankResult.data || []) as CompetitionRank[]).map((item) => ({
+        competition_code: item.competition_code,
+        rank: Number(item.rank) || 0,
+        total_players: Number(item.total_players) || 0,
+      }))
     );
 
     setLoading(false);
@@ -445,6 +473,11 @@ export default function PublicPlayerProfilePage() {
                             )
                           : 0;
 
+                      const competitionRank = competitionRanks.find(
+                        (item) =>
+                          item.competition_code === competition.competition_code
+                      );
+
                       return (
                         <div
                           key={competition.competition_code}
@@ -499,6 +532,27 @@ export default function PublicPlayerProfilePage() {
                           >
                             punten
                           </div>
+
+                          {competitionRank && (
+                            <div
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "7px",
+                                background: "rgba(65,229,139,0.10)",
+                                border: "1px solid rgba(65,229,139,0.18)",
+                                borderRadius: "999px",
+                                padding: "7px 10px",
+                                color: "#83e7ae",
+                                fontSize: "12px",
+                                fontWeight: 900,
+                                marginBottom: "10px",
+                              }}
+                            >
+                              🥇 #{competitionRank.rank} van{" "}
+                              {competitionRank.total_players} spelers
+                            </div>
+                          )}
 
                           <MiniStat
                             label="Voorspellingen"
