@@ -68,6 +68,45 @@ const competitionInfo: Record<string, { name: string; icon: string }> = {
   CL: { name: "Champions League", icon: "🏆" },
 };
 
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+const footballRanks = [
+  { min:0, next:50, icon:"🟤", nl:"Straatvoetballer", en:"Street Footballer", de:"Straßenfußballer", es:"Futbolista callejero", fr:"Footballeur de rue", it:"Calciatore di strada", pt:"Futebolista de rua" },
+  { min:50, next:100, icon:"🟢", nl:"Jeugdspeler", en:"Youth Player", de:"Jugendspieler", es:"Jugador juvenil", fr:"Joueur junior", it:"Giocatore giovanile", pt:"Jogador juvenil" },
+  { min:100, next:200, icon:"🔵", nl:"Academiespeler", en:"Academy Player", de:"Akademiespieler", es:"Jugador de academia", fr:"Joueur d’académie", it:"Giocatore dell’accademia", pt:"Jogador da academia" },
+  { min:200, next:350, icon:"⚪", nl:"Selectiespeler", en:"Squad Player", de:"Kaderspieler", es:"Jugador de plantilla", fr:"Joueur de l’effectif", it:"Giocatore della rosa", pt:"Jogador do plantel" },
+  { min:350, next:550, icon:"🟡", nl:"Basisspeler", en:"Starting Player", de:"Stammspieler", es:"Titular", fr:"Titulaire", it:"Titolare", pt:"Titular" },
+  { min:550, next:800, icon:"🟠", nl:"Profvoetballer", en:"Professional Footballer", de:"Profifußballer", es:"Futbolista profesional", fr:"Footballeur professionnel", it:"Calciatore professionista", pt:"Futebolista profissional" },
+  { min:800, next:1100, icon:"🔥", nl:"Sterspeler", en:"Star Player", de:"Starspieler", es:"Jugador estrella", fr:"Joueur vedette", it:"Giocatore stella", pt:"Jogador estrela" },
+  { min:1100, next:1500, icon:"⭐", nl:"Topspeler", en:"Top Player", de:"Topspieler", es:"Jugador de élite", fr:"Joueur d’élite", it:"Top player", pt:"Jogador de elite" },
+  { min:1500, next:2000, icon:"🌟", nl:"Wereldster", en:"World Star", de:"Weltstar", es:"Estrella mundial", fr:"Star mondiale", it:"Stella mondiale", pt:"Estrela mundial" },
+  { min:2000, next:2750, icon:"🏆", nl:"Kampioen", en:"Champion", de:"Champion", es:"Campeón", fr:"Champion", it:"Campione", pt:"Campeão" },
+  { min:2750, next:3500, icon:"👑", nl:"Ballon d'Or-niveau", en:"Ballon d'Or Level", de:"Ballon-d’Or-Niveau", es:"Nivel Balón de Oro", fr:"Niveau Ballon d’Or", it:"Livello Pallone d’Oro", pt:"Nível Bola de Ouro" },
+  { min:3500, next:null, icon:"🐐", nl:"VoetIQ GOAT", en:"VoetIQ GOAT", de:"VoetIQ GOAT", es:"VoetIQ GOAT", fr:"VoetIQ GOAT", it:"VoetIQ GOAT", pt:"VoetIQ GOAT" },
+] as const;
+
+
+const publicAchievementNames: Record<LanguageCode,string[]> = {
+ nl:["Scherpschutter","Precisieschutter","Scoremeester","Voorspelkoning","Goed gezien","Voetbalkenner","Kenner","Voetbalorakel","Debutant","Vaste voorspeller","Doorgewinterd","Honderdclub","Eerste punten","100-puntenclub","250-puntenclub","500-puntenclub","1000-puntenclub","In vorm","Niet te stoppen","Perfecte reeks","Podium","Koploper","Wereldreiziger","Alleskenner","Competitiespecialist","VoetIQ-veteraan"],
+ en:["Sharpshooter","Precision Shooter","Score Master","Prediction King","Good Call","Football Expert","Expert","Football Oracle","Debutant","Regular Predictor","Seasoned Predictor","Century Club","First Points","100 Point Club","250 Point Club","500 Point Club","1000 Point Club","In Form","Unstoppable","Perfect Streak","Podium","Leader","World Traveller","All-Round Expert","Competition Specialist","VoetIQ Veteran"],
+ de:["Scharfschütze","Präzisionsschütze","Ergebnismeister","Tippkönig","Gut getippt","Fußballexperte","Kenner","Fußballorakel","Debütant","Stammtipper","Erfahrener Tipper","Hunderterclub","Erste Punkte","100-Punkte-Club","250-Punkte-Club","500-Punkte-Club","1000-Punkte-Club","In Form","Unaufhaltsam","Perfekte Serie","Podium","Spitzenreiter","Weltenbummler","Alleskönner","Wettbewerbsspezialist","VoetIQ-Veteran"],
+ es:["Francotirador","Tirador de precisión","Maestro del marcador","Rey de las predicciones","Bien visto","Experto en fútbol","Conocedor","Oráculo del fútbol","Debutante","Pronosticador habitual","Experimentado","Club de los 100","Primeros puntos","Club de 100 puntos","Club de 250 puntos","Club de 500 puntos","Club de 1000 puntos","En forma","Imparable","Racha perfecta","Podio","Líder","Trotamundos","Experto total","Especialista de competición","Veterano de VoetIQ"],
+ fr:["Tireur d’élite","Tireur de précision","Maître du score","Roi des pronostics","Bien vu","Expert football","Connaisseur","Oracle du football","Débutant","Pronostiqueur régulier","Expérimenté","Club des 100","Premiers points","Club des 100 points","Club des 250 points","Club des 500 points","Club des 1000 points","En forme","Inarrêtable","Série parfaite","Podium","Leader","Globe-trotter","Expert complet","Spécialiste d’une compétition","Vétéran VoetIQ"],
+ it:["Cecchino","Tiratore di precisione","Maestro del risultato","Re dei pronostici","Ben visto","Esperto di calcio","Intenditore","Oracolo del calcio","Debuttante","Pronosticatore abituale","Esperto","Club dei 100","Primi punti","Club dei 100 punti","Club dei 250 punti","Club dei 500 punti","Club dei 1000 punti","In forma","Inarrestabile","Serie perfetta","Podio","Capolista","Girammondo","Tuttologo","Specialista di competizione","Veterano VoetIQ"],
+ pt:["Atirador certeiro","Atirador de precisão","Mestre do resultado","Rei das previsões","Boa previsão","Especialista em futebol","Conhecedor","Oráculo do futebol","Estreante","Prognosticador regular","Experiente","Clube dos 100","Primeiros pontos","Clube dos 100 pontos","Clube dos 250 pontos","Clube dos 500 pontos","Clube dos 1000 pontos","Em forma","Imparável","Série perfeita","Pódio","Líder","Viajante do mundo","Especialista total","Especialista da competição","Veterano VoetIQ"]
+};
+
+const publicUi = {
+ nl:{back:"Terug",loading:"{t.loading}",notFound:"Deze speler kon niet worden gevonden.",loadError:"Het spelersprofiel kon niet worden geladen.",noPublic:"Deze speler heeft nog geen openbaar VoetIQ-profiel.",player:"{t.player}",publicProfile:"{t.publicProfile}",totalPoints:"Totaal punten",predictions:"Voorspellingen",exactScores:"Exacte scores",correctResults:"Juiste uitslagen",overall:(n:number)=>`Algemeen · van ${n} spelers`,overallList:"Algemene ranglijst",statistics:"Statistieken",avg:"Gemiddeld aantal punten per voorspelling",competitionPerformance:"Prestaties per competitie",wherePoints:(u:string)=>`Bekijk waar ${u} zijn punten heeft verdiend.`,noCompetition:"{t.noCompetition}",points:"punten",ofPlayers:(n:number)=>`van ${n} spelers`,achievements:"Achievements",recent:"Recente voorspellingen",privacy:"{t.privacy}",noPublicPredictions:"{t.noPublicPredictions}",prediction:"Voorspelling",result:"Uitslag",live:"Bezig",footballRank:"Voetbalrang",currentRank:"Huidige rang",nextRank:"Volgende rang",needed:(n:number)=>`Nog ${n} punten nodig voor promotie`,highest:"Hoogste rang bereikt"},
+ en:{back:"Back",loading:"Loading player profile...",notFound:"This player could not be found.",loadError:"The player profile could not be loaded.",noPublic:"This player does not have a public VoetIQ profile yet.",player:"VOETIQ PLAYER",publicProfile:"Public player profile",totalPoints:"Total points",predictions:"Predictions",exactScores:"Exact scores",correctResults:"Correct results",overall:(n:number)=>`Overall · of ${n} players`,overallList:"Overall leaderboard",statistics:"Statistics",avg:"Average points per prediction",competitionPerformance:"Performance by competition",wherePoints:(u:string)=>`See where ${u} earned their points.`,noCompetition:"No competition data available yet.",points:"points",ofPlayers:(n:number)=>`of ${n} players`,achievements:"Achievements",recent:"Recent predictions",privacy:"Only predictions for matches that have already started are visible.",noPublicPredictions:"No public predictions available yet.",prediction:"Prediction",result:"Result",live:"In progress",footballRank:"Football rank",currentRank:"Current rank",nextRank:"Next rank",needed:(n:number)=>`${n} points needed for promotion`,highest:"Highest rank reached"},
+ de:{back:"Zurück",loading:"Spielerprofil wird geladen...",notFound:"Dieser Spieler wurde nicht gefunden.",loadError:"Das Spielerprofil konnte nicht geladen werden.",noPublic:"Dieser Spieler hat noch kein öffentliches VoetIQ-Profil.",player:"VOETIQ-SPIELER",publicProfile:"Öffentliches Spielerprofil",totalPoints:"Gesamtpunkte",predictions:"Tipps",exactScores:"Exakte Ergebnisse",correctResults:"Richtige Ausgänge",overall:(n:number)=>`Gesamt · von ${n} Spielern`,overallList:"Gesamtrangliste",statistics:"Statistiken",avg:"Durchschnittliche Punkte pro Tipp",competitionPerformance:"Leistung pro Wettbewerb",wherePoints:(u:string)=>`Sieh, wo ${u} seine Punkte verdient hat.`,noCompetition:"Noch keine Wettbewerbsdaten verfügbar.",points:"Punkte",ofPlayers:(n:number)=>`von ${n} Spielern`,achievements:"Erfolge",recent:"Letzte Tipps",privacy:"Nur Tipps für bereits begonnene Spiele sind sichtbar.",noPublicPredictions:"Noch keine öffentlichen Tipps verfügbar.",prediction:"Tipp",result:"Ergebnis",live:"Läuft",footballRank:"Fußballrang",currentRank:"Aktueller Rang",nextRank:"Nächster Rang",needed:(n:number)=>`Noch ${n} Punkte bis zum Aufstieg`,highest:"Höchster Rang erreicht"},
+ es:{back:"Volver",loading:"Cargando perfil del jugador...",notFound:"No se pudo encontrar a este jugador.",loadError:"No se pudo cargar el perfil del jugador.",noPublic:"Este jugador aún no tiene un perfil público de VoetIQ.",player:"JUGADOR VOETIQ",publicProfile:"Perfil público del jugador",totalPoints:"Puntos totales",predictions:"Predicciones",exactScores:"Marcadores exactos",correctResults:"Resultados correctos",overall:(n:number)=>`General · de ${n} jugadores`,overallList:"Clasificación general",statistics:"Estadísticas",avg:"Promedio de puntos por predicción",competitionPerformance:"Rendimiento por competición",wherePoints:(u:string)=>`Consulta dónde ha conseguido sus puntos ${u}.`,noCompetition:"Aún no hay datos de competiciones.",points:"puntos",ofPlayers:(n:number)=>`de ${n} jugadores`,achievements:"Logros",recent:"Predicciones recientes",privacy:"Solo son visibles las predicciones de partidos que ya han comenzado.",noPublicPredictions:"Aún no hay predicciones públicas.",prediction:"Predicción",result:"Resultado",live:"En juego",footballRank:"Rango de fútbol",currentRank:"Rango actual",nextRank:"Siguiente rango",needed:(n:number)=>`Faltan ${n} puntos para ascender`,highest:"Rango máximo alcanzado"},
+ fr:{back:"Retour",loading:"Chargement du profil joueur...",notFound:"Ce joueur est introuvable.",loadError:"Le profil du joueur n’a pas pu être chargé.",noPublic:"Ce joueur n’a pas encore de profil VoetIQ public.",player:"JOUEUR VOETIQ",publicProfile:"Profil public du joueur",totalPoints:"Points totaux",predictions:"Pronostics",exactScores:"Scores exacts",correctResults:"Bons résultats",overall:(n:number)=>`Général · sur ${n} joueurs`,overallList:"Classement général",statistics:"Statistiques",avg:"Moyenne de points par pronostic",competitionPerformance:"Performance par compétition",wherePoints:(u:string)=>`Découvre où ${u} a gagné ses points.`,noCompetition:"Aucune donnée de compétition disponible.",points:"points",ofPlayers:(n:number)=>`sur ${n} joueurs`,achievements:"Succès",recent:"Pronostics récents",privacy:"Seuls les pronostics des matchs déjà commencés sont visibles.",noPublicPredictions:"Aucun pronostic public disponible.",prediction:"Pronostic",result:"Résultat",live:"En cours",footballRank:"Rang football",currentRank:"Rang actuel",nextRank:"Rang suivant",needed:(n:number)=>`Encore ${n} points pour être promu`,highest:"Rang maximal atteint"},
+ it:{back:"Indietro",loading:"Caricamento profilo giocatore...",notFound:"Impossibile trovare questo giocatore.",loadError:"Impossibile caricare il profilo del giocatore.",noPublic:"Questo giocatore non ha ancora un profilo VoetIQ pubblico.",player:"GIOCATORE VOETIQ",publicProfile:"Profilo pubblico del giocatore",totalPoints:"Punti totali",predictions:"Pronostici",exactScores:"Risultati esatti",correctResults:"Esiti corretti",overall:(n:number)=>`Generale · su ${n} giocatori`,overallList:"Classifica generale",statistics:"Statistiche",avg:"Media punti per pronostico",competitionPerformance:"Prestazioni per competizione",wherePoints:(u:string)=>`Scopri dove ${u} ha guadagnato i suoi punti.`,noCompetition:"Nessun dato sulle competizioni disponibile.",points:"punti",ofPlayers:(n:number)=>`su ${n} giocatori`,achievements:"Obiettivi",recent:"Pronostici recenti",privacy:"Sono visibili solo i pronostici delle partite già iniziate.",noPublicPredictions:"Nessun pronostico pubblico disponibile.",prediction:"Pronostico",result:"Risultato",live:"In corso",footballRank:"Rango calcistico",currentRank:"Rango attuale",nextRank:"Rango successivo",needed:(n:number)=>`Mancano ${n} punti alla promozione`,highest:"Rango massimo raggiunto"},
+ pt:{back:"Voltar",loading:"A carregar perfil do jogador...",notFound:"Não foi possível encontrar este jogador.",loadError:"Não foi possível carregar o perfil do jogador.",noPublic:"Este jogador ainda não tem um perfil público no VoetIQ.",player:"JOGADOR VOETIQ",publicProfile:"Perfil público do jogador",totalPoints:"Pontos totais",predictions:"Previsões",exactScores:"Resultados exatos",correctResults:"Resultados corretos",overall:(n:number)=>`Geral · de ${n} jogadores`,overallList:"Classificação geral",statistics:"Estatísticas",avg:"Média de pontos por previsão",competitionPerformance:"Desempenho por competição",wherePoints:(u:string)=>`Vê onde ${u} ganhou os seus pontos.`,noCompetition:"Ainda não existem dados de competições.",points:"pontos",ofPlayers:(n:number)=>`de ${n} jogadores`,achievements:"Conquistas",recent:"Previsões recentes",privacy:"Só são visíveis previsões de jogos que já começaram.",noPublicPredictions:"Ainda não existem previsões públicas.",prediction:"Previsão",result:"Resultado",live:"Em jogo",footballRank:"Nível futebolístico",currentRank:"Nível atual",nextRank:"Próximo nível",needed:(n:number)=>`Faltam ${n} pontos para subir de nível`,highest:"Nível máximo alcançado"}
+};
+
 export default function PublicPlayerProfilePage() {
   const router = useRouter();
 
@@ -78,19 +117,31 @@ export default function PublicPlayerProfilePage() {
   const [competitionRanks, setCompetitionRanks] = useState<CompetitionRank[]>([]);
   const [achievementStats, setAchievementStats] = useState<AchievementStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState<LanguageCode>("nl");
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const stored = window.localStorage.getItem("voetiq-language");
+    if (stored && ["nl","en","de","es","fr","it","pt"].includes(stored)) setLanguage(stored as LanguageCode);
     const parts = window.location.pathname.split("/").filter(Boolean);
     const userId = parts[1];
 
     if (!userId) {
-      setError("Deze speler kon niet worden gevonden.");
+      setError(publicUi[language].notFound);
       setLoading(false);
       return;
     }
 
     loadProfile(userId);
+  }, []);
+
+  useEffect(() => {
+    function onLanguageChange(event: Event) {
+      const e = event as CustomEvent<{ language: LanguageCode }>;
+      if (e.detail?.language) setLanguage(e.detail.language);
+    }
+    window.addEventListener("voetiq-language-change", onLanguageChange);
+    return () => window.removeEventListener("voetiq-language-change", onLanguageChange);
   }, []);
 
   async function loadProfile(userId: string) {
@@ -127,7 +178,7 @@ export default function PublicPlayerProfilePage() {
 
     if (profileResult.error) {
       console.error(profileResult.error);
-      setError("Het spelersprofiel kon niet worden geladen.");
+      setError(publicUi[language].loadError);
       setLoading(false);
       return;
     }
@@ -135,7 +186,7 @@ export default function PublicPlayerProfilePage() {
     const player = profileResult.data?.[0] as PublicProfile | undefined;
 
     if (!player) {
-      setError("Deze speler heeft nog geen openbaar VoetIQ-profiel.");
+      setError(publicUi[language].noPublic);
       setLoading(false);
       return;
     }
@@ -242,6 +293,15 @@ export default function PublicPlayerProfilePage() {
         )
       : 0;
 
+  const t = publicUi[language];
+  const currentRankIndex = profile ? Math.max(0, footballRanks.findLastIndex((r) => profile.total_points >= r.min)) : 0;
+  const currentFootballRank = footballRanks[currentRankIndex];
+  const nextFootballRank = currentRankIndex < footballRanks.length - 1 ? footballRanks[currentRankIndex + 1] : null;
+  const rankProgress = profile && nextFootballRank
+    ? Math.min(100, Math.max(0, ((profile.total_points-currentFootballRank.min)/(nextFootballRank.min-currentFootballRank.min))*100))
+    : 100;
+  const pointsNeeded = profile && nextFootballRank ? Math.max(0,nextFootballRank.min-profile.total_points) : 0;
+
   return (
     <>
       <Navbar />
@@ -274,13 +334,13 @@ export default function PublicPlayerProfilePage() {
               fontSize: "14px",
             }}
           >
-            ← Terug
+            ← {t.back}
           </button>
 
           {loading ? (
             <section style={cardStyle}>
               <div style={{ color: "#a9bbb0" }}>
-                Spelersprofiel laden...
+                {t.loading}
               </div>
             </section>
           ) : error || !profile ? (
@@ -296,7 +356,7 @@ export default function PublicPlayerProfilePage() {
                   fontWeight: 800,
                 }}
               >
-                {error || "Deze speler kon niet worden gevonden."}
+                {error || t.notFound}
               </div>
             </section>
           ) : (
@@ -344,7 +404,7 @@ export default function PublicPlayerProfilePage() {
                         marginBottom: "6px",
                       }}
                     >
-                      VOETIQ SPELER
+                      {t.player}
                     </div>
 
                     <h1
@@ -364,9 +424,37 @@ export default function PublicPlayerProfilePage() {
                         fontSize: "14px",
                       }}
                     >
-                      Openbaar spelersprofiel
+                      {t.publicProfile}
                     </p>
                   </div>
+                </div>
+              </section>
+
+              <section style={{ ...cardStyle, marginBottom:"18px", padding:"24px 26px" }}>
+                <div style={{ display:"flex", justifyContent:"space-between", gap:"20px", alignItems:"flex-start", flexWrap:"wrap" }}>
+                  <div>
+                    <div style={{ color:"#41e58b", fontSize:"11px", fontWeight:900, letterSpacing:"1px", textTransform:"uppercase" }}>{t.footballRank}</div>
+                    <div style={{ color:"#a9bbb0", fontSize:"12px", marginTop:"8px" }}>{t.currentRank}</div>
+                    <div style={{ fontSize:"25px", fontWeight:900, marginTop:"4px" }}>
+                      {currentFootballRank.icon} {currentFootballRank[language]}
+                    </div>
+                  </div>
+                  <div style={{ textAlign:"right" }}>
+                    {nextFootballRank ? <>
+                      <div style={{ color:"#a9bbb0", fontSize:"12px" }}>{t.nextRank}</div>
+                      <div style={{ color:"#83e7ae", fontWeight:900, marginTop:"5px" }}>{nextFootballRank.icon} {nextFootballRank[language]}</div>
+                    </> : <div style={{ color:"#83e7ae", fontWeight:900 }}>🐐 {t.highest}</div>}
+                  </div>
+                </div>
+                <div style={{ marginTop:"20px" }}>
+                  <div style={{ display:"flex", justifyContent:"space-between", color:"#a9bbb0", fontSize:"12px", fontWeight:800 }}>
+                    <span>{profile.total_points} {t.points}</span>
+                    <span>{nextFootballRank ? `${nextFootballRank.min} ${t.points}` : t.highest}</span>
+                  </div>
+                  <div style={{ height:"9px", background:"rgba(255,255,255,0.08)", borderRadius:"999px", overflow:"hidden", marginTop:"8px" }}>
+                    <div style={{ width:`${rankProgress}%`, height:"100%", background:"#41e58b", borderRadius:"999px" }} />
+                  </div>
+                  <div style={{ color:"#a9bbb0", fontSize:"12px", marginTop:"9px" }}>{nextFootballRank ? t.needed(pointsNeeded) : t.highest}</div>
                 </div>
               </section>
 
@@ -382,25 +470,25 @@ export default function PublicPlayerProfilePage() {
                 <StatCard
                   icon="🏆"
                   value={profile.total_points}
-                  label="Totaal punten"
+                  label={t.totalPoints}
                 />
 
                 <StatCard
                   icon="⚽"
                   value={profile.predictions_count}
-                  label="Voorspellingen"
+                  label={t.predictions}
                 />
 
                 <StatCard
                   icon="🎯"
                   value={profile.exact_scores}
-                  label="Exacte scores"
+                  label={t.exactScores}
                 />
 
                 <StatCard
                   icon="✅"
                   value={profile.correct_results}
-                  label="Juiste uitslagen"
+                  label={t.correctResults}
                 />
 
                 <StatCard
@@ -412,8 +500,8 @@ export default function PublicPlayerProfilePage() {
                   }
                   label={
                     profileRank
-                      ? `Algemeen · van ${profileRank.total_players} spelers`
-                      : "Algemene ranglijst"
+                      ? t.overall(profileRank.total_players)
+                      : t.overallList
                   }
                 />
               </div>
@@ -430,21 +518,21 @@ export default function PublicPlayerProfilePage() {
                     fontSize: "22px",
                   }}
                 >
-                  📊 Statistieken
+                  📊 {t.statistics}
                 </h2>
 
                 <StatRow
-                  label="Gemiddeld aantal punten per voorspelling"
+                  label={t.avg}
                   value={averagePoints}
                 />
 
                 <StatRow
-                  label="Juiste uitslagen"
+                  label={t.correctResults}
                   value={`${correctPercentage}%`}
                 />
 
                 <StatRow
-                  label="Exacte scores"
+                  label={t.exactScores}
                   value={String(profile.exact_scores)}
                   last
                 />
@@ -458,7 +546,7 @@ export default function PublicPlayerProfilePage() {
                       fontSize: "22px",
                     }}
                   >
-                    🏟️ Prestaties per competitie
+                    🏟️ {t.competitionPerformance}
                   </h2>
 
                   <p
@@ -468,7 +556,7 @@ export default function PublicPlayerProfilePage() {
                       fontSize: "13px",
                     }}
                   >
-                    Bekijk waar {profile.username} zijn punten heeft verdiend.
+                    {t.wherePoints(profile.username)}
                   </p>
                 </div>
 
@@ -480,7 +568,7 @@ export default function PublicPlayerProfilePage() {
                       fontSize: "14px",
                     }}
                   >
-                    Nog geen competitiegegevens beschikbaar.
+                    {t.noCompetition}
                   </div>
                 ) : (
                   <div
@@ -564,7 +652,7 @@ export default function PublicPlayerProfilePage() {
                               marginBottom: "15px",
                             }}
                           >
-                            punten
+                            {t.points}
                           </div>
 
                           {competitionRank && (
@@ -583,21 +671,21 @@ export default function PublicPlayerProfilePage() {
                                 marginBottom: "10px",
                               }}
                             >
-                              🥇 #{competitionRank.rank} van{" "}
-                              {competitionRank.total_players} spelers
+                              🥇 #{competitionRank.rank} {t.ofPlayers(competitionRank.total_players)}
+                              
                             </div>
                           )}
 
                           <MiniStat
-                            label="Voorspellingen"
+                            label={t.predictions}
                             value={competition.predictions_count}
                           />
                           <MiniStat
-                            label="Exacte scores"
+                            label={t.exactScores}
                             value={competition.exact_scores}
                           />
                           <MiniStat
-                            label="Juiste uitslagen"
+                            label={t.correctResults}
                             value={`${competition.correct_results} (${percentage}%)`}
                             last
                           />
@@ -610,13 +698,14 @@ export default function PublicPlayerProfilePage() {
 
 
               <section style={{ ...cardStyle, marginBottom: "18px" }}>
-                <h2 style={{ margin: "0 0 18px", fontSize: "22px" }}>🏅 Achievements</h2>
+                <h2 style={{ margin: "0 0 18px", fontSize: "22px" }}>🏅 {t.achievements}</h2>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px,1fr))", gap: "12px" }}>
                   {[
                     ["🎯","Scherpschutter", achievementStats?.exact_scores||0,1],
                     ["🎯","Precisieschutter", achievementStats?.exact_scores||0,5],
                     ["🧙","Scoremeester", achievementStats?.exact_scores||0,10],
                     ["🔮","Voorspelkoning", achievementStats?.exact_scores||0,25],
+                    ["✅","Goed gezien", achievementStats?.correct_results||0,1],
                     ["⚽","Voetbalkenner", achievementStats?.correct_results||0,10],
                     ["🧠","Kenner", achievementStats?.correct_results||0,25],
                     ["👑","Voetbalorakel", achievementStats?.correct_results||0,50],
@@ -638,7 +727,6 @@ export default function PublicPlayerProfilePage() {
                     ["🌐","Alleskenner", achievementStats?.competitions_played||0,8],
                     ["🏟️","Competitiespecialist", achievementStats?.best_competition_correct_results||0,10],
                     ["💚","VoetIQ-veteraan", achievementStats?.predictions_count||0,250],
-                    ["🐐","GOAT in wording", achievementStats?.total_points||0,2500],
                   ].map(([icon,title,progress,target],i)=>{
                     const done = Number(progress)>=Number(target);
                     const pct = Math.min(100, Math.round((Number(progress)/Number(target))*100));
@@ -647,7 +735,7 @@ export default function PublicPlayerProfilePage() {
                         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
                           <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
                             <span style={{ fontSize:"20px" }}>{icon}</span>
-                            <strong style={{ color: done?"#83e7ae":"white", fontSize:"14px" }}>{title}</strong>
+                            <strong style={{ color: done?"#83e7ae":"white", fontSize:"14px" }}>{publicAchievementNames[language][i] || title}</strong>
                           </div>
                           <span style={{ color: done?"#41e58b":"#849088", fontSize:"18px" }}>{done?"✅":"🔒"}</span>
                         </div>
@@ -663,7 +751,7 @@ export default function PublicPlayerProfilePage() {
               <section style={cardStyle}>
                 <div style={{ marginBottom: "18px" }}>
                   <h2 style={{ margin: 0, fontSize: "22px" }}>
-                    🕘 Recente voorspellingen
+                    🕘 {t.recent}
                   </h2>
                   <p
                     style={{
@@ -672,7 +760,7 @@ export default function PublicPlayerProfilePage() {
                       fontSize: "13px",
                     }}
                   >
-                    Alleen voorspellingen van wedstrijden die al zijn begonnen zijn zichtbaar.
+                    {t.privacy}
                   </p>
                 </div>
 
@@ -684,7 +772,7 @@ export default function PublicPlayerProfilePage() {
                       fontSize: "14px",
                     }}
                   >
-                    Nog geen openbare voorspellingen beschikbaar.
+                    {t.noPublicPredictions}
                   </div>
                 ) : (
                   <div style={{ display: "grid", gap: "10px" }}>
@@ -730,7 +818,7 @@ export default function PublicPlayerProfilePage() {
                               >
                                 {info.icon} {info.name} ·{" "}
                                 {new Date(prediction.kickoff_at).toLocaleDateString(
-                                  "nl-NL",
+                                  ({nl:"nl-NL",en:"en-GB",de:"de-DE",es:"es-ES",fr:"fr-FR",it:"it-IT",pt:"pt-PT"} as Record<LanguageCode,string>)[language],
                                   {
                                     day: "numeric",
                                     month: "short",
@@ -758,7 +846,7 @@ export default function PublicPlayerProfilePage() {
                                 whiteSpace: "nowrap",
                               }}
                             >
-                              +{prediction.points} punten
+                              +{prediction.points} {t.points}
                             </div>
                           </div>
 
@@ -772,15 +860,15 @@ export default function PublicPlayerProfilePage() {
                             }}
                           >
                             <PredictionValue
-                              label="Voorspelling"
+                              label={t.prediction}
                               value={`${prediction.home_score} - ${prediction.away_score}`}
                             />
                             <PredictionValue
-                              label="Uitslag"
+                              label={t.result}
                               value={
                                 hasResult
                                   ? `${prediction.actual_home_score} - ${prediction.actual_away_score}`
-                                  : "Bezig"
+                                  : t.live
                               }
                             />
                           </div>
