@@ -12,6 +12,7 @@ type NotificationItem = {
   icon: string;
   text: string;
   createdAt: string;
+  href: string;
 };
 
 const notificationCopy: Record<LanguageCode, {
@@ -20,14 +21,29 @@ const notificationCopy: Record<LanguageCode, {
   markRead: string;
   points: (points: number, match: string) => string;
   exact: (match: string) => string;
+  achievement: (name: string) => string;
+  promotion: (rank: string) => string;
 }> = {
-  nl: { title:"Meldingen", empty:"Je hebt nog geen meldingen.", markRead:"Alles gelezen", points:(p,m)=>`+${p} punten verdiend bij ${m}`, exact:m=>`Exacte score voorspeld bij ${m}` },
-  en: { title:"Notifications", empty:"You don't have any notifications yet.", markRead:"Mark all read", points:(p,m)=>`Earned +${p} points for ${m}`, exact:m=>`Exact score predicted for ${m}` },
-  de: { title:"Benachrichtigungen", empty:"Du hast noch keine Benachrichtigungen.", markRead:"Alle gelesen", points:(p,m)=>`+${p} Punkte bei ${m} verdient`, exact:m=>`Exaktes Ergebnis bei ${m} getippt` },
-  es: { title:"Notificaciones", empty:"Aún no tienes notificaciones.", markRead:"Marcar todo como leído", points:(p,m)=>`Has ganado +${p} puntos en ${m}`, exact:m=>`Marcador exacto pronosticado en ${m}` },
-  fr: { title:"Notifications", empty:"Tu n’as encore aucune notification.", markRead:"Tout marquer comme lu", points:(p,m)=>`+${p} points gagnés pour ${m}`, exact:m=>`Score exact pronostiqué pour ${m}` },
-  it: { title:"Notifiche", empty:"Non hai ancora notifiche.", markRead:"Segna tutto come letto", points:(p,m)=>`+${p} punti guadagnati in ${m}`, exact:m=>`Risultato esatto pronosticato in ${m}` },
-  pt: { title:"Notificações", empty:"Ainda não tens notificações.", markRead:"Marcar tudo como lido", points:(p,m)=>`+${p} pontos ganhos em ${m}`, exact:m=>`Resultado exato previsto em ${m}` },
+  nl: { title:"Meldingen", empty:"Je hebt nog geen meldingen.", markRead:"Alles gelezen", points:(p,m)=>`+${p} punten verdiend bij ${m}`, exact:m=>`Exacte score voorspeld bij ${m}`, achievement:n=>`Achievement behaald: ${n}`, promotion:r=>`Gepromoveerd naar ${r}` },
+  en: { title:"Notifications", empty:"You don't have any notifications yet.", markRead:"Mark all read", points:(p,m)=>`Earned +${p} points for ${m}`, exact:m=>`Exact score predicted for ${m}`, achievement:n=>`Achievement unlocked: ${n}`, promotion:r=>`Promoted to ${r}` },
+  de: { title:"Benachrichtigungen", empty:"Du hast noch keine Benachrichtigungen.", markRead:"Alle gelesen", points:(p,m)=>`+${p} Punkte bei ${m} verdient`, exact:m=>`Exaktes Ergebnis bei ${m} getippt`, achievement:n=>`Erfolg freigeschaltet: ${n}`, promotion:r=>`Aufgestiegen zu ${r}` },
+  es: { title:"Notificaciones", empty:"Aún no tienes notificaciones.", markRead:"Marcar todo como leído", points:(p,m)=>`Has ganado +${p} puntos en ${m}`, exact:m=>`Marcador exacto pronosticado en ${m}`, achievement:n=>`Logro conseguido: ${n}`, promotion:r=>`Ascendido a ${r}` },
+  fr: { title:"Notifications", empty:"Tu n’as encore aucune notification.", markRead:"Tout marquer comme lu", points:(p,m)=>`+${p} points gagnés pour ${m}`, exact:m=>`Score exact pronostiqué pour ${m}`, achievement:n=>`Succès débloqué : ${n}`, promotion:r=>`Promu au rang ${r}` },
+  it: { title:"Notifiche", empty:"Non hai ancora notifiche.", markRead:"Segna tutto come letto", points:(p,m)=>`+${p} punti guadagnati in ${m}`, exact:m=>`Risultato esatto pronosticato in ${m}`, achievement:n=>`Obiettivo sbloccato: ${n}`, promotion:r=>`Promosso a ${r}` },
+  pt: { title:"Notificações", empty:"Ainda não tens notificações.", markRead:"Marcar tudo como lido", points:(p,m)=>`+${p} pontos ganhos em ${m}`, exact:m=>`Resultado exato previsto em ${m}`, achievement:n=>`Conquista desbloqueada: ${n}`, promotion:r=>`Promovido a ${r}` },
+};
+
+const achievementNotificationNames: Record<LanguageCode, {
+  debut: string; firstPoints: string; firstCorrect: string; firstExact: string;
+  tenPredictions: string; tenCorrect: string; hundredPoints: string;
+}> = {
+  nl:{debut:"Debutant",firstPoints:"Eerste punten",firstCorrect:"Goed gezien",firstExact:"Scherpschutter",tenPredictions:"Vaste voorspeller",tenCorrect:"Voetbalkenner",hundredPoints:"100-puntenclub"},
+  en:{debut:"Debutant",firstPoints:"First points",firstCorrect:"Good call",firstExact:"Sharpshooter",tenPredictions:"Regular predictor",tenCorrect:"Football expert",hundredPoints:"100-point club"},
+  de:{debut:"Debütant",firstPoints:"Erste Punkte",firstCorrect:"Gut gesehen",firstExact:"Scharfschütze",tenPredictions:"Stamm-Tipper",tenCorrect:"Fußballkenner",hundredPoints:"100-Punkte-Club"},
+  es:{debut:"Debutante",firstPoints:"Primeros puntos",firstCorrect:"Buen pronóstico",firstExact:"Francotirador",tenPredictions:"Pronosticador habitual",tenCorrect:"Experto en fútbol",hundredPoints:"Club de 100 puntos"},
+  fr:{debut:"Débutant",firstPoints:"Premiers points",firstCorrect:"Bien vu",firstExact:"Tireur d’élite",tenPredictions:"Pronostiqueur régulier",tenCorrect:"Expert football",hundredPoints:"Club des 100 points"},
+  it:{debut:"Debuttante",firstPoints:"Primi punti",firstCorrect:"Ben visto",firstExact:"Cecchino",tenPredictions:"Pronosticatore abituale",tenCorrect:"Esperto di calcio",hundredPoints:"Club dei 100 punti"},
+  pt:{debut:"Estreante",firstPoints:"Primeiros pontos",firstCorrect:"Boa previsão",firstExact:"Atirador de elite",tenPredictions:"Prognosticador habitual",tenCorrect:"Especialista em futebol",hundredPoints:"Clube dos 100 pontos"},
 };
 
 type PromotionCopy = {
@@ -305,10 +321,7 @@ export default function Navbar() {
       .from("predictions")
       .select("id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at")
       .eq("user_id", userId)
-      .not("actual_home_score", "is", null)
-      .not("actual_away_score", "is", null)
-      .order("created_at", { ascending: false })
-      .limit(8);
+      .order("created_at", { ascending: true });
 
     if (error) {
       console.error("Kon meldingen niet laden:", error);
@@ -316,34 +329,77 @@ export default function Navbar() {
     }
 
     const copy = notificationCopy[language];
+    const names = achievementNotificationNames[language];
+    const rows = data || [];
     const items: NotificationItem[] = [];
+    let runningPoints = 0;
+    let correctCount = 0;
+    let exactCount = 0;
+    let previousRankIndex = 0;
 
-    for (const row of data || []) {
-      const points = Number(row.points || 0);
-      const exact =
-        row.home_score === row.actual_home_score &&
-        row.away_score === row.actual_away_score;
+    rows.forEach((row, index) => {
+      const played = row.actual_home_score !== null && row.actual_away_score !== null;
+      const exact = played && row.home_score === row.actual_home_score && row.away_score === row.actual_away_score;
+      const correct = played && (
+        (row.home_score > row.away_score && row.actual_home_score > row.actual_away_score) ||
+        (row.home_score < row.away_score && row.actual_home_score < row.actual_away_score) ||
+        (row.home_score === row.away_score && row.actual_home_score === row.actual_away_score)
+      );
 
+      if (index === 0) {
+        items.push({ id:`achievement-debut-${row.id}`, icon:"🌱", text:copy.achievement(names.debut), createdAt:row.created_at, href:"/achievements" });
+      }
+      if (index + 1 === 10) {
+        items.push({ id:`achievement-10pred-${row.id}`, icon:"📋", text:copy.achievement(names.tenPredictions), createdAt:row.created_at, href:"/achievements" });
+      }
+
+      if (!played) return;
+
+      const beforePoints = runningPoints;
+      runningPoints += Number(row.points || 0);
+      if (correct) correctCount += 1;
+      if (exact) exactCount += 1;
+
+      if (Number(row.points || 0) > 0) {
+        items.push({ id:`points-${row.id}`, icon:"⚽", text:copy.points(Number(row.points || 0), row.match_name), createdAt:row.created_at, href:"/profiel" });
+      }
       if (exact) {
-        items.push({
-          id: `exact-${row.id}`,
-          icon: "🎯",
-          text: copy.exact(row.match_name),
-          createdAt: row.created_at,
-        });
+        items.push({ id:`exact-${row.id}`, icon:"🎯", text:copy.exact(row.match_name), createdAt:row.created_at, href:"/profiel" });
+      }
+      if (beforePoints === 0 && runningPoints > 0) {
+        items.push({ id:`achievement-firstpoints-${row.id}`, icon:"🪙", text:copy.achievement(names.firstPoints), createdAt:row.created_at, href:"/achievements" });
+      }
+      if (correctCount === 1 && correct) {
+        items.push({ id:`achievement-correct-${row.id}`, icon:"✅", text:copy.achievement(names.firstCorrect), createdAt:row.created_at, href:"/achievements" });
+      }
+      if (exactCount === 1 && exact) {
+        items.push({ id:`achievement-firstexact-${row.id}`, icon:"🎯", text:copy.achievement(names.firstExact), createdAt:row.created_at, href:"/achievements" });
+      }
+      if (correctCount === 10 && correct) {
+        items.push({ id:`achievement-10correct-${row.id}`, icon:"⚽", text:copy.achievement(names.tenCorrect), createdAt:row.created_at, href:"/achievements" });
+      }
+      if (beforePoints < 100 && runningPoints >= 100) {
+        items.push({ id:`achievement-100points-${row.id}`, icon:"💯", text:copy.achievement(names.hundredPoints), createdAt:row.created_at, href:"/achievements" });
       }
 
-      if (points > 0) {
-        items.push({
-          id: `points-${row.id}`,
-          icon: "⚽",
-          text: copy.points(points, row.match_name),
-          createdAt: row.created_at,
-        });
+      const currentRankIndex = getRankIndex(runningPoints);
+      if (currentRankIndex > previousRankIndex) {
+        for (let rankIndex = previousRankIndex + 1; rankIndex <= currentRankIndex; rankIndex += 1) {
+          const rank = footballRanks[rankIndex];
+          items.push({
+            id:`rank-${rankIndex}-${row.id}`,
+            icon:"⬆️",
+            text:copy.promotion(`${rank.icon} ${rank[language]}`),
+            createdAt:row.created_at,
+            href:"/profiel",
+          });
+        }
       }
-    }
+      previousRankIndex = currentRankIndex;
+    });
 
-    setNotifications(items.slice(0, 8));
+    items.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    setNotifications(items.slice(0, 12));
 
     const stored = window.localStorage.getItem(`voetiq-read-notifications-${userId}`);
     if (stored) {
@@ -360,12 +416,14 @@ export default function Navbar() {
     const ids = notifications.map((item) => item.id);
     setReadNotificationIds(ids);
 
-    if (promotionUserId) {
-      window.localStorage.setItem(
-        `voetiq-read-notifications-${promotionUserId}`,
-        JSON.stringify(ids)
-      );
-    }
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        window.localStorage.setItem(
+          `voetiq-read-notifications-${user.id}`,
+          JSON.stringify(ids)
+        );
+      }
+    });
   }
 
   async function checkPromotion(userId: string) {
@@ -520,8 +578,10 @@ export default function Navbar() {
                     ) : (
                       <div className="notification-list">
                         {notifications.map((item) => (
-                          <div
+                          <Link
                             key={item.id}
+                            href={item.href}
+                            onClick={() => setNotificationsOpen(false)}
                             className={
                               readNotificationIds.includes(item.id)
                                 ? "notification-item"
@@ -530,7 +590,7 @@ export default function Navbar() {
                           >
                             <span className="notification-icon">{item.icon}</span>
                             <span>{item.text}</span>
-                          </div>
+                          </Link>
                         ))}
                       </div>
                     )}
@@ -746,13 +806,15 @@ export default function Navbar() {
           ) : (
             <div className="notification-list">
               {notifications.map((item) => (
-                <div
+                <Link
                   key={`mobile-${item.id}`}
+                  href={item.href}
+                  onClick={() => setNotificationsOpen(false)}
                   className={readNotificationIds.includes(item.id) ? "notification-item" : "notification-item unread"}
                 >
                   <span className="notification-icon">{item.icon}</span>
                   <span>{item.text}</span>
-                </div>
+                </Link>
               ))}
             </div>
           )}
@@ -968,6 +1030,12 @@ export default function Navbar() {
           color: #b9c9c0;
           font-size: 12px;
           line-height: 1.45;
+          text-decoration: none;
+          cursor: pointer;
+        }
+
+        .notification-item:hover {
+          background: rgba(255,255,255,0.045);
         }
 
         .notification-item.unread {
