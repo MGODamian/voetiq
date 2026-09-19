@@ -516,10 +516,12 @@ export default function PoulesPage() {
                   width: "100%",
                   padding: "13px",
                   borderRadius: "10px",
-                  border: "1px solid #d7ddd9",
+                  border: "1px solid #315f48",
                   marginBottom: "20px",
-                  background: "white",
+                  background: "#164c33",
+                  color: "white",
                   fontSize: "15px",
+                  fontWeight: 700,
                 }}
               >
                 {competitions.map((item) => (
