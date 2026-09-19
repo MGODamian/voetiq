@@ -7,6 +7,47 @@ import { supabase } from "@/lib/supabase";
 
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
+type PromotionCopy = {
+  title: string;
+  promoted: string;
+  points: string;
+  next: string;
+  continue: string;
+};
+
+const promotionCopy: Record<LanguageCode, PromotionCopy> = {
+  nl: { title: "PROMOTIE!", promoted: "Je bent gepromoveerd!", points: "punten", next: "Op naar", continue: "Doorgaan" },
+  en: { title: "PROMOTION!", promoted: "You have been promoted!", points: "points", next: "Next up", continue: "Continue" },
+  de: { title: "AUFSTIEG!", promoted: "Du bist aufgestiegen!", points: "Punkte", next: "Weiter zu", continue: "Weiter" },
+  es: { title: "¡ASCENSO!", promoted: "¡Has ascendido!", points: "puntos", next: "A por", continue: "Continuar" },
+  fr: { title: "PROMOTION !", promoted: "Tu as été promu !", points: "points", next: "En route vers", continue: "Continuer" },
+  it: { title: "PROMOZIONE!", promoted: "Sei stato promosso!", points: "punti", next: "Prossimo obiettivo", continue: "Continua" },
+  pt: { title: "PROMOÇÃO!", promoted: "Foste promovido!", points: "pontos", next: "Rumo a", continue: "Continuar" },
+};
+
+const footballRanks = [
+  { min: 0, icon: "🟤", nl: "Straatvoetballer", en: "Street Footballer", de: "Straßenfußballer", es: "Futbolista callejero", fr: "Footballeur de rue", it: "Calciatore di strada", pt: "Futebolista de rua" },
+  { min: 50, icon: "🟢", nl: "Jeugdspeler", en: "Youth Player", de: "Jugendspieler", es: "Jugador juvenil", fr: "Joueur junior", it: "Giocatore giovanile", pt: "Jogador juvenil" },
+  { min: 100, icon: "🔵", nl: "Academiespeler", en: "Academy Player", de: "Akademiespieler", es: "Jugador de academia", fr: "Joueur d’académie", it: "Giocatore dell’accademia", pt: "Jogador da academia" },
+  { min: 200, icon: "⚪", nl: "Selectiespeler", en: "Squad Player", de: "Kaderspieler", es: "Jugador de plantilla", fr: "Joueur de l’effectif", it: "Giocatore della rosa", pt: "Jogador do plantel" },
+  { min: 350, icon: "🟡", nl: "Basisspeler", en: "Starting Player", de: "Stammspieler", es: "Titular", fr: "Titulaire", it: "Titolare", pt: "Titular" },
+  { min: 550, icon: "🟠", nl: "Profvoetballer", en: "Professional Footballer", de: "Profifußballer", es: "Futbolista profesional", fr: "Footballeur professionnel", it: "Calciatore professionista", pt: "Futebolista profissional" },
+  { min: 800, icon: "🔥", nl: "Sterspeler", en: "Star Player", de: "Starspieler", es: "Jugador estrella", fr: "Joueur vedette", it: "Giocatore stella", pt: "Jogador estrela" },
+  { min: 1100, icon: "⭐", nl: "Topspeler", en: "Top Player", de: "Topspieler", es: "Jugador de élite", fr: "Joueur d’élite", it: "Top player", pt: "Jogador de elite" },
+  { min: 1500, icon: "🌟", nl: "Wereldster", en: "World Star", de: "Weltstar", es: "Estrella mundial", fr: "Star mondiale", it: "Stella mondiale", pt: "Estrela mundial" },
+  { min: 2000, icon: "🏆", nl: "Kampioen", en: "Champion", de: "Champion", es: "Campeón", fr: "Champion", it: "Campione", pt: "Campeão" },
+  { min: 2750, icon: "👑", nl: "Ballon d'Or-niveau", en: "Ballon d'Or Level", de: "Ballon-d’Or-Niveau", es: "Nivel Balón de Oro", fr: "Niveau Ballon d’Or", it: "Livello Pallone d’Oro", pt: "Nível Bola de Ouro" },
+  { min: 3500, icon: "🐐", nl: "VoetIQ GOAT", en: "VoetIQ GOAT", de: "VoetIQ GOAT", es: "VoetIQ GOAT", fr: "VoetIQ GOAT", it: "VoetIQ GOAT", pt: "VoetIQ GOAT" },
+] as const;
+
+function getRankIndex(points: number) {
+  let index = 0;
+  for (let i = 0; i < footballRanks.length; i += 1) {
+    if (points >= footballRanks[i].min) index = i;
+  }
+  return index;
+}
+
 type NavbarTranslation = {
   home: string;
   matches: string;
@@ -149,6 +190,9 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("nl");
+  const [promotionRankIndex, setPromotionRankIndex] = useState<number | null>(null);
+  const [promotionPoints, setPromotionPoints] = useState(0);
+  const [promotionUserId, setPromotionUserId] = useState("");
 
   const languageRef = useRef<HTMLDivElement>(null);
 
@@ -173,6 +217,13 @@ export default function Navbar() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setLoggedIn(!!session);
       setMobileOpen(false);
+
+      if (session?.user) {
+        void checkPromotion(session.user.id);
+      } else {
+        setPromotionRankIndex(null);
+        setPromotionUserId("");
+      }
     });
 
     return () => {
@@ -203,6 +254,55 @@ export default function Navbar() {
     } = await supabase.auth.getUser();
 
     setLoggedIn(!!user);
+
+    if (user) {
+      await checkPromotion(user.id);
+    }
+  }
+
+  async function checkPromotion(userId: string) {
+    const [{ data: profile }, { data: predictionRows }] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("highest_rank_seen")
+        .eq("id", userId)
+        .maybeSingle(),
+      supabase
+        .from("predictions")
+        .select("points")
+        .eq("user_id", userId),
+    ]);
+
+    const totalPoints = (predictionRows || []).reduce(
+      (sum, row) => sum + Number(row.points || 0),
+      0
+    );
+
+    const currentRankIndex = getRankIndex(totalPoints);
+    const highestRankSeen = Number(profile?.highest_rank_seen ?? 0);
+
+    if (currentRankIndex > highestRankSeen) {
+      setPromotionPoints(totalPoints);
+      setPromotionRankIndex(currentRankIndex);
+      setPromotionUserId(userId);
+    }
+  }
+
+  async function closePromotion() {
+    if (promotionRankIndex === null || !promotionUserId) return;
+
+    const rankToSave = promotionRankIndex;
+
+    setPromotionRankIndex(null);
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ highest_rank_seen: rankToSave })
+      .eq("id", promotionUserId);
+
+    if (error) {
+      console.error("Kon hoogste bekeken voetbalrang niet opslaan:", error);
+    }
   }
 
   async function handleLogout() {
@@ -450,6 +550,48 @@ export default function Navbar() {
           </div>
         )}
       </header>
+
+      {promotionRankIndex !== null && (
+        <div className="promotion-overlay" role="dialog" aria-modal="true">
+          <div className="promotion-card">
+            <div className="promotion-badge">🎉</div>
+            <div className="promotion-kicker">{promotionCopy[language].title}</div>
+            <h2>{promotionCopy[language].promoted}</h2>
+
+            <div className="promotion-ranks">
+              <div className="promotion-rank old-rank">
+                <span>{footballRanks[promotionRankIndex - 1]?.icon}</span>
+                <strong>{footballRanks[promotionRankIndex - 1]?.[language]}</strong>
+              </div>
+
+              <div className="promotion-arrow">→</div>
+
+              <div className="promotion-rank new-rank">
+                <span>{footballRanks[promotionRankIndex].icon}</span>
+                <strong>{footballRanks[promotionRankIndex][language]}</strong>
+              </div>
+            </div>
+
+            <div className="promotion-points">
+              {promotionPoints} {promotionCopy[language].points}
+            </div>
+
+            {promotionRankIndex < footballRanks.length - 1 && (
+              <p className="promotion-next">
+                {promotionCopy[language].next}{" "}
+                <strong>
+                  {footballRanks[promotionRankIndex + 1].icon}{" "}
+                  {footballRanks[promotionRankIndex + 1][language]}
+                </strong>
+              </p>
+            )}
+
+            <button type="button" className="promotion-continue" onClick={closePromotion}>
+              {promotionCopy[language].continue}
+            </button>
+          </div>
+        </div>
+      )}
 
       <style jsx global>{`
         .voetiq-header {
@@ -702,6 +844,128 @@ export default function Navbar() {
 
         .mobile-menu {
           display: none;
+        }
+
+        .promotion-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 5000;
+          display: grid;
+          place-items: center;
+          padding: 20px;
+          background: rgba(0, 10, 6, 0.78);
+          backdrop-filter: blur(10px);
+        }
+
+        .promotion-card {
+          width: min(520px, 100%);
+          box-sizing: border-box;
+          padding: 34px 30px 30px;
+          text-align: center;
+          color: white;
+          background:
+            radial-gradient(circle at 50% 0%, rgba(46, 230, 129, 0.18), transparent 42%),
+            linear-gradient(145deg, #06271a 0%, #00170e 100%);
+          border: 1px solid rgba(65, 229, 139, 0.28);
+          border-radius: 24px;
+          box-shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
+        }
+
+        .promotion-badge {
+          font-size: 44px;
+          line-height: 1;
+          margin-bottom: 13px;
+        }
+
+        .promotion-kicker {
+          color: #41e58b;
+          font-size: 13px;
+          font-weight: 950;
+          letter-spacing: 1.6px;
+        }
+
+        .promotion-card h2 {
+          margin: 7px 0 24px;
+          font-size: 28px;
+          letter-spacing: -0.7px;
+        }
+
+        .promotion-ranks {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .promotion-rank {
+          min-height: 98px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 10px;
+          border-radius: 15px;
+          background: rgba(255, 255, 255, 0.045);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .promotion-rank span {
+          font-size: 30px;
+        }
+
+        .promotion-rank strong {
+          font-size: 13px;
+          line-height: 1.25;
+        }
+
+        .promotion-rank.new-rank {
+          background: rgba(46, 230, 129, 0.10);
+          border-color: rgba(46, 230, 129, 0.30);
+          color: #72f1a9;
+        }
+
+        .promotion-rank.old-rank {
+          color: #a9bbb0;
+        }
+
+        .promotion-arrow {
+          color: #41e58b;
+          font-size: 24px;
+          font-weight: 950;
+        }
+
+        .promotion-points {
+          margin-top: 22px;
+          color: white;
+          font-size: 23px;
+          font-weight: 950;
+        }
+
+        .promotion-next {
+          margin: 8px 0 22px;
+          color: #a9bbb0;
+          font-size: 14px;
+        }
+
+        .promotion-next strong {
+          color: #dff7e9;
+        }
+
+        .promotion-continue {
+          width: 100%;
+          border: 0;
+          border-radius: 11px;
+          padding: 13px 18px;
+          background: #2ee681;
+          color: #052c1b;
+          font-size: 14px;
+          font-weight: 950;
+          cursor: pointer;
+        }
+
+        .promotion-continue:hover {
+          background: #55ed98;
         }
 
         @media (max-width: 1080px) {
