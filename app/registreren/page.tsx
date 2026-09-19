@@ -361,6 +361,24 @@ export default function RegistrerenPage() {
 
   const t = ui[language];
 
+  function getSafeRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const requestedRedirect = params.get("redirect");
+
+    return requestedRedirect?.startsWith("/") &&
+      !requestedRedirect.startsWith("//")
+      ? requestedRedirect
+      : "/";
+  }
+
+  function getLoginHref() {
+    const redirect = getSafeRedirect();
+
+    return redirect === "/"
+      ? "/inloggen"
+      : `/inloggen?redirect=${encodeURIComponent(redirect)}`;
+  }
+
   useEffect(() => {
     const saved = window.localStorage.getItem("voetiq-language");
 
@@ -474,7 +492,7 @@ export default function RegistrerenPage() {
         return;
       }
 
-      window.location.href = "/";
+      window.location.href = getSafeRedirect();
     } catch (error) {
       console.error(error);
       setErrorMessage(t.genericError);
@@ -580,7 +598,7 @@ export default function RegistrerenPage() {
             </p>
 
             <Link
-              href="/inloggen"
+              href={getLoginHref()}
               style={{
                 display: "block",
                 marginTop: "25px",
@@ -875,7 +893,7 @@ export default function RegistrerenPage() {
             {t.alreadyAccount}{" "}
 
             <Link
-              href="/inloggen"
+              href={getLoginHref()}
               style={{
                 color: "#2ee681",
                 fontWeight: 800,
