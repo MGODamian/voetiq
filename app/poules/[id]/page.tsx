@@ -47,6 +47,14 @@ type StoredPrediction = {
   away_score: number;
 };
 
+type PoolMatchPrediction = {
+  user_id: string;
+  username: string;
+  home_score: number;
+  away_score: number;
+  points: number;
+};
+
 type TranslationKey =
   | "notFound" | "loadError" | "noAccess" | "leaderboardError" | "loading"
   | "backPools" | "poolLabel" | "inviteCode" | "copied" | "copyCode"
@@ -221,6 +229,12 @@ export default function PoolDetailPage() {
   const [selectedMatchday, setSelectedMatchday] = useState<number | null>(null);
   const [matchesLoading, setMatchesLoading] = useState(false);
   const [matchesMessage, setMatchesMessage] = useState("");
+  const [openMatchId, setOpenMatchId] = useState<number | null>(null);
+  const [poolMatchPredictions, setPoolMatchPredictions] = useState<
+    PoolMatchPrediction[]
+  >([]);
+  const [poolPredictionsLoading, setPoolPredictionsLoading] = useState(false);
+  const [poolPredictionsMessage, setPoolPredictionsMessage] = useState("");
 
   useEffect(() => {
     const savedLanguage = window.localStorage.getItem("voetiq-language");
@@ -335,32 +349,40 @@ export default function PoolDetailPage() {
       if (!response.ok) throw new Error("Kon wedstrijden niet ophalen");
 
       const data = await response.json();
-      const upcomingMatches: Match[] = (data.matches || [])
-        .filter(
-          (match: Match) =>
-            match.status === "SCHEDULED" || match.status === "TIMED"
-        )
+      const competitionMatches: Match[] = (data.matches || [])
         .sort(
           (a: Match, b: Match) =>
             new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
         );
 
-      setMatches(upcomingMatches);
+      setMatches(competitionMatches);
 
-      const matchdays = upcomingMatches
+      const matchdays = competitionMatches
         .map((match) => match.matchday)
         .filter((matchday): matchday is number => typeof matchday === "number");
 
       if (matchdays.length > 0) {
-        setSelectedMatchday(Math.min(...matchdays));
+        const now = Date.now();
+        const nextMatch = competitionMatches.find(
+          (match) => new Date(match.utcDate).getTime() >= now
+        );
+        const latestStartedMatch = [...competitionMatches]
+          .reverse()
+          .find((match) => new Date(match.utcDate).getTime() < now);
+
+        setSelectedMatchday(
+          nextMatch?.matchday ??
+            latestStartedMatch?.matchday ??
+            Math.min(...matchdays)
+        );
       }
 
       const {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (user && upcomingMatches.length > 0) {
-        const matchIds = upcomingMatches.map((match) => match.id);
+      if (user && competitionMatches.length > 0) {
+        const matchIds = competitionMatches.map((match) => match.id);
         const { data: stored } = await supabase
           .from("predictions")
           .select("match_id, home_score, away_score")
@@ -413,6 +435,59 @@ export default function PoolDetailPage() {
     if (nextIndex >= 0 && nextIndex < availableMatchdays.length) {
       setSelectedMatchday(availableMatchdays[nextIndex]);
     }
+  }
+
+  async function togglePoolPredictions(match: Match) {
+    const kickoff = new Date(match.utcDate).getTime();
+
+    if (Date.now() < kickoff) {
+      setOpenMatchId(match.id);
+      setPoolMatchPredictions([]);
+      setPoolPredictionsMessage(
+        "Voorspellingen van andere deelnemers worden zichtbaar zodra de wedstrijd is begonnen."
+      );
+      return;
+    }
+
+    if (openMatchId === match.id) {
+      setOpenMatchId(null);
+      setPoolMatchPredictions([]);
+      setPoolPredictionsMessage("");
+      return;
+    }
+
+    setOpenMatchId(match.id);
+    setPoolMatchPredictions([]);
+    setPoolPredictionsMessage("");
+    setPoolPredictionsLoading(true);
+
+    const { data, error } = await supabase.rpc(
+      "get_pool_match_predictions",
+      {
+        requested_pool_id: poolId,
+        requested_match_id: match.id,
+      }
+    );
+
+    if (error) {
+      console.error(error);
+      setPoolPredictionsMessage(
+        error.message ||
+          "De voorspellingen konden niet worden geladen."
+      );
+      setPoolPredictionsLoading(false);
+      return;
+    }
+
+    setPoolMatchPredictions((data || []) as PoolMatchPrediction[]);
+
+    if (!data || data.length === 0) {
+      setPoolPredictionsMessage(
+        "Niemand in deze poule heeft voor deze wedstrijd een voorspelling opgeslagen."
+      );
+    }
+
+    setPoolPredictionsLoading(false);
   }
 
   async function copyInviteCode() {
@@ -1042,6 +1117,8 @@ export default function PoolDetailPage() {
                         const date = new Date(match.utcDate);
                         const prediction = predictions[match.id];
                         const isSaved = savedMatchIds.has(match.id);
+                        const hasStarted = Date.now() >= date.getTime();
+                        const isOpen = openMatchId === match.id;
 
                         return (
                           <div
@@ -1085,7 +1162,8 @@ export default function PoolDetailPage() {
                             <div
                               style={{
                                 display: "grid",
-                                gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)",
+                                gridTemplateColumns:
+                                  "minmax(0,1fr) auto minmax(0,1fr)",
                                 alignItems: "center",
                                 gap: "14px",
                                 padding: "18px",
@@ -1117,6 +1195,114 @@ export default function PoolDetailPage() {
                                 side="away"
                               />
                             </div>
+
+                            <div
+                              style={{
+                                padding: "0 15px 15px",
+                                display: "flex",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <button
+                                onClick={() => togglePoolPredictions(match)}
+                                style={{
+                                  border: hasStarted
+                                    ? "1px solid #b9dfc9"
+                                    : "1px solid #e2e7e4",
+                                  borderRadius: "9px",
+                                  padding: "9px 13px",
+                                  background: hasStarted ? "#edf9f2" : "#f6f8f7",
+                                  color: hasStarted ? "#08783e" : "#7b8780",
+                                  fontWeight: 800,
+                                  cursor: "pointer",
+                                }}
+                              >
+                                {hasStarted
+                                  ? isOpen
+                                    ? "Verberg poulevoorspellingen ↑"
+                                    : "Bekijk poulevoorspellingen ↓"
+                                  : "🔒 Poulevoorspellingen na aftrap"}
+                              </button>
+                            </div>
+
+                            {isOpen && (
+                              <div
+                                style={{
+                                  borderTop: "1px solid #e8eeea",
+                                  background: "#fbfdfc",
+                                  padding: "15px",
+                                }}
+                              >
+                                {poolPredictionsLoading ? (
+                                  <div
+                                    style={{
+                                      color: "#738078",
+                                      textAlign: "center",
+                                      padding: "8px",
+                                    }}
+                                  >
+                                    Voorspellingen laden...
+                                  </div>
+                                ) : poolMatchPredictions.length > 0 ? (
+                                  <div
+                                    style={{
+                                      display: "flex",
+                                      flexDirection: "column",
+                                      gap: "8px",
+                                    }}
+                                  >
+                                    {poolMatchPredictions.map((item) => (
+                                      <div
+                                        key={item.user_id}
+                                        style={{
+                                          display: "grid",
+                                          gridTemplateColumns: "1fr auto auto",
+                                          gap: "14px",
+                                          alignItems: "center",
+                                          background: "white",
+                                          border: "1px solid #e7ece9",
+                                          borderRadius: "10px",
+                                          padding: "10px 12px",
+                                        }}
+                                      >
+                                        <strong style={{ color: "#173528" }}>
+                                          {item.username}
+                                        </strong>
+                                        <strong
+                                          style={{
+                                            color: "#08783e",
+                                            fontSize: "16px",
+                                          }}
+                                        >
+                                          {item.home_score} - {item.away_score}
+                                        </strong>
+                                        <span
+                                          style={{
+                                            color: "#7d8982",
+                                            fontSize: "12px",
+                                            minWidth: "54px",
+                                            textAlign: "right",
+                                          }}
+                                        >
+                                          {item.points} pt
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div
+                                    style={{
+                                      color: "#738078",
+                                      textAlign: "center",
+                                      lineHeight: 1.5,
+                                      padding: "8px",
+                                    }}
+                                  >
+                                    {poolPredictionsMessage}
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         );
                       })}
