@@ -34,6 +34,11 @@ type RecentPrediction = {
   kickoff_at: string;
 };
 
+type ProfileRank = {
+  rank: number;
+  total_players: number;
+};
+
 const competitionInfo: Record<string, { name: string; icon: string }> = {
   DED: { name: "Eredivisie", icon: "🇳🇱" },
   PL: { name: "Premier League", icon: "🏴" },
@@ -51,6 +56,7 @@ export default function PublicPlayerProfilePage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [competitions, setCompetitions] = useState<CompetitionStats[]>([]);
   const [recentPredictions, setRecentPredictions] = useState<RecentPrediction[]>([]);
+  const [profileRank, setProfileRank] = useState<ProfileRank | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -71,7 +77,7 @@ export default function PublicPlayerProfilePage() {
     setLoading(true);
     setError("");
 
-    const [profileResult, competitionResult, recentResult] = await Promise.all([
+    const [profileResult, competitionResult, recentResult, rankResult] = await Promise.all([
       supabase.rpc("get_public_profile", {
         requested_user_id: userId,
       }),
@@ -79,6 +85,9 @@ export default function PublicPlayerProfilePage() {
         requested_user_id: userId,
       }),
       supabase.rpc("get_public_recent_predictions", {
+        requested_user_id: userId,
+      }),
+      supabase.rpc("get_public_profile_rank", {
         requested_user_id: userId,
       }),
     ]);
@@ -104,6 +113,10 @@ export default function PublicPlayerProfilePage() {
 
     if (recentResult.error) {
       console.error(recentResult.error);
+    }
+
+    if (rankResult.error) {
+      console.error(rankResult.error);
     }
 
     const competitionRows = (
@@ -141,6 +154,17 @@ export default function PublicPlayerProfilePage() {
         points: Number(prediction.points) || 0,
       }))
     );
+    const rankRow = rankResult.data?.[0] as ProfileRank | undefined;
+
+    setProfileRank(
+      rankRow
+        ? {
+            rank: Number(rankRow.rank) || 0,
+            total_players: Number(rankRow.total_players) || 0,
+          }
+        : null
+    );
+
     setLoading(false);
   }
 
@@ -315,6 +339,20 @@ export default function PublicPlayerProfilePage() {
                   icon="✅"
                   value={profile.correct_results}
                   label="Juiste uitslagen"
+                />
+
+                <StatCard
+                  icon="🥇"
+                  value={
+                    profileRank
+                      ? `#${profileRank.rank}`
+                      : "-"
+                  }
+                  label={
+                    profileRank
+                      ? `Algemeen · van ${profileRank.total_players} spelers`
+                      : "Algemene ranglijst"
+                  }
                 />
               </div>
 
