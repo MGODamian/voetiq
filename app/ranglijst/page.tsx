@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Navbar from "../Navbar";
 
@@ -310,6 +311,7 @@ const competitions: Competition[] = [
 ];
 
 export default function Ranglijst() {
+  const router = useRouter();
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState("ALL");
   const [selectedMatchday, setSelectedMatchday] = useState<number | null>(null);
@@ -383,11 +385,33 @@ export default function Ranglijst() {
         return;
       }
 
-      const leaderboard: Player[] = (data || []).map(
+      const generalRows = data || [];
+
+      const usernames = generalRows.map(
+        (player: { username: string }) => player.username
+      );
+
+      const { data: profiles } =
+        usernames.length > 0
+          ? await supabase
+              .from("profiles")
+              .select("id, username")
+              .in("username", usernames)
+          : { data: [] };
+
+      const profileIds = new Map(
+        (profiles || []).map((profile) => [
+          profile.username,
+          profile.id,
+        ])
+      );
+
+      const leaderboard: Player[] = generalRows.map(
         (player: {
           username: string;
           total_points: number;
         }) => ({
+          user_id: profileIds.get(player.username),
           username: player.username,
           total_points: Number(player.total_points) || 0,
         })
@@ -686,9 +710,18 @@ export default function Ranglijst() {
                 </div>
 
                 <div>
-                  <p className="font-bold text-white">
-                    {player.username}
-                  </p>
+                  {player.user_id ? (
+                    <button
+                      onClick={() => router.push(`/speler/${player.user_id}`)}
+                      className="font-bold text-green-300 transition hover:text-green-200 hover:underline"
+                    >
+                      {player.username}
+                    </button>
+                  ) : (
+                    <p className="font-bold text-white">
+                      {player.username}
+                    </p>
+                  )}
 
                   {index === 0 && (
                     <p className="mt-1 text-xs font-medium text-yellow-300">
