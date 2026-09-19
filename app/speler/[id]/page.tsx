@@ -45,6 +45,18 @@ type CompetitionRank = {
   total_players: number;
 };
 
+type AchievementStats = {
+  total_points: number;
+  predictions_count: number;
+  played_predictions: number;
+  exact_scores: number;
+  correct_results: number;
+  competitions_played: number;
+  best_correct_streak: number;
+  best_exact_streak: number;
+  best_competition_correct_results: number;
+};
+
 const competitionInfo: Record<string, { name: string; icon: string }> = {
   DED: { name: "Eredivisie", icon: "🇳🇱" },
   PL: { name: "Premier League", icon: "🏴" },
@@ -64,6 +76,7 @@ export default function PublicPlayerProfilePage() {
   const [recentPredictions, setRecentPredictions] = useState<RecentPrediction[]>([]);
   const [profileRank, setProfileRank] = useState<ProfileRank | null>(null);
   const [competitionRanks, setCompetitionRanks] = useState<CompetitionRank[]>([]);
+  const [achievementStats, setAchievementStats] = useState<AchievementStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -90,6 +103,7 @@ export default function PublicPlayerProfilePage() {
       recentResult,
       rankResult,
       competitionRankResult,
+      achievementResult,
     ] = await Promise.all([
       supabase.rpc("get_public_profile", {
         requested_user_id: userId,
@@ -104,6 +118,9 @@ export default function PublicPlayerProfilePage() {
         requested_user_id: userId,
       }),
       supabase.rpc("get_public_profile_competition_ranks", {
+        requested_user_id: userId,
+      }),
+      supabase.rpc("get_public_achievement_stats", {
         requested_user_id: userId,
       }),
     ]);
@@ -137,6 +154,9 @@ export default function PublicPlayerProfilePage() {
 
     if (competitionRankResult.error) {
       console.error(competitionRankResult.error);
+    }
+    if (achievementResult.error) {
+      console.error(achievementResult.error);
     }
 
     const competitionRows = (
@@ -193,6 +213,20 @@ export default function PublicPlayerProfilePage() {
       }))
     );
 
+    const a = achievementResult.data?.[0] as AchievementStats | undefined;
+    if (a) {
+      setAchievementStats({
+        total_points: Number(a.total_points)||0,
+        predictions_count: Number(a.predictions_count)||0,
+        played_predictions: Number(a.played_predictions)||0,
+        exact_scores: Number(a.exact_scores)||0,
+        correct_results: Number(a.correct_results)||0,
+        competitions_played: Number(a.competitions_played)||0,
+        best_correct_streak: Number(a.best_correct_streak)||0,
+        best_exact_streak: Number(a.best_exact_streak)||0,
+        best_competition_correct_results: Number(a.best_competition_correct_results)||0,
+      });
+    }
     setLoading(false);
   }
 
@@ -574,6 +608,58 @@ export default function PublicPlayerProfilePage() {
                 )}
               </section>
 
+
+              <section style={{ ...cardStyle, marginBottom: "18px" }}>
+                <h2 style={{ margin: "0 0 18px", fontSize: "22px" }}>🏅 Achievements</h2>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px,1fr))", gap: "12px" }}>
+                  {[
+                    ["🎯","Scherpschutter", achievementStats?.exact_scores||0,1],
+                    ["🎯","Precisieschutter", achievementStats?.exact_scores||0,5],
+                    ["🧙","Scoremeester", achievementStats?.exact_scores||0,10],
+                    ["🔮","Voorspelkoning", achievementStats?.exact_scores||0,25],
+                    ["⚽","Voetbalkenner", achievementStats?.correct_results||0,10],
+                    ["🧠","Kenner", achievementStats?.correct_results||0,25],
+                    ["👑","Voetbalorakel", achievementStats?.correct_results||0,50],
+                    ["🌱","Debutant", achievementStats?.predictions_count||0,1],
+                    ["📋","Vaste voorspeller", achievementStats?.predictions_count||0,10],
+                    ["💪","Doorgewinterd", achievementStats?.predictions_count||0,50],
+                    ["💯","Honderdclub", achievementStats?.predictions_count||0,100],
+                    ["🪙","Eerste punten", achievementStats?.total_points||0,1],
+                    ["💯","100-puntenclub", achievementStats?.total_points||0,100],
+                    ["🚀","250-puntenclub", achievementStats?.total_points||0,250],
+                    ["💎","500-puntenclub", achievementStats?.total_points||0,500],
+                    ["🏆","1000-puntenclub", achievementStats?.total_points||0,1000],
+                    ["🔥","In vorm", achievementStats?.best_correct_streak||0,3],
+                    ["🔥","Niet te stoppen", achievementStats?.best_correct_streak||0,5],
+                    ["⚡","Perfecte reeks", achievementStats?.best_exact_streak||0,3],
+                    ["🥉","Podium", profileRank?.rank===1?3:profileRank?.rank===2?3:profileRank?.rank===3?3:0,3],
+                    ["🥇","Koploper", profileRank?.rank===1?1:0,1],
+                    ["🌍","Wereldreiziger", achievementStats?.competitions_played||0,3],
+                    ["🌐","Alleskenner", achievementStats?.competitions_played||0,8],
+                    ["🏟️","Competitiespecialist", achievementStats?.best_competition_correct_results||0,10],
+                    ["💚","VoetIQ-veteraan", achievementStats?.predictions_count||0,250],
+                    ["🐐","GOAT in wording", achievementStats?.total_points||0,2500],
+                  ].map(([icon,title,progress,target],i)=>{
+                    const done = Number(progress)>=Number(target);
+                    const pct = Math.min(100, Math.round((Number(progress)/Number(target))*100));
+                    return (
+                      <div key={i} style={{ background: done?"linear-gradient(145deg,#0b3523,#06271a)":"rgba(255,255,255,0.03)", border:`1px solid ${done?"rgba(65,229,139,0.25)":"rgba(255,255,255,0.08)"}`, borderRadius:"14px", padding:"14px" }}>
+                        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                          <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+                            <span style={{ fontSize:"20px" }}>{icon}</span>
+                            <strong style={{ color: done?"#83e7ae":"white", fontSize:"14px" }}>{title}</strong>
+                          </div>
+                          <span style={{ color: done?"#41e58b":"#849088", fontSize:"18px" }}>{done?"✅":"🔒"}</span>
+                        </div>
+                        <div style={{ color:"#a9bbb0", fontSize:"12px", marginTop:"8px" }}>{progress}/{target}</div>
+                        <div style={{ height:"6px", background:"rgba(255,255,255,0.08)", borderRadius:"999px", marginTop:"8px", overflow:"hidden" }}>
+                          <div style={{ width:`${pct}%`, height:"100%", background: done?"#41e58b":"#3b82f6" }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
               <section style={cardStyle}>
                 <div style={{ marginBottom: "18px" }}>
                   <h2 style={{ margin: 0, fontSize: "22px" }}>
