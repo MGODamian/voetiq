@@ -22,6 +22,18 @@ type CompetitionStats = {
   correct_results: number;
 };
 
+type RecentPrediction = {
+  match_id: number;
+  match_name: string;
+  competition_code: string;
+  home_score: number;
+  away_score: number;
+  actual_home_score: number | null;
+  actual_away_score: number | null;
+  points: number;
+  kickoff_at: string;
+};
+
 const competitionInfo: Record<string, { name: string; icon: string }> = {
   DED: { name: "Eredivisie", icon: "🇳🇱" },
   PL: { name: "Premier League", icon: "🏴" },
@@ -38,6 +50,7 @@ export default function PublicPlayerProfilePage() {
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [competitions, setCompetitions] = useState<CompetitionStats[]>([]);
+  const [recentPredictions, setRecentPredictions] = useState<RecentPrediction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -58,11 +71,14 @@ export default function PublicPlayerProfilePage() {
     setLoading(true);
     setError("");
 
-    const [profileResult, competitionResult] = await Promise.all([
+    const [profileResult, competitionResult, recentResult] = await Promise.all([
       supabase.rpc("get_public_profile", {
         requested_user_id: userId,
       }),
       supabase.rpc("get_public_profile_competitions", {
+        requested_user_id: userId,
+      }),
+      supabase.rpc("get_public_recent_predictions", {
         requested_user_id: userId,
       }),
     ]);
@@ -86,6 +102,10 @@ export default function PublicPlayerProfilePage() {
       console.error(competitionResult.error);
     }
 
+    if (recentResult.error) {
+      console.error(recentResult.error);
+    }
+
     const competitionRows = (
       (competitionResult.data || []) as CompetitionStats[]
     ).map((competition) => ({
@@ -104,6 +124,23 @@ export default function PublicPlayerProfilePage() {
       correct_results: Number(player.correct_results) || 0,
     });
     setCompetitions(competitionRows);
+    setRecentPredictions(
+      ((recentResult.data || []) as RecentPrediction[]).map((prediction) => ({
+        ...prediction,
+        match_id: Number(prediction.match_id),
+        home_score: Number(prediction.home_score),
+        away_score: Number(prediction.away_score),
+        actual_home_score:
+          prediction.actual_home_score === null
+            ? null
+            : Number(prediction.actual_home_score),
+        actual_away_score:
+          prediction.actual_away_score === null
+            ? null
+            : Number(prediction.actual_away_score),
+        points: Number(prediction.points) || 0,
+      }))
+    );
     setLoading(false);
   }
 
@@ -313,7 +350,7 @@ export default function PublicPlayerProfilePage() {
                 />
               </section>
 
-              <section style={cardStyle}>
+              <section style={{ ...cardStyle, marginBottom: "18px" }}>
                 <div style={{ marginBottom: "18px" }}>
                   <h2
                     style={{
@@ -438,6 +475,137 @@ export default function PublicPlayerProfilePage() {
                             value={`${competition.correct_results} (${percentage}%)`}
                             last
                           />
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+
+              <section style={cardStyle}>
+                <div style={{ marginBottom: "18px" }}>
+                  <h2 style={{ margin: 0, fontSize: "22px" }}>
+                    🕘 Recente voorspellingen
+                  </h2>
+                  <p
+                    style={{
+                      margin: "7px 0 0",
+                      color: "#a9bbb0",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Alleen voorspellingen van wedstrijden die al zijn begonnen zijn zichtbaar.
+                  </p>
+                </div>
+
+                {recentPredictions.length === 0 ? (
+                  <div
+                    style={{
+                      padding: "18px 0 4px",
+                      color: "#a9bbb0",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Nog geen openbare voorspellingen beschikbaar.
+                  </div>
+                ) : (
+                  <div style={{ display: "grid", gap: "10px" }}>
+                    {recentPredictions.map((prediction) => {
+                      const info =
+                        competitionInfo[prediction.competition_code] || {
+                          name: prediction.competition_code,
+                          icon: "⚽",
+                        };
+
+                      const hasResult =
+                        prediction.actual_home_score !== null &&
+                        prediction.actual_away_score !== null;
+
+                      return (
+                        <div
+                          key={`${prediction.match_id}-${prediction.kickoff_at}`}
+                          style={{
+                            background:
+                              "linear-gradient(145deg, rgba(11,53,35,0.78) 0%, rgba(0,23,14,0.92) 100%)",
+                            border: "1px solid rgba(65,229,139,0.14)",
+                            borderRadius: "16px",
+                            padding: "17px 18px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "flex-start",
+                              gap: "16px",
+                              flexWrap: "wrap",
+                            }}
+                          >
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div
+                                style={{
+                                  color: "#83e7ae",
+                                  fontSize: "11px",
+                                  fontWeight: 800,
+                                  marginBottom: "6px",
+                                }}
+                              >
+                                {info.icon} {info.name} ·{" "}
+                                {new Date(prediction.kickoff_at).toLocaleDateString(
+                                  "nl-NL",
+                                  {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </div>
+
+                              <div
+                                style={{
+                                  color: "white",
+                                  fontWeight: 900,
+                                  fontSize: "15px",
+                                }}
+                              >
+                                {prediction.match_name}
+                              </div>
+                            </div>
+
+                            <div
+                              style={{
+                                color: "#41e58b",
+                                fontWeight: 900,
+                                fontSize: "15px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              +{prediction.points} punten
+                            </div>
+                          </div>
+
+                          <div
+                            style={{
+                              display: "grid",
+                              gridTemplateColumns:
+                                "repeat(auto-fit, minmax(150px, 1fr))",
+                              gap: "10px",
+                              marginTop: "14px",
+                            }}
+                          >
+                            <PredictionValue
+                              label="Voorspelling"
+                              value={`${prediction.home_score} - ${prediction.away_score}`}
+                            />
+                            <PredictionValue
+                              label="Uitslag"
+                              value={
+                                hasResult
+                                  ? `${prediction.actual_home_score} - ${prediction.actual_away_score}`
+                                  : "Bezig"
+                              }
+                            />
+                          </div>
                         </div>
                       );
                     })}
@@ -584,6 +752,39 @@ function MiniStat({
       >
         {value}
       </strong>
+    </div>
+  );
+}
+
+function PredictionValue({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "rgba(0, 13, 8, 0.55)",
+        border: "1px solid rgba(255,255,255,0.06)",
+        borderRadius: "12px",
+        padding: "11px 13px",
+      }}
+    >
+      <div
+        style={{
+          color: "#a9bbb0",
+          fontSize: "10px",
+          fontWeight: 800,
+          textTransform: "uppercase",
+          letterSpacing: "0.7px",
+          marginBottom: "4px",
+        }}
+      >
+        {label}
+      </div>
+      <strong style={{ color: "white", fontSize: "16px" }}>{value}</strong>
     </div>
   );
 }
