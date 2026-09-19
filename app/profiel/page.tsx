@@ -85,6 +85,101 @@ type FootballRank = {
   names: Record<LanguageCode, string>;
 };
 
+
+const profileUi = {
+  nl: {
+    profileNotFound:profileUi[language].profileNotFound, unknownError:profileUi[language].unknownError,
+    loading:"{t.loading}", retry:"{t.retry}", myProfile:"{t.myProfile}", leaderboardRank:"Rang", ofPlayers:(n:number)=>`van ${n} spelers`,
+    points:"Punten", predictions:"Voorspellingen", exact:"Exact", accuracy:"Accuracy",
+    performance:"Performance", yourPredictions:"Jouw voorspellingen", performanceIntro:"Bekijk hoe je presteert als voorspeller.",
+    exactScores:"Exacte scores", exactDesc:"Precies goed voorspeld", correctResults:"Juiste uitslagen", correctDesc:"Winst, verlies of gelijk",
+    playedMatches:(n:number)=>`${n} gespeelde wedstrijden`, noPlayed:"Nog geen wedstrijden gespeeld", average:"Gemiddeld", averageDesc:"Punten per gespeelde wedstrijd",
+    competitions:"Competities", competitionPerformance:"Prestaties per competitie", competitionIntro:"Bekijk hoeveel punten je in iedere VoetIQ-competitie hebt verdiend.",
+    predicted:"Voorspeld", history:"Mijn geschiedenis", noPredictions:"Je hebt nog geen voorspellingen gedaan.", noPredictionsDesc:"Ga naar Wedstrijden en doe je eerste voorspelling.",
+    predictionCount:(n:number)=>`${n} voorspelling${n===1?"":"en"}`, predictedOn:"Voorspeld op", yourPrediction:"Jouw voorspelling", result:"Uitslag",
+    notPlayed:"⏳ Nog niet gespeeld", correct:"✅ Juiste uitslag", noPoints:"❌ Geen punten", unknownCompetition:"Onbekende competitie",
+    career:"🏆 Jouw VoetIQ-carrière", careerDesc:"Blijf voorspellen, verbeter je accuracy en klim op de ranglijst.", totalPoints:"Totaalpunten"
+  },
+  en: {
+    profileNotFound:"No profile was found for this account.", unknownError:"Unknown error while loading your profile.",
+    loading:"Loading profile...", retry:"Try again", myProfile:"My profile", leaderboardRank:"Rank", ofPlayers:(n:number)=>`of ${n} players`,
+    points:"Points", predictions:"Predictions", exact:"Exact", accuracy:"Accuracy",
+    performance:"Performance", yourPredictions:"Your predictions", performanceIntro:"See how you perform as a predictor.",
+    exactScores:"Exact scores", exactDesc:"Predicted exactly right", correctResults:"Correct results", correctDesc:"Win, loss or draw",
+    playedMatches:(n:number)=>`${n} matches played`, noPlayed:"No matches played yet", average:"Average", averageDesc:"Points per match played",
+    competitions:"Competitions", competitionPerformance:"Performance by competition", competitionIntro:"See how many points you have earned in each VoetIQ competition.",
+    predicted:"Predicted", history:"My history", noPredictions:"You haven't made any predictions yet.", noPredictionsDesc:"Go to Matches and make your first prediction.",
+    predictionCount:(n:number)=>`${n} prediction${n===1?"":"s"}`, predictedOn:"Predicted on", yourPrediction:"Your prediction", result:"Result",
+    notPlayed:"⏳ Not played yet", correct:"✅ Correct result", noPoints:"❌ No points", unknownCompetition:"Unknown competition",
+    career:"🏆 Your VoetIQ career", careerDesc:"Keep predicting, improve your accuracy and climb the leaderboard.", totalPoints:"Total points"
+  },
+  de: {
+    profileNotFound:"Für dieses Konto wurde kein Profil gefunden.", unknownError:"Unbekannter Fehler beim Laden deines Profils.",
+    loading:"Profil wird geladen...", retry:"Erneut versuchen", myProfile:"Mein Profil", leaderboardRank:"Rang", ofPlayers:(n:number)=>`von ${n} Spielern`,
+    points:"Punkte", predictions:"Tipps", exact:"Exakt", accuracy:"Genauigkeit",
+    performance:"Leistung", yourPredictions:"Deine Tipps", performanceIntro:"Sieh dir an, wie gut du tippst.",
+    exactScores:"Exakte Ergebnisse", exactDesc:"Genau richtig getippt", correctResults:"Richtige Ausgänge", correctDesc:"Sieg, Niederlage oder Unentschieden",
+    playedMatches:(n:number)=>`${n} gespielte Spiele`, noPlayed:"Noch keine Spiele gespielt", average:"Durchschnitt", averageDesc:"Punkte pro gespieltem Spiel",
+    competitions:"Wettbewerbe", competitionPerformance:"Leistung pro Wettbewerb", competitionIntro:"Sieh dir an, wie viele Punkte du in jedem VoetIQ-Wettbewerb verdient hast.",
+    predicted:"Getippt", history:"Mein Verlauf", noPredictions:"Du hast noch keine Tipps abgegeben.", noPredictionsDesc:"Gehe zu Spiele und gib deinen ersten Tipp ab.",
+    predictionCount:(n:number)=>`${n} Tipp${n===1?"":"s"}`, predictedOn:"Getippt am", yourPrediction:"Dein Tipp", result:"Ergebnis",
+    notPlayed:"⏳ Noch nicht gespielt", correct:"✅ Richtiger Ausgang", noPoints:"❌ Keine Punkte", unknownCompetition:"Unbekannter Wettbewerb",
+    career:"🏆 Deine VoetIQ-Karriere", careerDesc:"Tippe weiter, verbessere deine Genauigkeit und steige in der Rangliste.", totalPoints:"Gesamtpunkte"
+  },
+  es: {
+    profileNotFound:"No se encontró ningún perfil para esta cuenta.", unknownError:"Error desconocido al cargar tu perfil.",
+    loading:"Cargando perfil...", retry:"Intentar de nuevo", myProfile:"Mi perfil", leaderboardRank:"Clasificación", ofPlayers:(n:number)=>`de ${n} jugadores`,
+    points:"Puntos", predictions:"Predicciones", exact:"Exactos", accuracy:"Precisión",
+    performance:"Rendimiento", yourPredictions:"Tus predicciones", performanceIntro:"Consulta tu rendimiento como pronosticador.",
+    exactScores:"Marcadores exactos", exactDesc:"Marcadores acertados exactamente", correctResults:"Resultados correctos", correctDesc:"Victoria, derrota o empate",
+    playedMatches:(n:number)=>`${n} partidos jugados`, noPlayed:"Aún no hay partidos jugados", average:"Promedio", averageDesc:"Puntos por partido jugado",
+    competitions:"Competiciones", competitionPerformance:"Rendimiento por competición", competitionIntro:"Consulta cuántos puntos has conseguido en cada competición de VoetIQ.",
+    predicted:"Pronosticado", history:"Mi historial", noPredictions:"Aún no has hecho ninguna predicción.", noPredictionsDesc:"Ve a Partidos y haz tu primera predicción.",
+    predictionCount:(n:number)=>`${n} predicci${n===1?"ón":"ones"}`, predictedOn:"Pronosticado el", yourPrediction:"Tu predicción", result:"Resultado",
+    notPlayed:"⏳ Aún no jugado", correct:"✅ Resultado correcto", noPoints:"❌ Sin puntos", unknownCompetition:"Competición desconocida",
+    career:"🏆 Tu carrera en VoetIQ", careerDesc:"Sigue pronosticando, mejora tu precisión y sube en la clasificación.", totalPoints:"Puntos totales"
+  },
+  fr: {
+    profileNotFound:"Aucun profil n’a été trouvé pour ce compte.", unknownError:"Erreur inconnue lors du chargement de ton profil.",
+    loading:"Chargement du profil...", retry:"Réessayer", myProfile:"Mon profil", leaderboardRank:"Classement", ofPlayers:(n:number)=>`sur ${n} joueurs`,
+    points:"Points", predictions:"Pronostics", exact:"Exacts", accuracy:"Précision",
+    performance:"Performance", yourPredictions:"Tes pronostics", performanceIntro:"Découvre tes performances en tant que pronostiqueur.",
+    exactScores:"Scores exacts", exactDesc:"Scores parfaitement pronostiqués", correctResults:"Bons résultats", correctDesc:"Victoire, défaite ou nul",
+    playedMatches:(n:number)=>`${n} matchs joués`, noPlayed:"Aucun match joué pour le moment", average:"Moyenne", averageDesc:"Points par match joué",
+    competitions:"Compétitions", competitionPerformance:"Performance par compétition", competitionIntro:"Découvre combien de points tu as gagnés dans chaque compétition VoetIQ.",
+    predicted:"Pronostiqué", history:"Mon historique", noPredictions:"Tu n’as encore fait aucun pronostic.", noPredictionsDesc:"Va dans Matchs et fais ton premier pronostic.",
+    predictionCount:(n:number)=>`${n} pronostic${n===1?"":"s"}`, predictedOn:"Pronostiqué le", yourPrediction:"Ton pronostic", result:"Résultat",
+    notPlayed:"⏳ Pas encore joué", correct:"✅ Bon résultat", noPoints:"❌ Aucun point", unknownCompetition:"Compétition inconnue",
+    career:"🏆 Ta carrière VoetIQ", careerDesc:"Continue à pronostiquer, améliore ta précision et grimpe au classement.", totalPoints:"Points totaux"
+  },
+  it: {
+    profileNotFound:"Nessun profilo trovato per questo account.", unknownError:"Errore sconosciuto durante il caricamento del profilo.",
+    loading:"Caricamento profilo...", retry:"Riprova", myProfile:"Il mio profilo", leaderboardRank:"Classifica", ofPlayers:(n:number)=>`su ${n} giocatori`,
+    points:"Punti", predictions:"Pronostici", exact:"Esatti", accuracy:"Precisione",
+    performance:"Prestazioni", yourPredictions:"I tuoi pronostici", performanceIntro:"Scopri come stai andando come pronosticatore.",
+    exactScores:"Risultati esatti", exactDesc:"Pronosticati perfettamente", correctResults:"Esiti corretti", correctDesc:"Vittoria, sconfitta o pareggio",
+    playedMatches:(n:number)=>`${n} partite giocate`, noPlayed:"Nessuna partita ancora giocata", average:"Media", averageDesc:"Punti per partita giocata",
+    competitions:"Competizioni", competitionPerformance:"Prestazioni per competizione", competitionIntro:"Scopri quanti punti hai guadagnato in ogni competizione VoetIQ.",
+    predicted:"Pronosticato", history:"La mia cronologia", noPredictions:"Non hai ancora fatto pronostici.", noPredictionsDesc:"Vai su Partite e fai il tuo primo pronostico.",
+    predictionCount:(n:number)=>`${n} pronostic${n===1?"o":"i"}`, predictedOn:"Pronosticato il", yourPrediction:"Il tuo pronostico", result:"Risultato",
+    notPlayed:"⏳ Non ancora giocata", correct:"✅ Esito corretto", noPoints:"❌ Nessun punto", unknownCompetition:"Competizione sconosciuta",
+    career:"🏆 La tua carriera VoetIQ", careerDesc:"Continua a pronosticare, migliora la precisione e scala la classifica.", totalPoints:"Punti totali"
+  },
+  pt: {
+    profileNotFound:"Não foi encontrado nenhum perfil para esta conta.", unknownError:"Erro desconhecido ao carregar o teu perfil.",
+    loading:"A carregar perfil...", retry:"Tentar novamente", myProfile:"O meu perfil", leaderboardRank:"Classificação", ofPlayers:(n:number)=>`de ${n} jogadores`,
+    points:"Pontos", predictions:"Previsões", exact:"Exatos", accuracy:"Precisão",
+    performance:"Desempenho", yourPredictions:"As tuas previsões", performanceIntro:"Vê o teu desempenho como prognosticador.",
+    exactScores:"Resultados exatos", exactDesc:"Previstos exatamente", correctResults:"Resultados corretos", correctDesc:"Vitória, derrota ou empate",
+    playedMatches:(n:number)=>`${n} jogos disputados`, noPlayed:"Ainda não há jogos disputados", average:"Média", averageDesc:"Pontos por jogo disputado",
+    competitions:"Competições", competitionPerformance:"Desempenho por competição", competitionIntro:"Vê quantos pontos ganhaste em cada competição do VoetIQ.",
+    predicted:"Previsto", history:"O meu histórico", noPredictions:"Ainda não fizeste nenhuma previsão.", noPredictionsDesc:"Vai a Jogos e faz a tua primeira previsão.",
+    predictionCount:(n:number)=>`${n} previs${n===1?"ão":"ões"}`, predictedOn:"Previsto em", yourPrediction:"A tua previsão", result:"Resultado",
+    notPlayed:"⏳ Ainda não disputado", correct:"✅ Resultado correto", noPoints:"❌ Sem pontos", unknownCompetition:"Competição desconhecida",
+    career:"🏆 A tua carreira VoetIQ", careerDesc:"Continua a prever, melhora a tua precisão e sobe na classificação.", totalPoints:"Pontos totais"
+  }
+} satisfies Record<LanguageCode, Record<string, any>>;
+
 const footballRanks: FootballRank[] = [
   { min: 0, max: 49, icon: "🟤", names: { nl:"Straatvoetballer", en:"Street Footballer", de:"Straßenfußballer", es:"Futbolista callejero", fr:"Footballeur de rue", it:"Calciatore di strada", pt:"Futebolista de rua" } },
   { min: 50, max: 99, icon: "🟢", names: { nl:"Jeugdspeler", en:"Youth Player", de:"Jugendspieler", es:"Jugador juvenil", fr:"Joueur junior", it:"Giocatore giovanile", pt:"Jogador juvenil" } },
@@ -186,7 +281,7 @@ export default function ProfielPage() {
 
       if (!profileData) {
         throw new Error(
-          "Er is geen profiel gevonden voor dit account."
+          profileUi[language].profileNotFound
         );
       }
 
@@ -247,7 +342,7 @@ export default function ProfielPage() {
       const message =
         error instanceof Error
           ? error.message
-          : "Onbekende fout bij het laden van je profiel.";
+          : profileUi[language].unknownError;
 
       setErrorMessage(message);
     } finally {
@@ -276,6 +371,7 @@ export default function ProfielPage() {
     : 100;
   const pointsNeeded = nextFootballRank ? Math.max(0, nextFootballRank.min - totalPoints) : 0;
   const rui = rankUi[language];
+  const t = profileUi[language];
 
   const totalPredictions = predictions.length;
 
@@ -383,7 +479,7 @@ export default function ProfielPage() {
 
   function formatDate(date: string) {
     return new Date(date).toLocaleString(
-      "nl-NL",
+      ({nl:"nl-NL",en:"en-GB",de:"de-DE",es:"es-ES",fr:"fr-FR",it:"it-IT",pt:"pt-PT"} as Record<LanguageCode,string>)[language],
       {
         day: "2-digit",
         month: "2-digit",
@@ -403,7 +499,7 @@ export default function ProfielPage() {
 
     if (!hasResult) {
       return {
-        label: "⏳ Nog niet gespeeld",
+        label: t.notPlayed,
         color: "#8fa99a",
         background:
           "rgba(255,255,255,0.05)",
@@ -427,7 +523,7 @@ export default function ProfielPage() {
 
     if (prediction.points > 0) {
       return {
-        label: "✅ Juiste uitslag",
+        label: t.correct,
         color: "#9ee7bd",
         background:
           "rgba(46,230,129,0.08)",
@@ -435,7 +531,7 @@ export default function ProfielPage() {
     }
 
     return {
-      label: "❌ Geen punten",
+      label: t.noPoints,
       color: "#a9aaa9",
       background:
         "rgba(255,255,255,0.04)",
@@ -447,7 +543,7 @@ export default function ProfielPage() {
   ) {
     if (!code || !competitions[code]) {
       return {
-        name: "Onbekende competitie",
+        name: t.unknownCompetition,
         icon: "⚽",
       };
     }
@@ -462,7 +558,7 @@ export default function ProfielPage() {
       <section className="mx-auto max-w-6xl px-5 py-8 sm:px-6 sm:py-12">
         {loading && (
           <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-16 text-center text-green-100/70">
-            Profiel laden...
+            {t.loading}
           </div>
         )}
 
@@ -480,7 +576,7 @@ export default function ProfielPage() {
               onClick={loadProfile}
               className="mt-5 rounded-xl bg-green-600 px-6 py-3 font-bold text-white transition hover:bg-green-500"
             >
-              Opnieuw proberen
+              {t.retry}
             </button>
           </div>
         )}
@@ -499,7 +595,7 @@ export default function ProfielPage() {
 
                       <div>
                         <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
-                          Mijn profiel
+                          {t.myProfile}
                         </p>
 
                         <h1 className="mt-1 text-3xl font-black sm:text-4xl">
@@ -516,7 +612,7 @@ export default function ProfielPage() {
                     {rankPosition !== null && (
                       <div className="rounded-2xl border border-green-400/20 bg-green-400/10 px-5 py-4 text-center sm:min-w-[180px]">
                         <p className="text-xs font-bold uppercase tracking-wide text-green-300">
-                          Rang
+                          {t.leaderboardRank}
                         </p>
 
                         <p className="mt-1 text-3xl font-black text-white">
@@ -524,7 +620,7 @@ export default function ProfielPage() {
                         </p>
 
                         <p className="text-xs text-green-100/50">
-                          van {totalPlayers} spelers
+                          {t.ofPlayers(totalPlayers)}
                         </p>
                       </div>
                     )}
@@ -533,22 +629,22 @@ export default function ProfielPage() {
 
                 <div className="grid grid-cols-2 border-t border-white/10 sm:grid-cols-4">
                   <ProfileHeaderStat
-                    label="Punten"
+                    label={t.points}
                     value={totalPoints.toString()}
                   />
 
                   <ProfileHeaderStat
-                    label="Voorspellingen"
+                    label={t.predictions}
                     value={totalPredictions.toString()}
                   />
 
                   <ProfileHeaderStat
-                    label="Exact"
+                    label={t.exact}
                     value={exactPredictions.toString()}
                   />
 
                   <ProfileHeaderStat
-                    label="Accuracy"
+                    label={t.accuracy}
                     value={`${accuracy}%`}
                   />
                 </div>
@@ -602,50 +698,49 @@ export default function ProfielPage() {
               <section className="mt-8">
                 <div className="mb-4">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
-                    Performance
+                    {t.performance}
                   </p>
 
                   <h2 className="mt-1 text-2xl font-black">
-                    Jouw voorspellingen
+                    {t.yourPredictions}
                   </h2>
 
                   <p className="mt-1 text-sm text-green-100/50">
-                    Bekijk hoe je presteert als
-                    voorspeller.
+                    {t.performanceIntro}
                   </p>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <PerformanceCard
                     icon="🎯"
-                    label="Exacte scores"
+                    label={t.exactScores}
                     value={exactPredictions.toString()}
-                    description="Precies goed voorspeld"
+                    description={t.exactDesc}
                   />
 
                   <PerformanceCard
                     icon="✅"
-                    label="Juiste uitslagen"
+                    label={t.correctResults}
                     value={correctResults.toString()}
-                    description="Winst, verlies of gelijk"
+                    description={t.correctDesc}
                   />
 
                   <PerformanceCard
                     icon="📈"
-                    label="Accuracy"
+                    label={t.accuracy}
                     value={`${accuracy}%`}
                     description={
                       playedPredictions.length > 0
-                        ? `${playedPredictions.length} gespeelde wedstrijden`
-                        : "Nog geen wedstrijden gespeeld"
+                        ? t.playedMatches(playedPredictions.length)
+                        : t.noPlayed
                     }
                   />
 
                   <PerformanceCard
                     icon="⭐"
-                    label="Gemiddeld"
+                    label={t.average}
                     value={averagePoints}
-                    description="Punten per gespeelde wedstrijd"
+                    description={t.averageDesc}
                   />
                 </div>
               </section>
@@ -653,16 +748,15 @@ export default function ProfielPage() {
               <section className="mt-10">
                 <div className="mb-5">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
-                    Competities
+                    {t.competitions}
                   </p>
 
                   <h2 className="mt-1 text-2xl font-black">
-                    Prestaties per competitie
+                    {t.competitionPerformance}
                   </h2>
 
                   <p className="mt-1 text-sm text-green-100/50">
-                    Bekijk hoeveel punten je in iedere
-                    VoetIQ-competitie hebt verdiend.
+                    {t.competitionIntro}
                   </p>
                 </div>
 
@@ -684,7 +778,7 @@ export default function ProfielPage() {
                             </div>
 
                             <div className="text-[10px] font-bold uppercase tracking-wide text-green-100/35">
-                              punten
+                              {t.points}
                             </div>
                           </div>
                         </div>
@@ -700,7 +794,7 @@ export default function ProfielPage() {
                             </p>
 
                             <p className="text-[10px] uppercase tracking-wide text-green-100/35">
-                              Voorspeld
+                              {t.predicted}
                             </p>
                           </div>
 
@@ -724,19 +818,16 @@ export default function ProfielPage() {
                 <div className="mb-5 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
-                      Mijn geschiedenis
+                      {t.history}
                     </p>
 
                     <h2 className="mt-1 text-2xl font-black">
-                      Voorspellingen
+                      {t.predictions}
                     </h2>
                   </div>
 
                   <p className="text-sm text-green-100/40">
-                    {totalPredictions} voorspelling
-                    {totalPredictions === 1
-                      ? ""
-                      : "en"}
+{t.predictionCount(totalPredictions)}
                   </p>
                 </div>
 
@@ -747,13 +838,11 @@ export default function ProfielPage() {
                     </div>
 
                     <p className="mt-3 font-bold">
-                      Je hebt nog geen voorspellingen
-                      gedaan.
+                      {t.noPredictions}
                     </p>
 
                     <p className="mt-1 text-sm text-green-100/50">
-                      Ga naar Wedstrijden en doe je
-                      eerste voorspelling.
+                      {t.noPredictionsDesc}
                     </p>
                   </div>
                 )}
@@ -805,7 +894,7 @@ export default function ProfielPage() {
                               </p>
 
                               <p className="mt-1 text-xs text-green-100/40">
-                                Voorspeld op{" "}
+                                {t.predictedOn}{" "}
                                 {formatDate(
                                   prediction.created_at
                                 )}
@@ -814,7 +903,7 @@ export default function ProfielPage() {
 
                             <div className="flex items-center gap-4">
                               <ScoreBox
-                                label="Jouw voorspelling"
+                                label={t.yourPrediction}
                                 home={
                                   prediction.home_score
                                 }
@@ -830,7 +919,7 @@ export default function ProfielPage() {
                                   </span>
 
                                   <ScoreBox
-                                    label="Uitslag"
+                                    label={t.result}
                                     home={
                                       prediction.actual_home_score!
                                     }
@@ -865,7 +954,7 @@ export default function ProfielPage() {
                             >
                               +
                               {prediction.points || 0}{" "}
-                              punten
+                              {t.points}
                             </span>
                           </div>
                         </article>
@@ -879,19 +968,17 @@ export default function ProfielPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="font-black">
-                      🏆 Jouw VoetIQ-carrière
+                      {t.career}
                     </p>
 
                     <p className="mt-1 text-sm text-green-100/45">
-                      Blijf voorspellen, verbeter je
-                      accuracy en klim op de
-                      ranglijst.
+                      {t.careerDesc}
                     </p>
                   </div>
 
                   <div className="rounded-xl bg-green-500/10 px-4 py-3 text-center ring-1 ring-green-400/10">
                     <p className="text-xs text-green-100/50">
-                      Totaalpunten
+                      {t.totalPoints}
                     </p>
 
                     <p className="text-xl font-black text-green-300">
