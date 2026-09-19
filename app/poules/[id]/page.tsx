@@ -25,13 +25,16 @@ type LeaderboardPlayer = {
 
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
+type PoolTab = "leaderboard" | "predictions" | "participants";
+
 type TranslationKey =
   | "notFound" | "loadError" | "noAccess" | "leaderboardError" | "loading"
   | "backPools" | "poolLabel" | "inviteCode" | "copied" | "copyCode"
   | "participant" | "participants" | "competition" | "pointsSystem"
   | "predictMatches" | "inviteFriends" | "poolLeaderboard" | "onlyPoints"
   | "noParticipants" | "prediction" | "predictions" | "exact" | "predicted"
-  | "points" | "poolId";
+  | "points" | "poolId" | "tabLeaderboard" | "tabPredictions" | "tabParticipants"
+  | "predictionsTitle" | "predictionsIntro" | "participantsTitle" | "participantsIntro";
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   nl: {
@@ -52,7 +55,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Points system", predictMatches:"Predict matches", inviteFriends:"Invite friends",
     poolLeaderboard:"Pool leaderboard", onlyPoints:"Only points from {competition} count towards this pool.",
     noParticipants:"There are no participants in this pool yet.", prediction:"prediction", predictions:"predictions",
-    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID"
+    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID", tabLeaderboard:"Leaderboard", tabPredictions:"Predictions", tabParticipants:"Participants", predictionsTitle:"Predictions", predictionsIntro:"View or make your predictions for matches that count towards this pool.", participantsTitle:"Participants", participantsIntro:"See everyone who is taking part in this pool."
   },
   de: {
     notFound:"Diese Tipprunde konnte nicht gefunden werden.", loadError:"Die Daten dieser Tipprunde konnten nicht geladen werden.",
@@ -62,7 +65,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Punktesystem", predictMatches:"Spiele tippen", inviteFriends:"Freunde einladen",
     poolLeaderboard:"Tipprunden-Rangliste", onlyPoints:"Für diese Tipprunde zählen nur Punkte aus {competition}.",
     noParticipants:"In dieser Tipprunde gibt es noch keine Teilnehmer.", prediction:"Tipp", predictions:"Tipps",
-    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID"
+    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID", tabLeaderboard:"Rangliste", tabPredictions:"Tipps", tabParticipants:"Teilnehmer", predictionsTitle:"Tipps", predictionsIntro:"Sieh dir deine Tipps für Spiele an oder gib neue Tipps ab, die für diese Tipprunde zählen.", participantsTitle:"Teilnehmer", participantsIntro:"Sieh dir alle Teilnehmer dieser Tipprunde an."
   },
   es: {
     notFound:"No se ha podido encontrar este grupo.", loadError:"No se han podido cargar los datos de este grupo.",
@@ -72,7 +75,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema de puntos", predictMatches:"Pronosticar partidos", inviteFriends:"Invitar a amigos",
     poolLeaderboard:"Clasificación del grupo", onlyPoints:"Solo cuentan para este grupo los puntos de {competition}.",
     noParticipants:"Todavía no hay participantes en este grupo.", prediction:"pronóstico", predictions:"pronósticos",
-    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo"
+    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo", tabLeaderboard:"Clasificación", tabPredictions:"Pronósticos", tabParticipants:"Participantes", predictionsTitle:"Pronósticos", predictionsIntro:"Consulta o realiza tus pronósticos para los partidos que cuentan para este grupo.", participantsTitle:"Participantes", participantsIntro:"Consulta quién participa en este grupo."
   },
   fr: {
     notFound:"Cette ligue est introuvable.", loadError:"Les informations de cette ligue n’ont pas pu être chargées.",
@@ -82,7 +85,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Système de points", predictMatches:"Pronostiquer les matchs", inviteFriends:"Inviter des amis",
     poolLeaderboard:"Classement de la ligue", onlyPoints:"Seuls les points de {competition} comptent pour cette ligue.",
     noParticipants:"Il n’y a encore aucun participant dans cette ligue.", prediction:"pronostic", predictions:"pronostics",
-    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue"
+    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue", tabLeaderboard:"Classement", tabPredictions:"Pronostics", tabParticipants:"Participants", predictionsTitle:"Pronostics", predictionsIntro:"Consultez ou faites vos pronostics pour les matchs qui comptent pour cette ligue.", participantsTitle:"Participants", participantsIntro:"Découvrez tous les participants de cette ligue."
   },
   it: {
     notFound:"Questo gruppo non è stato trovato.", loadError:"Non è stato possibile caricare i dati di questo gruppo.",
@@ -92,7 +95,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema di punti", predictMatches:"Pronostica le partite", inviteFriends:"Invita amici",
     poolLeaderboard:"Classifica del gruppo", onlyPoints:"Per questo gruppo contano solo i punti di {competition}.",
     noParticipants:"Non ci sono ancora partecipanti in questo gruppo.", prediction:"pronostico", predictions:"pronostici",
-    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo"
+    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo", tabLeaderboard:"Classifica", tabPredictions:"Pronostici", tabParticipants:"Partecipanti", predictionsTitle:"Pronostici", predictionsIntro:"Visualizza o inserisci i pronostici per le partite valide per questo gruppo.", participantsTitle:"Partecipanti", participantsIntro:"Scopri chi partecipa a questo gruppo."
   },
   pt: {
     notFound:"Não foi possível encontrar este grupo.", loadError:"Não foi possível carregar os dados deste grupo.",
@@ -102,7 +105,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema de pontos", predictMatches:"Prever jogos", inviteFriends:"Convidar amigos",
     poolLeaderboard:"Classificação do grupo", onlyPoints:"Apenas os pontos de {competition} contam para este grupo.",
     noParticipants:"Ainda não há participantes neste grupo.", prediction:"previsão", predictions:"previsões",
-    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo"
+    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo", tabLeaderboard:"Classificação", tabPredictions:"Previsões", tabParticipants:"Participantes", predictionsTitle:"Previsões", predictionsIntro:"Vê ou faz as tuas previsões para os jogos que contam para este grupo.", participantsTitle:"Participantes", participantsIntro:"Vê quem participa neste grupo."
   }
 };
 
@@ -137,6 +140,7 @@ export default function PoolDetailPage() {
   const [language, setLanguage] = useState<LanguageCode>("nl");
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<PoolTab>("leaderboard");
 
   useEffect(() => {
     const savedLanguage = window.localStorage.getItem("voetiq-language");
@@ -591,6 +595,19 @@ export default function PoolDetailPage() {
             </button>
           </div>
 
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "18px" }}>
+            <TabButton active={activeTab === "leaderboard"} onClick={() => setActiveTab("leaderboard")}>
+              🏆 {t("tabLeaderboard")}
+            </TabButton>
+            <TabButton active={activeTab === "predictions"} onClick={() => setActiveTab("predictions")}>
+              ⚽ {t("tabPredictions")}
+            </TabButton>
+            <TabButton active={activeTab === "participants"} onClick={() => setActiveTab("participants")}>
+              👥 {t("tabParticipants")}
+            </TabButton>
+          </div>
+
+          {activeTab === "leaderboard" && (
           <section
             style={{
               background: "white",
@@ -755,6 +772,33 @@ export default function PoolDetailPage() {
               ))
             )}
           </section>
+          )}
+
+          {activeTab === "predictions" && (
+            <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", padding: "28px", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
+              <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>⚽ {t("predictionsTitle")}</h2>
+              <p style={{ margin: "8px 0 22px", color: "#738078", fontSize: "14px", lineHeight: 1.6 }}>{t("predictionsIntro")}</p>
+              <button onClick={() => router.push(`/wedstrijden?competition=${pool.competition_code}`)} style={{ border: 0, borderRadius: "11px", padding: "13px 18px", background: "#08783e", color: "white", fontWeight: 900, cursor: "pointer" }}>
+                ⚽ {t("predictMatches")}
+              </button>
+            </section>
+          )}
+
+          {activeTab === "participants" && (
+            <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
+              <div style={{ padding: "22px 24px", borderBottom: "1px solid #e8eeea" }}>
+                <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>👥 {t("participantsTitle")}</h2>
+                <p style={{ margin: "6px 0 0", color: "#738078", fontSize: "14px" }}>{t("participantsIntro")}</p>
+              </div>
+              {leaderboard.map((player, index) => (
+                <div key={player.user_id} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "17px 24px", borderBottom: index === leaderboard.length - 1 ? "none" : "1px solid #edf1ee" }}>
+                  <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#e9f8ef", color: "#08783e", display: "grid", placeItems: "center", fontWeight: 900 }}>{player.username.slice(0, 1).toUpperCase()}</div>
+                  <div style={{ flex: 1 }}><div style={{ color: "#10251a", fontWeight: 900 }}>{player.username}</div><div style={{ color: "#849088", fontSize: "12px", marginTop: "3px" }}>{player.predictions_count} {player.predictions_count === 1 ? t("prediction") : t("predictions")}</div></div>
+                  <div style={{ color: "#08783e", fontWeight: 900 }}>{player.total_points} {t("points").toLowerCase()}</div>
+                </div>
+              ))}
+            </section>
+          )}
 
           <div
             style={{
@@ -769,6 +813,14 @@ export default function PoolDetailPage() {
         </div>
       </main>
     </>
+  );
+}
+
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} style={{ border: active ? "1px solid #08783e" : "1px solid #dbe4de", borderRadius: "11px", padding: "11px 16px", background: active ? "#08783e" : "white", color: active ? "white" : "#183427", fontWeight: 900, cursor: "pointer" }}>
+      {children}
+    </button>
   );
 }
 
