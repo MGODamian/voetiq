@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../Navbar";
 import { supabase } from "@/lib/supabase";
@@ -26,6 +26,26 @@ type LeaderboardPlayer = {
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
 type PoolTab = "leaderboard" | "predictions" | "participants";
+
+type Match = {
+  id: number;
+  utcDate: string;
+  status: string;
+  matchday?: number;
+  homeTeam: { name: string; crest?: string };
+  awayTeam: { name: string; crest?: string };
+};
+
+type Prediction = {
+  home: string;
+  away: string;
+};
+
+type StoredPrediction = {
+  match_id: number;
+  home_score: number;
+  away_score: number;
+};
 
 type TranslationKey =
   | "notFound" | "loadError" | "noAccess" | "leaderboardError" | "loading"
@@ -127,6 +147,60 @@ const competitions: Record<
   CL: { name: "Champions League", flag: "🏆" },
 };
 
+const competitionThemes: Record<
+  string,
+  { hero: string; card: string; accent: string; glow: string }
+> = {
+  DED: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(38,103,255,0.55) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,181,255,0.24) 0%, transparent 28%), linear-gradient(135deg, #03132f 0%, #082d73 55%, #0757c9 100%)",
+    card: "linear-gradient(135deg, #071d45 0%, #0a4ba8 100%)",
+    accent: "#8ac5ff",
+    glow: "rgba(31,112,255,0.30)",
+  },
+  PL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(216,0,255,0.35) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,255,209,0.18) 0%, transparent 28%), linear-gradient(135deg, #170020 0%, #37003c 55%, #5b075f 100%)",
+    card: "linear-gradient(135deg, #24002b 0%, #52005c 100%)",
+    accent: "#ef8cff",
+    glow: "rgba(181,36,202,0.28)",
+  },
+  PD: {
+    hero: "linear-gradient(135deg, #1b0808 0%, #641616 55%, #a52b12 100%)",
+    card: "linear-gradient(135deg, #3b0c0c 0%, #9a2915 100%)",
+    accent: "#ffad78",
+    glow: "rgba(231,76,35,0.27)",
+  },
+  BL1: {
+    hero: "linear-gradient(135deg, #190404 0%, #650909 55%, #a20e0e 100%)",
+    card: "linear-gradient(135deg, #3d0606 0%, #9e1010 100%)",
+    accent: "#ff8b8b",
+    glow: "rgba(220,25,25,0.27)",
+  },
+  SA: {
+    hero: "linear-gradient(135deg, #041326 0%, #073c78 55%, #0967b5 100%)",
+    card: "linear-gradient(135deg, #062a55 0%, #0874bd 100%)",
+    accent: "#8bd1ff",
+    glow: "rgba(28,126,219,0.27)",
+  },
+  FL1: {
+    hero: "linear-gradient(135deg, #071124 0%, #101f4b 55%, #19327b 100%)",
+    card: "linear-gradient(135deg, #0c1837 0%, #1c3474 100%)",
+    accent: "#d8ff49",
+    glow: "rgba(97,119,255,0.24)",
+  },
+  PPL: {
+    hero: "linear-gradient(135deg, #061a11 0%, #0a5130 55%, #12693f 100%)",
+    card: "linear-gradient(135deg, #082f1d 0%, #12653d 100%)",
+    accent: "#76ecad",
+    glow: "rgba(26,166,91,0.25)",
+  },
+  CL: {
+    hero: "linear-gradient(135deg, #030514 0%, #0b1240 55%, #171e68 100%)",
+    card: "linear-gradient(135deg, #070b2b 0%, #192365 100%)",
+    accent: "#aeb7ff",
+    glow: "rgba(76,91,220,0.28)",
+  },
+};
+
 export default function PoolDetailPage() {
   const router = useRouter();
 
@@ -141,6 +215,12 @@ export default function PoolDetailPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<PoolTab>("leaderboard");
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [predictions, setPredictions] = useState<Record<number, Prediction>>({});
+  const [savedMatchIds, setSavedMatchIds] = useState<Set<number>>(new Set());
+  const [selectedMatchday, setSelectedMatchday] = useState<number | null>(null);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [matchesMessage, setMatchesMessage] = useState("");
 
   useEffect(() => {
     const savedLanguage = window.localStorage.getItem("voetiq-language");
@@ -221,6 +301,7 @@ export default function PoolDetailPage() {
     }
 
     setPool(poolData);
+    await loadPoolMatches(poolData.competition_code);
 
     const { data: leaderboardData, error: leaderboardError } =
       await supabase.rpc("get_pool_leaderboard", {
@@ -238,6 +319,100 @@ export default function PoolDetailPage() {
 
     setLeaderboard(leaderboardData || []);
     setLoading(false);
+  }
+
+
+  async function loadPoolMatches(competitionCode: string) {
+    setMatchesLoading(true);
+    setMatchesMessage("");
+
+    try {
+      const response = await fetch(
+        `/api/matches?competition=${competitionCode}`,
+        { cache: "no-store" }
+      );
+
+      if (!response.ok) throw new Error("Kon wedstrijden niet ophalen");
+
+      const data = await response.json();
+      const upcomingMatches: Match[] = (data.matches || [])
+        .filter(
+          (match: Match) =>
+            match.status === "SCHEDULED" || match.status === "TIMED"
+        )
+        .sort(
+          (a: Match, b: Match) =>
+            new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
+        );
+
+      setMatches(upcomingMatches);
+
+      const matchdays = upcomingMatches
+        .map((match) => match.matchday)
+        .filter((matchday): matchday is number => typeof matchday === "number");
+
+      if (matchdays.length > 0) {
+        setSelectedMatchday(Math.min(...matchdays));
+      }
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user && upcomingMatches.length > 0) {
+        const matchIds = upcomingMatches.map((match) => match.id);
+        const { data: stored } = await supabase
+          .from("predictions")
+          .select("match_id, home_score, away_score")
+          .eq("user_id", user.id)
+          .in("match_id", matchIds);
+
+        const predictionMap: Record<number, Prediction> = {};
+        const storedIds = new Set<number>();
+
+        ((stored || []) as StoredPrediction[]).forEach((prediction) => {
+          predictionMap[prediction.match_id] = {
+            home: String(prediction.home_score),
+            away: String(prediction.away_score),
+          };
+          storedIds.add(prediction.match_id);
+        });
+
+        setPredictions(predictionMap);
+        setSavedMatchIds(storedIds);
+      }
+    } catch (error) {
+      console.error(error);
+      setMatchesMessage("De wedstrijden konden niet worden geladen.");
+    } finally {
+      setMatchesLoading(false);
+    }
+  }
+
+  const availableMatchdays = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          matches
+            .map((match) => match.matchday)
+            .filter((matchday): matchday is number => typeof matchday === "number")
+        )
+      ).sort((a, b) => a - b),
+    [matches]
+  );
+
+  const currentMatches = matches.filter(
+    (match) => match.matchday === selectedMatchday
+  );
+
+  function changePoolMatchday(direction: "previous" | "next") {
+    if (selectedMatchday === null) return;
+    const index = availableMatchdays.indexOf(selectedMatchday);
+    const nextIndex = direction === "previous" ? index - 1 : index + 1;
+
+    if (nextIndex >= 0 && nextIndex < availableMatchdays.length) {
+      setSelectedMatchday(availableMatchdays[nextIndex]);
+    }
   }
 
   async function copyInviteCode() {
@@ -309,7 +484,7 @@ export default function PoolDetailPage() {
         <main
           style={{
             minHeight: "100vh",
-            background: "#f4f7f5",
+            background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
             padding: "60px 20px",
           }}
         >
@@ -334,7 +509,7 @@ export default function PoolDetailPage() {
         <main
           style={{
             minHeight: "100vh",
-            background: "#f4f7f5",
+            background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
             padding: "60px 20px",
           }}
         >
@@ -391,7 +566,7 @@ export default function PoolDetailPage() {
       <main
         style={{
           minHeight: "100vh",
-          background: "#f4f7f5",
+          background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
           padding: "38px 20px 80px",
         }}
       >
@@ -419,8 +594,7 @@ export default function PoolDetailPage() {
 
           <section
             style={{
-              background:
-                "linear-gradient(135deg, #0d3d27 0%, #082b1c 100%)",
+              background: (competitionThemes[pool.competition_code] || competitionThemes.DED).hero,
               color: "white",
               borderRadius: "24px",
               padding: "32px",
@@ -775,12 +949,200 @@ export default function PoolDetailPage() {
           )}
 
           {activeTab === "predictions" && (
-            <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", padding: "28px", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
-              <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>⚽ {"Voorspellingen"}</h2>
-              <p style={{ margin: "8px 0 22px", color: "#738078", fontSize: "14px", lineHeight: 1.6 }}>{"Bekijk en voorspel de wedstrijden die meetellen voor deze poule."}</p>
-              <button onClick={() => router.push(`/wedstrijden?competition=${pool.competition_code}`)} style={{ border: 0, borderRadius: "11px", padding: "13px 18px", background: "#08783e", color: "white", fontWeight: 900, cursor: "pointer" }}>
-                ⚽ {t("predictMatches")}
-              </button>
+            <section
+              style={{
+                background: "white",
+                borderRadius: "20px",
+                border: "1px solid #e3e9e5",
+                overflow: "hidden",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.04)",
+              }}
+            >
+              <div
+                style={{
+                  padding: "22px 24px",
+                  color: "white",
+                  background:
+                    (competitionThemes[pool.competition_code] ||
+                      competitionThemes.DED).card,
+                }}
+              >
+                <h2 style={{ margin: 0, fontSize: "25px" }}>
+                  ⚽ Voorspellingen
+                </h2>
+                <p
+                  style={{
+                    margin: "6px 0 0",
+                    color: "rgba(255,255,255,0.75)",
+                    fontSize: "14px",
+                  }}
+                >
+                  {competition.flag} Alleen wedstrijden uit {competition.name} tellen mee.
+                </p>
+              </div>
+
+              <div style={{ padding: "20px 24px 24px" }}>
+                {matchesLoading ? (
+                  <div style={{ padding: "35px 0", textAlign: "center", color: "#738078" }}>
+                    ⚽ Wedstrijden laden...
+                  </div>
+                ) : availableMatchdays.length === 0 ? (
+                  <div style={{ padding: "35px 0", textAlign: "center", color: "#738078" }}>
+                    {matchesMessage || "Er zijn momenteel geen komende wedstrijden beschikbaar."}
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr auto 1fr",
+                        alignItems: "center",
+                        padding: "10px",
+                        borderRadius: "14px",
+                        background: "#f5f8f6",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      <button
+                        onClick={() => changePoolMatchday("previous")}
+                        disabled={availableMatchdays.indexOf(selectedMatchday ?? -1) <= 0}
+                        style={poolNavigationButton(
+                          availableMatchdays.indexOf(selectedMatchday ?? -1) <= 0
+                        )}
+                      >
+                        ← Vorige
+                      </button>
+
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ color: "#89958e", fontSize: "10px", fontWeight: 900 }}>
+                          SPEELRONDE
+                        </div>
+                        <strong style={{ fontSize: "20px" }}>{selectedMatchday}</strong>
+                      </div>
+
+                      <div style={{ textAlign: "right" }}>
+                        <button
+                          onClick={() => changePoolMatchday("next")}
+                          disabled={
+                            availableMatchdays.indexOf(selectedMatchday ?? -1) ===
+                            availableMatchdays.length - 1
+                          }
+                          style={poolNavigationButton(
+                            availableMatchdays.indexOf(selectedMatchday ?? -1) ===
+                              availableMatchdays.length - 1
+                          )}
+                        >
+                          Volgende →
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {currentMatches.map((match) => {
+                        const date = new Date(match.utcDate);
+                        const prediction = predictions[match.id];
+                        const isSaved = savedMatchIds.has(match.id);
+
+                        return (
+                          <div
+                            key={match.id}
+                            style={{
+                              border: isSaved
+                                ? "1px solid rgba(11,143,77,0.28)"
+                                : "1px solid #e8eeea",
+                              borderRadius: "15px",
+                              overflow: "hidden",
+                              background: "white",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                padding: "10px 15px",
+                                background: isSaved ? "#f3fcf7" : "#fafcfb",
+                                color: "#7d8982",
+                                fontSize: "12px",
+                                fontWeight: 700,
+                              }}
+                            >
+                              <span>
+                                {date.toLocaleDateString("nl-NL", {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "short",
+                                })}
+                              </span>
+                              <span>
+                                {isSaved ? "✓ Voorspeld · " : ""}
+                                {date.toLocaleTimeString("nl-NL", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
+
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)",
+                                alignItems: "center",
+                                gap: "14px",
+                                padding: "18px",
+                              }}
+                            >
+                              <PoolTeam
+                                name={match.homeTeam.name}
+                                crest={match.homeTeam.crest}
+                                side="home"
+                              />
+
+                              <div
+                                style={{
+                                  minWidth: "86px",
+                                  textAlign: "center",
+                                  fontWeight: 900,
+                                  color: isSaved ? "#08783e" : "#849088",
+                                  fontSize: isSaved ? "19px" : "14px",
+                                }}
+                              >
+                                {prediction
+                                  ? `${prediction.home} - ${prediction.away}`
+                                  : "Nog invullen"}
+                              </div>
+
+                              <PoolTeam
+                                name={match.awayTeam.name}
+                                crest={match.awayTeam.crest}
+                                side="away"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        router.push(`/wedstrijden?competition=${pool.competition_code}`)
+                      }
+                      style={{
+                        marginTop: "18px",
+                        width: "100%",
+                        border: 0,
+                        borderRadius: "11px",
+                        padding: "13px 18px",
+                        background: "#08783e",
+                        color: "white",
+                        fontWeight: 900,
+                        cursor: "pointer",
+                      }}
+                    >
+                      ⚽ {t("predictMatches")}
+                    </button>
+                  </>
+                )}
+              </div>
             </section>
           )}
 
@@ -822,6 +1184,79 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
       {children}
     </button>
   );
+}
+
+
+function PoolTeam({
+  name,
+  crest,
+  side,
+}: {
+  name: string;
+  crest?: string;
+  side: "home" | "away";
+}) {
+  const home = side === "home";
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: home ? "row" : "row-reverse",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        gap: "10px",
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          textAlign: home ? "right" : "left",
+          fontWeight: 800,
+          fontSize: "14px",
+        }}
+      >
+        {name}
+      </div>
+
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          flexShrink: 0,
+          borderRadius: "10px",
+          background: "#f6f8f7",
+          border: "1px solid #edf0ee",
+          display: "grid",
+          placeItems: "center",
+          padding: "6px",
+          boxSizing: "border-box",
+        }}
+      >
+        {crest ? (
+          <img
+            src={crest}
+            alt={`${name} logo`}
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
+          />
+        ) : (
+          "⚽"
+        )}
+      </div>
+    </div>
+  );
+}
+
+function poolNavigationButton(disabled: boolean) {
+  return {
+    border: "none",
+    background: disabled ? "#ecefed" : "#e9faf1",
+    color: disabled ? "#a1aaa5" : "#08763e",
+    borderRadius: "9px",
+    padding: "9px 12px",
+    fontWeight: 800,
+    cursor: disabled ? "default" : "pointer",
+  };
 }
 
 function StatCard({
