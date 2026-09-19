@@ -179,7 +179,6 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     leaderboard: "Ranglijst",
     achievements: "Achievements",
     challenges: "Challenges",
-    challenges: "Challenges",
     howItWorks: "Hoe werkt het?",
     profile: "Mijn profiel",
     logout: "Uitloggen",
