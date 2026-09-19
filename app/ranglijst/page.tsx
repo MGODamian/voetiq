@@ -22,6 +22,29 @@ type Competition = {
 
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
+const footballRanks = [
+  { min: 0, icon: "🟤", nl: "Straatvoetballer", en: "Street Footballer", de: "Straßenfußballer", es: "Futbolista callejero", fr: "Footballeur de rue", it: "Calciatore di strada", pt: "Futebolista de rua" },
+  { min: 50, icon: "🟢", nl: "Jeugdspeler", en: "Youth Player", de: "Jugendspieler", es: "Jugador juvenil", fr: "Joueur junior", it: "Giocatore giovanile", pt: "Jogador juvenil" },
+  { min: 100, icon: "🔵", nl: "Academiespeler", en: "Academy Player", de: "Akademiespieler", es: "Jugador de academia", fr: "Joueur d’académie", it: "Giocatore dell’accademia", pt: "Jogador da academia" },
+  { min: 200, icon: "⚪", nl: "Selectiespeler", en: "Squad Player", de: "Kaderspieler", es: "Jugador de plantilla", fr: "Joueur de l’effectif", it: "Giocatore della rosa", pt: "Jogador do plantel" },
+  { min: 350, icon: "🟡", nl: "Basisspeler", en: "Starting Player", de: "Stammspieler", es: "Titular", fr: "Titulaire", it: "Titolare", pt: "Titular" },
+  { min: 550, icon: "🟠", nl: "Profvoetballer", en: "Professional Footballer", de: "Profifußballer", es: "Futbolista profesional", fr: "Footballeur professionnel", it: "Calciatore professionista", pt: "Futebolista profissional" },
+  { min: 800, icon: "🔥", nl: "Sterspeler", en: "Star Player", de: "Starspieler", es: "Jugador estrella", fr: "Joueur vedette", it: "Giocatore stella", pt: "Jogador estrela" },
+  { min: 1100, icon: "⭐", nl: "Topspeler", en: "Top Player", de: "Topspieler", es: "Jugador de élite", fr: "Joueur d’élite", it: "Top player", pt: "Jogador de elite" },
+  { min: 1500, icon: "🌟", nl: "Wereldster", en: "World Star", de: "Weltstar", es: "Estrella mundial", fr: "Star mondiale", it: "Stella mondiale", pt: "Estrela mundial" },
+  { min: 2000, icon: "🏆", nl: "Kampioen", en: "Champion", de: "Champion", es: "Campeón", fr: "Champion", it: "Campione", pt: "Campeão" },
+  { min: 2750, icon: "👑", nl: "Ballon d'Or-niveau", en: "Ballon d'Or Level", de: "Ballon-d’Or-Niveau", es: "Nivel Balón de Oro", fr: "Niveau Ballon d’Or", it: "Livello Pallone d’Oro", pt: "Nível Bola de Ouro" },
+  { min: 3500, icon: "🐐", nl: "VoetIQ GOAT", en: "VoetIQ GOAT", de: "VoetIQ GOAT", es: "VoetIQ GOAT", fr: "VoetIQ GOAT", it: "VoetIQ GOAT", pt: "VoetIQ GOAT" },
+] as const;
+
+function getFootballRank(points: number) {
+  let current = footballRanks[0];
+  for (const rank of footballRanks) {
+    if (points >= rank.min) current = rank;
+  }
+  return current;
+}
+
 type Translation = {
   general: string;
   title: string;
@@ -728,6 +751,15 @@ export default function Ranglijst() {
                       {t.leader}
                     </p>
                   )}
+
+                  {(() => {
+                    const footballRank = getFootballRank(player.total_points);
+                    return (
+                      <p className="mt-1.5 text-xs font-bold text-green-100/55">
+                        {footballRank.icon} {footballRank[language]}
+                      </p>
+                    );
+                  })()}
                 </div>
 
                 {selectedCompetition !== "ALL" && (
