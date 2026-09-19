@@ -37,11 +37,15 @@ const footballRanks = [
   { min: 3500, icon: "🐐", nl: "VoetIQ GOAT", en: "VoetIQ GOAT", de: "VoetIQ GOAT", es: "VoetIQ GOAT", fr: "VoetIQ GOAT", it: "VoetIQ GOAT", pt: "VoetIQ GOAT" },
 ] as const;
 
-function getFootballRank(points: number) {
-  let current = footballRanks[0];
+function getFootballRank(points: number): (typeof footballRanks)[number] {
+  let current: (typeof footballRanks)[number] = footballRanks[0];
+
   for (const rank of footballRanks) {
-    if (points >= rank.min) current = rank;
+    if (points >= rank.min) {
+      current = rank;
+    }
   }
+
   return current;
 }
 
