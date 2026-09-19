@@ -32,6 +32,7 @@ export default function PoolManagePage() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [regeneratingCode, setRegeneratingCode] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -122,6 +123,47 @@ export default function PoolManagePage() {
     setName(cleanName);
     setMessage("✓ Poulenaam succesvol gewijzigd.");
     setSaving(false);
+  }
+
+  async function regenerateInviteCode() {
+    if (!pool) return;
+
+    const confirmed = window.confirm(
+      "Weet je zeker dat je de uitnodigingscode wilt vernieuwen? De oude code werkt daarna niet meer."
+    );
+
+    if (!confirmed) return;
+
+    setRegeneratingCode(true);
+    setError("");
+    setMessage("");
+
+    const { data, error: regenerateError } = await supabase.rpc(
+      "regenerate_pool_invite_code",
+      {
+        requested_pool_id: pool.id,
+      }
+    );
+
+    if (regenerateError) {
+      console.error(regenerateError);
+      setError(
+        regenerateError.message ||
+          "De uitnodigingscode kon niet worden vernieuwd."
+      );
+      setRegeneratingCode(false);
+      return;
+    }
+
+    const newCode = String(data || "");
+
+    setPool({
+      ...pool,
+      invite_code: newCode,
+    });
+
+    setMessage("✓ Nieuwe uitnodigingscode aangemaakt.");
+    setRegeneratingCode(false);
   }
 
   return (
@@ -363,6 +405,89 @@ export default function PoolManagePage() {
                   }}
                 >
                   {saving ? "Opslaan..." : "Naam opslaan"}
+                </button>
+              </section>
+
+              <section
+                style={{
+                  background:
+                    "linear-gradient(145deg, #06271a 0%, #00170e 100%)",
+                  border: "1px solid rgba(80,190,130,0.20)",
+                  borderRadius: "20px",
+                  padding: "24px",
+                  marginTop: "18px",
+                }}
+              >
+                <h2
+                  style={{
+                    margin: "0 0 6px",
+                    fontSize: "22px",
+                  }}
+                >
+                  Uitnodigingscode
+                </h2>
+
+                <p
+                  style={{
+                    margin: "0 0 18px",
+                    color: "#a9bbb0",
+                    fontSize: "14px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Vernieuw de code als je niet meer wilt dat de oude
+                  uitnodigingslink gebruikt kan worden.
+                </p>
+
+                <div
+                  style={{
+                    background: "#00170e",
+                    border: "1px solid rgba(80,190,130,0.25)",
+                    borderRadius: "12px",
+                    padding: "14px 16px",
+                    marginBottom: "14px",
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "#7f978a",
+                      fontSize: "11px",
+                      fontWeight: 900,
+                      marginBottom: "5px",
+                      letterSpacing: "0.8px",
+                    }}
+                  >
+                    HUIDIGE CODE
+                  </div>
+
+                  <div
+                    style={{
+                      color: "white",
+                      fontSize: "20px",
+                      fontWeight: 900,
+                      letterSpacing: "1px",
+                    }}
+                  >
+                    {pool.invite_code}
+                  </div>
+                </div>
+
+                <button
+                  onClick={regenerateInviteCode}
+                  disabled={regeneratingCode}
+                  style={{
+                    border: "1px solid rgba(65,229,139,0.22)",
+                    borderRadius: "11px",
+                    padding: "12px 18px",
+                    background: regeneratingCode ? "#17422f" : "#0b3523",
+                    color: regeneratingCode ? "#759987" : "#83e7ae",
+                    fontWeight: 900,
+                    cursor: regeneratingCode ? "default" : "pointer",
+                  }}
+                >
+                  {regeneratingCode
+                    ? "Nieuwe code maken..."
+                    : "🔄 Uitnodigingscode vernieuwen"}
                 </button>
               </section>
             </>
