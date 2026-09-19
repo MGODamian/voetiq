@@ -75,6 +75,41 @@ const competitionOrder = [
   "CL",
 ];
 
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+type FootballRank = {
+  min: number;
+  max: number | null;
+  icon: string;
+  names: Record<LanguageCode, string>;
+};
+
+const footballRanks: FootballRank[] = [
+  { min: 0, max: 49, icon: "🟤", names: { nl:"Straatvoetballer", en:"Street Footballer", de:"Straßenfußballer", es:"Futbolista callejero", fr:"Footballeur de rue", it:"Calciatore di strada", pt:"Futebolista de rua" } },
+  { min: 50, max: 99, icon: "🟢", names: { nl:"Jeugdspeler", en:"Youth Player", de:"Jugendspieler", es:"Jugador juvenil", fr:"Joueur junior", it:"Giocatore giovanile", pt:"Jogador juvenil" } },
+  { min: 100, max: 199, icon: "🔵", names: { nl:"Academiespeler", en:"Academy Player", de:"Akademiespieler", es:"Jugador de academia", fr:"Joueur d’académie", it:"Giocatore dell’accademia", pt:"Jogador da academia" } },
+  { min: 200, max: 349, icon: "⚪", names: { nl:"Selectiespeler", en:"Squad Player", de:"Kaderspieler", es:"Jugador de plantilla", fr:"Joueur de l’effectif", it:"Giocatore della rosa", pt:"Jogador do plantel" } },
+  { min: 350, max: 549, icon: "🟡", names: { nl:"Basisspeler", en:"Starting Player", de:"Stammspieler", es:"Titular", fr:"Titulaire", it:"Titolare", pt:"Titular" } },
+  { min: 550, max: 799, icon: "🟠", names: { nl:"Profvoetballer", en:"Professional Footballer", de:"Profifußballer", es:"Futbolista profesional", fr:"Footballeur professionnel", it:"Calciatore professionista", pt:"Futebolista profissional" } },
+  { min: 800, max: 1099, icon: "🔥", names: { nl:"Sterspeler", en:"Star Player", de:"Starspieler", es:"Jugador estrella", fr:"Joueur vedette", it:"Giocatore stella", pt:"Jogador estrela" } },
+  { min: 1100, max: 1499, icon: "⭐", names: { nl:"Topspeler", en:"Top Player", de:"Topspieler", es:"Jugador de élite", fr:"Joueur d’élite", it:"Top player", pt:"Jogador de elite" } },
+  { min: 1500, max: 1999, icon: "🌟", names: { nl:"Wereldster", en:"World Star", de:"Weltstar", es:"Estrella mundial", fr:"Star mondiale", it:"Stella mondiale", pt:"Estrela mundial" } },
+  { min: 2000, max: 2749, icon: "🏆", names: { nl:"Kampioen", en:"Champion", de:"Champion", es:"Campeón", fr:"Champion", it:"Campione", pt:"Campeão" } },
+  { min: 2750, max: 3499, icon: "👑", names: { nl:"Ballon d'Or-niveau", en:"Ballon d'Or Level", de:"Ballon-d’Or-Niveau", es:"Nivel Balón de Oro", fr:"Niveau Ballon d’Or", it:"Livello Pallone d’Oro", pt:"Nível Bola de Ouro" } },
+  { min: 3500, max: null, icon: "🐐", names: { nl:"VoetIQ GOAT", en:"VoetIQ GOAT", de:"VoetIQ GOAT", es:"VoetIQ GOAT", fr:"VoetIQ GOAT", it:"VoetIQ GOAT", pt:"VoetIQ GOAT" } },
+];
+
+const rankUi: Record<LanguageCode, {careerRank:string; current:string; next:string; needed:(n:number)=>string; highest:string; points:string}> = {
+  nl:{careerRank:"Voetbalrang",current:"Huidige rang",next:"Volgende rang",needed:n=>`Nog ${n} punten nodig voor promotie`,highest:"Hoogste rang bereikt",points:"punten"},
+  en:{careerRank:"Football rank",current:"Current rank",next:"Next rank",needed:n=>`${n} points needed for promotion`,highest:"Highest rank reached",points:"points"},
+  de:{careerRank:"Fußballrang",current:"Aktueller Rang",next:"Nächster Rang",needed:n=>`Noch ${n} Punkte bis zum Aufstieg`,highest:"Höchster Rang erreicht",points:"Punkte"},
+  es:{careerRank:"Rango de fútbol",current:"Rango actual",next:"Siguiente rango",needed:n=>`Faltan ${n} puntos para ascender`,highest:"Rango máximo alcanzado",points:"puntos"},
+  fr:{careerRank:"Rang football",current:"Rang actuel",next:"Rang suivant",needed:n=>`Encore ${n} points pour être promu`,highest:"Rang maximal atteint",points:"points"},
+  it:{careerRank:"Rango calcistico",current:"Rango attuale",next:"Rango successivo",needed:n=>`Mancano ${n} punti alla promozione`,highest:"Rango massimo raggiunto",points:"punti"},
+  pt:{careerRank:"Nível futebolístico",current:"Nível atual",next:"Próximo nível",needed:n=>`Faltam ${n} pontos para subir de nível`,highest:"Nível máximo alcançado",points:"pontos"},
+};
+
 export default function ProfielPage() {
   const router = useRouter();
 
@@ -93,12 +128,26 @@ export default function ProfielPage() {
   const [totalPlayers, setTotalPlayers] = useState(0);
 
   const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState<LanguageCode>("nl");
 
   const [errorMessage, setErrorMessage] =
     useState("");
 
   useEffect(() => {
     loadProfile();
+
+    const stored = window.localStorage.getItem("voetiq-language");
+    if (stored && ["nl","en","de","es","fr","it","pt"].includes(stored)) {
+      setLanguage(stored as LanguageCode);
+    }
+
+    function handleLanguageChange(event: Event) {
+      const customEvent = event as CustomEvent<{ language: LanguageCode }>;
+      if (customEvent.detail?.language) setLanguage(customEvent.detail.language);
+    }
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+    return () => window.removeEventListener("voetiq-language-change", handleLanguageChange);
   }, []);
 
   async function loadProfile() {
@@ -211,6 +260,22 @@ export default function ProfielPage() {
       total + (prediction.points || 0),
     0
   );
+
+  const currentFootballRankIndex = footballRanks.findIndex(
+    (rank) => totalPoints >= rank.min && (rank.max === null || totalPoints <= rank.max)
+  );
+  const currentFootballRank = footballRanks[Math.max(0, currentFootballRankIndex)];
+  const nextFootballRank =
+    currentFootballRankIndex >= 0 && currentFootballRankIndex < footballRanks.length - 1
+      ? footballRanks[currentFootballRankIndex + 1]
+      : null;
+  const rankStart = currentFootballRank.min;
+  const rankEnd = nextFootballRank ? nextFootballRank.min : currentFootballRank.min;
+  const rankProgress = nextFootballRank
+    ? Math.min(100, Math.max(0, ((totalPoints - rankStart) / (rankEnd - rankStart)) * 100))
+    : 100;
+  const pointsNeeded = nextFootballRank ? Math.max(0, nextFootballRank.min - totalPoints) : 0;
+  const rui = rankUi[language];
 
   const totalPredictions = predictions.length;
 
@@ -486,6 +551,51 @@ export default function ProfielPage() {
                     label="Accuracy"
                     value={`${accuracy}%`}
                   />
+                </div>
+              </section>
+
+              <section className="mt-8 rounded-3xl border border-green-400/15 bg-gradient-to-br from-green-900/70 via-green-950/80 to-gray-950 p-6 sm:p-7">
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">{rui.careerRank}</p>
+                    <p className="mt-2 text-sm text-green-100/45">{rui.current}</p>
+                    <h2 className="mt-1 text-2xl font-black sm:text-3xl">
+                      {currentFootballRank.icon} {currentFootballRank.names[language]}
+                    </h2>
+                  </div>
+
+                  <div className="sm:text-right">
+                    {nextFootballRank ? (
+                      <>
+                        <p className="text-xs text-green-100/45">{rui.next}</p>
+                        <p className="mt-1 font-black text-green-300">
+                          {nextFootballRank.icon} {nextFootballRank.names[language]}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="font-black text-green-300">🐐 {rui.highest}</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <div className="mb-2 flex items-center justify-between gap-3 text-xs">
+                    <span className="font-bold text-green-100/55">
+                      {totalPoints} {rui.points}
+                    </span>
+                    <span className="font-bold text-green-300">
+                      {nextFootballRank ? `${nextFootballRank.min} ${rui.points}` : rui.highest}
+                    </span>
+                  </div>
+                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="h-full rounded-full bg-green-400 transition-all duration-500"
+                      style={{ width: `${rankProgress}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-sm font-bold text-green-100/60">
+                    {nextFootballRank ? rui.needed(pointsNeeded) : rui.highest}
+                  </p>
                 </div>
               </section>
 
