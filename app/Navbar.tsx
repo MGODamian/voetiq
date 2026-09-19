@@ -146,6 +146,7 @@ type NavbarTranslation = {
   pools: string;
   leaderboard: string;
   achievements: string;
+  challenges: string;
   howItWorks: string;
   profile: string;
   logout: string;
@@ -177,6 +178,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     pools: "Poules",
     leaderboard: "Ranglijst",
     achievements: "Achievements",
+    challenges: "Challenges",
+    challenges: "Challenges",
     howItWorks: "Hoe werkt het?",
     profile: "Mijn profiel",
     logout: "Uitloggen",
@@ -205,6 +208,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     pools: "Tipprunden",
     leaderboard: "Rangliste",
     achievements: "Erfolge",
+    challenges: "Challenges",
     howItWorks: "Wie funktioniert es?",
     profile: "Mein Profil",
     logout: "Abmelden",
@@ -219,6 +223,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     pools: "Grupos",
     leaderboard: "Clasificación",
     achievements: "Logros",
+    challenges: "Desafíos",
     howItWorks: "¿Cómo funciona?",
     profile: "Mi perfil",
     logout: "Cerrar sesión",
@@ -233,6 +238,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     pools: "Ligues",
     leaderboard: "Classement",
     achievements: "Succès",
+    challenges: "Défis",
     howItWorks: "Comment ça marche ?",
     profile: "Mon profil",
     logout: "Se déconnecter",
@@ -247,6 +253,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     pools: "Gruppi",
     leaderboard: "Classifica",
     achievements: "Obiettivi",
+    challenges: "Sfide",
     howItWorks: "Come funziona?",
     profile: "Il mio profilo",
     logout: "Esci",
@@ -261,6 +268,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     pools: "Grupos",
     leaderboard: "Classificação",
     achievements: "Conquistas",
+    challenges: "Desafios",
     howItWorks: "Como funciona?",
     profile: "O meu perfil",
     logout: "Terminar sessão",
@@ -722,6 +730,11 @@ export default function Navbar() {
                 label={`🏅 ${t.achievements}`}
                 active={isActive("/achievements")}
               />
+              <NavLink
+                href="/challenges"
+                label={`🔥 ${t.challenges}`}
+                active={isActive("/challenges")}
+              />
             )}
 
             <NavLink
@@ -893,6 +906,9 @@ export default function Navbar() {
             {loggedIn && (
               <Link href="/achievements" onClick={() => setMobileOpen(false)}>
                 🏅 {t.achievements}
+              </Link>
+              <Link href="/challenges" onClick={() => setMobileOpen(false)}>
+                🔥 {t.challenges}
               </Link>
             )}
 
