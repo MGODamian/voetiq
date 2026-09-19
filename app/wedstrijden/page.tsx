@@ -67,7 +67,9 @@ type TranslationKey =
   | "predictionSaveError"
   | "premiumRequired"
   | "unlockPremium"
-  | "premiumOnly";
+  | "premiumOnly"
+  | "premiumGateTitle"
+  | "premiumGateDescription";
 
 const localeByLanguage: Record<LanguageCode, string> = {
   nl: "nl-NL",
@@ -111,6 +113,8 @@ const translations: Record<
     premiumRequired: "Voor Champions League-voorspellingen heb je VoetIQ Premium nodig.",
     unlockPremium: "Ontgrendel met VoetIQ Premium",
     premiumOnly: "Alleen met Premium",
+    premiumGateTitle: "Champions League is onderdeel van VoetIQ Premium",
+    premiumGateDescription: "Word Premium om Champions League-wedstrijden te bekijken en te voorspellen.",
   },
   en: {
     matches: "Matches",
@@ -139,6 +143,8 @@ const translations: Record<
     premiumRequired: "You need VoetIQ Premium to predict Champions League matches.",
     unlockPremium: "Unlock with VoetIQ Premium",
     premiumOnly: "Premium only",
+    premiumGateTitle: "Champions League is part of VoetIQ Premium",
+    premiumGateDescription: "Go Premium to view and predict Champions League matches.",
   },
   de: {
     matches: "Spiele",
@@ -167,6 +173,8 @@ const translations: Record<
     premiumRequired: "Für Champions-League-Tipps benötigst du VoetIQ Premium.",
     unlockPremium: "Mit VoetIQ Premium freischalten",
     premiumOnly: "Nur mit Premium",
+    premiumGateTitle: "Die Champions League ist Teil von VoetIQ Premium",
+    premiumGateDescription: "Hol dir Premium, um Champions-League-Spiele zu sehen und zu tippen.",
   },
   es: {
     matches: "Partidos",
@@ -195,6 +203,8 @@ const translations: Record<
     premiumRequired: "Necesitas VoetIQ Premium para pronosticar la Champions League.",
     unlockPremium: "Desbloquear con VoetIQ Premium",
     premiumOnly: "Solo con Premium",
+    premiumGateTitle: "La Champions League forma parte de VoetIQ Premium",
+    premiumGateDescription: "Hazte Premium para ver y pronosticar los partidos de la Champions League.",
   },
   fr: {
     matches: "Matchs",
@@ -225,6 +235,8 @@ const translations: Record<
     premiumRequired: "VoetIQ Premium est nécessaire pour pronostiquer la Champions League.",
     unlockPremium: "Débloquer avec VoetIQ Premium",
     premiumOnly: "Premium uniquement",
+    premiumGateTitle: "La Ligue des champions fait partie de VoetIQ Premium",
+    premiumGateDescription: "Passez à Premium pour voir et pronostiquer les matchs de Ligue des champions.",
   },
   it: {
     matches: "Partite",
@@ -254,6 +266,8 @@ const translations: Record<
     premiumRequired: "Serve VoetIQ Premium per pronosticare la Champions League.",
     unlockPremium: "Sblocca con VoetIQ Premium",
     premiumOnly: "Solo Premium",
+    premiumGateTitle: "La Champions League fa parte di VoetIQ Premium",
+    premiumGateDescription: "Passa a Premium per vedere e pronosticare le partite di Champions League.",
   },
   pt: {
     matches: "Jogos",
@@ -282,6 +296,8 @@ const translations: Record<
     premiumRequired: "Precisas do VoetIQ Premium para prever jogos da Champions League.",
     unlockPremium: "Desbloquear com VoetIQ Premium",
     premiumOnly: "Apenas Premium",
+    premiumGateTitle: "A Champions League faz parte do VoetIQ Premium",
+    premiumGateDescription: "Adere ao Premium para veres e preveres os jogos da Champions League.",
   },
 };
 
@@ -1176,6 +1192,7 @@ export default function Wedstrijden() {
           </div>
 
           {!loading &&
+            !(selectedCompetition === "CL" && !premiumLoading && !isPremium) &&
             currentMatches.length >
               0 && (
               <div
@@ -1229,7 +1246,78 @@ export default function Wedstrijden() {
             )}
         </div>
 
-        {loading && (
+        {selectedCompetition === "CL" && !premiumLoading && !isPremium && (
+          <div
+            style={{
+              background: activeTheme.surface,
+              border: `1px solid ${activeTheme.border}`,
+              borderRadius: "18px",
+              padding: "58px 28px",
+              textAlign: "center",
+              boxShadow: `0 10px 32px ${activeTheme.glow}`,
+            }}
+          >
+            <div
+              style={{
+                width: "76px",
+                height: "76px",
+                margin: "0 auto 20px",
+                borderRadius: "22px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: activeTheme.surfaceSoft,
+                border: `1px solid ${activeTheme.border}`,
+                fontSize: "36px",
+              }}
+            >
+              🔒
+            </div>
+
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "25px",
+                fontWeight: 900,
+                color: "white",
+              }}
+            >
+              {t("premiumGateTitle")}
+            </h3>
+
+            <p
+              style={{
+                maxWidth: "560px",
+                margin: "12px auto 0",
+                color: "rgba(255,255,255,0.62)",
+                fontSize: "14px",
+                lineHeight: 1.6,
+              }}
+            >
+              {t("premiumGateDescription")}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => router.push("/premium")}
+              style={{
+                marginTop: "24px",
+                padding: "13px 20px",
+                border: "none",
+                borderRadius: "11px",
+                background: activeTheme.accent,
+                color: "#080b1d",
+                fontSize: "14px",
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              👑 {t("unlockPremium")}
+            </button>
+          </div>
+        )}
+
+        {!(selectedCompetition === "CL" && !premiumLoading && !isPremium) && loading && (
           <div style={{...emptyCardStyle, background: activeTheme.surface, border: `1px solid ${activeTheme.border}`, color: "white"}}>
             <div
               style={{
@@ -1245,7 +1333,8 @@ export default function Wedstrijden() {
           </div>
         )}
 
-        {!loading &&
+        {!(selectedCompetition === "CL" && !premiumLoading && !isPremium) &&
+          !loading &&
           availableMatchdays.length ===
             0 && (
             <div style={{...emptyCardStyle, background: activeTheme.surface, border: `1px solid ${activeTheme.border}`, color: "white"}}>
@@ -1281,7 +1370,8 @@ export default function Wedstrijden() {
             </div>
           )}
 
-        {!loading &&
+        {!(selectedCompetition === "CL" && !premiumLoading && !isPremium) &&
+          !loading &&
           availableMatchdays.length >
             0 && (
             <>
