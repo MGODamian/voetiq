@@ -34,7 +34,7 @@ type TranslationKey =
   | "predictMatches" | "inviteFriends" | "poolLeaderboard" | "onlyPoints"
   | "noParticipants" | "prediction" | "predictions" | "exact" | "predicted"
   | "points" | "poolId"
-  | "predictionsIntro" | "participantsIntro";
+ ;
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   nl: {
@@ -777,7 +777,7 @@ export default function PoolDetailPage() {
           {activeTab === "predictions" && (
             <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", padding: "28px", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
               <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>⚽ {"Voorspellingen"}</h2>
-              <p style={{ margin: "8px 0 22px", color: "#738078", fontSize: "14px", lineHeight: 1.6 }}>{t("predictionsIntro")}</p>
+              <p style={{ margin: "8px 0 22px", color: "#738078", fontSize: "14px", lineHeight: 1.6 }}>{"Bekijk en voorspel de wedstrijden die meetellen voor deze poule."}</p>
               <button onClick={() => router.push(`/wedstrijden?competition=${pool.competition_code}`)} style={{ border: 0, borderRadius: "11px", padding: "13px 18px", background: "#08783e", color: "white", fontWeight: 900, cursor: "pointer" }}>
                 ⚽ {t("predictMatches")}
               </button>
@@ -788,7 +788,7 @@ export default function PoolDetailPage() {
             <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
               <div style={{ padding: "22px 24px", borderBottom: "1px solid #e8eeea" }}>
                 <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>👥 {"Deelnemers"}</h2>
-                <p style={{ margin: "6px 0 0", color: "#738078", fontSize: "14px" }}>{t("participantsIntro")}</p>
+                <p style={{ margin: "6px 0 0", color: "#738078", fontSize: "14px" }}>{"Bekijk de deelnemers van deze poule."}</p>
               </div>
               {leaderboard.map((player, index) => (
                 <div key={player.user_id} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "17px 24px", borderBottom: index === leaderboard.length - 1 ? "none" : "1px solid #edf1ee" }}>
