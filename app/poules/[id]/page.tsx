@@ -25,6 +25,29 @@ type LeaderboardPlayer = {
 
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
+const footballRanks = [
+  { min:0, icon:"🟤", nl:"Straatvoetballer", en:"Street Footballer", de:"Straßenfußballer", es:"Futbolista callejero", fr:"Footballeur de rue", it:"Calciatore di strada", pt:"Futebolista de rua" },
+  { min:50, icon:"🟢", nl:"Jeugdspeler", en:"Youth Player", de:"Jugendspieler", es:"Jugador juvenil", fr:"Joueur junior", it:"Giocatore giovanile", pt:"Jogador juvenil" },
+  { min:100, icon:"🔵", nl:"Academiespeler", en:"Academy Player", de:"Akademiespieler", es:"Jugador de academia", fr:"Joueur d’académie", it:"Giocatore dell’accademia", pt:"Jogador da academia" },
+  { min:200, icon:"⚪", nl:"Selectiespeler", en:"Squad Player", de:"Kaderspieler", es:"Jugador de plantilla", fr:"Joueur de l’effectif", it:"Giocatore della rosa", pt:"Jogador do plantel" },
+  { min:350, icon:"🟡", nl:"Basisspeler", en:"Starting Player", de:"Stammspieler", es:"Titular", fr:"Titulaire", it:"Titolare", pt:"Titular" },
+  { min:550, icon:"🟠", nl:"Profvoetballer", en:"Professional Footballer", de:"Profifußballer", es:"Futbolista profesional", fr:"Footballeur professionnel", it:"Calciatore professionista", pt:"Futebolista profissional" },
+  { min:800, icon:"🔥", nl:"Sterspeler", en:"Star Player", de:"Starspieler", es:"Jugador estrella", fr:"Joueur vedette", it:"Giocatore stella", pt:"Jogador estrela" },
+  { min:1100, icon:"⭐", nl:"Topspeler", en:"Top Player", de:"Topspieler", es:"Jugador de élite", fr:"Joueur d’élite", it:"Top player", pt:"Jogador de elite" },
+  { min:1500, icon:"🌟", nl:"Wereldster", en:"World Star", de:"Weltstar", es:"Estrella mundial", fr:"Star mondiale", it:"Stella mondiale", pt:"Estrela mundial" },
+  { min:2000, icon:"🏆", nl:"Kampioen", en:"Champion", de:"Champion", es:"Campeón", fr:"Champion", it:"Campione", pt:"Campeão" },
+  { min:2750, icon:"👑", nl:"Ballon d'Or-niveau", en:"Ballon d'Or Level", de:"Ballon-d’Or-Niveau", es:"Nivel Balón de Oro", fr:"Niveau Ballon d’Or", it:"Livello Pallone d’Oro", pt:"Nível Bola de Ouro" },
+  { min:3500, icon:"🐐", nl:"VoetIQ GOAT", en:"VoetIQ GOAT", de:"VoetIQ GOAT", es:"VoetIQ GOAT", fr:"VoetIQ GOAT", it:"VoetIQ GOAT", pt:"VoetIQ GOAT" },
+] as const;
+
+function getFootballRank(points: number): (typeof footballRanks)[number] {
+  let current: (typeof footballRanks)[number] = footballRanks[0];
+  for (const rank of footballRanks) {
+    if (points >= rank.min) current = rank;
+  }
+  return current;
+}
+
 type PoolTab = "leaderboard" | "predictions" | "participants";
 
 type Match = {
@@ -967,6 +990,22 @@ export default function PoolDetailPage() {
                     >
                       {player.predictions_count}{" "}{player.predictions_count === 1 ? t("prediction") : t("predictions")}
                     </div>
+
+                    {(() => {
+                      const footballRank = getFootballRank(player.total_points);
+                      return (
+                        <div
+                          style={{
+                            color: "#83e7ae",
+                            fontSize: "12px",
+                            fontWeight: 800,
+                            marginTop: "5px",
+                          }}
+                        >
+                          {footballRank.icon} {footballRank[language]}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   <div
@@ -1356,7 +1395,18 @@ export default function PoolDetailPage() {
               {leaderboard.map((player, index) => (
                 <div key={player.user_id} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "17px 24px", borderBottom: index === leaderboard.length - 1 ? "none" : "1px solid #edf1ee" }}>
                   <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#e9f8ef", color: "#41e58b", display: "grid", placeItems: "center", fontWeight: 900 }}>{player.username.slice(0, 1).toUpperCase()}</div>
-                  <div style={{ flex: 1 }}><button onClick={() => router.push(`/speler/${player.user_id}`)} style={{ border: 0, background: "transparent", color: "#41e58b", fontWeight: 900, padding: 0, cursor: "pointer", textAlign: "left", fontSize: "inherit" }}>{player.username}</button><div style={{ color: "#849088", fontSize: "12px", marginTop: "3px" }}>{player.predictions_count} {player.predictions_count === 1 ? t("prediction") : t("predictions")}</div></div>
+                  <div style={{ flex: 1 }}>
+                    <button onClick={() => router.push(`/speler/${player.user_id}`)} style={{ border: 0, background: "transparent", color: "#41e58b", fontWeight: 900, padding: 0, cursor: "pointer", textAlign: "left", fontSize: "inherit" }}>{player.username}</button>
+                    <div style={{ color: "#849088", fontSize: "12px", marginTop: "3px" }}>{player.predictions_count} {player.predictions_count === 1 ? t("prediction") : t("predictions")}</div>
+                    {(() => {
+                      const footballRank = getFootballRank(player.total_points);
+                      return (
+                        <div style={{ color: "#83e7ae", fontSize: "12px", fontWeight: 800, marginTop: "4px" }}>
+                          {footballRank.icon} {footballRank[language]}
+                        </div>
+                      );
+                    })()}
+                  </div>
                   <div style={{ color: "#41e58b", fontWeight: 900 }}>{player.total_points} {t("points").toLowerCase()}</div>
                 </div>
               ))}
