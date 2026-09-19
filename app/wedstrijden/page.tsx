@@ -1,35 +1,44 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Navbar from "../../Navbar";
 import { supabase } from "@/lib/supabase";
+
+type Pool = {
+  id: string;
+  name: string;
+  competition_code: string;
+  invite_code: string;
+  owner_id: string;
+  created_at: string;
+};
+
+type LeaderboardPlayer = {
+  user_id: string;
+  username: string;
+  total_points: number;
+  predictions_count: number;
+  exact_scores: number;
+};
+
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+type PoolTab = "leaderboard" | "predictions" | "participants";
 
 type Match = {
   id: number;
   utcDate: string;
   status: string;
   matchday?: number;
-  homeTeam: {
-    name: string;
-    crest?: string;
-  };
-  awayTeam: {
-    name: string;
-    crest?: string;
-  };
-  competition: {
-    name: string;
-  };
+  homeTeam: { name: string; crest?: string };
+  awayTeam: { name: string; crest?: string };
 };
 
 type Prediction = {
   home: string;
   away: string;
-};
-
-type Competition = {
-  code: string;
-  name: string;
-  flag: string;
 };
 
 type StoredPrediction = {
@@ -38,273 +47,109 @@ type StoredPrediction = {
   away_score: number;
 };
 
-
-type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
-
 type TranslationKey =
-  | "matches"
-  | "subtitle"
-  | "competition"
-  | "filled"
-  | "loading"
-  | "noUpcoming"
-  | "noUpcomingDescription"
-  | "previous"
-  | "matchday"
-  | "next"
-  | "predicted"
-  | "predictionClosed"
-  | "saving"
-  | "changePrediction"
-  | "savePrediction"
-  | "matchesLoadFailed"
-  | "completeScore"
-  | "validScore"
-  | "loginRequired"
-  | "predictionSaveFailed"
-  | "predictionSaved"
-  | "predictionSaveError";
+  | "notFound" | "loadError" | "noAccess" | "leaderboardError" | "loading"
+  | "backPools" | "poolLabel" | "inviteCode" | "copied" | "copyCode"
+  | "participant" | "participants" | "competition" | "pointsSystem"
+  | "predictMatches" | "inviteFriends" | "poolLeaderboard" | "onlyPoints"
+  | "noParticipants" | "prediction" | "predictions" | "exact" | "predicted"
+  | "points" | "poolId"
+ ;
 
-const localeByLanguage: Record<LanguageCode, string> = {
-  nl: "nl-NL",
-  en: "en-GB",
-  de: "de-DE",
-  es: "es-ES",
-  fr: "fr-FR",
-  it: "it-IT",
-  pt: "pt-PT",
-};
-
-const translations: Record<
-  LanguageCode,
-  Record<TranslationKey, string>
-> = {
+const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   nl: {
-    matches: "Wedstrijden",
-    subtitle: "Voorspel de uitslagen en verdien punten.",
-    competition: "Competitie",
-    filled: "Ingevuld",
-    loading: "Wedstrijden laden...",
-    noUpcoming: "Geen komende wedstrijden",
-    noUpcomingDescription:
-      "Er zijn momenteel geen aankomende wedstrijden beschikbaar voor deze competitie.",
-    previous: "Vorige",
-    matchday: "Speelronde",
-    next: "Volgende",
-    predicted: "Voorspeld",
-    predictionClosed: "Voorspelling gesloten",
-    saving: "Opslaan...",
-    changePrediction: "Voorspelling wijzigen",
-    savePrediction: "Voorspelling opslaan",
-    matchesLoadFailed: "De wedstrijden konden niet worden opgehaald.",
-    completeScore: "Vul eerst een volledige uitslag in.",
-    validScore: "Vul een geldige uitslag in van 0 t/m 20.",
-    loginRequired: "Je moet ingelogd zijn om een voorspelling op te slaan.",
-    predictionSaveFailed: "Je voorspelling kon niet worden opgeslagen.",
-    predictionSaved: "Je voorspelling is opgeslagen.",
-    predictionSaveError:
-      "Er ging iets mis bij het opslaan van je voorspelling.",
+    notFound:"Deze poule kon niet worden gevonden.", loadError:"De gegevens van deze poule konden niet worden geladen.",
+    noAccess:"Deze poule bestaat niet of je hebt geen toegang.", leaderboardError:"Het pouleklassement kon niet worden geladen.",
+    loading:"Poule wordt geladen...", backPools:"Mijn poules", poolLabel:"VOETIQ POULE", inviteCode:"UITNODIGINGSCODE",
+    copied:"Gekopieerd", copyCode:"Code kopiëren", participant:"Deelnemer", participants:"Deelnemers", competition:"Competitie",
+    pointsSystem:"Puntensysteem", predictMatches:"Voorspel wedstrijden", inviteFriends:"Vrienden uitnodigen",
+    poolLeaderboard:"Pouleklassement", onlyPoints:"Alleen punten uit {competition} tellen mee voor deze poule.",
+    noParticipants:"Er zijn nog geen deelnemers in deze poule.", prediction:"voorspelling", predictions:"voorspellingen",
+    exact:"exact", predicted:"voorspeld", points:"PUNTEN", poolId:"Poule-ID"
   },
   en: {
-    matches: "Matches",
-    subtitle: "Predict the scores and earn points.",
-    competition: "Competition",
-    filled: "Completed",
-    loading: "Loading matches...",
-    noUpcoming: "No upcoming matches",
-    noUpcomingDescription:
-      "There are currently no upcoming matches available for this competition.",
-    previous: "Previous",
-    matchday: "Matchday",
-    next: "Next",
-    predicted: "Predicted",
-    predictionClosed: "Prediction closed",
-    saving: "Saving...",
-    changePrediction: "Change prediction",
-    savePrediction: "Save prediction",
-    matchesLoadFailed: "The matches could not be loaded.",
-    completeScore: "Enter a complete score first.",
-    validScore: "Enter a valid score from 0 to 20.",
-    loginRequired: "You must be logged in to save a prediction.",
-    predictionSaveFailed: "Your prediction could not be saved.",
-    predictionSaved: "Your prediction has been saved.",
-    predictionSaveError: "Something went wrong while saving your prediction.",
+    notFound:"This pool could not be found.", loadError:"The details for this pool could not be loaded.",
+    noAccess:"This pool does not exist or you do not have access.", leaderboardError:"The pool leaderboard could not be loaded.",
+    loading:"Loading pool...", backPools:"My pools", poolLabel:"VOETIQ POOL", inviteCode:"INVITATION CODE",
+    copied:"Copied", copyCode:"Copy code", participant:"Participant", participants:"Participants", competition:"Competition",
+    pointsSystem:"Points system", predictMatches:"Predict matches", inviteFriends:"Invite friends",
+    poolLeaderboard:"Pool leaderboard", onlyPoints:"Only points from {competition} count towards this pool.",
+    noParticipants:"There are no participants in this pool yet.", prediction:"prediction", predictions:"predictions",
+    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID"
   },
   de: {
-    matches: "Spiele",
-    subtitle: "Tippe die Ergebnisse und sammle Punkte.",
-    competition: "Wettbewerb",
-    filled: "Ausgefüllt",
-    loading: "Spiele werden geladen...",
-    noUpcoming: "Keine kommenden Spiele",
-    noUpcomingDescription:
-      "Für diesen Wettbewerb sind derzeit keine kommenden Spiele verfügbar.",
-    previous: "Zurück",
-    matchday: "Spieltag",
-    next: "Weiter",
-    predicted: "Getippt",
-    predictionClosed: "Tippabgabe geschlossen",
-    saving: "Speichern...",
-    changePrediction: "Tipp ändern",
-    savePrediction: "Tipp speichern",
-    matchesLoadFailed: "Die Spiele konnten nicht geladen werden.",
-    completeScore: "Gib zuerst ein vollständiges Ergebnis ein.",
-    validScore: "Gib ein gültiges Ergebnis von 0 bis 20 ein.",
-    loginRequired: "Du musst angemeldet sein, um einen Tipp zu speichern.",
-    predictionSaveFailed: "Dein Tipp konnte nicht gespeichert werden.",
-    predictionSaved: "Dein Tipp wurde gespeichert.",
-    predictionSaveError: "Beim Speichern deines Tipps ist etwas schiefgelaufen.",
+    notFound:"Diese Tipprunde konnte nicht gefunden werden.", loadError:"Die Daten dieser Tipprunde konnten nicht geladen werden.",
+    noAccess:"Diese Tipprunde existiert nicht oder du hast keinen Zugriff.", leaderboardError:"Die Rangliste der Tipprunde konnte nicht geladen werden.",
+    loading:"Tipprunde wird geladen...", backPools:"Meine Tipprunden", poolLabel:"VOETIQ TIPPRUNDE", inviteCode:"EINLADUNGSCODE",
+    copied:"Kopiert", copyCode:"Code kopieren", participant:"Teilnehmer", participants:"Teilnehmer", competition:"Wettbewerb",
+    pointsSystem:"Punktesystem", predictMatches:"Spiele tippen", inviteFriends:"Freunde einladen",
+    poolLeaderboard:"Tipprunden-Rangliste", onlyPoints:"Für diese Tipprunde zählen nur Punkte aus {competition}.",
+    noParticipants:"In dieser Tipprunde gibt es noch keine Teilnehmer.", prediction:"Tipp", predictions:"Tipps",
+    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID"
   },
   es: {
-    matches: "Partidos",
-    subtitle: "Pronostica los resultados y gana puntos.",
-    competition: "Competición",
-    filled: "Completados",
-    loading: "Cargando partidos...",
-    noUpcoming: "No hay próximos partidos",
-    noUpcomingDescription:
-      "Actualmente no hay próximos partidos disponibles para esta competición.",
-    previous: "Anterior",
-    matchday: "Jornada",
-    next: "Siguiente",
-    predicted: "Pronosticado",
-    predictionClosed: "Pronóstico cerrado",
-    saving: "Guardando...",
-    changePrediction: "Cambiar pronóstico",
-    savePrediction: "Guardar pronóstico",
-    matchesLoadFailed: "No se han podido cargar los partidos.",
-    completeScore: "Introduce primero un resultado completo.",
-    validScore: "Introduce un resultado válido entre 0 y 20.",
-    loginRequired: "Debes iniciar sesión para guardar un pronóstico.",
-    predictionSaveFailed: "No se ha podido guardar tu pronóstico.",
-    predictionSaved: "Tu pronóstico se ha guardado.",
-    predictionSaveError: "Se ha producido un error al guardar tu pronóstico.",
+    notFound:"No se ha podido encontrar este grupo.", loadError:"No se han podido cargar los datos de este grupo.",
+    noAccess:"Este grupo no existe o no tienes acceso.", leaderboardError:"No se ha podido cargar la clasificación del grupo.",
+    loading:"Cargando grupo...", backPools:"Mis grupos", poolLabel:"GRUPO VOETIQ", inviteCode:"CÓDIGO DE INVITACIÓN",
+    copied:"Copiado", copyCode:"Copiar código", participant:"Participante", participants:"Participantes", competition:"Competición",
+    pointsSystem:"Sistema de puntos", predictMatches:"Pronosticar partidos", inviteFriends:"Invitar a amigos",
+    poolLeaderboard:"Clasificación del grupo", onlyPoints:"Solo cuentan para este grupo los puntos de {competition}.",
+    noParticipants:"Todavía no hay participantes en este grupo.", prediction:"pronóstico", predictions:"pronósticos",
+    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo"
   },
   fr: {
-    matches: "Matchs",
-    subtitle: "Pronostiquez les scores et gagnez des points.",
-    competition: "Compétition",
-    filled: "Complétés",
-    loading: "Chargement des matchs...",
-    noUpcoming: "Aucun match à venir",
-    noUpcomingDescription:
-      "Aucun match à venir n’est actuellement disponible pour cette compétition.",
-    previous: "Précédent",
-    matchday: "Journée",
-    next: "Suivant",
-    predicted: "Pronostiqué",
-    predictionClosed: "Pronostic fermé",
-    saving: "Enregistrement...",
-    changePrediction: "Modifier le pronostic",
-    savePrediction: "Enregistrer le pronostic",
-    matchesLoadFailed: "Les matchs n’ont pas pu être chargés.",
-    completeScore: "Saisissez d’abord un score complet.",
-    validScore: "Saisissez un score valide compris entre 0 et 20.",
-    loginRequired:
-      "Vous devez être connecté pour enregistrer un pronostic.",
-    predictionSaveFailed: "Votre pronostic n’a pas pu être enregistré.",
-    predictionSaved: "Votre pronostic a été enregistré.",
-    predictionSaveError:
-      "Une erreur s’est produite lors de l’enregistrement de votre pronostic.",
+    notFound:"Cette ligue est introuvable.", loadError:"Les informations de cette ligue n’ont pas pu être chargées.",
+    noAccess:"Cette ligue n’existe pas ou vous n’y avez pas accès.", leaderboardError:"Le classement de la ligue n’a pas pu être chargé.",
+    loading:"Chargement de la ligue...", backPools:"Mes ligues", poolLabel:"LIGUE VOETIQ", inviteCode:"CODE D’INVITATION",
+    copied:"Copié", copyCode:"Copier le code", participant:"Participant", participants:"Participants", competition:"Compétition",
+    pointsSystem:"Système de points", predictMatches:"Pronostiquer les matchs", inviteFriends:"Inviter des amis",
+    poolLeaderboard:"Classement de la ligue", onlyPoints:"Seuls les points de {competition} comptent pour cette ligue.",
+    noParticipants:"Il n’y a encore aucun participant dans cette ligue.", prediction:"pronostic", predictions:"pronostics",
+    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue"
   },
   it: {
-    matches: "Partite",
-    subtitle: "Pronostica i risultati e guadagna punti.",
-    competition: "Competizione",
-    filled: "Completati",
-    loading: "Caricamento delle partite...",
-    noUpcoming: "Nessuna partita in programma",
-    noUpcomingDescription:
-      "Al momento non ci sono prossime partite disponibili per questa competizione.",
-    previous: "Precedente",
-    matchday: "Giornata",
-    next: "Successiva",
-    predicted: "Pronosticato",
-    predictionClosed: "Pronostico chiuso",
-    saving: "Salvataggio...",
-    changePrediction: "Modifica pronostico",
-    savePrediction: "Salva pronostico",
-    matchesLoadFailed: "Non è stato possibile caricare le partite.",
-    completeScore: "Inserisci prima un risultato completo.",
-    validScore: "Inserisci un risultato valido da 0 a 20.",
-    loginRequired: "Devi accedere per salvare un pronostico.",
-    predictionSaveFailed: "Non è stato possibile salvare il tuo pronostico.",
-    predictionSaved: "Il tuo pronostico è stato salvato.",
-    predictionSaveError:
-      "Si è verificato un errore durante il salvataggio del pronostico.",
+    notFound:"Questo gruppo non è stato trovato.", loadError:"Non è stato possibile caricare i dati di questo gruppo.",
+    noAccess:"Questo gruppo non esiste oppure non hai accesso.", leaderboardError:"Non è stato possibile caricare la classifica del gruppo.",
+    loading:"Caricamento gruppo...", backPools:"I miei gruppi", poolLabel:"GRUPPO VOETIQ", inviteCode:"CODICE D’INVITO",
+    copied:"Copiato", copyCode:"Copia codice", participant:"Partecipante", participants:"Partecipanti", competition:"Competizione",
+    pointsSystem:"Sistema di punti", predictMatches:"Pronostica le partite", inviteFriends:"Invita amici",
+    poolLeaderboard:"Classifica del gruppo", onlyPoints:"Per questo gruppo contano solo i punti di {competition}.",
+    noParticipants:"Non ci sono ancora partecipanti in questo gruppo.", prediction:"pronostico", predictions:"pronostici",
+    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo"
   },
   pt: {
-    matches: "Jogos",
-    subtitle: "Prevê os resultados e ganha pontos.",
-    competition: "Competição",
-    filled: "Preenchidos",
-    loading: "A carregar jogos...",
-    noUpcoming: "Sem próximos jogos",
-    noUpcomingDescription:
-      "De momento, não existem próximos jogos disponíveis para esta competição.",
-    previous: "Anterior",
-    matchday: "Jornada",
-    next: "Seguinte",
-    predicted: "Previsto",
-    predictionClosed: "Previsão encerrada",
-    saving: "A guardar...",
-    changePrediction: "Alterar previsão",
-    savePrediction: "Guardar previsão",
-    matchesLoadFailed: "Não foi possível carregar os jogos.",
-    completeScore: "Introduz primeiro um resultado completo.",
-    validScore: "Introduz um resultado válido entre 0 e 20.",
-    loginRequired: "Tens de iniciar sessão para guardar uma previsão.",
-    predictionSaveFailed: "Não foi possível guardar a tua previsão.",
-    predictionSaved: "A tua previsão foi guardada.",
-    predictionSaveError: "Ocorreu um erro ao guardar a tua previsão.",
-  },
+    notFound:"Não foi possível encontrar este grupo.", loadError:"Não foi possível carregar os dados deste grupo.",
+    noAccess:"Este grupo não existe ou não tens acesso.", leaderboardError:"Não foi possível carregar a classificação do grupo.",
+    loading:"A carregar grupo...", backPools:"Os meus grupos", poolLabel:"GRUPO VOETIQ", inviteCode:"CÓDIGO DE CONVITE",
+    copied:"Copiado", copyCode:"Copiar código", participant:"Participante", participants:"Participantes", competition:"Competição",
+    pointsSystem:"Sistema de pontos", predictMatches:"Prever jogos", inviteFriends:"Convidar amigos",
+    poolLeaderboard:"Classificação do grupo", onlyPoints:"Apenas os pontos de {competition} contam para este grupo.",
+    noParticipants:"Ainda não há participantes neste grupo.", prediction:"previsão", predictions:"previsões",
+    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo"
+  }
 };
 
 function isLanguageCode(value: string): value is LanguageCode {
-  return ["nl", "en", "de", "es", "fr", "it", "pt"].includes(value);
+  return ["nl","en","de","es","fr","it","pt"].includes(value);
 }
 
-
-function translateServerMessage(
-  message: unknown,
-  language: LanguageCode
-): string {
-  if (typeof message !== "string" || message.trim() === "") {
-    return "";
-  }
-
-  const knownMessages: Record<string, TranslationKey> = {
-    "Je voorspelling is opgeslagen.": "predictionSaved",
-    "Je voorspelling kon niet worden opgeslagen.": "predictionSaveFailed",
-    "Je moet ingelogd zijn om een voorspelling op te slaan.": "loginRequired",
-    "Vul eerst een volledige uitslag in.": "completeScore",
-    "Vul een geldige uitslag in van 0 t/m 20.": "validScore",
-  };
-
-  const key = knownMessages[message];
-
-  return key ? translations[language][key] : message;
-}
-
-const competitions: Competition[] = [
-  { code: "PL", name: "Premier League", flag: "🏴" },
-  { code: "DED", name: "Eredivisie", flag: "🇳🇱" },
-  { code: "PD", name: "La Liga", flag: "🇪🇸" },
-  { code: "BL1", name: "Bundesliga", flag: "🇩🇪" },
-  { code: "SA", name: "Serie A", flag: "🇮🇹" },
-  { code: "FL1", name: "Ligue 1", flag: "🇫🇷" },
-  { code: "PPL", name: "Primeira Liga", flag: "🇵🇹" },
-  { code: "CL", name: "Champions League", flag: "🏆" },
-];
+const competitions: Record<
+  string,
+  { name: string; flag: string }
+> = {
+  DED: { name: "Eredivisie", flag: "🇳🇱" },
+  PL: { name: "Premier League", flag: "🏴" },
+  PD: { name: "La Liga", flag: "🇪🇸" },
+  BL1: { name: "Bundesliga", flag: "🇩🇪" },
+  SA: { name: "Serie A", flag: "🇮🇹" },
+  FL1: { name: "Ligue 1", flag: "🇫🇷" },
+  PPL: { name: "Primeira Liga", flag: "🇵🇹" },
+  CL: { name: "Champions League", flag: "🏆" },
+};
 
 const competitionThemes: Record<
   string,
-  {
-    hero: string;
-    card: string;
-    accent: string;
-    glow: string;
-  }
+  { hero: string; card: string; accent: string; glow: string }
 > = {
   DED: {
     hero: "radial-gradient(circle at 82% 18%, rgba(38,103,255,0.55) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,181,255,0.24) 0%, transparent 28%), linear-gradient(135deg, #03132f 0%, #082d73 55%, #0757c9 100%)",
@@ -319,67 +164,63 @@ const competitionThemes: Record<
     glow: "rgba(181,36,202,0.28)",
   },
   PD: {
-    hero: "radial-gradient(circle at 82% 20%, rgba(255,126,38,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,43,43,0.22) 0%, transparent 28%), linear-gradient(135deg, #1b0808 0%, #641616 55%, #a52b12 100%)",
+    hero: "linear-gradient(135deg, #1b0808 0%, #641616 55%, #a52b12 100%)",
     card: "linear-gradient(135deg, #3b0c0c 0%, #9a2915 100%)",
     accent: "#ffad78",
     glow: "rgba(231,76,35,0.27)",
   },
   BL1: {
-    hero: "radial-gradient(circle at 80% 20%, rgba(255,70,70,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,255,255,0.09) 0%, transparent 28%), linear-gradient(135deg, #190404 0%, #650909 55%, #a20e0e 100%)",
+    hero: "linear-gradient(135deg, #190404 0%, #650909 55%, #a20e0e 100%)",
     card: "linear-gradient(135deg, #3d0606 0%, #9e1010 100%)",
     accent: "#ff8b8b",
     glow: "rgba(220,25,25,0.27)",
   },
   SA: {
-    hero: "radial-gradient(circle at 80% 20%, rgba(36,131,255,0.45) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(72,205,255,0.18) 0%, transparent 28%), linear-gradient(135deg, #041326 0%, #073c78 55%, #0967b5 100%)",
+    hero: "linear-gradient(135deg, #041326 0%, #073c78 55%, #0967b5 100%)",
     card: "linear-gradient(135deg, #062a55 0%, #0874bd 100%)",
     accent: "#8bd1ff",
     glow: "rgba(28,126,219,0.27)",
   },
   FL1: {
-    hero: "radial-gradient(circle at 82% 18%, rgba(216,255,0,0.22) 0%, transparent 30%), radial-gradient(circle at 15% 80%, rgba(39,82,255,0.22) 0%, transparent 28%), linear-gradient(135deg, #071124 0%, #101f4b 55%, #19327b 100%)",
+    hero: "linear-gradient(135deg, #071124 0%, #101f4b 55%, #19327b 100%)",
     card: "linear-gradient(135deg, #0c1837 0%, #1c3474 100%)",
     accent: "#d8ff49",
     glow: "rgba(97,119,255,0.24)",
   },
   PPL: {
-    hero: "radial-gradient(circle at 82% 20%, rgba(225,32,50,0.34) 0%, transparent 31%), radial-gradient(circle at 15% 80%, rgba(31,190,102,0.25) 0%, transparent 28%), linear-gradient(135deg, #061a11 0%, #0a5130 55%, #12693f 100%)",
+    hero: "linear-gradient(135deg, #061a11 0%, #0a5130 55%, #12693f 100%)",
     card: "linear-gradient(135deg, #082f1d 0%, #12653d 100%)",
     accent: "#76ecad",
     glow: "rgba(26,166,91,0.25)",
   },
   CL: {
-    hero: "radial-gradient(circle at 82% 18%, rgba(93,110,255,0.42) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(42,58,180,0.30) 0%, transparent 30%), linear-gradient(135deg, #030514 0%, #0b1240 55%, #171e68 100%)",
+    hero: "linear-gradient(135deg, #030514 0%, #0b1240 55%, #171e68 100%)",
     card: "linear-gradient(135deg, #070b2b 0%, #192365 100%)",
     accent: "#aeb7ff",
     glow: "rgba(76,91,220,0.28)",
   },
 };
 
-export default function Wedstrijden() {
-  const [selectedCompetition, setSelectedCompetition] =
-    useState("DED");
+export default function PoolDetailPage() {
+  const router = useRouter();
 
-  const [matches, setMatches] = useState<Match[]>([]);
+  const [poolId, setPoolId] = useState("");
+  const [pool, setPool] = useState<Pool | null>(null);
+  const [leaderboard, setLeaderboard] = useState<
+    LeaderboardPlayer[]
+  >([]);
 
-  const [predictions, setPredictions] = useState<
-    Record<number, Prediction>
-  >({});
-
-  const [savedMatchIds, setSavedMatchIds] = useState<
-    Set<number>
-  >(new Set());
-
-  const [savingMatchId, setSavingMatchId] = useState<
-    number | null
-  >(null);
-
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState<LanguageCode>("nl");
-
-  const [selectedMatchday, setSelectedMatchday] =
-    useState<number | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<PoolTab>("leaderboard");
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [predictions, setPredictions] = useState<Record<number, Prediction>>({});
+  const [savedMatchIds, setSavedMatchIds] = useState<Set<number>>(new Set());
+  const [selectedMatchday, setSelectedMatchday] = useState<number | null>(null);
+  const [matchesLoading, setMatchesLoading] = useState(false);
+  const [matchesMessage, setMatchesMessage] = useState("");
 
   useEffect(() => {
     const savedLanguage = window.localStorage.getItem("voetiq-language");
@@ -392,7 +233,6 @@ export default function Wedstrijden() {
     function handleLanguageChange(event: Event) {
       const customEvent = event as CustomEvent<{ language?: string }>;
       const nextLanguage = customEvent.detail?.language;
-
       if (nextLanguage && isLanguageCode(nextLanguage)) {
         setLanguage(nextLanguage);
         document.documentElement.lang = nextLanguage;
@@ -401,1210 +241,953 @@ export default function Wedstrijden() {
 
     window.addEventListener("voetiq-language-change", handleLanguageChange);
 
-    const params = new URLSearchParams(
-      window.location.search
-    );
+    const parts = window.location.pathname
+      .split("/")
+      .filter(Boolean);
 
-    const competitionFromUrl =
-      params.get("competition")?.toUpperCase() || "DED";
+    const id = parts[1];
 
-    const isValidCompetition = competitions.some(
-      (competition) =>
-        competition.code === competitionFromUrl
-    );
-
-    if (isValidCompetition) {
-      setSelectedCompetition(competitionFromUrl);
+    if (!id) {
+      setErrorMessage(translations[initialLanguage].notFound);
+      setLoading(false);
+      return;
     }
+
+    setPoolId(id);
+    loadPool(id);
 
     return () => {
       window.removeEventListener("voetiq-language-change", handleLanguageChange);
     };
   }, []);
 
-  useEffect(() => {
-    loadCompetition(selectedCompetition);
-  }, [selectedCompetition]);
-
-  async function loadCompetition(
-    competitionCode: string
-  ) {
+  async function loadPool(id: string) {
     setLoading(true);
-    setMessage("");
-    setMatches([]);
-    setPredictions({});
-    setSavedMatchIds(new Set());
-    setSelectedMatchday(null);
+    setErrorMessage("");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/inloggen");
+      return;
+    }
+
+    const { data: poolData, error: poolError } =
+      await supabase
+        .from("pools")
+        .select(
+          "id, name, competition_code, invite_code, owner_id, created_at"
+        )
+        .eq("id", id)
+        .maybeSingle();
+
+    if (poolError) {
+      console.error(poolError);
+      setErrorMessage(
+        translations[language]["loadError"]
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (!poolData) {
+      setErrorMessage(
+        translations[language]["noAccess"]
+      );
+      setLoading(false);
+      return;
+    }
+
+    setPool(poolData);
+    await loadPoolMatches(poolData.competition_code);
+
+    const { data: leaderboardData, error: leaderboardError } =
+      await supabase.rpc("get_pool_leaderboard", {
+        requested_pool_id: id,
+      });
+
+    if (leaderboardError) {
+      console.error(leaderboardError);
+      setErrorMessage(
+        translations[language]["leaderboardError"]
+      );
+      setLoading(false);
+      return;
+    }
+
+    setLeaderboard(leaderboardData || []);
+    setLoading(false);
+  }
+
+
+  async function loadPoolMatches(competitionCode: string) {
+    setMatchesLoading(true);
+    setMatchesMessage("");
 
     try {
       const response = await fetch(
         `/api/matches?competition=${competitionCode}`,
-        {
-          cache: "no-store",
-        }
+        { cache: "no-store" }
       );
 
-      if (!response.ok) {
-        throw new Error(
-          "Kon wedstrijden niet ophalen"
-        );
-      }
+      if (!response.ok) throw new Error("Kon wedstrijden niet ophalen");
 
       const data = await response.json();
-
-      const upcomingMatches: Match[] = (
-        data.matches || []
-      )
+      const upcomingMatches: Match[] = (data.matches || [])
         .filter(
           (match: Match) =>
-            match.status === "SCHEDULED" ||
-            match.status === "TIMED"
+            match.status === "SCHEDULED" || match.status === "TIMED"
         )
         .sort(
           (a: Match, b: Match) =>
-            new Date(a.utcDate).getTime() -
-            new Date(b.utcDate).getTime()
+            new Date(a.utcDate).getTime() - new Date(b.utcDate).getTime()
         );
 
       setMatches(upcomingMatches);
 
       const matchdays = upcomingMatches
-        .map((match: Match) => match.matchday)
-        .filter(
-          (
-            matchday: number | undefined
-          ): matchday is number =>
-            typeof matchday === "number"
-        );
+        .map((match) => match.matchday)
+        .filter((matchday): matchday is number => typeof matchday === "number");
 
       if (matchdays.length > 0) {
-        setSelectedMatchday(
-          Math.min(...matchdays)
-        );
+        setSelectedMatchday(Math.min(...matchdays));
       }
 
-      await loadSavedPredictions(
-        upcomingMatches
-      );
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user && upcomingMatches.length > 0) {
+        const matchIds = upcomingMatches.map((match) => match.id);
+        const { data: stored } = await supabase
+          .from("predictions")
+          .select("match_id, home_score, away_score")
+          .eq("user_id", user.id)
+          .in("match_id", matchIds);
+
+        const predictionMap: Record<number, Prediction> = {};
+        const storedIds = new Set<number>();
+
+        ((stored || []) as StoredPrediction[]).forEach((prediction) => {
+          predictionMap[prediction.match_id] = {
+            home: String(prediction.home_score),
+            away: String(prediction.away_score),
+          };
+          storedIds.add(prediction.match_id);
+        });
+
+        setPredictions(predictionMap);
+        setSavedMatchIds(storedIds);
+      }
     } catch (error) {
       console.error(error);
-
-      setMessage(
-        t("matchesLoadFailed")
-      );
+      setMatchesMessage("De wedstrijden konden niet worden geladen.");
     } finally {
-      setLoading(false);
+      setMatchesLoading(false);
     }
   }
 
-  async function loadSavedPredictions(
-    upcomingMatches: Match[]
-  ) {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user || upcomingMatches.length === 0) {
-      return;
-    }
-
-    const matchIds = upcomingMatches.map(
-      (match) => match.id
-    );
-
-    const { data, error } = await supabase
-      .from("predictions")
-      .select(
-        "match_id, home_score, away_score"
-      )
-      .eq("user_id", user.id)
-      .in("match_id", matchIds);
-
-    if (error) {
-      console.error(
-        "Kon opgeslagen voorspellingen niet laden:",
-        error
-      );
-      return;
-    }
-
-    const predictionMap: Record<
-      number,
-      Prediction
-    > = {};
-
-    const storedIds = new Set<number>();
-
-    ((data || []) as StoredPrediction[]).forEach(
-      (prediction) => {
-        predictionMap[prediction.match_id] = {
-          home: String(
-            prediction.home_score
-          ),
-          away: String(
-            prediction.away_score
-          ),
-        };
-
-        storedIds.add(
-          prediction.match_id
-        );
-      }
-    );
-
-    setPredictions(predictionMap);
-    setSavedMatchIds(storedIds);
-  }
-
-  const availableMatchdays = useMemo(() => {
-    return Array.from(
-      new Set(
-        matches
-          .map(
-            (match: Match) =>
-              match.matchday
-          )
-          .filter(
-            (
-              matchday:
-                | number
-                | undefined
-            ): matchday is number =>
-              typeof matchday ===
-              "number"
-          )
-      )
-    ).sort((a, b) => a - b);
-  }, [matches]);
-
-  const currentMatchdayIndex =
-    selectedMatchday !== null
-      ? availableMatchdays.indexOf(
-          selectedMatchday
+  const availableMatchdays = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          matches
+            .map((match) => match.matchday)
+            .filter((matchday): matchday is number => typeof matchday === "number")
         )
-      : -1;
-
-  const currentMatches = matches.filter(
-    (match) =>
-      match.matchday === selectedMatchday
+      ).sort((a, b) => a - b),
+    [matches]
   );
 
-  const selectedCompetitionData =
-    competitions.find(
-      (competition) =>
-        competition.code ===
-        selectedCompetition
-    ) || competitions[1];
+  const currentMatches = matches.filter(
+    (match) => match.matchday === selectedMatchday
+  );
 
-  const activeTheme =
-    competitionThemes[selectedCompetition] ||
-    competitionThemes.DED;
+  function changePoolMatchday(direction: "previous" | "next") {
+    if (selectedMatchday === null) return;
+    const index = availableMatchdays.indexOf(selectedMatchday);
+    const nextIndex = direction === "previous" ? index - 1 : index + 1;
 
-  const savedPredictionsThisRound =
-    currentMatches.filter((match) =>
-      savedMatchIds.has(match.id)
-    ).length;
-
-  function changeCompetition(
-    code: string
-  ) {
-    setSelectedCompetition(code);
-
-    const url = new URL(
-      window.location.href
-    );
-
-    url.searchParams.set(
-      "competition",
-      code
-    );
-
-    window.history.replaceState(
-      {},
-      "",
-      `${url.pathname}${url.search}`
-    );
+    if (nextIndex >= 0 && nextIndex < availableMatchdays.length) {
+      setSelectedMatchday(availableMatchdays[nextIndex]);
+    }
   }
 
-  function updatePrediction(
-    matchId: number,
-    type: "home" | "away",
-    value: string
-  ) {
-    setPredictions((current) => ({
-      ...current,
-      [matchId]: {
-        home:
-          current[matchId]?.home || "",
-        away:
-          current[matchId]?.away || "",
-        [type]: value,
-      },
-    }));
-  }
-
-  async function savePrediction(
-    match: Match
-  ) {
-    if (savingMatchId !== null) {
-      return;
-    }
-
-    const prediction =
-      predictions[match.id];
-
-    if (
-      !prediction ||
-      prediction.home === "" ||
-      prediction.away === ""
-    ) {
-      setMessage(
-        t("completeScore")
-      );
-      return;
-    }
-
-    const home = Number(
-      prediction.home
-    );
-
-    const away = Number(
-      prediction.away
-    );
-
-    if (
-      !Number.isInteger(home) ||
-      !Number.isInteger(away) ||
-      home < 0 ||
-      away < 0 ||
-      home > 20 ||
-      away > 20
-    ) {
-      setMessage(
-        t("validScore")
-      );
-      return;
-    }
-
-    const {
-      data: { session },
-    } =
-      await supabase.auth.getSession();
-
-    if (!session) {
-      setMessage(
-        t("loginRequired")
-      );
-      return;
-    }
-
-    setSavingMatchId(match.id);
-    setMessage("");
+  async function copyInviteCode() {
+    if (!pool) return;
 
     try {
-      const response = await fetch(
-        "/api/predictions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-          body: JSON.stringify({
-            accessToken:
-              session.access_token,
-            matchId: match.id,
-            competition:
-              selectedCompetition,
-            homeScore: home,
-            awayScore: away,
-          }),
-        }
-      );
+      await navigator.clipboard.writeText(pool.invite_code);
+      setCopied(true);
 
-      const result =
-        await response.json();
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-      if (!response.ok) {
-        setMessage(
-          translateServerMessage(result.error, language) ||
-            t("predictionSaveFailed")
-        );
+  async function inviteFriends() {
+    if (!pool) return;
+
+    const inviteUrl = `${window.location.origin}/poules/join/${encodeURIComponent(
+      pool.invite_code
+    )}`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: pool.name,
+          text: `Doe mee met mijn VoetIQ-poule "${pool.name}"!`,
+          url: inviteUrl,
+        });
         return;
       }
 
-      setSavedMatchIds(
-        (current) => {
-          const next =
-            new Set(current);
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
 
-          next.add(match.id);
-
-          return next;
-        }
-      );
-
-      setMessage(
-        translateServerMessage(result.message, language) ||
-          t("predictionSaved")
-      );
+      window.setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       console.error(error);
-
-      setMessage(
-        t("predictionSaveError")
-      );
-    } finally {
-      setSavingMatchId(null);
     }
   }
 
-  function changeMatchday(
-    direction: "previous" | "next"
-  ) {
-    if (
-      currentMatchdayIndex === -1
-    ) {
-      return;
-    }
+  function getMedal(index: number) {
+    if (index === 0) return "🥇";
+    if (index === 1) return "🥈";
+    if (index === 2) return "🥉";
 
-    const newIndex =
-      direction === "previous"
-        ? currentMatchdayIndex - 1
-        : currentMatchdayIndex + 1;
-
-    if (
-      newIndex >= 0 &&
-      newIndex <
-        availableMatchdays.length
-    ) {
-      setSelectedMatchday(
-        availableMatchdays[newIndex]
-      );
-
-      setMessage("");
-    }
+    return `${index + 1}.`;
   }
 
   const t = (key: TranslationKey) =>
     translations[language][key] || translations.nl[key];
 
-  const locale = localeByLanguage[language];
+  const format = (key: TranslationKey, values: Record<string, string>) =>
+    Object.entries(values).reduce(
+      (text, [name, value]) => text.replace(`{${name}}`, value),
+      t(key)
+    );
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+
+        <main
+          style={{
+            minHeight: "100vh",
+            background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
+            padding: "60px 20px",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1000px",
+              margin: "0 auto",
+            }}
+          >
+            <p>{t("loading")}</p>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  if (errorMessage || !pool) {
+    return (
+      <>
+        <Navbar />
+
+        <main
+          style={{
+            minHeight: "100vh",
+            background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
+            padding: "60px 20px",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "800px",
+              margin: "0 auto",
+            }}
+          >
+            <div
+              style={{
+                background: "#fee2e2",
+                color: "#991b1b",
+                padding: "20px",
+                borderRadius: "14px",
+                fontWeight: 700,
+                marginBottom: "20px",
+              }}
+            >
+              {errorMessage ||
+                t("loadError")}
+            </div>
+
+            <button
+              onClick={() => router.push("/poules")}
+              style={{
+                border: 0,
+                borderRadius: "10px",
+                padding: "12px 18px",
+                background: "#08783e",
+                color: "white",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              ← {t("backPools")}
+            </button>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  const competition =
+    competitions[pool.competition_code] || {
+      name: pool.competition_code,
+      flag: "⚽",
+    };
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        background: "#f3f6f4",
-        color: "#111",
-        fontFamily:
-          "Arial, Helvetica, sans-serif",
-      }}
-    >
-      <section
+    <>
+      <Navbar />
+
+      <main
         style={{
-          background: activeTheme.hero,
-          position: "relative",
-          overflow: "hidden",
-          boxShadow: `inset 0 -50px 80px ${activeTheme.glow}`,
-          color: "white",
-          padding:
-            "48px 20px 44px",
+          minHeight: "100vh",
+          background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
+          padding: "38px 20px 80px",
         }}
       >
         <div
           style={{
-            maxWidth: "1050px",
+            maxWidth: "1000px",
             margin: "0 auto",
           }}
         >
-          <div
+          <button
+            onClick={() => router.push("/poules")}
             style={{
-              display:
-                "inline-flex",
-              alignItems: "center",
-              gap: "7px",
-              padding: "7px 12px",
-              borderRadius:
-                "999px",
-              background:
-                "rgba(255,255,255,0.10)",
-              border:
-                "1px solid rgba(255,255,255,0.18)",
-              color: activeTheme.accent,
-              fontSize: "11px",
-              fontWeight: 900,
-              letterSpacing:
-                "0.4px",
-              marginBottom:
-                "15px",
+              border: 0,
+              background: "transparent",
+              color: "#08783e",
+              fontWeight: 800,
+              cursor: "pointer",
+              padding: 0,
+              marginBottom: "22px",
+              fontSize: "14px",
             }}
           >
-            ⚽ VOETIQ MATCH CENTER
-          </div>
+            ← {t("backPools")}
+          </button>
 
-          <h1
+          <section
             style={{
-              margin: 0,
-              fontSize: "42px",
-              fontWeight: 900,
-              letterSpacing:
-                "-1.5px",
-            }}
-          >
-            {t("matches")}
-          </h1>
-
-          <p
-            style={{
-              margin:
-                "10px 0 0",
-              color: "rgba(255,255,255,0.72)",
-              fontSize: "15px",
-            }}
-          >
-            {t("subtitle")}
-          </p>
-        </div>
-      </section>
-
-      <section
-        style={{
-          maxWidth: "1050px",
-          margin: "0 auto",
-          padding:
-            "28px 20px 70px",
-        }}
-      >
-        <div
-          style={{
-            background: "white",
-            borderRadius: "16px",
-            padding: "10px",
-            boxShadow:
-              "0 8px 28px rgba(0,0,0,0.06)",
-            overflowX: "auto",
-            marginBottom:
-              "18px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              gap: "6px",
-              minWidth:
-                "max-content",
-            }}
-          >
-            {competitions.map(
-              (competition) => {
-                const active =
-                  selectedCompetition ===
-                  competition.code;
-
-                return (
-                  <button
-                    key={
-                      competition.code
-                    }
-                    onClick={() =>
-                      changeCompetition(
-                        competition.code
-                      )
-                    }
-                    style={{
-                      display:
-                        "flex",
-                      alignItems:
-                        "center",
-                      gap: "7px",
-                      padding:
-                        "10px 13px",
-                      borderRadius:
-                        "10px",
-                      border: active
-                        ? "1px solid rgba(11,143,77,0.18)"
-                        : "1px solid transparent",
-                      background:
-                        active
-                          ? "#e9faf1"
-                          : "transparent",
-                      color: active
-                        ? "#08763e"
-                        : "#52605a",
-                      fontSize:
-                        "13px",
-                      fontWeight:
-                        active
-                          ? 800
-                          : 600,
-                      cursor:
-                        "pointer",
-                      whiteSpace:
-                        "nowrap",
-                    }}
-                  >
-                    <span>
-                      {
-                        competition.flag
-                      }
-                    </span>
-
-                    {
-                      competition.name
-                    }
-                  </button>
-                );
-              }
-            )}
-          </div>
-        </div>
-
-        <div
-          style={{
-            background: activeTheme.card,
-            borderRadius: "18px",
-            padding:
-              "22px 24px",
-            color: "white",
-            marginBottom: "16px",
-            boxShadow:
-              `0 12px 34px ${activeTheme.glow}`,
-            display: "flex",
-            justifyContent:
-              "space-between",
-            alignItems: "center",
-            gap: "20px",
-            flexWrap: "wrap",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "13px",
+              background: (competitionThemes[pool.competition_code] || competitionThemes.DED).hero,
+              color: "white",
+              borderRadius: "24px",
+              padding: "32px",
+              marginBottom: "22px",
+              boxShadow:
+                "0 12px 35px rgba(13,61,39,0.16)",
             }}
           >
             <div
               style={{
-                width: "48px",
-                height: "48px",
-                borderRadius:
-                  "13px",
-                background:
-                  "rgba(255,255,255,0.08)",
                 display: "flex",
-                alignItems:
-                  "center",
-                justifyContent:
-                  "center",
-                fontSize: "25px",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                gap: "20px",
+                flexWrap: "wrap",
               }}
             >
-              {
-                selectedCompetitionData.flag
-              }
-            </div>
+              <div>
+                <div
+                  style={{
+                    color: "#83e7ae",
+                    fontWeight: 900,
+                    fontSize: "13px",
+                    letterSpacing: "1px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {t("poolLabel")}
+                </div>
 
-            <div>
-              <div
-                style={{
-                  color:
-                    activeTheme.accent,
-                  fontSize:
-                    "10px",
-                  fontWeight: 900,
-                  textTransform:
-                    "uppercase",
-                  letterSpacing:
-                    "0.9px",
-                }}
-              >
-                {t("competition")}
+                <h1
+                  style={{
+                    margin: 0,
+                    fontSize: "38px",
+                  }}
+                >
+                  {pool.name}
+                </h1>
+
+                <div
+                  style={{
+                    marginTop: "10px",
+                    color: "#cce5d7",
+                    fontSize: "16px",
+                  }}
+                >
+                  {competition.flag} {competition.name}
+                </div>
               </div>
 
+              <div
+                style={{
+                  background: "rgba(255,255,255,0.08)",
+                  border:
+                    "1px solid rgba(255,255,255,0.10)",
+                  borderRadius: "16px",
+                  padding: "15px 18px",
+                  minWidth: "210px",
+                }}
+              >
+                <div
+                  style={{
+                    color: "#a8c8b7",
+                    fontSize: "12px",
+                    fontWeight: 800,
+                    marginBottom: "5px",
+                  }}
+                >
+                  {t("inviteCode")}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "22px",
+                    fontWeight: 900,
+                    letterSpacing: "1px",
+                  }}
+                >
+                  {pool.invite_code}
+                </div>
+
+                <button
+                  onClick={copyInviteCode}
+                  style={{
+                    marginTop: "10px",
+                    width: "100%",
+                    border: 0,
+                    borderRadius: "9px",
+                    padding: "9px",
+                    background: "#2ee681",
+                    color: "#052c1b",
+                    fontWeight: 900,
+                    cursor: "pointer",
+                  }}
+                >
+                  {copied ? `✓ ${t("copied")}` : t("copyCode")}
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "14px",
+              marginBottom: "24px",
+            }}
+          >
+            <StatCard
+              icon="👥"
+              value={leaderboard.length}
+              label={
+                leaderboard.length === 1 ? t("participant") : t("participants")
+              }
+            />
+
+            <StatCard
+              icon="⚽"
+              value={competition.name}
+              label={t("competition")}
+            />
+
+            <StatCard
+              icon="🎯"
+              value="10+ / 2 / 0"
+              label={t("pointsSystem")}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "12px",
+              flexWrap: "wrap",
+              marginBottom: "28px",
+            }}
+          >
+            <button
+              onClick={() =>
+                router.push(
+                  `/wedstrijden?competition=${pool.competition_code}`
+                )
+              }
+              style={{
+                border: 0,
+                borderRadius: "11px",
+                padding: "13px 18px",
+                background: "#08783e",
+                color: "white",
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              ⚽ {t("predictMatches")}
+            </button>
+
+            <button
+              onClick={inviteFriends}
+              style={{
+                border: "1px solid #d6dfd9",
+                borderRadius: "11px",
+                padding: "13px 18px",
+                background: "white",
+                color: "#183427",
+                fontWeight: 800,
+                cursor: "pointer",
+              }}
+            >
+              🔗 {t("inviteFriends")}
+            </button>
+          </div>
+
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "18px" }}>
+            <TabButton active={activeTab === "leaderboard"} onClick={() => setActiveTab("leaderboard")}>
+              🏆 {"Klassement"}
+            </TabButton>
+            <TabButton active={activeTab === "predictions"} onClick={() => setActiveTab("predictions")}>
+              ⚽ {"Voorspellingen"}
+            </TabButton>
+            <TabButton active={activeTab === "participants"} onClick={() => setActiveTab("participants")}>
+              👥 {"Deelnemers"}
+            </TabButton>
+          </div>
+
+          {activeTab === "leaderboard" && (
+          <section
+            style={{
+              background: "white",
+              borderRadius: "20px",
+              overflow: "hidden",
+              border: "1px solid #e3e9e5",
+              boxShadow:
+                "0 8px 30px rgba(0,0,0,0.04)",
+            }}
+          >
+            <div
+              style={{
+                padding: "22px 24px",
+                borderBottom: "1px solid #e8eeea",
+              }}
+            >
               <h2
                 style={{
-                  margin:
-                    "3px 0 0",
-                  fontSize:
-                    "25px",
+                  margin: 0,
+                  color: "#10251a",
+                  fontSize: "25px",
                 }}
               >
-                {
-                  selectedCompetitionData.name
-                }
+                🏆 {t("poolLeaderboard")}
               </h2>
-            </div>
-          </div>
-
-          {!loading &&
-            currentMatches.length >
-              0 && (
-              <div
-                style={{
-                  background:
-                    "rgba(255,255,255,0.08)",
-                  border:
-                    "1px solid rgba(255,255,255,0.08)",
-                  borderRadius:
-                    "12px",
-                  padding:
-                    "10px 15px",
-                  textAlign:
-                    "center",
-                }}
-              >
-                <div
-                  style={{
-                    color:
-                      "#70f0aa",
-                    fontSize:
-                      "10px",
-                    fontWeight:
-                      900,
-                    textTransform:
-                      "uppercase",
-                  }}
-                >
-                  {t("filled")}
-                </div>
-
-                <div
-                  style={{
-                    marginTop:
-                      "3px",
-                    fontSize:
-                      "17px",
-                    fontWeight:
-                      900,
-                  }}
-                >
-                  {
-                    savedPredictionsThisRound
-                  }{" "}
-                  /{" "}
-                  {
-                    currentMatches.length
-                  }
-                </div>
-              </div>
-            )}
-        </div>
-
-        {loading && (
-          <div style={emptyCardStyle}>
-            <div
-              style={{
-                fontSize: "32px",
-                marginBottom:
-                  "10px",
-              }}
-            >
-              ⚽
-            </div>
-
-            <strong>{t("loading")}</strong>
-          </div>
-        )}
-
-        {!loading &&
-          availableMatchdays.length ===
-            0 && (
-            <div style={emptyCardStyle}>
-              <div
-                style={{
-                  fontSize: "34px",
-                  marginBottom:
-                    "10px",
-                }}
-              >
-                📅
-              </div>
-
-              <strong
-                style={{
-                  fontSize:
-                    "17px",
-                }}
-              >
-                {t("noUpcoming")}
-              </strong>
 
               <p
                 style={{
-                  color:
-                    "#78827d",
-                  margin:
-                    "8px 0 0",
+                  margin: "6px 0 0",
+                  color: "#738078",
+                  fontSize: "14px",
                 }}
               >
-                {t("noUpcomingDescription")}
+                {format("onlyPoints", { competition: competition.name })}
               </p>
             </div>
-          )}
 
-        {!loading &&
-          availableMatchdays.length >
-            0 && (
-            <>
+            {leaderboard.length === 0 ? (
               <div
                 style={{
-                  background:
-                    "white",
-                  borderRadius:
-                    "15px",
-                  padding: "10px",
-                  display: "grid",
-                  gridTemplateColumns:
-                    "1fr auto 1fr",
-                  alignItems:
-                    "center",
-                  marginBottom:
-                    "15px",
-                  boxShadow:
-                    "0 6px 22px rgba(0,0,0,0.055)",
+                  padding: "35px 24px",
+                  textAlign: "center",
+                  color: "#738078",
                 }}
               >
-                <div>
-                  <button
-                    onClick={() =>
-                      changeMatchday(
-                        "previous"
-                      )
-                    }
-                    disabled={
-                      currentMatchdayIndex <=
-                      0
-                    }
-                    style={navigationButtonStyle(
-                      currentMatchdayIndex <=
-                        0
-                    )}
-                  >
-                    ← {t("previous")}
-                  </button>
-                </div>
-
+                {t("noParticipants")}
+              </div>
+            ) : (
+              leaderboard.map((player, index) => (
                 <div
+                  key={player.user_id}
                   style={{
-                    textAlign:
-                      "center",
+                    display: "grid",
+                    gridTemplateColumns:
+                      "55px minmax(140px, 1fr) 100px 100px 90px",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "17px 24px",
+                    borderBottom:
+                      index === leaderboard.length - 1
+                        ? "none"
+                        : "1px solid #edf1ee",
                   }}
                 >
                   <div
                     style={{
-                      color:
-                        "#89958e",
                       fontSize:
-                        "10px",
-                      fontWeight:
-                        900,
-                      textTransform:
-                        "uppercase",
-                      letterSpacing:
-                        "0.6px",
+                        index < 3 ? "23px" : "16px",
+                      fontWeight: 900,
                     }}
                   >
-                    {t("matchday")}
+                    {getMedal(index)}
                   </div>
 
-                  <strong
+                  <div>
+                    <div
+                      style={{
+                        color: "#10251a",
+                        fontWeight: 900,
+                      }}
+                    >
+                      {player.username}
+                    </div>
+
+                    <div
+                      style={{
+                        color: "#849088",
+                        fontSize: "12px",
+                        marginTop: "3px",
+                      }}
+                    >
+                      {player.predictions_count}{" "}{player.predictions_count === 1 ? t("prediction") : t("predictions")}
+                    </div>
+                  </div>
+
+                  <div
                     style={{
-                      fontSize:
-                        "20px",
+                      textAlign: "center",
                     }}
                   >
-                    {
-                      selectedMatchday
-                    }
-                  </strong>
-                </div>
+                    <div
+                      style={{
+                        fontWeight: 900,
+                        color: "#10251a",
+                      }}
+                    >
+                      {player.exact_scores}
+                    </div>
+                    <div
+                      style={{
+                        color: "#849088",
+                        fontSize: "11px",
+                      }}
+                    >
+                      {t("exact")}
+                    </div>
+                  </div>
 
-                <div
-                  style={{
-                    textAlign:
-                      "right",
-                  }}
-                >
-                  <button
-                    onClick={() =>
-                      changeMatchday(
-                        "next"
-                      )
-                    }
-                    disabled={
-                      currentMatchdayIndex ===
-                      availableMatchdays.length -
-                        1
-                    }
-                    style={navigationButtonStyle(
-                      currentMatchdayIndex ===
-                        availableMatchdays.length -
-                          1
-                    )}
+                  <div
+                    style={{
+                      textAlign: "center",
+                    }}
                   >
-                    {t("next")} →
-                  </button>
-                </div>
-              </div>
+                    <div
+                      style={{
+                        fontWeight: 900,
+                        color: "#10251a",
+                      }}
+                    >
+                      {player.predictions_count}
+                    </div>
+                    <div
+                      style={{
+                        color: "#849088",
+                        fontSize: "11px",
+                      }}
+                    >
+                      {t("predicted")}
+                    </div>
+                  </div>
 
+                  <div
+                    style={{
+                      textAlign: "right",
+                      color: "#08783e",
+                      fontSize: "20px",
+                      fontWeight: 900,
+                    }}
+                  >
+                    {player.total_points}
+                    <div
+                      style={{
+                        fontSize: "10px",
+                        color: "#849088",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {t("points")}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </section>
+          )}
+
+          {activeTab === "predictions" && (
+            <section
+              style={{
+                background: "white",
+                borderRadius: "20px",
+                border: "1px solid #e3e9e5",
+                overflow: "hidden",
+                boxShadow: "0 8px 30px rgba(0,0,0,0.04)",
+              }}
+            >
               <div
                 style={{
-                  display: "flex",
-                  flexDirection:
-                    "column",
-                  gap: "12px",
+                  padding: "22px 24px",
+                  color: "white",
+                  background:
+                    (competitionThemes[pool.competition_code] ||
+                      competitionThemes.DED).card,
                 }}
               >
-                {currentMatches.map(
-                  (match) => {
-                    const prediction =
-                      predictions[
-                        match.id
-                      ] || {
-                        home: "",
-                        away: "",
-                      };
+                <h2 style={{ margin: 0, fontSize: "25px" }}>
+                  ⚽ Voorspellingen
+                </h2>
+                <p
+                  style={{
+                    margin: "6px 0 0",
+                    color: "rgba(255,255,255,0.75)",
+                    fontSize: "14px",
+                  }}
+                >
+                  {competition.flag} Alleen wedstrijden uit {competition.name} tellen mee.
+                </p>
+              </div>
 
-                    const date =
-                      new Date(
-                        match.utcDate
-                      );
-
-                    const isSaved =
-                      savedMatchIds.has(
-                        match.id
-                      );
-
-                    const isSaving =
-                      savingMatchId ===
-                      match.id;
-
-                    const locked =
-                      date.getTime() <=
-                      Date.now();
-
-                    return (
-                      <div
-                        key={match.id}
-                        style={{
-                          background:
-                            "white",
-                          borderRadius:
-                            "17px",
-                          border:
-                            isSaved
-                              ? "1px solid rgba(11,143,77,0.25)"
-                              : "1px solid #edf1ee",
-                          overflow:
-                            "hidden",
-                          boxShadow:
-                            "0 7px 24px rgba(0,0,0,0.055)",
-                        }}
+              <div style={{ padding: "20px 24px 24px" }}>
+                {matchesLoading ? (
+                  <div style={{ padding: "35px 0", textAlign: "center", color: "#738078" }}>
+                    ⚽ Wedstrijden laden...
+                  </div>
+                ) : availableMatchdays.length === 0 ? (
+                  <div style={{ padding: "35px 0", textAlign: "center", color: "#738078" }}>
+                    {matchesMessage || "Er zijn momenteel geen komende wedstrijden beschikbaar."}
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr auto 1fr",
+                        alignItems: "center",
+                        padding: "10px",
+                        borderRadius: "14px",
+                        background: "#f5f8f6",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      <button
+                        onClick={() => changePoolMatchday("previous")}
+                        disabled={availableMatchdays.indexOf(selectedMatchday ?? -1) <= 0}
+                        style={poolNavigationButton(
+                          availableMatchdays.indexOf(selectedMatchday ?? -1) <= 0
+                        )}
                       >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            justifyContent:
-                              "space-between",
-                            alignItems:
-                              "center",
-                            padding:
-                              "11px 18px",
-                            background:
-                              isSaved
-                                ? "#f3fcf7"
-                                : "#fafcfb",
-                            borderBottom:
-                              "1px solid #edf1ee",
-                            color:
-                              "#7d8982",
-                            fontSize:
-                              "12px",
-                            fontWeight:
-                              700,
-                          }}
-                        >
-                          <span>
-                            {date.toLocaleDateString(
-                              "nl-NL",
-                              {
-                                weekday:
-                                  "short",
-                                day: "numeric",
-                                month:
-                                  "short",
-                              }
-                            )}
-                          </span>
+                        ← Vorige
+                      </button>
 
-                          <div
-                            style={{
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              gap: "12px",
-                            }}
-                          >
-                            {isSaved && (
-                              <span
-                                style={{
-                                  color:
-                                    "#0b8f4d",
-                                  fontSize:
-                                    "11px",
-                                  fontWeight:
-                                    900,
-                                }}
-                              >
-                                ✓ {t("predicted")}
-                              </span>
-                            )}
-
-                            <span>
-                              {date.toLocaleTimeString(
-                                locale,
-                                {
-                                  hour:
-                                    "2-digit",
-                                  minute:
-                                    "2-digit",
-                                }
-                              )}
-                            </span>
-                          </div>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ color: "#89958e", fontSize: "10px", fontWeight: 900 }}>
+                          SPEELRONDE
                         </div>
+                        <strong style={{ fontSize: "20px" }}>{selectedMatchday}</strong>
+                      </div>
 
-                        <div
-                          style={{
-                            padding:
-                              "23px 22px 21px",
-                          }}
+                      <div style={{ textAlign: "right" }}>
+                        <button
+                          onClick={() => changePoolMatchday("next")}
+                          disabled={
+                            availableMatchdays.indexOf(selectedMatchday ?? -1) ===
+                            availableMatchdays.length - 1
+                          }
+                          style={poolNavigationButton(
+                            availableMatchdays.indexOf(selectedMatchday ?? -1) ===
+                              availableMatchdays.length - 1
+                          )}
                         >
+                          Volgende →
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      {currentMatches.map((match) => {
+                        const date = new Date(match.utcDate);
+                        const prediction = predictions[match.id];
+                        const isSaved = savedMatchIds.has(match.id);
+
+                        return (
                           <div
+                            key={match.id}
                             style={{
-                              display:
-                                "grid",
-                              gridTemplateColumns:
-                                "minmax(0,1fr) 150px minmax(0,1fr)",
-                              alignItems:
-                                "center",
-                              gap: "18px",
+                              border: isSaved
+                                ? "1px solid rgba(11,143,77,0.28)"
+                                : "1px solid #e8eeea",
+                              borderRadius: "15px",
+                              overflow: "hidden",
+                              background: "white",
                             }}
                           >
-                            <Team
-                              name={
-                                match
-                                  .homeTeam
-                                  .name
-                              }
-                              crest={
-                                match
-                                  .homeTeam
-                                  .crest
-                              }
-                              side="home"
-                            />
+                            <div
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                padding: "10px 15px",
+                                background: isSaved ? "#f3fcf7" : "#fafcfb",
+                                color: "#7d8982",
+                                fontSize: "12px",
+                                fontWeight: 700,
+                              }}
+                            >
+                              <span>
+                                {date.toLocaleDateString("nl-NL", {
+                                  weekday: "short",
+                                  day: "numeric",
+                                  month: "short",
+                                })}
+                              </span>
+                              <span>
+                                {isSaved ? "✓ Voorspeld · " : ""}
+                                {date.toLocaleTimeString("nl-NL", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
+                              </span>
+                            </div>
 
                             <div
                               style={{
-                                display:
-                                  "flex",
-                                justifyContent:
-                                  "center",
-                                alignItems:
-                                  "center",
-                                gap: "8px",
+                                display: "grid",
+                                gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)",
+                                alignItems: "center",
+                                gap: "14px",
+                                padding: "18px",
                               }}
                             >
-                              <input
-                                type="number"
-                                min="0"
-                                max="20"
-                                disabled={
-                                  locked
-                                }
-                                value={
-                                  prediction.home
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  updatePrediction(
-                                    match.id,
-                                    "home",
-                                    e
-                                      .target
-                                      .value
-                                  )
-                                }
-                                style={{
-                                  ...scoreInputStyle,
-                                  opacity:
-                                    locked
-                                      ? 0.6
-                                      : 1,
-                                }}
+                              <PoolTeam
+                                name={match.homeTeam.name}
+                                crest={match.homeTeam.crest}
+                                side="home"
                               />
 
-                              <span
+                              <div
                                 style={{
-                                  fontWeight:
-                                    900,
-                                  color:
-                                    "#9ca7a1",
+                                  minWidth: "86px",
+                                  textAlign: "center",
+                                  fontWeight: 900,
+                                  color: isSaved ? "#08783e" : "#849088",
+                                  fontSize: isSaved ? "19px" : "14px",
                                 }}
                               >
-                                -
-                              </span>
+                                {prediction
+                                  ? `${prediction.home} - ${prediction.away}`
+                                  : "Nog invullen"}
+                              </div>
 
-                              <input
-                                type="number"
-                                min="0"
-                                max="20"
-                                disabled={
-                                  locked
-                                }
-                                value={
-                                  prediction.away
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  updatePrediction(
-                                    match.id,
-                                    "away",
-                                    e
-                                      .target
-                                      .value
-                                  )
-                                }
-                                style={{
-                                  ...scoreInputStyle,
-                                  opacity:
-                                    locked
-                                      ? 0.6
-                                      : 1,
-                                }}
+                              <PoolTeam
+                                name={match.awayTeam.name}
+                                crest={match.awayTeam.crest}
+                                side="away"
                               />
                             </div>
-
-                            <Team
-                              name={
-                                match
-                                  .awayTeam
-                                  .name
-                              }
-                              crest={
-                                match
-                                  .awayTeam
-                                  .crest
-                              }
-                              side="away"
-                            />
                           </div>
+                        );
+                      })}
+                    </div>
 
-                          <button
-                            onClick={() =>
-                              savePrediction(
-                                match
-                              )
-                            }
-                            disabled={
-                              isSaving ||
-                              locked
-                            }
-                            style={{
-                              marginTop:
-                                "21px",
-                              width: "100%",
-                              padding:
-                                "12px",
-                              background:
-                                locked
-                                  ? "#aeb8b2"
-                                  : isSaved
-                                    ? "#075f35"
-                                    : "#0b8f4d",
-                              color:
-                                "white",
-                              border:
-                                "none",
-                              borderRadius:
-                                "10px",
-                              fontSize:
-                                "14px",
-                              fontWeight:
-                                800,
-                              cursor:
-                                locked ||
-                                isSaving
-                                  ? "default"
-                                  : "pointer",
-                              opacity:
-                                isSaving
-                                  ? 0.75
-                                  : 1,
-                            }}
-                          >
-                            {locked
-                              ? "Voorspelling gesloten"
-                              : isSaving
-                                ? "Opslaan..."
-                                : isSaved
-                                  ? "Voorspelling wijzigen"
-                                  : "Voorspelling opslaan"}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  }
+                    <button
+                      onClick={() =>
+                        router.push(`/wedstrijden?competition=${pool.competition_code}`)
+                      }
+                      style={{
+                        marginTop: "18px",
+                        width: "100%",
+                        border: 0,
+                        borderRadius: "11px",
+                        padding: "13px 18px",
+                        background: "#08783e",
+                        color: "white",
+                        fontWeight: 900,
+                        cursor: "pointer",
+                      }}
+                    >
+                      ⚽ {t("predictMatches")}
+                    </button>
+                  </>
                 )}
               </div>
-            </>
+            </section>
           )}
 
-        {message && (
+          {activeTab === "participants" && (
+            <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
+              <div style={{ padding: "22px 24px", borderBottom: "1px solid #e8eeea" }}>
+                <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>👥 {"Deelnemers"}</h2>
+                <p style={{ margin: "6px 0 0", color: "#738078", fontSize: "14px" }}>{"Bekijk de deelnemers van deze poule."}</p>
+              </div>
+              {leaderboard.map((player, index) => (
+                <div key={player.user_id} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "17px 24px", borderBottom: index === leaderboard.length - 1 ? "none" : "1px solid #edf1ee" }}>
+                  <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#e9f8ef", color: "#08783e", display: "grid", placeItems: "center", fontWeight: 900 }}>{player.username.slice(0, 1).toUpperCase()}</div>
+                  <div style={{ flex: 1 }}><div style={{ color: "#10251a", fontWeight: 900 }}>{player.username}</div><div style={{ color: "#849088", fontSize: "12px", marginTop: "3px" }}>{player.predictions_count} {player.predictions_count === 1 ? t("prediction") : t("predictions")}</div></div>
+                  <div style={{ color: "#08783e", fontWeight: 900 }}>{player.total_points} {t("points").toLowerCase()}</div>
+                </div>
+              ))}
+            </section>
+          )}
+
           <div
             style={{
-              marginTop: "18px",
-              padding:
-                "14px 17px",
-              background:
-                "#e9faf1",
-              border:
-                "1px solid rgba(11,143,77,0.15)",
-              borderRadius:
-                "12px",
-              color: "#08763e",
-              fontWeight: 700,
-              fontSize: "14px",
+              marginTop: "20px",
+              color: "#89958e",
+              fontSize: "12px",
+              textAlign: "center",
             }}
           >
-            {message}
+            {t("poolId")}: {poolId}
           </div>
-        )}
-
-        <p
-          style={{
-            marginTop: "28px",
-            fontSize: "11px",
-            color: "#929b96",
-            textAlign: "center",
-          }}
-        >
-          Data provided by
-          football-data.org
-        </p>
-      </section>
-    </main>
+        </div>
+      </main>
+    </>
   );
 }
 
-function Team({
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} style={{ border: active ? "1px solid #08783e" : "1px solid #dbe4de", borderRadius: "11px", padding: "11px 16px", background: active ? "#08783e" : "white", color: active ? "white" : "#183427", fontWeight: 900, cursor: "pointer" }}>
+      {children}
+    </button>
+  );
+}
+
+
+function PoolTeam({
   name,
   crest,
   side,
@@ -1619,24 +1202,18 @@ function Team({
     <div
       style={{
         display: "flex",
-        flexDirection: home
-          ? "row"
-          : "row-reverse",
+        flexDirection: home ? "row" : "row-reverse",
         alignItems: "center",
-        justifyContent:
-          "flex-end",
-        gap: "13px",
+        justifyContent: "flex-end",
+        gap: "10px",
         minWidth: 0,
       }}
     >
       <div
         style={{
-          textAlign: home
-            ? "right"
-            : "left",
+          textAlign: home ? "right" : "left",
           fontWeight: 800,
-          fontSize: "15px",
-          lineHeight: 1.25,
+          fontSize: "14px",
         }}
       >
         {name}
@@ -1644,89 +1221,90 @@ function Team({
 
       <div
         style={{
-          width: "48px",
-          height: "48px",
+          width: "40px",
+          height: "40px",
           flexShrink: 0,
-          borderRadius: "12px",
+          borderRadius: "10px",
           background: "#f6f8f7",
-          border:
-            "1px solid #edf0ee",
-          display: "flex",
-          alignItems: "center",
-          justifyContent:
-            "center",
-          padding: "7px",
-          boxSizing:
-            "border-box",
+          border: "1px solid #edf0ee",
+          display: "grid",
+          placeItems: "center",
+          padding: "6px",
+          boxSizing: "border-box",
         }}
       >
         {crest ? (
           <img
             src={crest}
             alt={`${name} logo`}
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit:
-                "contain",
-            }}
+            style={{ width: "100%", height: "100%", objectFit: "contain" }}
           />
         ) : (
-          <span
-            style={{
-              fontSize: "20px",
-            }}
-          >
-            ⚽
-          </span>
+          "⚽"
         )}
       </div>
     </div>
   );
 }
 
-const scoreInputStyle = {
-  width: "55px",
-  height: "52px",
-  boxSizing:
-    "border-box" as const,
-  border:
-    "1px solid #dce3df",
-  borderRadius: "11px",
-  textAlign:
-    "center" as const,
-  fontSize: "20px",
-  fontWeight: 900,
-  outline: "none",
-  background: "#fbfcfb",
-};
-
-const emptyCardStyle = {
-  background: "white",
-  borderRadius: "17px",
-  padding: "45px 25px",
-  textAlign:
-    "center" as const,
-  boxShadow:
-    "0 7px 24px rgba(0,0,0,0.055)",
-};
-
-function navigationButtonStyle(
-  disabled: boolean
-) {
+function poolNavigationButton(disabled: boolean) {
   return {
     border: "none",
-    background: disabled
-      ? "#f1f3f2"
-      : "#e9faf1",
-    color: disabled
-      ? "#a1aaa5"
-      : "#08763e",
+    background: disabled ? "#ecefed" : "#e9faf1",
+    color: disabled ? "#a1aaa5" : "#08763e",
     borderRadius: "9px",
-    padding: "10px 14px",
+    padding: "9px 12px",
     fontWeight: 800,
-    cursor: disabled
-      ? "default"
-      : "pointer",
+    cursor: disabled ? "default" : "pointer",
   };
+}
+
+function StatCard({
+  icon,
+  value,
+  label,
+}: {
+  icon: string;
+  value: string | number;
+  label: string;
+}) {
+  return (
+    <div
+      style={{
+        background: "white",
+        border: "1px solid #e3e9e5",
+        borderRadius: "16px",
+        padding: "18px",
+      }}
+    >
+      <div
+        style={{
+          fontSize: "22px",
+          marginBottom: "7px",
+        }}
+      >
+        {icon}
+      </div>
+
+      <div
+        style={{
+          color: "#10251a",
+          fontSize: "19px",
+          fontWeight: 900,
+        }}
+      >
+        {value}
+      </div>
+
+      <div
+        style={{
+          color: "#7a867f",
+          fontSize: "12px",
+          marginTop: "3px",
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
 }
