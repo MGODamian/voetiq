@@ -489,30 +489,148 @@ export default function ProfielPage() {
     return predicted === actual;
   };
 
-  const activityItems = predictions
+  const achievementNames: Record<LanguageCode, {
+    firstPrediction: string;
+    firstPoints: string;
+    firstCorrect: string;
+    firstExact: string;
+    tenPredictions: string;
+    tenCorrect: string;
+    hundredPoints: string;
+  }> = {
+    nl: { firstPrediction:"Debutant", firstPoints:"Eerste punten", firstCorrect:"Goed gezien", firstExact:"Scherpschutter", tenPredictions:"Vaste voorspeller", tenCorrect:"Voetbalkenner", hundredPoints:"100-puntenclub" },
+    en: { firstPrediction:"Debutant", firstPoints:"First points", firstCorrect:"Good call", firstExact:"Sharpshooter", tenPredictions:"Regular predictor", tenCorrect:"Football expert", hundredPoints:"100-point club" },
+    de: { firstPrediction:"Debütant", firstPoints:"Erste Punkte", firstCorrect:"Gut gesehen", firstExact:"Scharfschütze", tenPredictions:"Stamm-Tipper", tenCorrect:"Fußballkenner", hundredPoints:"100-Punkte-Club" },
+    es: { firstPrediction:"Debutante", firstPoints:"Primeros puntos", firstCorrect:"Buen pronóstico", firstExact:"Francotirador", tenPredictions:"Pronosticador habitual", tenCorrect:"Experto en fútbol", hundredPoints:"Club de 100 puntos" },
+    fr: { firstPrediction:"Débutant", firstPoints:"Premiers points", firstCorrect:"Bien vu", firstExact:"Tireur d’élite", tenPredictions:"Pronostiqueur régulier", tenCorrect:"Expert football", hundredPoints:"Club des 100 points" },
+    it: { firstPrediction:"Debuttante", firstPoints:"Primi punti", firstCorrect:"Ben visto", firstExact:"Cecchino", tenPredictions:"Pronosticatore abituale", tenCorrect:"Esperto di calcio", hundredPoints:"Club dei 100 punti" },
+    pt: { firstPrediction:"Estreante", firstPoints:"Primeiros pontos", firstCorrect:"Boa previsão", firstExact:"Atirador de elite", tenPredictions:"Prognosticador habitual", tenCorrect:"Especialista em futebol", hundredPoints:"Clube dos 100 pontos" },
+  };
+
+  const playedChronological = [...predictions]
     .filter(
       (prediction) =>
         prediction.actual_home_score !== null &&
         prediction.actual_away_score !== null
     )
-    .slice(0, 5)
-    .map((prediction) => {
-      const exact =
-        prediction.home_score === prediction.actual_home_score &&
-        prediction.away_score === prediction.actual_away_score;
-      const correct = isCorrectResult(prediction);
+    .sort(
+      (a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
 
-      return {
-        id: `prediction-${prediction.id}`,
-        icon: exact ? "🎯" : correct ? "✅" : "⚽",
-        title: exact
-          ? aui.exact(prediction.match_name, prediction.points || 0)
-          : correct
-            ? aui.correct(prediction.match_name, prediction.points || 0)
-            : aui.played(prediction.match_name),
-        date: prediction.created_at,
-      };
+  const timelineItems: { id: string; icon: string; title: string; date: string }[] = [];
+  let runningPoints = 0;
+  let runningCorrect = 0;
+  let runningExact = 0;
+  let previousRankIndex = 0;
+
+  playedChronological.forEach((prediction, index) => {
+    const exact =
+      prediction.home_score === prediction.actual_home_score &&
+      prediction.away_score === prediction.actual_away_score;
+    const correct = isCorrectResult(prediction);
+    const beforePoints = runningPoints;
+
+    runningPoints += prediction.points || 0;
+    if (correct) runningCorrect += 1;
+    if (exact) runningExact += 1;
+
+    timelineItems.push({
+      id: `prediction-${prediction.id}`,
+      icon: exact ? "🎯" : correct ? "✅" : "⚽",
+      title: exact
+        ? aui.exact(prediction.match_name, prediction.points || 0)
+        : correct
+          ? aui.correct(prediction.match_name, prediction.points || 0)
+          : aui.played(prediction.match_name),
+      date: prediction.created_at,
     });
+
+    const names = achievementNames[language];
+
+    if (index === 0) {
+      timelineItems.push({
+        id: `achievement-debut-${prediction.id}`,
+        icon: "🏅",
+        title: aui.achievement(names.firstPrediction),
+        date: prediction.created_at,
+      });
+    }
+    if (beforePoints === 0 && runningPoints > 0) {
+      timelineItems.push({
+        id: `achievement-points-${prediction.id}`,
+        icon: "🪙",
+        title: aui.achievement(names.firstPoints),
+        date: prediction.created_at,
+      });
+    }
+    if (correct && runningCorrect === 1) {
+      timelineItems.push({
+        id: `achievement-correct-${prediction.id}`,
+        icon: "✅",
+        title: aui.achievement(names.firstCorrect),
+        date: prediction.created_at,
+      });
+    }
+    if (exact && runningExact === 1) {
+      timelineItems.push({
+        id: `achievement-exact-${prediction.id}`,
+        icon: "🎯",
+        title: aui.achievement(names.firstExact),
+        date: prediction.created_at,
+      });
+    }
+    if (index + 1 === 10) {
+      timelineItems.push({
+        id: `achievement-tenpred-${prediction.id}`,
+        icon: "📋",
+        title: aui.achievement(names.tenPredictions),
+        date: prediction.created_at,
+      });
+    }
+    if (correct && runningCorrect === 10) {
+      timelineItems.push({
+        id: `achievement-tencorrect-${prediction.id}`,
+        icon: "⚽",
+        title: aui.achievement(names.tenCorrect),
+        date: prediction.created_at,
+      });
+    }
+    if (beforePoints < 100 && runningPoints >= 100) {
+      timelineItems.push({
+        id: `achievement-100points-${prediction.id}`,
+        icon: "💯",
+        title: aui.achievement(names.hundredPoints),
+        date: prediction.created_at,
+      });
+    }
+
+    let currentRankIndex = 0;
+    for (let i = 0; i < footballRanks.length; i += 1) {
+      if (runningPoints >= footballRanks[i].min) currentRankIndex = i;
+    }
+
+    if (currentRankIndex > previousRankIndex) {
+      for (let i = previousRankIndex + 1; i <= currentRankIndex; i += 1) {
+        timelineItems.push({
+          id: `promotion-${i}-${prediction.id}`,
+          icon: "⬆️",
+          title: aui.promotion(
+            `${footballRanks[i].icon} ${footballRanks[i].names[language]}`
+          ),
+          date: prediction.created_at,
+        });
+      }
+    }
+    previousRankIndex = currentRankIndex;
+  });
+
+  const activityItems = timelineItems
+    .sort(
+      (a, b) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
+    )
+    .slice(0, 8);
 
   const totalPredictions = predictions.length;
 
