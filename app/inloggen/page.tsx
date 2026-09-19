@@ -236,7 +236,16 @@ export default function Inloggen() {
     }
 
     setLoading(false);
-    window.location.href = "/";
+
+    const params = new URLSearchParams(window.location.search);
+    const requestedRedirect = params.get("redirect");
+    const safeRedirect =
+      requestedRedirect?.startsWith("/") &&
+      !requestedRedirect.startsWith("//")
+        ? requestedRedirect
+        : "/";
+
+    window.location.href = safeRedirect;
   }
 
   return (
@@ -468,7 +477,11 @@ export default function Inloggen() {
             {t.noAccount}{" "}
 
             <a
-              href="/registreren"
+              href={
+                typeof window !== "undefined" && window.location.search
+                  ? `/registreren${window.location.search}`
+                  : "/registreren"
+              }
               style={{
                 color: "#42e78e",
                 textDecoration: "none",
