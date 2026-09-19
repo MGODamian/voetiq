@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type Match = {
@@ -357,6 +358,8 @@ const competitionThemes: Record<
 };
 
 export default function Wedstrijden() {
+  const router = useRouter();
+
   const [selectedCompetition, setSelectedCompetition] =
     useState("DED");
 
@@ -818,6 +821,28 @@ export default function Wedstrijden() {
             margin: "0 auto",
           }}
         >
+          <button
+            onClick={() => router.back()}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "7px",
+              marginBottom: "16px",
+              padding: "8px 12px",
+              borderRadius: "10px",
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: "rgba(255,255,255,0.10)",
+              color: "white",
+              fontSize: "13px",
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            ← Terug
+          </button>
+
+          <br />
+
           <div
             style={{
               display:
