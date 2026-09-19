@@ -513,23 +513,13 @@ export default function PoolDetailPage() {
     )}`;
 
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: pool.name,
-          text: `Doe mee met mijn VoetIQ-poule "${pool.name}"!`,
-          url: inviteUrl,
-        });
-        return;
-      }
-
       await navigator.clipboard.writeText(inviteUrl);
       setCopied(true);
 
       window.setTimeout(() => {
         setCopied(false);
-      }, 2000);
+      }, 2500);
     } catch (error) {
-      if (error instanceof DOMException && error.name === "AbortError") return;
       console.error(error);
     }
   }
@@ -840,7 +830,7 @@ export default function PoolDetailPage() {
                 cursor: "pointer",
               }}
             >
-              🔗 {t("inviteFriends")}
+              🔗 {copied ? "Uitnodigingslink gekopieerd!" : t("inviteFriends")}
             </button>
           </div>
 
