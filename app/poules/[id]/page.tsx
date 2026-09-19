@@ -33,8 +33,8 @@ type TranslationKey =
   | "participant" | "participants" | "competition" | "pointsSystem"
   | "predictMatches" | "inviteFriends" | "poolLeaderboard" | "onlyPoints"
   | "noParticipants" | "prediction" | "predictions" | "exact" | "predicted"
-  | "points" | "poolId" | "tabLeaderboard" | "tabPredictions" | "tabParticipants"
-  | "predictionsTitle" | "predictionsIntro" | "participantsTitle" | "participantsIntro";
+  | "points" | "poolId"
+  | "predictionsIntro" | "participantsIntro";
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
   nl: {
@@ -597,13 +597,13 @@ export default function PoolDetailPage() {
 
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "18px" }}>
             <TabButton active={activeTab === "leaderboard"} onClick={() => setActiveTab("leaderboard")}>
-              🏆 {t("tabLeaderboard")}
+              🏆 {"Klassement"}
             </TabButton>
             <TabButton active={activeTab === "predictions"} onClick={() => setActiveTab("predictions")}>
-              ⚽ {t("tabPredictions")}
+              ⚽ {"Voorspellingen"}
             </TabButton>
             <TabButton active={activeTab === "participants"} onClick={() => setActiveTab("participants")}>
-              👥 {t("tabParticipants")}
+              👥 {"Deelnemers"}
             </TabButton>
           </div>
 
@@ -776,7 +776,7 @@ export default function PoolDetailPage() {
 
           {activeTab === "predictions" && (
             <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", padding: "28px", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
-              <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>⚽ {t("predictionsTitle")}</h2>
+              <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>⚽ {"Voorspellingen"}</h2>
               <p style={{ margin: "8px 0 22px", color: "#738078", fontSize: "14px", lineHeight: 1.6 }}>{t("predictionsIntro")}</p>
               <button onClick={() => router.push(`/wedstrijden?competition=${pool.competition_code}`)} style={{ border: 0, borderRadius: "11px", padding: "13px 18px", background: "#08783e", color: "white", fontWeight: 900, cursor: "pointer" }}>
                 ⚽ {t("predictMatches")}
@@ -787,7 +787,7 @@ export default function PoolDetailPage() {
           {activeTab === "participants" && (
             <section style={{ background: "white", borderRadius: "20px", border: "1px solid #e3e9e5", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.04)" }}>
               <div style={{ padding: "22px 24px", borderBottom: "1px solid #e8eeea" }}>
-                <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>👥 {t("participantsTitle")}</h2>
+                <h2 style={{ margin: 0, color: "#10251a", fontSize: "25px" }}>👥 {"Deelnemers"}</h2>
                 <p style={{ margin: "6px 0 0", color: "#738078", fontSize: "14px" }}>{t("participantsIntro")}</p>
               </div>
               {leaderboard.map((player, index) => (
