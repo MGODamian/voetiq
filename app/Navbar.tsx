@@ -33,17 +33,70 @@ const notificationCopy: Record<LanguageCode, {
   pt: { title:"Notificações", empty:"Ainda não tens notificações.", markRead:"Marcar tudo como lido", points:(p,m)=>`+${p} pontos ganhos em ${m}`, exact:m=>`Resultado exato previsto em ${m}`, achievement:n=>`Conquista desbloqueada: ${n}`, promotion:r=>`Promovido a ${r}` },
 };
 
-const achievementNotificationNames: Record<LanguageCode, {
-  debut: string; firstPoints: string; firstCorrect: string; firstExact: string;
-  tenPredictions: string; tenCorrect: string; hundredPoints: string;
-}> = {
-  nl:{debut:"Debutant",firstPoints:"Eerste punten",firstCorrect:"Goed gezien",firstExact:"Scherpschutter",tenPredictions:"Vaste voorspeller",tenCorrect:"Voetbalkenner",hundredPoints:"100-puntenclub"},
-  en:{debut:"Debutant",firstPoints:"First points",firstCorrect:"Good call",firstExact:"Sharpshooter",tenPredictions:"Regular predictor",tenCorrect:"Football expert",hundredPoints:"100-point club"},
-  de:{debut:"Debütant",firstPoints:"Erste Punkte",firstCorrect:"Gut gesehen",firstExact:"Scharfschütze",tenPredictions:"Stamm-Tipper",tenCorrect:"Fußballkenner",hundredPoints:"100-Punkte-Club"},
-  es:{debut:"Debutante",firstPoints:"Primeros puntos",firstCorrect:"Buen pronóstico",firstExact:"Francotirador",tenPredictions:"Pronosticador habitual",tenCorrect:"Experto en fútbol",hundredPoints:"Club de 100 puntos"},
-  fr:{debut:"Débutant",firstPoints:"Premiers points",firstCorrect:"Bien vu",firstExact:"Tireur d’élite",tenPredictions:"Pronostiqueur régulier",tenCorrect:"Expert football",hundredPoints:"Club des 100 points"},
-  it:{debut:"Debuttante",firstPoints:"Primi punti",firstCorrect:"Ben visto",firstExact:"Cecchino",tenPredictions:"Pronosticatore abituale",tenCorrect:"Esperto di calcio",hundredPoints:"Club dei 100 punti"},
-  pt:{debut:"Estreante",firstPoints:"Primeiros pontos",firstCorrect:"Boa previsão",firstExact:"Atirador de elite",tenPredictions:"Prognosticador habitual",tenCorrect:"Especialista em futebol",hundredPoints:"Clube dos 100 pontos"},
+const achievementNotificationNames: Record<LanguageCode, Record<string, string>> = {
+  nl: {
+    debut:"Debutant", firstPoints:"Eerste punten", firstCorrect:"Goed gezien", firstExact:"Scherpschutter",
+    exact5:"Precisieschutter", exact10:"Scoremeester", exact25:"Voorspelkoning",
+    correct10:"Voetbalkenner", correct25:"Kenner", correct50:"Voetbalorakel",
+    predictions10:"Vaste voorspeller", predictions50:"Doorgewinterd", predictions100:"Honderdclub", predictions250:"VoetIQ-veteraan",
+    points100:"100-puntenclub", points250:"250-puntenclub", points500:"500-puntenclub", points1000:"1000-puntenclub",
+    correctStreak3:"In vorm", correctStreak5:"Niet te stoppen", exactStreak3:"Perfecte reeks",
+    competitions3:"Wereldreiziger", competitions8:"Alleskenner", competitionCorrect10:"Competitiespecialist"
+  },
+  en: {
+    debut:"Debutant", firstPoints:"First points", firstCorrect:"Good call", firstExact:"Sharpshooter",
+    exact5:"Precision shooter", exact10:"Score master", exact25:"Prediction king",
+    correct10:"Football expert", correct25:"Expert", correct50:"Football oracle",
+    predictions10:"Regular predictor", predictions50:"Seasoned predictor", predictions100:"Hundred club", predictions250:"VoetIQ veteran",
+    points100:"100-point club", points250:"250-point club", points500:"500-point club", points1000:"1000-point club",
+    correctStreak3:"In form", correctStreak5:"Unstoppable", exactStreak3:"Perfect streak",
+    competitions3:"World traveler", competitions8:"All-round expert", competitionCorrect10:"Competition specialist"
+  },
+  de: {
+    debut:"Debütant", firstPoints:"Erste Punkte", firstCorrect:"Gut gesehen", firstExact:"Scharfschütze",
+    exact5:"Präzisionsschütze", exact10:"Ergebnismeister", exact25:"Tippkönig",
+    correct10:"Fußballkenner", correct25:"Kenner", correct50:"Fußballorakel",
+    predictions10:"Stamm-Tipper", predictions50:"Erfahrener Tipper", predictions100:"Hunderterclub", predictions250:"VoetIQ-Veteran",
+    points100:"100-Punkte-Club", points250:"250-Punkte-Club", points500:"500-Punkte-Club", points1000:"1000-Punkte-Club",
+    correctStreak3:"In Form", correctStreak5:"Nicht zu stoppen", exactStreak3:"Perfekte Serie",
+    competitions3:"Weltenbummler", competitions8:"Alleskönner", competitionCorrect10:"Wettbewerbsspezialist"
+  },
+  es: {
+    debut:"Debutante", firstPoints:"Primeros puntos", firstCorrect:"Buen pronóstico", firstExact:"Francotirador",
+    exact5:"Tirador de precisión", exact10:"Maestro del marcador", exact25:"Rey de los pronósticos",
+    correct10:"Experto en fútbol", correct25:"Conocedor", correct50:"Oráculo del fútbol",
+    predictions10:"Pronosticador habitual", predictions50:"Pronosticador veterano", predictions100:"Club de los cien", predictions250:"Veterano de VoetIQ",
+    points100:"Club de 100 puntos", points250:"Club de 250 puntos", points500:"Club de 500 puntos", points1000:"Club de 1000 puntos",
+    correctStreak3:"En forma", correctStreak5:"Imparable", exactStreak3:"Racha perfecta",
+    competitions3:"Trotamundos", competitions8:"Experto total", competitionCorrect10:"Especialista de competición"
+  },
+  fr: {
+    debut:"Débutant", firstPoints:"Premiers points", firstCorrect:"Bien vu", firstExact:"Tireur d’élite",
+    exact5:"Tireur de précision", exact10:"Maître du score", exact25:"Roi des pronostics",
+    correct10:"Expert football", correct25:"Connaisseur", correct50:"Oracle du football",
+    predictions10:"Pronostiqueur régulier", predictions50:"Pronostiqueur chevronné", predictions100:"Club des cent", predictions250:"Vétéran VoetIQ",
+    points100:"Club des 100 points", points250:"Club des 250 points", points500:"Club des 500 points", points1000:"Club des 1000 points",
+    correctStreak3:"En forme", correctStreak5:"Inarrêtable", exactStreak3:"Série parfaite",
+    competitions3:"Globe-trotteur", competitions8:"Expert complet", competitionCorrect10:"Spécialiste de compétition"
+  },
+  it: {
+    debut:"Debuttante", firstPoints:"Primi punti", firstCorrect:"Ben visto", firstExact:"Cecchino",
+    exact5:"Tiratore di precisione", exact10:"Maestro del risultato", exact25:"Re dei pronostici",
+    correct10:"Esperto di calcio", correct25:"Conoscitore", correct50:"Oracolo del calcio",
+    predictions10:"Pronosticatore abituale", predictions50:"Pronosticatore esperto", predictions100:"Club dei cento", predictions250:"Veterano VoetIQ",
+    points100:"Club dei 100 punti", points250:"Club dei 250 punti", points500:"Club dei 500 punti", points1000:"Club dei 1000 punti",
+    correctStreak3:"In forma", correctStreak5:"Inarrestabile", exactStreak3:"Serie perfetta",
+    competitions3:"Giramondo", competitions8:"Esperto completo", competitionCorrect10:"Specialista di competizione"
+  },
+  pt: {
+    debut:"Estreante", firstPoints:"Primeiros pontos", firstCorrect:"Boa previsão", firstExact:"Atirador de elite",
+    exact5:"Atirador de precisão", exact10:"Mestre do resultado", exact25:"Rei dos prognósticos",
+    correct10:"Especialista em futebol", correct25:"Conhecedor", correct50:"Oráculo do futebol",
+    predictions10:"Prognosticador habitual", predictions50:"Prognosticador experiente", predictions100:"Clube dos cem", predictions250:"Veterano VoetIQ",
+    points100:"Clube dos 100 pontos", points250:"Clube dos 250 pontos", points500:"Clube dos 500 pontos", points1000:"Clube dos 1000 pontos",
+    correctStreak3:"Em forma", correctStreak5:"Imparável", exactStreak3:"Série perfeita",
+    competitions3:"Viajante do mundo", competitions8:"Especialista completo", competitionCorrect10:"Especialista da competição"
+  },
 };
 
 type PromotionCopy = {
@@ -328,7 +381,7 @@ export default function Navbar() {
   async function loadNotifications(userId: string) {
     const { data, error } = await supabase
       .from("predictions")
-      .select("id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at")
+      .select("id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at, competition_code")
       .eq("user_id", userId)
       .order("created_at", { ascending: true });
 
@@ -344,7 +397,15 @@ export default function Navbar() {
     let runningPoints = 0;
     let correctCount = 0;
     let exactCount = 0;
+    let correctStreak = 0;
+    let exactStreak = 0;
     let previousRankIndex = 0;
+    const competitions = new Set<string>();
+    const competitionCorrect: Record<string, number> = {};
+
+    const achievement = (id:string, icon:string, name:string, createdAt:string) => {
+      items.push({ id, icon, text:copy.achievement(name), createdAt, href:"/achievements" });
+    };
 
     rows.forEach((row, index) => {
       const played = row.actual_home_score !== null && row.actual_away_score !== null;
@@ -355,19 +416,38 @@ export default function Navbar() {
         (row.home_score === row.away_score && row.actual_home_score === row.actual_away_score)
       );
 
-      if (index === 0) {
-        items.push({ id:`achievement-debut-${row.id}`, icon:"🌱", text:copy.achievement(names.debut), createdAt:row.created_at, href:"/achievements" });
-      }
-      if (index + 1 === 10) {
-        items.push({ id:`achievement-10pred-${row.id}`, icon:"📋", text:copy.achievement(names.tenPredictions), createdAt:row.created_at, href:"/achievements" });
+      const predictionCount = index + 1;
+      if (predictionCount === 1) achievement(`achievement-debut-${row.id}`,"🌱",names.debut,row.created_at);
+      if (predictionCount === 10) achievement(`achievement-pred10-${row.id}`,"📋",names.predictions10,row.created_at);
+      if (predictionCount === 50) achievement(`achievement-pred50-${row.id}`,"💪",names.predictions50,row.created_at);
+      if (predictionCount === 100) achievement(`achievement-pred100-${row.id}`,"💯",names.predictions100,row.created_at);
+      if (predictionCount === 250) achievement(`achievement-pred250-${row.id}`,"💚",names.predictions250,row.created_at);
+
+      if (row.competition_code) {
+        const before = competitions.size;
+        competitions.add(row.competition_code);
+        if (before < 3 && competitions.size >= 3) achievement(`achievement-comp3-${row.id}`,"🌍",names.competitions3,row.created_at);
+        if (before < 8 && competitions.size >= 8) achievement(`achievement-comp8-${row.id}`,"🌐",names.competitions8,row.created_at);
       }
 
       if (!played) return;
 
       const beforePoints = runningPoints;
       runningPoints += Number(row.points || 0);
-      if (correct) correctCount += 1;
-      if (exact) exactCount += 1;
+
+      if (correct) {
+        correctCount += 1;
+        correctStreak += 1;
+      } else {
+        correctStreak = 0;
+      }
+
+      if (exact) {
+        exactCount += 1;
+        exactStreak += 1;
+      } else {
+        exactStreak = 0;
+      }
 
       if (Number(row.points || 0) > 0) {
         items.push({ id:`points-${row.id}`, icon:"⚽", text:copy.points(Number(row.points || 0), row.match_name), createdAt:row.created_at, href:"/profiel" });
@@ -375,20 +455,33 @@ export default function Navbar() {
       if (exact) {
         items.push({ id:`exact-${row.id}`, icon:"🎯", text:copy.exact(row.match_name), createdAt:row.created_at, href:"/profiel" });
       }
-      if (beforePoints === 0 && runningPoints > 0) {
-        items.push({ id:`achievement-firstpoints-${row.id}`, icon:"🪙", text:copy.achievement(names.firstPoints), createdAt:row.created_at, href:"/achievements" });
-      }
-      if (correctCount === 1 && correct) {
-        items.push({ id:`achievement-correct-${row.id}`, icon:"✅", text:copy.achievement(names.firstCorrect), createdAt:row.created_at, href:"/achievements" });
-      }
-      if (exactCount === 1 && exact) {
-        items.push({ id:`achievement-firstexact-${row.id}`, icon:"🎯", text:copy.achievement(names.firstExact), createdAt:row.created_at, href:"/achievements" });
-      }
-      if (correctCount === 10 && correct) {
-        items.push({ id:`achievement-10correct-${row.id}`, icon:"⚽", text:copy.achievement(names.tenCorrect), createdAt:row.created_at, href:"/achievements" });
-      }
-      if (beforePoints < 100 && runningPoints >= 100) {
-        items.push({ id:`achievement-100points-${row.id}`, icon:"💯", text:copy.achievement(names.hundredPoints), createdAt:row.created_at, href:"/achievements" });
+
+      if (beforePoints === 0 && runningPoints > 0) achievement(`achievement-firstpoints-${row.id}`,"🪙",names.firstPoints,row.created_at);
+      if (correct && correctCount === 1) achievement(`achievement-correct1-${row.id}`,"✅",names.firstCorrect,row.created_at);
+      if (correct && correctCount === 10) achievement(`achievement-correct10-${row.id}`,"⚽",names.correct10,row.created_at);
+      if (correct && correctCount === 25) achievement(`achievement-correct25-${row.id}`,"🧠",names.correct25,row.created_at);
+      if (correct && correctCount === 50) achievement(`achievement-correct50-${row.id}`,"👑",names.correct50,row.created_at);
+
+      if (exact && exactCount === 1) achievement(`achievement-exact1-${row.id}`,"🎯",names.firstExact,row.created_at);
+      if (exact && exactCount === 5) achievement(`achievement-exact5-${row.id}`,"🎯",names.exact5,row.created_at);
+      if (exact && exactCount === 10) achievement(`achievement-exact10-${row.id}`,"🧙",names.exact10,row.created_at);
+      if (exact && exactCount === 25) achievement(`achievement-exact25-${row.id}`,"🔮",names.exact25,row.created_at);
+
+      if (correctStreak === 3) achievement(`achievement-correctstreak3-${row.id}`,"🔥",names.correctStreak3,row.created_at);
+      if (correctStreak === 5) achievement(`achievement-correctstreak5-${row.id}`,"🔥",names.correctStreak5,row.created_at);
+      if (exactStreak === 3) achievement(`achievement-exactstreak3-${row.id}`,"⚡",names.exactStreak3,row.created_at);
+
+      if (beforePoints < 100 && runningPoints >= 100) achievement(`achievement-points100-${row.id}`,"💯",names.points100,row.created_at);
+      if (beforePoints < 250 && runningPoints >= 250) achievement(`achievement-points250-${row.id}`,"🚀",names.points250,row.created_at);
+      if (beforePoints < 500 && runningPoints >= 500) achievement(`achievement-points500-${row.id}`,"💎",names.points500,row.created_at);
+      if (beforePoints < 1000 && runningPoints >= 1000) achievement(`achievement-points1000-${row.id}`,"🏆",names.points1000,row.created_at);
+
+      if (correct && row.competition_code) {
+        const code = row.competition_code;
+        competitionCorrect[code] = (competitionCorrect[code] || 0) + 1;
+        if (competitionCorrect[code] === 10) {
+          achievement(`achievement-compspecialist-${code}-${row.id}`,"🏟️",names.competitionCorrect10,row.created_at);
+        }
       }
 
       const currentRankIndex = getRankIndex(runningPoints);
@@ -408,7 +501,7 @@ export default function Navbar() {
     });
 
     items.sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    setNotifications(items.slice(0, 12));
+    setNotifications(items.slice(0, 20));
 
     const stored = window.localStorage.getItem(`voetiq-read-notifications-${userId}`);
     if (stored) {
