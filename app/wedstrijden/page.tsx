@@ -1354,13 +1354,13 @@ export default function Wedstrijden() {
                         key={match.id}
                         style={{
                           background:
-                            "white",
+                            activeTheme.surfaceSoft,
                           borderRadius:
                             "17px",
                           border:
                             isSaved
-                              ? "1px solid rgba(11,143,77,0.25)"
-                              : "1px solid #edf1ee",
+                              ? `1px solid ${activeTheme.accent}`
+                              : `1px solid ${activeTheme.border}`,
                           overflow:
                             "hidden",
                           boxShadow:
@@ -1378,13 +1378,11 @@ export default function Wedstrijden() {
                             padding:
                               "11px 18px",
                             background:
-                              isSaved
-                                ? "#f3fcf7"
-                                : "#fafcfb",
+                              activeTheme.surface,
                             borderBottom:
-                              "1px solid #edf1ee",
+                              `1px solid ${activeTheme.border}`,
                             color:
-                              "#7d8982",
+                              "rgba(255,255,255,0.58)",
                             fontSize:
                               "12px",
                             fontWeight:
@@ -1508,6 +1506,9 @@ export default function Wedstrijden() {
                                 }
                                 style={{
                                   ...scoreInputStyle,
+                                  background: activeTheme.surface,
+                                  border: `1px solid ${activeTheme.border}`,
+                                  color: "white",
                                   opacity:
                                     locked
                                       ? 0.6
@@ -1549,6 +1550,9 @@ export default function Wedstrijden() {
                                 }
                                 style={{
                                   ...scoreInputStyle,
+                                  background: activeTheme.surface,
+                                  border: `1px solid ${activeTheme.border}`,
+                                  color: "white",
                                   opacity:
                                     locked
                                       ? 0.6
