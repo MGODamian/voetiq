@@ -235,6 +235,7 @@ export default function Navbar() {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [readNotificationIds, setReadNotificationIds] = useState<string[]>([]);
+  const [notificationUserId, setNotificationUserId] = useState("");
 
   const languageRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -262,11 +263,13 @@ export default function Navbar() {
       setMobileOpen(false);
 
       if (session?.user) {
+        setNotificationUserId(session.user.id);
         void checkPromotion(session.user.id);
         void loadNotifications(session.user.id);
       } else {
         setPromotionRankIndex(null);
         setPromotionUserId("");
+        setNotificationUserId("");
         setNotifications([]);
         setReadNotificationIds([]);
       }
@@ -309,12 +312,18 @@ export default function Navbar() {
     setLoggedIn(!!user);
 
     if (user) {
+      setNotificationUserId(user.id);
       await Promise.all([
         checkPromotion(user.id),
         loadNotifications(user.id),
       ]);
     }
   }
+
+  useEffect(() => {
+    if (!notificationUserId) return;
+    void loadNotifications(notificationUserId);
+  }, [language, notificationUserId]);
 
   async function loadNotifications(userId: string) {
     const { data, error } = await supabase
