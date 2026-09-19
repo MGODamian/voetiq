@@ -906,12 +906,14 @@ export default function Navbar() {
             </Link>
 
             {loggedIn && (
-              <Link href="/achievements" onClick={() => setMobileOpen(false)}>
-                🏅 {t.achievements}
-              </Link>
-              <Link href="/challenges" onClick={() => setMobileOpen(false)}>
-                🔥 {t.challenges}
-              </Link>
+              <>
+                <Link href="/achievements" onClick={() => setMobileOpen(false)}>
+                  🏅 {t.achievements}
+                </Link>
+                <Link href="/challenges" onClick={() => setMobileOpen(false)}>
+                  🔥 {t.challenges}
+                </Link>
+              </>
             )}
 
             <Link
