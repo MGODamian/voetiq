@@ -85,8 +85,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Client om te controleren welke gebruiker
-    // bij het access token hoort.
+    // Client waarmee we controleren welke gebruiker
+    // bij het meegestuurde access token hoort.
     const authClient = createClient(
       supabaseUrl,
       supabasePublishableKey,
@@ -107,6 +107,94 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: "Je bent niet ingelogd." },
         { status: 401 }
+      );
+    }
+
+    // Secret/server client.
+    // Deze key komt nooit in de browser terecht.
+    const adminClient = createClient(
+      supabaseUrl,
+      supabaseSecretKey,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
+
+    // Profiel + Premium-status ophalen.
+    const {
+      data: profile,
+      error: profileError,
+    } = await adminClient
+      .from("profiles")
+      .select(
+        "username, is_premium, premium_expires_at"
+      )
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error(profileError);
+
+      return NextResponse.json(
+        {
+          error:
+            "Je profiel kon niet worden geladen.",
+        },
+        { status: 500 }
+      );
+    }
+
+    if (!profile) {
+      return NextResponse.json(
+        {
+          error:
+            "Je profiel kon niet worden gevonden.",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Premium is alleen actief wanneer:
+    // 1. is_premium true is
+    // 2. de verloopdatum nog niet verstreken is
+    //    of er geen verloopdatum is.
+    const premiumExpiresAt =
+      profile.premium_expires_at
+        ? new Date(profile.premium_expires_at)
+        : null;
+
+    const premiumIsActive =
+      profile.is_premium === true &&
+      (
+        premiumExpiresAt === null ||
+        (
+          !Number.isNaN(
+            premiumExpiresAt.getTime()
+          ) &&
+          premiumExpiresAt.getTime() >
+            Date.now()
+        )
+      );
+
+    // Champions League is een VoetIQ Premium-functie.
+    //
+    // Dit wordt SERVER-SIDE gecontroleerd.
+    // Een gratis gebruiker kan de blokkade dus niet
+    // omzeilen door zelf een API-request te sturen.
+    if (
+      competition === "CL" &&
+      !premiumIsActive
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Voor Champions League-voorspellingen heb je VoetIQ Premium nodig.",
+          code: "PREMIUM_REQUIRED",
+        },
+        { status: 403 }
       );
     }
 
@@ -139,6 +227,8 @@ export async function POST(request: Request) {
 
     const match = await footballResponse.json();
 
+    // Controleren of de wedstrijd daadwerkelijk
+    // bij de meegestuurde competitie hoort.
     if (
       !match.competition ||
       match.competition.code !== competition
@@ -176,6 +266,7 @@ export async function POST(request: Request) {
       );
     }
 
+    // Alleen wedstrijden die nog voorspeld mogen worden.
     if (
       match.status !== "SCHEDULED" &&
       match.status !== "TIMED"
@@ -195,43 +286,11 @@ export async function POST(request: Request) {
         ? match.matchday
         : null;
 
-    // Secret/server client.
-    // Deze key komt nooit in de browser terecht.
-    const adminClient = createClient(
-      supabaseUrl,
-      supabaseSecretKey,
-      {
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false,
-        },
-      }
-    );
-
-    const {
-      data: profile,
-      error: profileError,
-    } = await adminClient
-      .from("profiles")
-      .select("username")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profileError) {
-      console.error(profileError);
-
-      return NextResponse.json(
-        {
-          error:
-            "Je profiel kon niet worden geladen.",
-        },
-        { status: 500 }
-      );
-    }
-
     const matchName =
       `${match.homeTeam.name} - ${match.awayTeam.name}`;
 
+    // Controleren of deze gebruiker al een voorspelling
+    // voor deze wedstrijd heeft.
     const {
       data: existingPrediction,
       error: existingError,
@@ -254,7 +313,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Bestaande voorspelling wijzigen.
+    // ------------------------------------------------
+    // BESTAANDE VOORSPELLING WIJZIGEN
+    // ------------------------------------------------
+
     if (existingPrediction) {
       const { error: updateError } =
         await adminClient
@@ -264,10 +326,6 @@ export async function POST(request: Request) {
             away_score: away,
             competition_code: competition,
             matchday: matchday,
-
-            // NIEUW:
-            // Aftraptijd opslaan zodat /api/score
-            // toekomstige wedstrijden kan overslaan.
             kickoff_at: kickoff.toISOString(),
           })
           .eq("id", existingPrediction.id)
@@ -294,7 +352,10 @@ export async function POST(request: Request) {
       });
     }
 
-    // Nieuwe voorspelling opslaan.
+    // ------------------------------------------------
+    // NIEUWE VOORSPELLING OPSLAAN
+    // ------------------------------------------------
+
     const { error: insertError } =
       await adminClient
         .from("predictions")
@@ -302,16 +363,19 @@ export async function POST(request: Request) {
           user_id: user.id,
           user_email: user.email || "",
           player_name:
-            profile?.username || "Speler",
+            profile.username || "Speler",
+
           match_id: matchId,
           match_name: matchName,
+
           home_score: home,
           away_score: away,
+
           competition_code: competition,
           matchday: matchday,
 
-          // NIEUW:
-          // Aftraptijd opslaan.
+          // Aftraptijd opslaan zodat andere serverroutes
+          // toekomstige wedstrijden kunnen herkennen.
           kickoff_at: kickoff.toISOString(),
         });
 
