@@ -1074,7 +1074,7 @@ export default function PoolDetailPage() {
                         alignItems: "center",
                         padding: "10px",
                         borderRadius: "14px",
-                        background: "#f5f8f6",
+                        background: "#0b3523",
                         marginBottom: "15px",
                       }}
                     >
