@@ -559,7 +559,7 @@ export default function PoolDetailPage() {
         <main
           style={{
             minHeight: "100vh",
-            background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
+            background: "radial-gradient(circle at 50% 0%, rgba(15, 122, 70, 0.20) 0%, transparent 32%), linear-gradient(180deg, #00170e 0%, #00110a 48%, #000d08 100%)",
             padding: "60px 20px",
           }}
         >
@@ -584,7 +584,7 @@ export default function PoolDetailPage() {
         <main
           style={{
             minHeight: "100vh",
-            background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
+            background: "radial-gradient(circle at 50% 0%, rgba(15, 122, 70, 0.20) 0%, transparent 32%), linear-gradient(180deg, #00170e 0%, #00110a 48%, #000d08 100%)",
             padding: "60px 20px",
           }}
         >
@@ -641,7 +641,7 @@ export default function PoolDetailPage() {
       <main
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(180deg, #eef4f1 0%, #f8faf9 42%, #edf3ef 100%)",
+          background: "radial-gradient(circle at 50% 0%, rgba(15, 122, 70, 0.20) 0%, transparent 32%), linear-gradient(180deg, #00170e 0%, #00110a 48%, #000d08 100%)",
           padding: "38px 20px 80px",
         }}
       >
@@ -656,7 +656,7 @@ export default function PoolDetailPage() {
             style={{
               border: 0,
               background: "transparent",
-              color: "#08783e",
+              color: "#41e58b",
               fontWeight: 800,
               cursor: "pointer",
               padding: 0,
@@ -831,11 +831,11 @@ export default function PoolDetailPage() {
             <button
               onClick={inviteFriends}
               style={{
-                border: "1px solid #d6dfd9",
+                border: "1px solid rgba(80,190,130,0.25)",
                 borderRadius: "11px",
                 padding: "13px 18px",
-                background: "white",
-                color: "#183427",
+                background: "#0b3523",
+                color: "white",
                 fontWeight: 800,
                 cursor: "pointer",
               }}
@@ -1366,7 +1366,7 @@ export default function PoolDetailPage() {
 
 function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
-    <button onClick={onClick} style={{ border: active ? "1px solid #08783e" : "1px solid #dbe4de", borderRadius: "11px", padding: "11px 16px", background: active ? "#08783e" : "white", color: active ? "white" : "#183427", fontWeight: 900, cursor: "pointer" }}>
+    <button onClick={onClick} style={{ border: active ? "1px solid #21b66f" : "1px solid rgba(80,190,130,0.22)", borderRadius: "11px", padding: "11px 16px", background: active ? "#08783e" : "#0b3523", color: "white", fontWeight: 900, cursor: "pointer" }}>
       {children}
     </button>
   );
@@ -1457,8 +1457,8 @@ function StatCard({
   return (
     <div
       style={{
-        background: "white",
-        border: "1px solid #e3e9e5",
+        background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
+        border: "1px solid rgba(80,190,130,0.20)",
         borderRadius: "16px",
         padding: "18px",
       }}
@@ -1474,7 +1474,7 @@ function StatCard({
 
       <div
         style={{
-          color: "#10251a",
+          color: "white",
           fontSize: "19px",
           fontWeight: 900,
         }}
@@ -1484,7 +1484,7 @@ function StatCard({
 
       <div
         style={{
-          color: "#7a867f",
+          color: "#a9bbb0",
           fontSize: "12px",
           marginTop: "3px",
         }}
