@@ -41,7 +41,7 @@ const achievementNotificationNames: Record<LanguageCode, Record<string, string>>
     predictions10:"Vaste voorspeller", predictions50:"Doorgewinterd", predictions100:"Honderdclub", predictions250:"VoetIQ-veteraan",
     points100:"100-puntenclub", points250:"250-puntenclub", points500:"500-puntenclub", points1000:"1000-puntenclub",
     correctStreak3:"In vorm", correctStreak5:"Niet te stoppen", exactStreak3:"Perfecte reeks",
-    competitions3:"Wereldreiziger", competitions8:"Alleskenner", competitionCorrect10:"Competitiespecialist"
+    competitions3:"Wereldreiziger", competitions8:"Alleskenner", competitionCorrect10:"Competitiespecialist", podium:"Podium", leader:"Koploper"
   },
   en: {
     debut:"Debutant", firstPoints:"First points", firstCorrect:"Good call", firstExact:"Sharpshooter",
@@ -50,7 +50,7 @@ const achievementNotificationNames: Record<LanguageCode, Record<string, string>>
     predictions10:"Regular predictor", predictions50:"Seasoned predictor", predictions100:"Hundred club", predictions250:"VoetIQ veteran",
     points100:"100-point club", points250:"250-point club", points500:"500-point club", points1000:"1000-point club",
     correctStreak3:"In form", correctStreak5:"Unstoppable", exactStreak3:"Perfect streak",
-    competitions3:"World traveler", competitions8:"All-round expert", competitionCorrect10:"Competition specialist"
+    competitions3:"World traveler", competitions8:"All-round expert", competitionCorrect10:"Competition specialist", podium:"Podium", leader:"Leader"
   },
   de: {
     debut:"Debütant", firstPoints:"Erste Punkte", firstCorrect:"Gut gesehen", firstExact:"Scharfschütze",
@@ -59,7 +59,7 @@ const achievementNotificationNames: Record<LanguageCode, Record<string, string>>
     predictions10:"Stamm-Tipper", predictions50:"Erfahrener Tipper", predictions100:"Hunderterclub", predictions250:"VoetIQ-Veteran",
     points100:"100-Punkte-Club", points250:"250-Punkte-Club", points500:"500-Punkte-Club", points1000:"1000-Punkte-Club",
     correctStreak3:"In Form", correctStreak5:"Nicht zu stoppen", exactStreak3:"Perfekte Serie",
-    competitions3:"Weltenbummler", competitions8:"Alleskönner", competitionCorrect10:"Wettbewerbsspezialist"
+    competitions3:"Weltenbummler", competitions8:"Alleskönner", competitionCorrect10:"Wettbewerbsspezialist", podium:"Podium", leader:"Tabellenführer"
   },
   es: {
     debut:"Debutante", firstPoints:"Primeros puntos", firstCorrect:"Buen pronóstico", firstExact:"Francotirador",
@@ -68,7 +68,7 @@ const achievementNotificationNames: Record<LanguageCode, Record<string, string>>
     predictions10:"Pronosticador habitual", predictions50:"Pronosticador veterano", predictions100:"Club de los cien", predictions250:"Veterano de VoetIQ",
     points100:"Club de 100 puntos", points250:"Club de 250 puntos", points500:"Club de 500 puntos", points1000:"Club de 1000 puntos",
     correctStreak3:"En forma", correctStreak5:"Imparable", exactStreak3:"Racha perfecta",
-    competitions3:"Trotamundos", competitions8:"Experto total", competitionCorrect10:"Especialista de competición"
+    competitions3:"Trotamundos", competitions8:"Experto total", competitionCorrect10:"Especialista de competición", podium:"Podio", leader:"Líder"
   },
   fr: {
     debut:"Débutant", firstPoints:"Premiers points", firstCorrect:"Bien vu", firstExact:"Tireur d’élite",
@@ -77,7 +77,7 @@ const achievementNotificationNames: Record<LanguageCode, Record<string, string>>
     predictions10:"Pronostiqueur régulier", predictions50:"Pronostiqueur chevronné", predictions100:"Club des cent", predictions250:"Vétéran VoetIQ",
     points100:"Club des 100 points", points250:"Club des 250 points", points500:"Club des 500 points", points1000:"Club des 1000 points",
     correctStreak3:"En forme", correctStreak5:"Inarrêtable", exactStreak3:"Série parfaite",
-    competitions3:"Globe-trotteur", competitions8:"Expert complet", competitionCorrect10:"Spécialiste de compétition"
+    competitions3:"Globe-trotteur", competitions8:"Expert complet", competitionCorrect10:"Spécialiste de compétition", podium:"Podium", leader:"Leader"
   },
   it: {
     debut:"Debuttante", firstPoints:"Primi punti", firstCorrect:"Ben visto", firstExact:"Cecchino",
@@ -86,7 +86,7 @@ const achievementNotificationNames: Record<LanguageCode, Record<string, string>>
     predictions10:"Pronosticatore abituale", predictions50:"Pronosticatore esperto", predictions100:"Club dei cento", predictions250:"Veterano VoetIQ",
     points100:"Club dei 100 punti", points250:"Club dei 250 punti", points500:"Club dei 500 punti", points1000:"Club dei 1000 punti",
     correctStreak3:"In forma", correctStreak5:"Inarrestabile", exactStreak3:"Serie perfetta",
-    competitions3:"Giramondo", competitions8:"Esperto completo", competitionCorrect10:"Specialista di competizione"
+    competitions3:"Giramondo", competitions8:"Esperto completo", competitionCorrect10:"Specialista di competizione", podium:"Podio", leader:"Capolista"
   },
   pt: {
     debut:"Estreante", firstPoints:"Primeiros pontos", firstCorrect:"Boa previsão", firstExact:"Atirador de elite",
@@ -95,7 +95,7 @@ const achievementNotificationNames: Record<LanguageCode, Record<string, string>>
     predictions10:"Prognosticador habitual", predictions50:"Prognosticador experiente", predictions100:"Clube dos cem", predictions250:"Veterano VoetIQ",
     points100:"Clube dos 100 pontos", points250:"Clube dos 250 pontos", points500:"Clube dos 500 pontos", points1000:"Clube dos 1000 pontos",
     correctStreak3:"Em forma", correctStreak5:"Imparável", exactStreak3:"Série perfeita",
-    competitions3:"Viajante do mundo", competitions8:"Especialista completo", competitionCorrect10:"Especialista da competição"
+    competitions3:"Viajante do mundo", competitions8:"Especialista completo", competitionCorrect10:"Especialista da competição", podium:"Pódio", leader:"Líder"
   },
 };
 
@@ -319,6 +319,7 @@ export default function Navbar() {
         setNotificationUserId(session.user.id);
         void checkPromotion(session.user.id);
         void loadNotifications(session.user.id);
+        void checkLeaderboardAchievements(session.user.id);
       } else {
         setPromotionRankIndex(null);
         setPromotionUserId("");
@@ -369,6 +370,7 @@ export default function Navbar() {
       await Promise.all([
         checkPromotion(user.id),
         loadNotifications(user.id),
+        checkLeaderboardAchievements(user.id),
       ]);
     }
   }
@@ -511,6 +513,91 @@ export default function Navbar() {
       } catch {
         setReadNotificationIds([]);
       }
+    }
+  }
+
+  async function checkLeaderboardAchievements(userId: string) {
+    const [{ data: leaderboard, error: leaderboardError }, { data: profile, error: profileError }] =
+      await Promise.all([
+        supabase.rpc("get_leaderboard"),
+        supabase
+          .from("profiles")
+          .select("podium_achievement_unlocked, leader_achievement_unlocked")
+          .eq("id", userId)
+          .maybeSingle(),
+      ]);
+
+    if (leaderboardError) {
+      console.error("Kon ranglijst-achievements niet controleren:", leaderboardError);
+      return;
+    }
+
+    if (profileError) {
+      console.error("Kon achievementstatus niet laden:", profileError);
+      return;
+    }
+
+    const { data: ownProfile } = await supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", userId)
+      .maybeSingle();
+
+    const username = ownProfile?.username;
+    if (!username) return;
+
+    const rows = Array.isArray(leaderboard) ? leaderboard : [];
+    const rankIndex = rows.findIndex((row) => row.username === username);
+    if (rankIndex < 0) return;
+
+    const rank = rankIndex + 1;
+    const now = new Date().toISOString();
+    const copy = notificationCopy[language];
+    const names = achievementNotificationNames[language];
+    const additions: NotificationItem[] = [];
+    const updates: {
+      podium_achievement_unlocked?: boolean;
+      leader_achievement_unlocked?: boolean;
+    } = {};
+
+    if (rank <= 3 && !profile?.podium_achievement_unlocked) {
+      additions.push({
+        id: "achievement-podium",
+        icon: "🥉",
+        text: copy.achievement(names.podium),
+        createdAt: now,
+        href: "/achievements",
+      });
+      updates.podium_achievement_unlocked = true;
+    }
+
+    if (rank === 1 && !profile?.leader_achievement_unlocked) {
+      additions.push({
+        id: "achievement-leader",
+        icon: "🥇",
+        text: copy.achievement(names.leader),
+        createdAt: now,
+        href: "/achievements",
+      });
+      updates.leader_achievement_unlocked = true;
+    }
+
+    if (additions.length === 0) return;
+
+    setNotifications((current) => {
+      const merged = [...additions, ...current.filter(
+        (item) => !additions.some((addition) => addition.id === item.id)
+      )];
+      return merged.slice(0, 20);
+    });
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", userId);
+
+    if (updateError) {
+      console.error("Kon ranglijst-achievement niet opslaan:", updateError);
     }
   }
 
