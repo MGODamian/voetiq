@@ -69,7 +69,9 @@ type TranslationKey =
   | "unlockPremium"
   | "premiumOnly"
   | "premiumGateTitle"
-  | "premiumGateDescription";
+  | "premiumGateDescription"
+  | "back"
+  | "matchCenter";
 
 const localeByLanguage: Record<LanguageCode, string> = {
   nl: "nl-NL",
@@ -115,6 +117,8 @@ const translations: Record<
     premiumOnly: "Alleen met Premium",
     premiumGateTitle: "Champions League is onderdeel van VoetIQ Premium",
     premiumGateDescription: "Word Premium om Champions League-wedstrijden te bekijken en te voorspellen.",
+    back: "Terug",
+    matchCenter: "VOETIQ MATCH CENTER",
   },
   en: {
     matches: "Matches",
@@ -145,6 +149,8 @@ const translations: Record<
     premiumOnly: "Premium only",
     premiumGateTitle: "Champions League is part of VoetIQ Premium",
     premiumGateDescription: "Go Premium to view and predict Champions League matches.",
+    back: "Back",
+    matchCenter: "VOETIQ MATCH CENTER",
   },
   de: {
     matches: "Spiele",
@@ -175,6 +181,8 @@ const translations: Record<
     premiumOnly: "Nur mit Premium",
     premiumGateTitle: "Die Champions League ist Teil von VoetIQ Premium",
     premiumGateDescription: "Hol dir Premium, um Champions-League-Spiele zu sehen und zu tippen.",
+    back: "Zurück",
+    matchCenter: "VOETIQ MATCH CENTER",
   },
   es: {
     matches: "Partidos",
@@ -205,6 +213,8 @@ const translations: Record<
     premiumOnly: "Solo con Premium",
     premiumGateTitle: "La Champions League forma parte de VoetIQ Premium",
     premiumGateDescription: "Hazte Premium para ver y pronosticar los partidos de la Champions League.",
+    back: "Volver",
+    matchCenter: "CENTRO DE PARTIDOS VOETIQ",
   },
   fr: {
     matches: "Matchs",
@@ -237,6 +247,8 @@ const translations: Record<
     premiumOnly: "Premium uniquement",
     premiumGateTitle: "La Ligue des champions fait partie de VoetIQ Premium",
     premiumGateDescription: "Passez à Premium pour voir et pronostiquer les matchs de Ligue des champions.",
+    back: "Retour",
+    matchCenter: "CENTRE DES MATCHS VOETIQ",
   },
   it: {
     matches: "Partite",
@@ -268,6 +280,8 @@ const translations: Record<
     premiumOnly: "Solo Premium",
     premiumGateTitle: "La Champions League fa parte di VoetIQ Premium",
     premiumGateDescription: "Passa a Premium per vedere e pronosticare le partite di Champions League.",
+    back: "Indietro",
+    matchCenter: "CENTRO PARTITE VOETIQ",
   },
   pt: {
     matches: "Jogos",
@@ -298,6 +312,8 @@ const translations: Record<
     premiumOnly: "Apenas Premium",
     premiumGateTitle: "A Champions League faz parte do VoetIQ Premium",
     premiumGateDescription: "Adere ao Premium para veres e preveres os jogos da Champions League.",
+    back: "Voltar",
+    matchCenter: "CENTRO DE JOGOS VOETIQ",
   },
 };
 
@@ -960,7 +976,7 @@ export default function Wedstrijden() {
               cursor: "pointer",
             }}
           >
-            ← Terug
+            ← {t("back")}
           </button>
 
           <br />
@@ -987,7 +1003,7 @@ export default function Wedstrijden() {
                 "15px",
             }}
           >
-            ⚽ VOETIQ MATCH CENTER
+            ⚽ {t("matchCenter")}
           </div>
 
           <h1
@@ -1563,7 +1579,7 @@ export default function Wedstrijden() {
                         >
                           <span>
                             {date.toLocaleDateString(
-                              "nl-NL",
+                              locale,
                               {
                                 weekday:
                                   "short",
