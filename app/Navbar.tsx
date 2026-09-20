@@ -764,14 +764,6 @@ export default function Navbar() {
           <nav className="desktop-nav">
             <NavLink href="/" label={t.home} active={isActive("/")} />
 
-            {loggedIn && (
-              <NavLink
-                href="/dashboard"
-                label={`📊 ${t.dashboard}`}
-                active={isActive("/dashboard")}
-              />
-            )}
-
             <NavLink
               href="/wedstrijden"
               label={t.matches}
@@ -819,43 +811,40 @@ export default function Navbar() {
               </div>
             )}
 
-            <div className="nav-dropdown" ref={moreRef}>
-              <button
-                type="button"
-                className={
-                  (loggedIn && (isActive("/mijn-voorspellingen") || isActive("/premium"))) ||
-                  isActive("/hoe-werkt-het")
-                    ? "nav-dropdown-button active"
-                    : "nav-dropdown-button"
-                }
-                onClick={() => {
-                  setMoreOpen((current) => !current);
-                  setProgressOpen(false);
-                }}
-                aria-expanded={moreOpen}
-              >
-                {t.more} <span>⌄</span>
-              </button>
+            {loggedIn && (
+              <div className="nav-dropdown" ref={moreRef}>
+                <button
+                  type="button"
+                  className={
+                    isActive("/dashboard") ||
+                    isActive("/mijn-voorspellingen") ||
+                    isActive("/premium")
+                      ? "nav-dropdown-button active"
+                      : "nav-dropdown-button"
+                  }
+                  onClick={() => {
+                    setMoreOpen((current) => !current);
+                    setProgressOpen(false);
+                  }}
+                  aria-expanded={moreOpen}
+                >
+                  {t.more} <span>⌄</span>
+                </button>
 
-              {moreOpen && (
-                <div className="nav-dropdown-menu nav-dropdown-menu-right">
-                  {loggedIn && (
+                {moreOpen && (
+                  <div className="nav-dropdown-menu nav-dropdown-menu-right">
+                    <Link href="/dashboard" onClick={() => setMoreOpen(false)}>
+                      <span>📊</span>
+                      <div><strong>{t.dashboard}</strong></div>
+                    </Link>
                     <Link href="/mijn-voorspellingen" onClick={() => setMoreOpen(false)}>
                       <span>⚽</span>
                       <div><strong>{t.predictions}</strong></div>
                     </Link>
-                  )}
-                  {loggedIn && (
                     <Link href="/premium" onClick={() => setMoreOpen(false)}>
                       <span>👑</span>
                       <div><strong>{t.premium}</strong></div>
                     </Link>
-                  )}
-                  <Link href="/hoe-werkt-het" onClick={() => setMoreOpen(false)}>
-                    <span>❓</span>
-                    <div><strong>{t.howItWorks}</strong></div>
-                  </Link>
-                  {loggedIn && (
                     <button
                       type="button"
                       className="dropdown-logout"
@@ -864,10 +853,16 @@ export default function Navbar() {
                       <span>↪</span>
                       <div><strong>{t.logout}</strong></div>
                     </button>
-                  )}
-                </div>
-              )}
-            </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <NavLink
+              href="/hoe-werkt-het"
+              label={t.howItWorks}
+              active={isActive("/hoe-werkt-het")}
+            />
           </nav>
 
           <div className="desktop-account">
@@ -917,7 +912,7 @@ export default function Navbar() {
                 </Link>
               )}
 
-              {loggedIn ? (
+              {loggedIn && (
                 <div className="notification-picker" ref={notificationRef}>
                   <button
                     type="button"
@@ -965,10 +960,6 @@ export default function Navbar() {
                     </div>
                   )}
                 </div>
-              ) : (
-                <Link href="/registreren" className="register-button">
-                  {t.playFree}
-                </Link>
               )}
             </div>
           </div>
@@ -1207,7 +1198,7 @@ export default function Navbar() {
           max-width: 1320px;
           min-height: 86px;
           margin: 0 auto;
-          padding: 0 24px;
+          padding: 0 190px 0 24px;
           display: flex;
           align-items: center;
           gap: 24px;
@@ -1270,23 +1261,24 @@ export default function Navbar() {
         }
 
         .desktop-account {
+          position: absolute;
+          top: 0;
+          right: 22px;
+          width: 142px;
+          height: 86px;
           display: flex;
-          align-items: stretch;
+          align-items: center;
           justify-content: flex-end;
-          flex: 0 0 142px;
-          align-self: stretch;
           white-space: nowrap;
-          border-left: 1px solid rgba(255,255,255,0.07);
-          padding-left: 14px;
         }
 
         .account-stack {
           width: 100%;
-          display: grid;
-          grid-template-rows: repeat(3, minmax(0, 1fr));
-          align-items: center;
-          padding: 6px 0;
-          gap: 2px;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          justify-content: center;
+          gap: 7px;
         }
 
         .account-stack > * {
@@ -1384,7 +1376,7 @@ export default function Navbar() {
         .notification-button {
           position: relative;
           width: 100%;
-          height: 24px;
+          height: 25px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1628,6 +1620,7 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           justify-content: center;
+          min-height: 25px;
           color: #e9f5ee;
           text-decoration: none;
           padding: 3px 6px;
@@ -1814,6 +1807,8 @@ export default function Navbar() {
           .voetiq-navbar {
             justify-content: space-between;
             min-height: 68px;
+            padding-left: 24px;
+            padding-right: 24px;
           }
 
           .mobile-menu-button {
