@@ -16,6 +16,19 @@ type Translation = {
   step2Text: string;
   step3Title: string;
   step3Text: string;
+  journeyEyebrow: string;
+  journeyTitle: string;
+  journeyText: string;
+  poolsTitle: string;
+  poolsText: string;
+  challengesTitle: string;
+  challengesText: string;
+  achievementsTitle: string;
+  achievementsText: string;
+  ranksTitle: string;
+  ranksText: string;
+  dashboardTitle: string;
+  dashboardText: string;
   scoringEyebrow: string;
   scoringTitle: string;
   formula: string;
@@ -61,6 +74,19 @@ const ui: Record<LanguageCode, Translation> = {
     step2Text: "Hoe dichter je voorspelling bij de echte uitslag zit, hoe meer punten je verdient.",
     step3Title: "Klim in het klassement",
     step3Text: "Vergelijk je punten met andere spelers en probeer bovenaan het klassement te eindigen.",
+    journeyEyebrow: "MEER DAN ALLEEN VOORSPELLEN",
+    journeyTitle: "Bouw je eigen VoetIQ-carrière.",
+    journeyText: "Je voorspellingen vormen de basis. Daarna kun je jezelf uitdagen, samen met vrienden spelen en steeds verder groeien.",
+    poolsTitle: "Speel in poules",
+    poolsText: "Maak een poule of sluit je aan bij vrienden en vergelijk jullie prestaties.",
+    challengesTitle: "Voltooi challenges",
+    challengesText: "Werk aan dagelijkse en wekelijkse uitdagingen terwijl je voorspelt.",
+    achievementsTitle: "Verdien achievements",
+    achievementsText: "Ontgrendel mijlpalen door te voorspellen, punten te pakken en goede reeksen neer te zetten.",
+    ranksTitle: "Stijg in voetbalrang",
+    ranksText: "Je totaalpunten bepalen je voetbalrang. Hoe meer punten, hoe verder je carrière groeit.",
+    dashboardTitle: "Alles op je dashboard",
+    dashboardText: "Bekijk je punten, rang, voorspellingen, poules, challenges en achievements overzichtelijk op één plek.",
     scoringEyebrow: "VOETIQ PUNTENSYSTEEM",
     scoringTitle: "Niet iedere uitslag is evenveel waard.",
     formula: "10 + (doelpunten × 2)",
@@ -104,6 +130,19 @@ const ui: Record<LanguageCode, Translation> = {
     step2Text: "The closer your prediction is to the actual score, the more points you earn.",
     step3Title: "Climb the leaderboard",
     step3Text: "Compare your points with other players and try to finish at the top of the leaderboard.",
+    journeyEyebrow: "MORE THAN PREDICTIONS",
+    journeyTitle: "Build your own VoetIQ career.",
+    journeyText: "Your predictions are the foundation. From there you can challenge yourself, play with friends and keep progressing.",
+    poolsTitle: "Play in pools",
+    poolsText: "Create a pool or join your friends and compare your performances.",
+    challengesTitle: "Complete challenges",
+    challengesText: "Work on daily and weekly challenges while making predictions.",
+    achievementsTitle: "Earn achievements",
+    achievementsText: "Unlock milestones by predicting, earning points and building strong streaks.",
+    ranksTitle: "Climb football ranks",
+    ranksText: "Your total points determine your football rank. The more points you earn, the further your career grows.",
+    dashboardTitle: "Everything on your dashboard",
+    dashboardText: "See your points, rank, predictions, pools, challenges and achievements clearly in one place.",
     scoringEyebrow: "VOETIQ SCORING SYSTEM",
     scoringTitle: "Not every score is worth the same.",
     formula: "10 + (goals × 2)",
@@ -147,6 +186,19 @@ const ui: Record<LanguageCode, Translation> = {
     step2Text: "Je näher dein Tipp am tatsächlichen Ergebnis liegt, desto mehr Punkte erhältst du.",
     step3Title: "In der Rangliste aufsteigen",
     step3Text: "Vergleiche deine Punkte mit anderen Spielern und versuche, die Rangliste anzuführen.",
+    journeyEyebrow: "MEHR ALS NUR TIPPEN",
+    journeyTitle: "Baue deine eigene VoetIQ-Karriere auf.",
+    journeyText: "Deine Tipps sind die Grundlage. Danach kannst du dich Herausforderungen stellen, mit Freunden spielen und immer weiter aufsteigen.",
+    poolsTitle: "In Tipprunden spielen",
+    poolsText: "Erstelle eine Tipprunde oder tritt deinen Freunden bei und vergleicht eure Leistungen.",
+    challengesTitle: "Challenges abschließen",
+    challengesText: "Erfülle tägliche und wöchentliche Herausforderungen während du tippst.",
+    achievementsTitle: "Erfolge freischalten",
+    achievementsText: "Schalte Meilensteine durch Tipps, Punkte und starke Serien frei.",
+    ranksTitle: "Im Fußballrang aufsteigen",
+    ranksText: "Deine Gesamtpunkte bestimmen deinen Fußballrang. Je mehr Punkte du sammelst, desto weiter wächst deine Karriere.",
+    dashboardTitle: "Alles auf deinem Dashboard",
+    dashboardText: "Sieh Punkte, Rang, Tipps, Tipprunden, Challenges und Erfolge übersichtlich an einem Ort.",
     scoringEyebrow: "VOETIQ-PUNKTESYSTEM",
     scoringTitle: "Nicht jedes Ergebnis ist gleich viel wert.",
     formula: "10 + (Tore × 2)",
@@ -190,6 +242,19 @@ const ui: Record<LanguageCode, Translation> = {
     step2Text: "Cuanto más se acerque tu pronóstico al resultado real, más puntos ganarás.",
     step3Title: "Sube en la clasificación",
     step3Text: "Compara tus puntos con otros jugadores e intenta terminar en lo más alto de la clasificación.",
+    journeyEyebrow: "MÁS QUE PRONÓSTICOS",
+    journeyTitle: "Construye tu propia carrera en VoetIQ.",
+    journeyText: "Tus pronósticos son la base. Después puedes superar desafíos, jugar con amigos y seguir progresando.",
+    poolsTitle: "Juega en ligas",
+    poolsText: "Crea una liga o únete a tus amigos y comparad vuestro rendimiento.",
+    challengesTitle: "Completa desafíos",
+    challengesText: "Supera desafíos diarios y semanales mientras haces pronósticos.",
+    achievementsTitle: "Consigue logros",
+    achievementsText: "Desbloquea hitos haciendo pronósticos, consiguiendo puntos y creando buenas rachas.",
+    ranksTitle: "Sube de rango futbolístico",
+    ranksText: "Tus puntos totales determinan tu rango. Cuantos más puntos consigas, más avanzará tu carrera.",
+    dashboardTitle: "Todo en tu panel",
+    dashboardText: "Consulta tus puntos, rango, pronósticos, ligas, desafíos y logros claramente en un solo lugar.",
     scoringEyebrow: "SISTEMA DE PUNTOS DE VOETIQ",
     scoringTitle: "No todos los resultados valen lo mismo.",
     formula: "10 + (goles × 2)",
@@ -233,6 +298,19 @@ const ui: Record<LanguageCode, Translation> = {
     step2Text: "Plus votre pronostic est proche du score réel, plus vous gagnez de points.",
     step3Title: "Grimpez au classement",
     step3Text: "Comparez vos points à ceux des autres joueurs et essayez de terminer en tête du classement.",
+    journeyEyebrow: "PLUS QUE DES PRONOSTICS",
+    journeyTitle: "Construisez votre propre carrière VoetIQ.",
+    journeyText: "Vos pronostics sont la base. Ensuite, relevez des défis, jouez avec vos amis et continuez à progresser.",
+    poolsTitle: "Jouez dans des poules",
+    poolsText: "Créez une poule ou rejoignez vos amis et comparez vos performances.",
+    challengesTitle: "Relevez des challenges",
+    challengesText: "Progressez dans des défis quotidiens et hebdomadaires en faisant vos pronostics.",
+    achievementsTitle: "Débloquez des succès",
+    achievementsText: "Atteignez des étapes grâce à vos pronostics, vos points et vos bonnes séries.",
+    ranksTitle: "Montez de rang",
+    ranksText: "Votre total de points détermine votre rang football. Plus vous gagnez de points, plus votre carrière progresse.",
+    dashboardTitle: "Tout sur votre tableau de bord",
+    dashboardText: "Retrouvez clairement vos points, rang, pronostics, poules, challenges et succès au même endroit.",
     scoringEyebrow: "SYSTÈME DE POINTS VOETIQ",
     scoringTitle: "Tous les scores n'ont pas la même valeur.",
     formula: "10 + (buts × 2)",
@@ -276,6 +354,19 @@ const ui: Record<LanguageCode, Translation> = {
     step2Text: "Più il tuo pronostico si avvicina al risultato reale, più punti guadagni.",
     step3Title: "Sali in classifica",
     step3Text: "Confronta i tuoi punti con quelli degli altri giocatori e prova ad arrivare in cima alla classifica.",
+    journeyEyebrow: "PIÙ DI SEMPLICI PRONOSTICI",
+    journeyTitle: "Costruisci la tua carriera VoetIQ.",
+    journeyText: "I pronostici sono la base. Poi puoi affrontare sfide, giocare con gli amici e continuare a crescere.",
+    poolsTitle: "Gioca nei gironi",
+    poolsText: "Crea un girone o unisciti ai tuoi amici e confrontate le vostre prestazioni.",
+    challengesTitle: "Completa le sfide",
+    challengesText: "Affronta sfide giornaliere e settimanali mentre fai i tuoi pronostici.",
+    achievementsTitle: "Ottieni obiettivi",
+    achievementsText: "Sblocca traguardi facendo pronostici, guadagnando punti e creando serie positive.",
+    ranksTitle: "Sali di rango calcistico",
+    ranksText: "I tuoi punti totali determinano il rango calcistico. Più punti guadagni, più cresce la tua carriera.",
+    dashboardTitle: "Tutto nella dashboard",
+    dashboardText: "Visualizza punti, rango, pronostici, gironi, sfide e obiettivi in modo chiaro in un unico posto.",
     scoringEyebrow: "SISTEMA DI PUNTEGGIO VOETIQ",
     scoringTitle: "Non tutti i risultati valgono allo stesso modo.",
     formula: "10 + (gol × 2)",
@@ -319,6 +410,19 @@ const ui: Record<LanguageCode, Translation> = {
     step2Text: "Quanto mais próxima a tua previsão estiver do resultado real, mais pontos ganhas.",
     step3Title: "Sobe na classificação",
     step3Text: "Compara os teus pontos com os de outros jogadores e tenta chegar ao topo da classificação.",
+    journeyEyebrow: "MAIS DO QUE PREVISÕES",
+    journeyTitle: "Constrói a tua própria carreira VoetIQ.",
+    journeyText: "As tuas previsões são a base. Depois podes enfrentar desafios, jogar com amigos e continuar a evoluir.",
+    poolsTitle: "Joga em grupos",
+    poolsText: "Cria um grupo ou junta-te aos teus amigos e compara os vossos desempenhos.",
+    challengesTitle: "Completa desafios",
+    challengesText: "Avança em desafios diários e semanais enquanto fazes previsões.",
+    achievementsTitle: "Conquista achievements",
+    achievementsText: "Desbloqueia marcos através de previsões, pontos e boas sequências.",
+    ranksTitle: "Sobe de nível futebolístico",
+    ranksText: "Os teus pontos totais determinam o teu nível. Quanto mais pontos ganhares, mais a tua carreira evolui.",
+    dashboardTitle: "Tudo no teu dashboard",
+    dashboardText: "Vê pontos, nível, previsões, grupos, desafios e achievements de forma clara num só lugar.",
     scoringEyebrow: "SISTEMA DE PONTOS VOETIQ",
     scoringTitle: "Nem todos os resultados valem o mesmo.",
     formula: "10 + (golos × 2)",
@@ -417,6 +521,22 @@ export default function HoeWerktHetPage() {
             <div className="icon">🏆</div>
             <h2>{t.step3Title}</h2>
             <p>{t.step3Text}</p>
+          </div>
+        </section>
+
+        <section className="journey">
+          <div className="journeyHeader">
+            <span className="eyebrow">{t.journeyEyebrow}</span>
+            <h2>{t.journeyTitle}</h2>
+            <p>{t.journeyText}</p>
+          </div>
+
+          <div className="journeyGrid">
+            <div className="journeyCard"><span>👥</span><div><h3>{t.poolsTitle}</h3><p>{t.poolsText}</p></div></div>
+            <div className="journeyCard"><span>🎯</span><div><h3>{t.challengesTitle}</h3><p>{t.challengesText}</p></div></div>
+            <div className="journeyCard"><span>🏅</span><div><h3>{t.achievementsTitle}</h3><p>{t.achievementsText}</p></div></div>
+            <div className="journeyCard"><span>⭐</span><div><h3>{t.ranksTitle}</h3><p>{t.ranksText}</p></div></div>
+            <div className="journeyCard wide"><span>📊</span><div><h3>{t.dashboardTitle}</h3><p>{t.dashboardText}</p></div></div>
           </div>
         </section>
 
@@ -581,6 +701,7 @@ export default function HoeWerktHetPage() {
 
         .hero,
         .steps,
+        .journey,
         .scoring,
         .distance,
         .drawExample,
@@ -663,6 +784,64 @@ export default function HoeWerktHetPage() {
         .why p {
           color: #9eafa8;
           line-height: 1.7;
+        }
+
+        .journey {
+          margin-bottom: 80px;
+        }
+
+        .journeyHeader {
+          max-width: 760px;
+          margin-bottom: 24px;
+        }
+
+        .journeyHeader h2 {
+          margin: 10px 0;
+          font-size: clamp(28px, 4vw, 42px);
+          letter-spacing: -1px;
+        }
+
+        .journeyHeader p {
+          color: #9eafa8;
+          line-height: 1.7;
+          margin: 0;
+        }
+
+        .journeyGrid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 14px;
+        }
+
+        .journeyCard {
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+          padding: 22px;
+          border: 1px solid #1d352c;
+          background: #0b1c16;
+          border-radius: 18px;
+        }
+
+        .journeyCard.wide {
+          grid-column: 1 / -1;
+        }
+
+        .journeyCard > span {
+          font-size: 25px;
+          line-height: 1;
+        }
+
+        .journeyCard h3 {
+          margin: 0 0 7px;
+          font-size: 16px;
+        }
+
+        .journeyCard p {
+          margin: 0;
+          color: #84978f;
+          line-height: 1.55;
+          font-size: 13px;
         }
 
         .scoring {
@@ -917,7 +1096,8 @@ export default function HoeWerktHetPage() {
         @media (max-width: 900px) {
           .steps,
           .distance,
-          .drawExample {
+          .drawExample,
+          .journeyGrid {
             grid-template-columns: 1fr;
           }
 
