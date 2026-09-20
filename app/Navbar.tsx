@@ -1198,7 +1198,7 @@ export default function Navbar() {
           max-width: 1320px;
           min-height: 86px;
           margin: 0 auto;
-          padding: 0 190px 0 24px;
+          padding: 0 330px 0 24px;
           display: flex;
           align-items: center;
           gap: 24px;
@@ -1264,7 +1264,6 @@ export default function Navbar() {
           position: absolute;
           top: 0;
           right: 22px;
-          width: 142px;
           height: 86px;
           display: flex;
           align-items: center;
@@ -1273,16 +1272,15 @@ export default function Navbar() {
         }
 
         .account-stack {
-          width: 100%;
           display: flex;
-          flex-direction: column;
-          align-items: stretch;
-          justify-content: center;
-          gap: 7px;
+          flex-direction: row;
+          align-items: center;
+          justify-content: flex-end;
+          gap: 8px;
         }
 
         .account-stack > * {
-          width: 100%;
+          width: auto;
           min-width: 0;
         }
 
@@ -1375,8 +1373,9 @@ export default function Navbar() {
 
         .notification-button {
           position: relative;
-          width: 100%;
-          height: 25px;
+          width: auto;
+          min-width: 36px;
+          height: 34px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -1620,7 +1619,9 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 25px;
+          min-height: 34px;
+          padding-left: 12px;
+          padding-right: 12px;
           color: #e9f5ee;
           text-decoration: none;
           padding: 3px 6px;
