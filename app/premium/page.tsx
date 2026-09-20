@@ -16,11 +16,11 @@ const copy = {
     price: "€2,99",
     perMonth: "per maand",
     cancel: "Maandelijks opzegbaar",
-    button: "Word Premium",
+    button: "Binnenkort beschikbaar",
     activeButton: "👑 Jij hebt VoetIQ Premium",
     checking: "Premium-status controleren...",
     activeText: "Je Premium-abonnement is actief.",
-    soon: "Betalen koppelen we in de volgende stap.",
+    soon: "VoetIQ Premium is binnenkort beschikbaar.",
     included: "Inbegrepen bij Premium",
     features: [
       "Champions League voorspellen",
@@ -45,11 +45,11 @@ const copy = {
     price: "€2.99",
     perMonth: "per month",
     cancel: "Cancel monthly",
-    button: "Get Premium",
+    button: "Coming soon",
     activeButton: "👑 You have VoetIQ Premium",
     checking: "Checking Premium status...",
     activeText: "Your Premium subscription is active.",
-    soon: "Payments will be connected in the next step.",
+    soon: "VoetIQ Premium is coming soon.",
     included: "Included with Premium",
     features: [
       "Predict Champions League matches",
@@ -74,11 +74,11 @@ const copy = {
     price: "€2,99",
     perMonth: "pro Monat",
     cancel: "Monatlich kündbar",
-    button: "Premium werden",
+    button: "Demnächst verfügbar",
     activeButton: "👑 Du hast VoetIQ Premium",
     checking: "Premium-Status wird geprüft...",
     activeText: "Dein Premium-Abonnement ist aktiv.",
-    soon: "Die Zahlung verbinden wir im nächsten Schritt.",
+    soon: "VoetIQ Premium ist demnächst verfügbar.",
     included: "In Premium enthalten",
     features: [
       "Champions League tippen",
@@ -103,11 +103,11 @@ const copy = {
     price: "€2,99",
     perMonth: "al mes",
     cancel: "Cancela mensualmente",
-    button: "Hazte Premium",
+    button: "Próximamente",
     activeButton: "👑 Tienes VoetIQ Premium",
     checking: "Comprobando estado Premium...",
     activeText: "Tu suscripción Premium está activa.",
-    soon: "Conectaremos los pagos en el siguiente paso.",
+    soon: "VoetIQ Premium estará disponible próximamente.",
     included: "Incluido con Premium",
     features: [
       "Pronósticos de Champions League",
@@ -132,11 +132,11 @@ const copy = {
     price: "2,99 €",
     perMonth: "par mois",
     cancel: "Résiliable chaque mois",
-    button: "Passer à Premium",
+    button: "Bientôt disponible",
     activeButton: "👑 Tu as VoetIQ Premium",
     checking: "Vérification du statut Premium...",
     activeText: "Ton abonnement Premium est actif.",
-    soon: "Nous connecterons le paiement à l’étape suivante.",
+    soon: "VoetIQ Premium sera bientôt disponible.",
     included: "Inclus avec Premium",
     features: [
       "Pronostiquer la Champions League",
@@ -161,11 +161,11 @@ const copy = {
     price: "€2,99",
     perMonth: "al mese",
     cancel: "Annullabile mensilmente",
-    button: "Passa a Premium",
+    button: "Prossimamente",
     activeButton: "👑 Hai VoetIQ Premium",
     checking: "Controllo dello stato Premium...",
     activeText: "Il tuo abbonamento Premium è attivo.",
-    soon: "Collegheremo i pagamenti nel prossimo passaggio.",
+    soon: "VoetIQ Premium sarà disponibile prossimamente.",
     included: "Incluso con Premium",
     features: [
       "Pronostici Champions League",
@@ -190,11 +190,11 @@ const copy = {
     price: "€2,99",
     perMonth: "por mês",
     cancel: "Cancelamento mensal",
-    button: "Tornar-me Premium",
+    button: "Em breve",
     activeButton: "👑 Tens VoetIQ Premium",
     checking: "A verificar o estado Premium...",
     activeText: "A tua subscrição Premium está ativa.",
-    soon: "Vamos ligar os pagamentos no próximo passo.",
+    soon: "O VoetIQ Premium estará disponível em breve.",
     included: "Incluído no Premium",
     features: [
       "Prever jogos da Champions League",
@@ -336,7 +336,7 @@ export default function PremiumPage() {
                 {t.activeButton}
               </button>
             ) : (
-              <button type="button" className="premium-button">
+              <button type="button" className="premium-button coming-soon-button" disabled>
                 {t.button}
               </button>
             )}
@@ -493,6 +493,11 @@ export default function PremiumPage() {
           font-size: 14px;
           font-weight: 950;
           cursor: pointer;
+        }
+
+        .coming-soon-button {
+          opacity: 0.72;
+          cursor: not-allowed;
         }
 
         .active-button {
