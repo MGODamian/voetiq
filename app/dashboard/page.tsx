@@ -107,13 +107,15 @@ export default function DashboardPage() {
       if (predictionResult.error) throw predictionResult.error;
       if (!profileResult.data) throw new Error("Profile not found");
 
-      setProfile(profileResult.data as Profile);
+      const loadedProfile = profileResult.data as Profile;
+
+      setProfile(loadedProfile);
       setPredictions((predictionResult.data || []) as Prediction[]);
 
       if (!leaderboardResult.error) {
         const ranking = (leaderboardResult.data || []) as {username:string;total_points:number}[];
         setTotalPlayers(ranking.length);
-        const index = ranking.findIndex(x => x.username === profileResult.data.username);
+        const index = ranking.findIndex(x => x.username === loadedProfile.username);
         setRankPosition(index >= 0 ? index + 1 : null);
       }
     } catch(e) {
