@@ -20,6 +20,7 @@ type LeaderboardPlayer = {
   total_points: number;
   predictions_count: number;
   exact_scores: number;
+  is_premium?: boolean;
 };
 
 
@@ -357,7 +358,46 @@ export default function PoolDetailPage() {
       return;
     }
 
-    setLeaderboard(leaderboardData || []);
+    const leaderboardRows = (leaderboardData || []) as LeaderboardPlayer[];
+    const userIds = leaderboardRows
+      .map((player) => player.user_id)
+      .filter((id): id is string => Boolean(id));
+
+    let premiumByUserId = new Map<string, boolean>();
+
+    if (userIds.length > 0) {
+      const { data: premiumProfiles, error: premiumError } = await supabase
+        .from("profiles")
+        .select("id, is_premium, premium_expires_at")
+        .in("id", userIds);
+
+      if (premiumError) {
+        console.error("Premium-status poule fout:", premiumError);
+      } else {
+        premiumByUserId = new Map(
+          (premiumProfiles || []).map((profile) => {
+            const expiresAt = profile.premium_expires_at
+              ? new Date(profile.premium_expires_at)
+              : null;
+
+            const premiumActive =
+              profile.is_premium === true &&
+              (expiresAt === null ||
+                (!Number.isNaN(expiresAt.getTime()) &&
+                  expiresAt.getTime() > Date.now()));
+
+            return [profile.id, premiumActive];
+          })
+        );
+      }
+    }
+
+    setLeaderboard(
+      leaderboardRows.map((player) => ({
+        ...player,
+        is_premium: premiumByUserId.get(player.user_id) || false,
+      }))
+    );
     setLoading(false);
   }
 
@@ -981,6 +1021,27 @@ export default function PoolDetailPage() {
                       {player.username}
                     </button>
 
+                    {player.is_premium && (
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          marginLeft: "8px",
+                          padding: "3px 7px",
+                          borderRadius: "999px",
+                          border: "1px solid rgba(253,224,71,0.25)",
+                          background: "rgba(253,224,71,0.10)",
+                          color: "#fde68a",
+                          fontSize: "10px",
+                          fontWeight: 900,
+                          letterSpacing: "0.4px",
+                          verticalAlign: "middle",
+                        }}
+                      >
+                        👑 PREMIUM
+                      </span>
+                    )}
+
                     <div
                       style={{
                         color: "#849088",
@@ -1396,7 +1457,14 @@ export default function PoolDetailPage() {
                 <div key={player.user_id} style={{ display: "flex", alignItems: "center", gap: "14px", padding: "17px 24px", borderBottom: index === leaderboard.length - 1 ? "none" : "1px solid #edf1ee" }}>
                   <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#e9f8ef", color: "#41e58b", display: "grid", placeItems: "center", fontWeight: 900 }}>{player.username.slice(0, 1).toUpperCase()}</div>
                   <div style={{ flex: 1 }}>
-                    <button onClick={() => router.push(`/speler/${player.user_id}`)} style={{ border: 0, background: "transparent", color: "#41e58b", fontWeight: 900, padding: 0, cursor: "pointer", textAlign: "left", fontSize: "inherit" }}>{player.username}</button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                      <button onClick={() => router.push(`/speler/${player.user_id}`)} style={{ border: 0, background: "transparent", color: "#41e58b", fontWeight: 900, padding: 0, cursor: "pointer", textAlign: "left", fontSize: "inherit" }}>{player.username}</button>
+                      {player.is_premium && (
+                        <span style={{ display: "inline-flex", alignItems: "center", padding: "3px 7px", borderRadius: "999px", border: "1px solid rgba(253,224,71,0.25)", background: "rgba(253,224,71,0.10)", color: "#fde68a", fontSize: "10px", fontWeight: 900, letterSpacing: "0.4px" }}>
+                          👑 PREMIUM
+                        </span>
+                      )}
+                    </div>
                     <div style={{ color: "#849088", fontSize: "12px", marginTop: "3px" }}>{player.predictions_count} {player.predictions_count === 1 ? t("prediction") : t("predictions")}</div>
                     {(() => {
                       const footballRank = getFootballRank(player.total_points);
