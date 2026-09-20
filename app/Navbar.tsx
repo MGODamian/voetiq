@@ -143,6 +143,7 @@ function getRankIndex(points: number) {
 type NavbarTranslation = {
   home: string;
   matches: string;
+  predictions: string;
   pools: string;
   leaderboard: string;
   achievements: string;
@@ -176,6 +177,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   nl: {
     home: "Home",
     matches: "Wedstrijden",
+    predictions: "Mijn voorspellingen",
     pools: "Poules",
     leaderboard: "Ranglijst",
     achievements: "Achievements",
@@ -192,6 +194,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   en: {
     home: "Home",
     matches: "Matches",
+    predictions: "My predictions",
     pools: "Pools",
     leaderboard: "Leaderboard",
     achievements: "Achievements",
@@ -208,6 +211,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   de: {
     home: "Startseite",
     matches: "Spiele",
+    predictions: "Meine Tipps",
     pools: "Tipprunden",
     leaderboard: "Rangliste",
     achievements: "Erfolge",
@@ -224,6 +228,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   es: {
     home: "Inicio",
     matches: "Partidos",
+    predictions: "Mis pronósticos",
     pools: "Grupos",
     leaderboard: "Clasificación",
     achievements: "Logros",
@@ -240,6 +245,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   fr: {
     home: "Accueil",
     matches: "Matchs",
+    predictions: "Mes pronostics",
     pools: "Ligues",
     leaderboard: "Classement",
     achievements: "Succès",
@@ -256,6 +262,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   it: {
     home: "Home",
     matches: "Partite",
+    predictions: "I miei pronostici",
     pools: "Gruppi",
     leaderboard: "Classifica",
     achievements: "Obiettivi",
@@ -272,6 +279,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   pt: {
     home: "Início",
     matches: "Jogos",
+    predictions: "Os meus prognósticos",
     pools: "Grupos",
     leaderboard: "Classificação",
     achievements: "Conquistas",
@@ -468,10 +476,10 @@ export default function Navbar() {
       }
 
       if (Number(row.points || 0) > 0) {
-        items.push({ id:`points-${row.id}`, icon:"⚽", text:copy.points(Number(row.points || 0), row.match_name), createdAt:row.created_at, href:"/profiel" });
+        items.push({ id:`points-${row.id}`, icon:"⚽", text:copy.points(Number(row.points || 0), row.match_name), createdAt:row.created_at, href:"/mijn-voorspellingen" });
       }
       if (exact) {
-        items.push({ id:`exact-${row.id}`, icon:"🎯", text:copy.exact(row.match_name), createdAt:row.created_at, href:"/profiel" });
+        items.push({ id:`exact-${row.id}`, icon:"🎯", text:copy.exact(row.match_name), createdAt:row.created_at, href:"/mijn-voorspellingen" });
       }
 
       if (beforePoints === 0 && runningPoints > 0) achievement(`achievement-firstpoints-${row.id}`,"🪙",names.firstPoints,row.created_at);
@@ -720,6 +728,14 @@ export default function Navbar() {
               active={isActive("/wedstrijden")}
             />
 
+            {loggedIn && (
+              <NavLink
+                href="/mijn-voorspellingen"
+                label={`⚽ ${t.predictions}`}
+                active={isActive("/mijn-voorspellingen")}
+              />
+            )}
+
             <NavLink
               href="/poules"
               label={t.pools}
@@ -909,6 +925,15 @@ export default function Navbar() {
             >
               {t.matches}
             </Link>
+
+            {loggedIn && (
+              <Link
+                href="/mijn-voorspellingen"
+                onClick={() => setMobileOpen(false)}
+              >
+                ⚽ {t.predictions}
+              </Link>
+            )}
 
             <Link href="/poules" onClick={() => setMobileOpen(false)}>
               {t.pools}
