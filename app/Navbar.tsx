@@ -1284,6 +1284,10 @@ export default function Navbar() {
           min-width: 0;
         }
 
+        .account-stack .language-picker {
+          order: -1;
+        }
+
         .nav-dropdown {
           position: relative;
           height: 86px;
