@@ -9,6 +9,8 @@ type Profile = {
   username: string;
   first_name: string;
   last_name: string;
+  is_premium: boolean;
+  premium_expires_at: string | null;
 };
 
 type Prediction = {
@@ -179,6 +181,20 @@ const profileUi = {
     career:"🏆 A tua carreira VoetIQ", careerDesc:"Continua a prever, melhora a tua precisão e sobe na classificação.", totalPoints:"Pontos totais"
   }
 } satisfies Record<LanguageCode, Record<string, any>>;
+
+const premiumInsightsUi: Record<LanguageCode, {
+  eyebrow: string; title: string; intro: string; lockedTitle: string; lockedText: string; unlock: string;
+  lastTen: string; lastTenDesc: string; exactRate: string; exactRateDesc: string; avgLastTen: string; avgLastTenDesc: string;
+  bestCompetition: string; bestCompetitionDesc: string; highestMatch: string; highestMatchDesc: string; currentStreak: string; currentStreakDesc: string; bestStreak: string; bestStreakDesc: string; noData: string; matches: string;
+}> = {
+  nl:{eyebrow:"👑 Premium Insights",title:"Jouw uitgebreide statistieken",intro:"Duik dieper in je prestaties en ontdek waar jij het verschil maakt.",lockedTitle:"Ontgrendel Premium Insights",lockedText:"Bekijk je vorm, reeksen, beste competitie en meer met VoetIQ Premium.",unlock:"👑 Ontgrendel met VoetIQ Premium",lastTen:"Vorm laatste 10",lastTenDesc:"Juiste uitslagen in je laatste 10 gespeelde voorspellingen",exactRate:"Exact-percentage",exactRateDesc:"Percentage gespeelde voorspellingen met de exacte score",avgLastTen:"Gemiddelde laatste 10",avgLastTenDesc:"Punten per voorspelling over je laatste 10 gespeelde wedstrijden",bestCompetition:"Beste competitie",bestCompetitionDesc:"Hoogste gemiddelde punten per gespeelde voorspelling",highestMatch:"Beste voorspelling",highestMatchDesc:"Hoogste aantal punten uit één voorspelling",currentStreak:"Huidige reeks",currentStreakDesc:"Opeenvolgende juiste uitslagen vanaf je nieuwste resultaat",bestStreak:"Beste reeks",bestStreakDesc:"Langste reeks juiste uitslagen",noData:"Nog onvoldoende gespeelde voorspellingen",matches:"wedstrijden"},
+  en:{eyebrow:"👑 Premium Insights",title:"Your advanced statistics",intro:"Dive deeper into your performance and discover where you make the difference.",lockedTitle:"Unlock Premium Insights",lockedText:"See your form, streaks, best competition and more with VoetIQ Premium.",unlock:"👑 Unlock with VoetIQ Premium",lastTen:"Last 10 form",lastTenDesc:"Correct results in your last 10 played predictions",exactRate:"Exact-score rate",exactRateDesc:"Percentage of played predictions with the exact score",avgLastTen:"Last 10 average",avgLastTenDesc:"Points per prediction over your last 10 played matches",bestCompetition:"Best competition",bestCompetitionDesc:"Highest average points per played prediction",highestMatch:"Best prediction",highestMatchDesc:"Highest points from a single prediction",currentStreak:"Current streak",currentStreakDesc:"Consecutive correct results from your newest result",bestStreak:"Best streak",bestStreakDesc:"Longest streak of correct results",noData:"Not enough played predictions yet",matches:"matches"},
+  de:{eyebrow:"👑 Premium Insights",title:"Deine erweiterten Statistiken",intro:"Analysiere deine Leistung genauer und entdecke deine Stärken.",lockedTitle:"Premium Insights freischalten",lockedText:"Sieh Form, Serien, besten Wettbewerb und mehr mit VoetIQ Premium.",unlock:"👑 Mit VoetIQ Premium freischalten",lastTen:"Form letzte 10",lastTenDesc:"Richtige Ausgänge in deinen letzten 10 gespielten Tipps",exactRate:"Exakt-Quote",exactRateDesc:"Anteil gespielter Tipps mit exakt richtigem Ergebnis",avgLastTen:"Schnitt letzte 10",avgLastTenDesc:"Punkte pro Tipp in deinen letzten 10 gespielten Spielen",bestCompetition:"Bester Wettbewerb",bestCompetitionDesc:"Höchster Punkteschnitt pro gespieltem Tipp",highestMatch:"Bester Tipp",highestMatchDesc:"Höchste Punktzahl aus einem einzelnen Tipp",currentStreak:"Aktuelle Serie",currentStreakDesc:"Richtige Ausgänge in Folge ab dem neuesten Ergebnis",bestStreak:"Beste Serie",bestStreakDesc:"Längste Serie richtiger Ausgänge",noData:"Noch nicht genügend gespielte Tipps",matches:"Spiele"},
+  es:{eyebrow:"👑 Premium Insights",title:"Tus estadísticas avanzadas",intro:"Profundiza en tu rendimiento y descubre tus puntos fuertes.",lockedTitle:"Desbloquea Premium Insights",lockedText:"Consulta tu forma, rachas, mejor competición y más con VoetIQ Premium.",unlock:"👑 Desbloquear con VoetIQ Premium",lastTen:"Forma últimos 10",lastTenDesc:"Resultados correctos en tus últimos 10 pronósticos jugados",exactRate:"Porcentaje exacto",exactRateDesc:"Porcentaje de pronósticos jugados con marcador exacto",avgLastTen:"Promedio últimos 10",avgLastTenDesc:"Puntos por pronóstico en tus últimos 10 partidos jugados",bestCompetition:"Mejor competición",bestCompetitionDesc:"Mayor promedio de puntos por pronóstico jugado",highestMatch:"Mejor pronóstico",highestMatchDesc:"Mayor puntuación obtenida en un solo pronóstico",currentStreak:"Racha actual",currentStreakDesc:"Resultados correctos consecutivos desde el resultado más reciente",bestStreak:"Mejor racha",bestStreakDesc:"Racha más larga de resultados correctos",noData:"Aún no hay suficientes pronósticos jugados",matches:"partidos"},
+  fr:{eyebrow:"👑 Premium Insights",title:"Tes statistiques avancées",intro:"Analyse tes performances en profondeur et découvre tes points forts.",lockedTitle:"Débloque Premium Insights",lockedText:"Découvre ta forme, tes séries, ta meilleure compétition et plus avec VoetIQ Premium.",unlock:"👑 Débloquer avec VoetIQ Premium",lastTen:"Forme sur 10",lastTenDesc:"Bons résultats sur tes 10 derniers pronostics joués",exactRate:"Taux de scores exacts",exactRateDesc:"Pourcentage de pronostics joués avec le score exact",avgLastTen:"Moyenne sur 10",avgLastTenDesc:"Points par pronostic sur tes 10 derniers matchs joués",bestCompetition:"Meilleure compétition",bestCompetitionDesc:"Meilleure moyenne de points par pronostic joué",highestMatch:"Meilleur pronostic",highestMatchDesc:"Plus grand nombre de points sur un seul pronostic",currentStreak:"Série actuelle",currentStreakDesc:"Bons résultats consécutifs depuis le résultat le plus récent",bestStreak:"Meilleure série",bestStreakDesc:"Plus longue série de bons résultats",noData:"Pas encore assez de pronostics joués",matches:"matchs"},
+  it:{eyebrow:"👑 Premium Insights",title:"Le tue statistiche avanzate",intro:"Analizza più a fondo le tue prestazioni e scopri i tuoi punti di forza.",lockedTitle:"Sblocca Premium Insights",lockedText:"Scopri forma, serie, migliore competizione e altro con VoetIQ Premium.",unlock:"👑 Sblocca con VoetIQ Premium",lastTen:"Forma ultime 10",lastTenDesc:"Esiti corretti negli ultimi 10 pronostici giocati",exactRate:"Percentuale esatta",exactRateDesc:"Percentuale di pronostici giocati con risultato esatto",avgLastTen:"Media ultime 10",avgLastTenDesc:"Punti per pronostico nelle ultime 10 partite giocate",bestCompetition:"Migliore competizione",bestCompetitionDesc:"Media punti più alta per pronostico giocato",highestMatch:"Miglior pronostico",highestMatchDesc:"Punteggio più alto ottenuto in un singolo pronostico",currentStreak:"Serie attuale",currentStreakDesc:"Esiti corretti consecutivi dal risultato più recente",bestStreak:"Migliore serie",bestStreakDesc:"Serie più lunga di esiti corretti",noData:"Non ci sono ancora abbastanza pronostici giocati",matches:"partite"},
+  pt:{eyebrow:"👑 Premium Insights",title:"As tuas estatísticas avançadas",intro:"Aprofunda o teu desempenho e descobre os teus pontos fortes.",lockedTitle:"Desbloqueia Premium Insights",lockedText:"Vê a tua forma, sequências, melhor competição e mais com VoetIQ Premium.",unlock:"👑 Desbloquear com VoetIQ Premium",lastTen:"Forma últimos 10",lastTenDesc:"Resultados corretos nas tuas últimas 10 previsões jogadas",exactRate:"Percentagem exata",exactRateDesc:"Percentagem de previsões jogadas com resultado exato",avgLastTen:"Média últimos 10",avgLastTenDesc:"Pontos por previsão nos teus últimos 10 jogos disputados",bestCompetition:"Melhor competição",bestCompetitionDesc:"Maior média de pontos por previsão jogada",highestMatch:"Melhor previsão",highestMatchDesc:"Maior pontuação numa única previsão",currentStreak:"Sequência atual",currentStreakDesc:"Resultados corretos consecutivos desde o resultado mais recente",bestStreak:"Melhor sequência",bestStreakDesc:"Maior sequência de resultados corretos",noData:"Ainda não há previsões jogadas suficientes",matches:"jogos"}
+};
 
 const activityUi: Record<LanguageCode, {
   eyebrow: string;
@@ -360,7 +376,7 @@ export default function ProfielPage() {
       } = await supabase
         .from("profiles")
         .select(
-          "username, first_name, last_name"
+          "username, first_name, last_name, is_premium, premium_expires_at"
         )
         .eq("id", user.id)
         .maybeSingle();
@@ -736,6 +752,38 @@ export default function ProfielPage() {
       };
     });
 
+  const premiumActive = Boolean(
+    profile?.is_premium === true &&
+    (!profile.premium_expires_at || new Date(profile.premium_expires_at).getTime() > Date.now())
+  );
+  const pui = premiumInsightsUi[language];
+
+  const recentPlayed = [...playedPredictions]
+    .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const lastTen = recentPlayed.slice(0, 10);
+  const lastTenCorrect = lastTen.filter(isCorrectResult).length;
+  const lastTenPoints = lastTen.reduce((sum,p) => sum + (p.points || 0), 0);
+  const lastTenAverage = lastTen.length ? (lastTenPoints / lastTen.length).toFixed(1) : "0.0";
+  const exactRate = playedPredictions.length ? Math.round((exactPredictions / playedPredictions.length) * 100) : 0;
+  const highestMatchPoints = playedPredictions.length ? Math.max(...playedPredictions.map(p => p.points || 0)) : 0;
+
+  const competitionPremiumStats = competitionOrder.map((code) => {
+    const played = playedPredictions.filter(p => p.competition_code === code);
+    const points = played.reduce((sum,p) => sum + (p.points || 0), 0);
+    return { code, name: competitions[code].name, icon: competitions[code].icon, played: played.length, average: played.length ? points / played.length : -1 };
+  }).filter(item => item.played > 0).sort((a,b) => b.average - a.average);
+  const bestCompetition = competitionPremiumStats[0] || null;
+
+  let currentStreak = 0;
+  for (const prediction of recentPlayed) {
+    if (isCorrectResult(prediction)) currentStreak += 1; else break;
+  }
+  let bestStreak = 0;
+  let runningStreak = 0;
+  [...playedPredictions].sort((a,b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).forEach((prediction) => {
+    if (isCorrectResult(prediction)) { runningStreak += 1; bestStreak = Math.max(bestStreak, runningStreak); } else runningStreak = 0;
+  });
+
   function formatDate(date: string) {
     return new Date(date).toLocaleString(
       ({nl:"nl-NL",en:"en-GB",de:"de-DE",es:"es-ES",fr:"fr-FR",it:"it-IT",pt:"pt-PT"} as Record<LanguageCode,string>)[language],
@@ -1045,6 +1093,33 @@ export default function ProfielPage() {
                 </div>
               </section>
 
+              <section className="mt-10 overflow-hidden rounded-3xl border border-amber-300/20 bg-gradient-to-br from-amber-400/[0.08] via-green-950/70 to-gray-950 p-6 sm:p-7">
+                <div className="mb-5">
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">{pui.eyebrow}</p>
+                  <h2 className="mt-1 text-2xl font-black">{premiumActive ? pui.title : pui.lockedTitle}</h2>
+                  <p className="mt-1 text-sm text-green-100/50">{premiumActive ? pui.intro : pui.lockedText}</p>
+                </div>
+
+                {!premiumActive ? (
+                  <div className="rounded-2xl border border-amber-300/15 bg-black/20 px-6 py-10 text-center">
+                    <div className="text-5xl">🔒</div>
+                    <h3 className="mt-4 text-xl font-black">{pui.lockedTitle}</h3>
+                    <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-green-100/50">{pui.lockedText}</p>
+                    <button onClick={() => router.push("/premium")} className="mt-6 rounded-xl bg-amber-300 px-5 py-3 font-black text-gray-950 transition hover:bg-amber-200">{pui.unlock}</button>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <PremiumInsightCard icon="🔥" label={pui.lastTen} value={`${lastTenCorrect}/${lastTen.length || 0}`} description={pui.lastTenDesc} />
+                    <PremiumInsightCard icon="🎯" label={pui.exactRate} value={`${exactRate}%`} description={pui.exactRateDesc} />
+                    <PremiumInsightCard icon="📊" label={pui.avgLastTen} value={lastTenAverage} description={pui.avgLastTenDesc} />
+                    <PremiumInsightCard icon="🏆" label={pui.bestCompetition} value={bestCompetition ? `${bestCompetition.icon} ${bestCompetition.name}` : "—"} description={bestCompetition ? `${bestCompetition.average.toFixed(1)} ${t.points} · ${bestCompetition.played} ${pui.matches}` : pui.noData} />
+                    <PremiumInsightCard icon="⭐" label={pui.highestMatch} value={playedPredictions.length ? highestMatchPoints.toString() : "—"} description={playedPredictions.length ? pui.highestMatchDesc : pui.noData} />
+                    <PremiumInsightCard icon="⚡" label={pui.currentStreak} value={playedPredictions.length ? currentStreak.toString() : "—"} description={playedPredictions.length ? pui.currentStreakDesc : pui.noData} />
+                    <PremiumInsightCard icon="👑" label={pui.bestStreak} value={playedPredictions.length ? bestStreak.toString() : "—"} description={playedPredictions.length ? pui.bestStreakDesc : pui.noData} />
+                  </div>
+                )}
+              </section>
+
               <section className="mt-10">
                 <div className="mb-5">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
@@ -1344,6 +1419,19 @@ function PerformanceCard({
       <p className="mt-1 text-xs leading-5 text-green-100/40">
         {description}
       </p>
+    </div>
+  );
+}
+
+function PremiumInsightCard({ icon, label, value, description }: { icon: string; label: string; value: string; description: string; }) {
+  return (
+    <div className="rounded-2xl border border-amber-300/10 bg-black/20 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <span className="text-2xl">{icon}</span>
+        <span className="text-right text-xl font-black text-amber-200">{value}</span>
+      </div>
+      <p className="mt-4 font-black text-white">{label}</p>
+      <p className="mt-1 text-xs leading-5 text-green-100/45">{description}</p>
     </div>
   );
 }
