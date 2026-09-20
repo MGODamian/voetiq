@@ -875,7 +875,6 @@ export default function Navbar() {
                   aria-expanded={languageOpen}
                   aria-label={t.language}
                 >
-                  <span className="language-flag">{currentLanguage.flag}</span>
                   <span>{currentLanguage.short}</span>
                   <span className="language-chevron">⌄</span>
                 </button>
@@ -922,7 +921,6 @@ export default function Navbar() {
                     aria-expanded={notificationsOpen}
                   >
                     <span>🔔</span>
-                    <span className="notification-label">{notificationCopy[language].title}</span>
                     {notifications.filter((item) => !readNotificationIds.includes(item.id)).length > 0 && (
                       <span className="notification-count">
                         {Math.min(9, notifications.filter((item) => !readNotificationIds.includes(item.id)).length)}
