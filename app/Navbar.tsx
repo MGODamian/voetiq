@@ -1218,7 +1218,7 @@ export default function Navbar() {
         .desktop-nav {
           display: flex;
           align-items: center;
-          gap: 3px;
+          gap: 10px;
           flex: 1;
           min-width: 0;
         }
@@ -1228,7 +1228,7 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           height: 86px;
-          padding: 0 12px;
+          padding: 0 14px;
           color: #c9d8d0;
           text-decoration: none;
           font-size: 13px;
@@ -1308,7 +1308,7 @@ export default function Navbar() {
           display: flex;
           align-items: center;
           gap: 5px;
-          padding: 0 12px;
+          padding: 0 14px;
           border: 0;
           background: transparent;
           color: #c9d8d0;
