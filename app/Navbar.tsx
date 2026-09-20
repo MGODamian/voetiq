@@ -142,6 +142,7 @@ function getRankIndex(points: number) {
 
 type NavbarTranslation = {
   home: string;
+  dashboard: string;
   matches: string;
   predictions: string;
   pools: string;
@@ -176,6 +177,7 @@ const languages: {
 const translations: Record<LanguageCode, NavbarTranslation> = {
   nl: {
     home: "Home",
+    dashboard: "Dashboard",
     matches: "Wedstrijden",
     predictions: "Mijn voorspellingen",
     pools: "Poules",
@@ -193,6 +195,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   },
   en: {
     home: "Home",
+    dashboard: "Dashboard",
     matches: "Matches",
     predictions: "My predictions",
     pools: "Pools",
@@ -210,6 +213,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   },
   de: {
     home: "Startseite",
+    dashboard: "Dashboard",
     matches: "Spiele",
     predictions: "Meine Tipps",
     pools: "Tipprunden",
@@ -227,6 +231,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   },
   es: {
     home: "Inicio",
+    dashboard: "Panel",
     matches: "Partidos",
     predictions: "Mis pronósticos",
     pools: "Grupos",
@@ -244,6 +249,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   },
   fr: {
     home: "Accueil",
+    dashboard: "Tableau de bord",
     matches: "Matchs",
     predictions: "Mes pronostics",
     pools: "Ligues",
@@ -261,6 +267,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   },
   it: {
     home: "Home",
+    dashboard: "Dashboard",
     matches: "Partite",
     predictions: "I miei pronostici",
     pools: "Gruppi",
@@ -278,6 +285,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
   },
   pt: {
     home: "Início",
+    dashboard: "Dashboard",
     matches: "Jogos",
     predictions: "Os meus prognósticos",
     pools: "Grupos",
@@ -722,6 +730,14 @@ export default function Navbar() {
           <nav className="desktop-nav">
             <NavLink href="/" label={t.home} active={isActive("/")} />
 
+            {loggedIn && (
+              <NavLink
+                href="/dashboard"
+                label={`📊 ${t.dashboard}`}
+                active={isActive("/dashboard")}
+              />
+            )}
+
             <NavLink
               href="/wedstrijden"
               label={t.matches}
@@ -918,6 +934,12 @@ export default function Navbar() {
             <Link href="/" onClick={() => setMobileOpen(false)}>
               {t.home}
             </Link>
+
+            {loggedIn && (
+              <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
+                📊 {t.dashboard}
+              </Link>
+            )}
 
             <Link
               href="/wedstrijden"
