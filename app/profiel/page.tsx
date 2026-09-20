@@ -197,6 +197,21 @@ const premiumInsightsUi: Record<LanguageCode, {
   pt:{eyebrow:"👑 Premium Insights",title:"As tuas estatísticas avançadas",intro:"Aprofunda o teu desempenho e descobre os teus pontos fortes.",lockedTitle:"Desbloqueia Premium Insights",lockedText:"Vê a tua forma, sequências, melhor competição e mais com VoetIQ Premium.",unlock:"👑 Desbloquear com VoetIQ Premium",lastTen:"Forma últimos 10",lastTenDesc:"Resultados corretos nas tuas últimas 10 previsões jogadas",exactRate:"Percentagem exata",exactRateDesc:"Percentagem de previsões jogadas com resultado exato",avgLastTen:"Média últimos 10",avgLastTenDesc:"Pontos por previsão nos teus últimos 10 jogos disputados",bestCompetition:"Melhor competição",bestCompetitionDesc:"Maior média de pontos por previsão jogada",highestMatch:"Melhor previsão",highestMatchDesc:"Maior pontuação numa única previsão",currentStreak:"Sequência atual",currentStreakDesc:"Resultados corretos consecutivos desde o resultado mais recente",bestStreak:"Melhor sequência",bestStreakDesc:"Maior sequência de resultados corretos",noData:"Ainda não há previsões jogadas suficientes",matches:"jogos"}
 };
 
+const historyStatsUi: Record<LanguageCode, {
+  eyebrow: string; title: string; intro: string; lockedTitle: string; lockedText: string; unlock: string;
+  bestMonth: string; bestMonthDesc: string; totalMonths: string; totalMonthsDesc: string;
+  recentMonth: string; recentMonthDesc: string; monthlyHistory: string; month: string;
+  played: string; points: string; correct: string; exact: string; accuracy: string; noData: string;
+}> = {
+  nl:{eyebrow:"👑 Historische statistieken",title:"Jouw prestaties door de tijd",intro:"Bekijk hoe je voorspellingen zich per maand hebben ontwikkeld.",lockedTitle:"Ontgrendel historische statistieken",lockedText:"Bekijk je maandelijkse prestaties, beste maand en ontwikkeling met VoetIQ Premium.",unlock:"👑 Ontgrendel met VoetIQ Premium",bestMonth:"Beste maand",bestMonthDesc:"Meeste punten in één maand",totalMonths:"Actieve maanden",totalMonthsDesc:"Maanden met gespeelde voorspellingen",recentMonth:"Laatste maand",recentMonthDesc:"Punten in je meest recente actieve maand",monthlyHistory:"Maandoverzicht",month:"Maand",played:"Gespeeld",points:"Punten",correct:"Juist",exact:"Exact",accuracy:"Accuracy",noData:"Nog geen gespeelde voorspellingen om historische statistieken te tonen."},
+  en:{eyebrow:"👑 Historical statistics",title:"Your performance over time",intro:"See how your predictions have developed month by month.",lockedTitle:"Unlock historical statistics",lockedText:"See monthly performance, your best month and development with VoetIQ Premium.",unlock:"👑 Unlock with VoetIQ Premium",bestMonth:"Best month",bestMonthDesc:"Most points in a single month",totalMonths:"Active months",totalMonthsDesc:"Months with played predictions",recentMonth:"Latest month",recentMonthDesc:"Points in your most recent active month",monthlyHistory:"Monthly overview",month:"Month",played:"Played",points:"Points",correct:"Correct",exact:"Exact",accuracy:"Accuracy",noData:"No played predictions yet for historical statistics."},
+  de:{eyebrow:"👑 Historische Statistiken",title:"Deine Leistung im Zeitverlauf",intro:"Sieh, wie sich deine Tipps Monat für Monat entwickelt haben.",lockedTitle:"Historische Statistiken freischalten",lockedText:"Sieh monatliche Leistungen, deinen besten Monat und deine Entwicklung mit VoetIQ Premium.",unlock:"👑 Mit VoetIQ Premium freischalten",bestMonth:"Bester Monat",bestMonthDesc:"Meiste Punkte in einem Monat",totalMonths:"Aktive Monate",totalMonthsDesc:"Monate mit gespielten Tipps",recentMonth:"Letzter Monat",recentMonthDesc:"Punkte im letzten aktiven Monat",monthlyHistory:"Monatsübersicht",month:"Monat",played:"Gespielt",points:"Punkte",correct:"Richtig",exact:"Exakt",accuracy:"Genauigkeit",noData:"Noch keine gespielten Tipps für historische Statistiken."},
+  es:{eyebrow:"👑 Estadísticas históricas",title:"Tu rendimiento a lo largo del tiempo",intro:"Consulta cómo han evolucionado tus pronósticos mes a mes.",lockedTitle:"Desbloquea estadísticas históricas",lockedText:"Consulta tu rendimiento mensual, tu mejor mes y evolución con VoetIQ Premium.",unlock:"👑 Desbloquear con VoetIQ Premium",bestMonth:"Mejor mes",bestMonthDesc:"Más puntos en un solo mes",totalMonths:"Meses activos",totalMonthsDesc:"Meses con pronósticos jugados",recentMonth:"Último mes",recentMonthDesc:"Puntos en tu mes activo más reciente",monthlyHistory:"Resumen mensual",month:"Mes",played:"Jugados",points:"Puntos",correct:"Correctos",exact:"Exactos",accuracy:"Precisión",noData:"Aún no hay pronósticos jugados para mostrar estadísticas históricas."},
+  fr:{eyebrow:"👑 Statistiques historiques",title:"Tes performances au fil du temps",intro:"Découvre l’évolution de tes pronostics mois après mois.",lockedTitle:"Débloque les statistiques historiques",lockedText:"Découvre tes performances mensuelles, ton meilleur mois et ton évolution avec VoetIQ Premium.",unlock:"👑 Débloquer avec VoetIQ Premium",bestMonth:"Meilleur mois",bestMonthDesc:"Plus grand nombre de points sur un mois",totalMonths:"Mois actifs",totalMonthsDesc:"Mois avec des pronostics joués",recentMonth:"Dernier mois",recentMonthDesc:"Points lors de ton dernier mois actif",monthlyHistory:"Aperçu mensuel",month:"Mois",played:"Joués",points:"Points",correct:"Corrects",exact:"Exacts",accuracy:"Précision",noData:"Aucun pronostic joué pour afficher les statistiques historiques."},
+  it:{eyebrow:"👑 Statistiche storiche",title:"Le tue prestazioni nel tempo",intro:"Scopri come sono cambiati i tuoi pronostici mese dopo mese.",lockedTitle:"Sblocca le statistiche storiche",lockedText:"Scopri prestazioni mensili, mese migliore e andamento con VoetIQ Premium.",unlock:"👑 Sblocca con VoetIQ Premium",bestMonth:"Mese migliore",bestMonthDesc:"Più punti in un singolo mese",totalMonths:"Mesi attivi",totalMonthsDesc:"Mesi con pronostici giocati",recentMonth:"Ultimo mese",recentMonthDesc:"Punti nel mese attivo più recente",monthlyHistory:"Riepilogo mensile",month:"Mese",played:"Giocate",points:"Punti",correct:"Corretti",exact:"Esatti",accuracy:"Precisione",noData:"Non ci sono ancora pronostici giocati per le statistiche storiche."},
+  pt:{eyebrow:"👑 Estatísticas históricas",title:"O teu desempenho ao longo do tempo",intro:"Vê como as tuas previsões evoluíram mês após mês.",lockedTitle:"Desbloqueia estatísticas históricas",lockedText:"Vê o desempenho mensal, o teu melhor mês e evolução com VoetIQ Premium.",unlock:"👑 Desbloquear com VoetIQ Premium",bestMonth:"Melhor mês",bestMonthDesc:"Mais pontos num único mês",totalMonths:"Meses ativos",totalMonthsDesc:"Meses com previsões jogadas",recentMonth:"Último mês",recentMonthDesc:"Pontos no teu mês ativo mais recente",monthlyHistory:"Resumo mensal",month:"Mês",played:"Jogados",points:"Pontos",correct:"Corretos",exact:"Exatos",accuracy:"Precisão",noData:"Ainda não há previsões jogadas para mostrar estatísticas históricas."}
+};
+
 const activityUi: Record<LanguageCode, {
   eyebrow: string;
   title: string;
@@ -888,6 +903,58 @@ export default function ProfielPage() {
     if (isCorrectResult(prediction)) { runningStreak += 1; bestStreak = Math.max(bestStreak, runningStreak); } else runningStreak = 0;
   });
 
+  const hui = historyStatsUi[language];
+  const localeByLanguage: Record<LanguageCode, string> = {
+    nl:"nl-NL", en:"en-GB", de:"de-DE", es:"es-ES", fr:"fr-FR", it:"it-IT", pt:"pt-PT"
+  };
+
+  const monthlyHistoryMap = new Map<string, {
+    key: string; date: Date; played: number; points: number; correct: number; exact: number;
+  }>();
+
+  playedPredictions.forEach((prediction) => {
+    const date = new Date(prediction.created_at);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    const current = monthlyHistoryMap.get(key) || {
+      key,
+      date: new Date(date.getFullYear(), date.getMonth(), 1),
+      played: 0,
+      points: 0,
+      correct: 0,
+      exact: 0,
+    };
+
+    current.played += 1;
+    current.points += prediction.points || 0;
+    if (isCorrectResult(prediction)) current.correct += 1;
+    if (
+      prediction.home_score === prediction.actual_home_score &&
+      prediction.away_score === prediction.actual_away_score
+    ) current.exact += 1;
+
+    monthlyHistoryMap.set(key, current);
+  });
+
+  const monthlyHistory = [...monthlyHistoryMap.values()]
+    .map((item) => ({
+      ...item,
+      accuracy: item.played ? Math.round((item.correct / item.played) * 100) : 0,
+    }))
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+  const bestHistoryMonth = [...monthlyHistory].sort((a, b) =>
+    b.points - a.points || b.accuracy - a.accuracy || b.played - a.played
+  )[0] || null;
+  const latestHistoryMonth = monthlyHistory[0] || null;
+
+  function formatHistoryMonth(date: Date) {
+    const formatted = new Intl.DateTimeFormat(localeByLanguage[language], {
+      month: "long",
+      year: "numeric",
+    }).format(date);
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  }
+
   async function saveProfileTheme(theme: ProfileTheme) {
     if (!profile || themeSaving) return;
     if (theme !== "default" && !premiumActive) {
@@ -1325,6 +1392,106 @@ export default function ProfielPage() {
                     <PremiumInsightCard icon="⭐" label={pui.highestMatch} value={playedPredictions.length ? highestMatchPoints.toString() : "—"} description={playedPredictions.length ? pui.highestMatchDesc : pui.noData} />
                     <PremiumInsightCard icon="⚡" label={pui.currentStreak} value={playedPredictions.length ? currentStreak.toString() : "—"} description={playedPredictions.length ? pui.currentStreakDesc : pui.noData} />
                     <PremiumInsightCard icon="👑" label={pui.bestStreak} value={playedPredictions.length ? bestStreak.toString() : "—"} description={playedPredictions.length ? pui.bestStreakDesc : pui.noData} />
+                  </div>
+                )}
+              </section>
+
+              <section className="mt-6 overflow-hidden rounded-3xl border border-yellow-300/20 bg-[linear-gradient(145deg,rgba(66,45,7,0.62),rgba(9,23,17,0.96)_48%,rgba(3,12,8,0.99))] shadow-2xl">
+                <div className="border-b border-yellow-300/10 p-6 sm:p-8">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <p className="text-xs font-black uppercase tracking-[0.2em] text-yellow-300">
+                        {hui.eyebrow}
+                      </p>
+                      <h2 className="mt-2 text-2xl font-black sm:text-3xl">
+                        {premiumActive ? hui.title : hui.lockedTitle}
+                      </h2>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-green-100/60">
+                        {premiumActive ? hui.intro : hui.lockedText}
+                      </p>
+                    </div>
+                    <span className="w-fit rounded-full border border-yellow-300/20 bg-yellow-300/10 px-3 py-1 text-xs font-black text-yellow-200">
+                      PREMIUM
+                    </span>
+                  </div>
+                </div>
+
+                {!premiumActive ? (
+                  <div className="p-6 sm:p-8">
+                    <button
+                      onClick={() => router.push("/premium")}
+                      className="rounded-xl border border-yellow-300/25 bg-yellow-300/10 px-5 py-3 text-sm font-black text-yellow-200 transition hover:bg-yellow-300/15"
+                    >
+                      {hui.unlock}
+                    </button>
+                  </div>
+                ) : monthlyHistory.length === 0 ? (
+                  <div className="p-6 text-sm text-green-100/60 sm:p-8">
+                    {hui.noData}
+                  </div>
+                ) : (
+                  <div className="p-6 sm:p-8">
+                    <div className="grid gap-3 md:grid-cols-3">
+                      <div className="rounded-2xl border border-yellow-300/15 bg-black/20 p-5">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-yellow-200/70">{hui.bestMonth}</p>
+                        <p className="mt-2 text-xl font-black text-white">
+                          {bestHistoryMonth ? formatHistoryMonth(bestHistoryMonth.date) : "—"}
+                        </p>
+                        <p className="mt-1 text-sm font-bold text-yellow-200">
+                          {bestHistoryMonth ? `${bestHistoryMonth.points} ${hui.points.toLowerCase()}` : "—"}
+                        </p>
+                        <p className="mt-2 text-xs text-green-100/45">{hui.bestMonthDesc}</p>
+                      </div>
+
+                      <div className="rounded-2xl border border-yellow-300/15 bg-black/20 p-5">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-yellow-200/70">{hui.totalMonths}</p>
+                        <p className="mt-2 text-3xl font-black text-white">{monthlyHistory.length}</p>
+                        <p className="mt-2 text-xs text-green-100/45">{hui.totalMonthsDesc}</p>
+                      </div>
+
+                      <div className="rounded-2xl border border-yellow-300/15 bg-black/20 p-5">
+                        <p className="text-xs font-bold uppercase tracking-[0.14em] text-yellow-200/70">{hui.recentMonth}</p>
+                        <p className="mt-2 text-xl font-black text-white">
+                          {latestHistoryMonth ? formatHistoryMonth(latestHistoryMonth.date) : "—"}
+                        </p>
+                        <p className="mt-1 text-sm font-bold text-yellow-200">
+                          {latestHistoryMonth ? `${latestHistoryMonth.points} ${hui.points.toLowerCase()}` : "—"}
+                        </p>
+                        <p className="mt-2 text-xs text-green-100/45">{hui.recentMonthDesc}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 overflow-hidden rounded-2xl border border-white/10 bg-black/15">
+                      <div className="border-b border-white/10 px-5 py-4">
+                        <h3 className="font-black text-white">{hui.monthlyHistory}</h3>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[680px] text-left text-sm">
+                          <thead className="bg-white/[0.03] text-xs uppercase tracking-wider text-green-100/45">
+                            <tr>
+                              <th className="px-5 py-3">{hui.month}</th>
+                              <th className="px-4 py-3">{hui.played}</th>
+                              <th className="px-4 py-3">{hui.points}</th>
+                              <th className="px-4 py-3">{hui.correct}</th>
+                              <th className="px-4 py-3">{hui.exact}</th>
+                              <th className="px-4 py-3">{hui.accuracy}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {monthlyHistory.map((item) => (
+                              <tr key={item.key} className="border-t border-white/[0.06]">
+                                <td className="px-5 py-4 font-bold text-white">{formatHistoryMonth(item.date)}</td>
+                                <td className="px-4 py-4 text-green-100/70">{item.played}</td>
+                                <td className="px-4 py-4 font-black text-yellow-200">{item.points}</td>
+                                <td className="px-4 py-4 text-green-100/70">{item.correct}</td>
+                                <td className="px-4 py-4 text-green-100/70">{item.exact}</td>
+                                <td className="px-4 py-4 font-bold text-green-300">{item.accuracy}%</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 )}
               </section>
