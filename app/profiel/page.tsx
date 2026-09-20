@@ -11,6 +11,7 @@ type Profile = {
   last_name: string;
   is_premium: boolean;
   premium_expires_at: string | null;
+  profile_theme: "default" | "emerald" | "gold" | "midnight" | "champions";
 };
 
 type Prediction = {
@@ -311,6 +312,39 @@ const rankUi: Record<LanguageCode, {careerRank:string; current:string; next:stri
   pt:{careerRank:"Nível futebolístico",current:"Nível atual",next:"Próximo nível",needed:n=>`Faltam ${n} pontos para subir de nível`,highest:"Nível máximo alcançado",points:"pontos"},
 };
 
+
+type ProfileTheme = "default" | "emerald" | "gold" | "midnight" | "champions";
+
+const profileThemeUi: Record<LanguageCode, {
+  eyebrow: string;
+  title: string;
+  intro: string;
+  saved: string;
+  saving: string;
+  premiumOnly: string;
+}> = {
+  nl:{eyebrow:"👑 Premium profielthema",title:"Geef je profiel een eigen stijl",intro:"Kies een exclusief thema voor jouw VoetIQ-profiel.",saved:"Profielthema opgeslagen.",saving:"Opslaan...",premiumOnly:"Premium"},
+  en:{eyebrow:"👑 Premium profile theme",title:"Give your profile its own style",intro:"Choose an exclusive theme for your VoetIQ profile.",saved:"Profile theme saved.",saving:"Saving...",premiumOnly:"Premium"},
+  de:{eyebrow:"👑 Premium-Profilthema",title:"Gib deinem Profil einen eigenen Stil",intro:"Wähle ein exklusives Design für dein VoetIQ-Profil.",saved:"Profilthema gespeichert.",saving:"Speichern...",premiumOnly:"Premium"},
+  es:{eyebrow:"👑 Tema de perfil Premium",title:"Dale a tu perfil un estilo propio",intro:"Elige un tema exclusivo para tu perfil de VoetIQ.",saved:"Tema de perfil guardado.",saving:"Guardando...",premiumOnly:"Premium"},
+  fr:{eyebrow:"👑 Thème de profil Premium",title:"Donne ton propre style à ton profil",intro:"Choisis un thème exclusif pour ton profil VoetIQ.",saved:"Thème du profil enregistré.",saving:"Enregistrement...",premiumOnly:"Premium"},
+  it:{eyebrow:"👑 Tema profilo Premium",title:"Dai al tuo profilo uno stile unico",intro:"Scegli un tema esclusivo per il tuo profilo VoetIQ.",saved:"Tema del profilo salvato.",saving:"Salvataggio...",premiumOnly:"Premium"},
+  pt:{eyebrow:"👑 Tema de perfil Premium",title:"Dá um estilo próprio ao teu perfil",intro:"Escolhe um tema exclusivo para o teu perfil VoetIQ.",saved:"Tema do perfil guardado.",saving:"A guardar...",premiumOnly:"Premium"}
+};
+
+const profileThemes: Array<{
+  id: ProfileTheme;
+  name: string;
+  icon: string;
+  preview: string;
+}> = [
+  { id:"default", name:"Default", icon:"⚽", preview:"linear-gradient(135deg,#166534,#052e16,#030712)" },
+  { id:"emerald", name:"Emerald", icon:"💚", preview:"linear-gradient(135deg,#065f46,#064e3b,#022c22)" },
+  { id:"gold", name:"Gold", icon:"👑", preview:"linear-gradient(135deg,#92400e,#422006,#111827)" },
+  { id:"midnight", name:"Midnight", icon:"🌙", preview:"linear-gradient(135deg,#172554,#0f172a,#020617)" },
+  { id:"champions", name:"Champions", icon:"🏆", preview:"linear-gradient(135deg,#312e81,#172554,#020617)" },
+];
+
 export default function ProfielPage() {
   const router = useRouter();
 
@@ -333,6 +367,9 @@ export default function ProfielPage() {
 
   const [errorMessage, setErrorMessage] =
     useState("");
+
+  const [themeSaving, setThemeSaving] = useState(false);
+  const [themeMessage, setThemeMessage] = useState("");
 
   useEffect(() => {
     loadProfile();
@@ -376,7 +413,7 @@ export default function ProfielPage() {
       } = await supabase
         .from("profiles")
         .select(
-          "username, first_name, last_name, is_premium, premium_expires_at"
+          "username, first_name, last_name, is_premium, premium_expires_at, profile_theme"
         )
         .eq("id", user.id)
         .maybeSingle();
@@ -784,6 +821,44 @@ export default function ProfielPage() {
     if (isCorrectResult(prediction)) { runningStreak += 1; bestStreak = Math.max(bestStreak, runningStreak); } else runningStreak = 0;
   });
 
+  async function saveProfileTheme(theme: ProfileTheme) {
+    if (!profile || themeSaving) return;
+    if (theme !== "default" && !premiumActive) {
+      router.push("/premium");
+      return;
+    }
+
+    setThemeSaving(true);
+    setThemeMessage("");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      router.push("/inloggen");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ profile_theme: theme })
+      .eq("id", user.id);
+
+    if (error) {
+      console.error("PROFIELTHEMA FOUT:", error);
+      setThemeMessage(error.message);
+      setThemeSaving(false);
+      return;
+    }
+
+    setProfile((current) =>
+      current ? { ...current, profile_theme: theme } : current
+    );
+    setThemeMessage(profileThemeUi[language].saved);
+    setThemeSaving(false);
+  }
+
   function formatDate(date: string) {
     return new Date(date).toLocaleString(
       ({nl:"nl-NL",en:"en-GB",de:"de-DE",es:"es-ES",fr:"fr-FR",it:"it-IT",pt:"pt-PT"} as Record<LanguageCode,string>)[language],
@@ -956,6 +1031,67 @@ export default function ProfielPage() {
                   />
                 </div>
               </section>
+
+              {premiumActive && (
+                <section className="mt-8 overflow-hidden rounded-3xl border border-amber-300/20 bg-gradient-to-br from-amber-400/[0.08] via-green-950/70 to-gray-950 p-6 sm:p-7">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
+                      {profileThemeUi[language].eyebrow}
+                    </p>
+                    <h2 className="mt-1 text-2xl font-black">
+                      {profileThemeUi[language].title}
+                    </h2>
+                    <p className="mt-1 text-sm text-green-100/50">
+                      {profileThemeUi[language].intro}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    {profileThemes.map((theme) => {
+                      const selected = (profile.profile_theme || "default") === theme.id;
+                      return (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          disabled={themeSaving}
+                          onClick={() => saveProfileTheme(theme.id)}
+                          className={`overflow-hidden rounded-2xl border text-left transition ${
+                            selected
+                              ? "border-amber-300/70 ring-2 ring-amber-300/20"
+                              : "border-white/10 hover:border-amber-300/30"
+                          }`}
+                        >
+                          <div
+                            className="h-20"
+                            style={{ background: theme.preview }}
+                          />
+                          <div className="bg-black/30 px-4 py-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-black text-white">
+                                {theme.icon} {theme.name}
+                              </span>
+                              {selected && (
+                                <span className="text-xs font-black text-amber-300">✓</span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {themeMessage && (
+                    <p className="mt-4 text-sm font-bold text-amber-200">
+                      {themeMessage}
+                    </p>
+                  )}
+                  {themeSaving && (
+                    <p className="mt-4 text-sm text-green-100/50">
+                      {profileThemeUi[language].saving}
+                    </p>
+                  )}
+                </section>
+              )}
 
               <section className="mt-8 rounded-3xl border border-green-400/15 bg-gradient-to-br from-green-900/70 via-green-950/80 to-gray-950 p-6 sm:p-7">
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
