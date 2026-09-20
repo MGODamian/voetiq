@@ -416,6 +416,9 @@ export default function RegistrerenPage() {
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+
+    if (loading) return;
+
     setErrorMessage("");
 
     const cleanFirstName = firstName.trim();
@@ -477,7 +480,7 @@ export default function RegistrerenPage() {
         ) {
           setErrorMessage(t.emailExists);
         } else {
-          setErrorMessage(error.message);
+          setErrorMessage(t.accountFailed);
         }
 
         setLoading(false);
@@ -540,6 +543,7 @@ export default function RegistrerenPage() {
           </Link>
 
           <div
+            className="register-card confirmation-card"
             style={{
               background:
                 "linear-gradient(145deg, rgba(8,36,24,0.98), rgba(4,21,13,0.98))",
@@ -618,6 +622,18 @@ export default function RegistrerenPage() {
             </Link>
           </div>
         </div>
+
+        <style jsx>{`
+          @media (max-width: 520px) {
+            main {
+              padding: 24px 14px !important;
+            }
+
+            .register-card {
+              padding: 24px 18px !important;
+            }
+          }
+        `}</style>
       </main>
     );
   }
@@ -657,6 +673,7 @@ export default function RegistrerenPage() {
         </Link>
 
         <div
+          className="register-card"
           style={{
             background:
               "linear-gradient(145deg, rgba(8,36,24,0.98), rgba(4,21,13,0.98))",
@@ -688,6 +705,7 @@ export default function RegistrerenPage() {
 
           <form onSubmit={handleRegister}>
             <div
+              className="name-grid"
               style={{
                 display: "grid",
                 gridTemplateColumns: "1fr 1fr",
@@ -909,6 +927,23 @@ export default function RegistrerenPage() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @media (max-width: 520px) {
+          main {
+            padding: 24px 14px !important;
+            align-items: flex-start !important;
+          }
+
+          .register-card {
+            padding: 24px 18px !important;
+          }
+
+          .name-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
