@@ -279,6 +279,7 @@ export default function PoolDetailPage() {
   const [poolId, setPoolId] = useState("");
   const [currentUserId, setCurrentUserId] = useState("");
   const [pool, setPool] = useState<Pool | null>(null);
+  const [ownerPremiumActive, setOwnerPremiumActive] = useState(false);
   const [leaderboard, setLeaderboard] = useState<
     LeaderboardPlayer[]
   >([]);
@@ -382,6 +383,30 @@ export default function PoolDetailPage() {
     }
 
     setPool(poolData);
+
+    const { data: ownerProfile, error: ownerPremiumError } = await supabase
+      .from("profiles")
+      .select("is_premium, premium_expires_at")
+      .eq("id", poolData.owner_id)
+      .maybeSingle();
+
+    if (ownerPremiumError) {
+      console.error("Premium-status poulebeheerder fout:", ownerPremiumError);
+      setOwnerPremiumActive(false);
+    } else {
+      const ownerExpiresAt = ownerProfile?.premium_expires_at
+        ? new Date(ownerProfile.premium_expires_at)
+        : null;
+
+      const ownerHasActivePremium =
+        ownerProfile?.is_premium === true &&
+        (ownerExpiresAt === null ||
+          (!Number.isNaN(ownerExpiresAt.getTime()) &&
+            ownerExpiresAt.getTime() > Date.now()));
+
+      setOwnerPremiumActive(ownerHasActivePremium);
+    }
+
     await loadPoolMatches(poolData.competition_code);
 
     const { data: leaderboardData, error: leaderboardError } =
@@ -730,8 +755,12 @@ export default function PoolDetailPage() {
       flag: "⚽",
     };
 
+  const selectedPoolTheme: PoolTheme = ownerPremiumActive
+    ? ((pool.pool_theme || "default") as PoolTheme)
+    : "default";
+
   const activePoolTheme =
-    poolThemes[(pool.pool_theme || "default") as PoolTheme] || poolThemes.default;
+    poolThemes[selectedPoolTheme] || poolThemes.default;
 
   return (
     <>
