@@ -39,6 +39,7 @@ type Translation = {
   loading: string;
   loginRequired: string;
   competition: string;
+  matchesOnDay: string;
 };
 
 const translations: Record<LanguageCode, Translation> = {
@@ -61,6 +62,7 @@ const translations: Record<LanguageCode, Translation> = {
     loading: "Voorspellingen laden...",
     loginRequired: "Je moet ingelogd zijn om je voorspellingen te bekijken.",
     competition: "Competitie",
+    matchesOnDay: "wedstrijden",
   },
   en: {
     kicker: "YOUR VOETIQ",
@@ -81,6 +83,7 @@ const translations: Record<LanguageCode, Translation> = {
     loading: "Loading predictions...",
     loginRequired: "You need to be logged in to view your predictions.",
     competition: "Competition",
+    matchesOnDay: "matches",
   },
   de: {
     kicker: "DEIN VOETIQ",
@@ -101,6 +104,7 @@ const translations: Record<LanguageCode, Translation> = {
     loading: "Tipps werden geladen...",
     loginRequired: "Du musst angemeldet sein, um deine Tipps anzusehen.",
     competition: "Wettbewerb",
+    matchesOnDay: "Spiele",
   },
   es: {
     kicker: "TU VOETIQ",
@@ -122,6 +126,7 @@ const translations: Record<LanguageCode, Translation> = {
     loginRequired:
       "Debes iniciar sesión para consultar tus pronósticos.",
     competition: "Competición",
+    matchesOnDay: "partidos",
   },
   fr: {
     kicker: "TON VOETIQ",
@@ -143,6 +148,7 @@ const translations: Record<LanguageCode, Translation> = {
     loginRequired:
       "Tu dois être connecté pour consulter tes pronostics.",
     competition: "Compétition",
+    matchesOnDay: "matchs",
   },
   it: {
     kicker: "IL TUO VOETIQ",
@@ -164,6 +170,7 @@ const translations: Record<LanguageCode, Translation> = {
     loginRequired:
       "Devi effettuare l'accesso per vedere i tuoi pronostici.",
     competition: "Competizione",
+    matchesOnDay: "partite",
   },
   pt: {
     kicker: "O TEU VOETIQ",
@@ -185,6 +192,7 @@ const translations: Record<LanguageCode, Translation> = {
     loginRequired:
       "Tens de iniciar sessão para veres os teus prognósticos.",
     competition: "Competição",
+    matchesOnDay: "jogos",
   },
 };
 
@@ -389,6 +397,36 @@ export default function MyPredictionsPage() {
     });
   }
 
+  function dayKey(date: string | null) {
+    if (!date) return "unknown";
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed.getTime())) return "unknown";
+    return `${parsed.getFullYear()}-${parsed.getMonth()}-${parsed.getDate()}`;
+  }
+
+  function formatDay(date: string | null) {
+    if (!date) return "";
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return parsed.toLocaleDateString(locale, {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }
+
+  const groupedPredictions = useMemo(() => {
+    const groups: { key: string; date: string | null; items: Prediction[] }[] = [];
+    for (const prediction of filteredPredictions) {
+      const key = dayKey(prediction.kickoff_at);
+      const existing = groups.find((group) => group.key === key);
+      if (existing) existing.items.push(prediction);
+      else groups.push({ key, date: prediction.kickoff_at, items: [prediction] });
+    }
+    return groups;
+  }, [filteredPredictions]);
+
   return (
     <>
       <Navbar />
@@ -498,8 +536,15 @@ export default function MyPredictionsPage() {
               {filteredPredictions.length === 0 ? (
                 <div className="state-card">{t.noResults}</div>
               ) : (
-                <section className="prediction-list">
-                  {filteredPredictions.map((prediction) => {
+                <section className="prediction-groups">
+                  {groupedPredictions.map((group) => (
+                    <section className="prediction-day" key={group.key}>
+                      <div className="day-heading">
+                        <h2>{formatDay(group.date)}</h2>
+                        <span>{group.items.length} {t.matchesOnDay}</span>
+                      </div>
+                      <div className="prediction-list">
+                        {group.items.map((prediction) => {
                     const played = isPlayed(prediction);
                     const exact = isExact(prediction);
                     const points = Number(prediction.points || 0);
@@ -580,7 +625,10 @@ export default function MyPredictionsPage() {
                         </div>
                       </article>
                     );
-                  })}
+                        })}
+                      </div>
+                    </section>
+                  ))}
                 </section>
               )}
             </>
@@ -667,6 +715,38 @@ export default function MyPredictionsPage() {
           padding: 10px 12px;
           font-weight: 800;
           outline: none;
+        }
+
+        .prediction-groups {
+          display: grid;
+          gap: 26px;
+        }
+
+        .prediction-day {
+          display: grid;
+          gap: 11px;
+        }
+
+        .day-heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          padding: 0 4px;
+        }
+
+        .day-heading h2 {
+          margin: 0;
+          color: #dff7e9;
+          font-size: 14px;
+          font-weight: 950;
+          text-transform: capitalize;
+        }
+
+        .day-heading span {
+          color: #718b7d;
+          font-size: 10px;
+          font-weight: 850;
         }
 
         .prediction-list {
