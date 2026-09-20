@@ -14,6 +14,7 @@ type PublicProfile = {
   correct_results: number;
   is_premium?: boolean;
   premium_expires_at?: string | null;
+  profile_theme?: "default" | "emerald" | "gold" | "midnight" | "champions";
 };
 
 type CompetitionStats = {
@@ -109,6 +110,59 @@ const publicUi = {
  pt:{back:"Voltar",loading:"A carregar perfil do jogador...",notFound:"Não foi possível encontrar este jogador.",loadError:"Não foi possível carregar o perfil do jogador.",noPublic:"Este jogador ainda não tem um perfil público no VoetIQ.",player:"JOGADOR VOETIQ",publicProfile:"Perfil público do jogador",totalPoints:"Pontos totais",predictions:"Previsões",exactScores:"Resultados exatos",correctResults:"Resultados corretos",overall:(n:number)=>`Geral · de ${n} jogadores`,overallList:"Classificação geral",statistics:"Estatísticas",avg:"Média de pontos por previsão",competitionPerformance:"Desempenho por competição",wherePoints:(u:string)=>`Vê onde ${u} ganhou os seus pontos.`,noCompetition:"Ainda não existem dados de competições.",points:"pontos",ofPlayers:(n:number)=>`de ${n} jogadores`,achievements:"Conquistas",recent:"Previsões recentes",privacy:"Só são visíveis previsões de jogos que já começaram.",noPublicPredictions:"Ainda não existem previsões públicas.",prediction:"Previsão",result:"Resultado",live:"Em jogo",footballRank:"Nível futebolístico",currentRank:"Nível atual",nextRank:"Próximo nível",needed:(n:number)=>`Faltam ${n} pontos para subir de nível`,highest:"Nível máximo alcançado"}
 };
 
+
+type PublicProfileTheme = "default" | "emerald" | "gold" | "midnight" | "champions";
+
+const publicProfileThemes: Record<PublicProfileTheme, {
+  background: string;
+  border: string;
+  accent: string;
+  soft: string;
+  avatarBackground: string;
+  avatarBorder: string;
+}> = {
+  default: {
+    background: "linear-gradient(145deg, #06271a 0%, #00170e 100%)",
+    border: "1px solid rgba(80,190,130,0.20)",
+    accent: "#41e58b",
+    soft: "#83e7ae",
+    avatarBackground: "#0b3523",
+    avatarBorder: "2px solid rgba(65,229,139,0.28)",
+  },
+  emerald: {
+    background: "linear-gradient(145deg, rgba(6,95,70,0.98) 0%, rgba(2,44,34,0.98) 100%)",
+    border: "1px solid rgba(52,211,153,0.30)",
+    accent: "#6ee7b7",
+    soft: "#a7f3d0",
+    avatarBackground: "rgba(16,185,129,0.16)",
+    avatarBorder: "2px solid rgba(52,211,153,0.32)",
+  },
+  gold: {
+    background: "linear-gradient(145deg, rgba(120,53,15,0.98) 0%, rgba(66,32,6,0.97) 58%, rgba(17,24,39,0.99) 100%)",
+    border: "1px solid rgba(253,224,71,0.30)",
+    accent: "#fde047",
+    soft: "#fde68a",
+    avatarBackground: "rgba(245,158,11,0.16)",
+    avatarBorder: "2px solid rgba(253,224,71,0.32)",
+  },
+  midnight: {
+    background: "linear-gradient(145deg, rgba(23,37,84,0.99) 0%, rgba(15,23,42,0.98) 58%, rgba(2,6,23,0.99) 100%)",
+    border: "1px solid rgba(129,140,248,0.30)",
+    accent: "#a5b4fc",
+    soft: "#c7d2fe",
+    avatarBackground: "rgba(99,102,241,0.15)",
+    avatarBorder: "2px solid rgba(129,140,248,0.32)",
+  },
+  champions: {
+    background: "linear-gradient(145deg, rgba(49,46,129,0.99) 0%, rgba(30,58,138,0.97) 55%, rgba(2,6,23,0.99) 100%)",
+    border: "1px solid rgba(196,181,253,0.32)",
+    accent: "#c4b5fd",
+    soft: "#ddd6fe",
+    avatarBackground: "rgba(139,92,246,0.16)",
+    avatarBorder: "2px solid rgba(196,181,253,0.34)",
+  },
+};
+
 export default function PublicPlayerProfilePage() {
   const router = useRouter();
 
@@ -122,6 +176,7 @@ export default function PublicPlayerProfilePage() {
   const [language, setLanguage] = useState<LanguageCode>("nl");
   const [error, setError] = useState("");
   const [isPremium, setIsPremium] = useState(false);
+  const [profileTheme, setProfileTheme] = useState<"default" | "emerald" | "gold" | "midnight" | "champions">("default");
 
   useEffect(() => {
     const stored = window.localStorage.getItem("voetiq-language");
@@ -196,7 +251,7 @@ export default function PublicPlayerProfilePage() {
 
     const { data: premiumProfile, error: premiumProfileError } = await supabase
       .from("profiles")
-      .select("is_premium, premium_expires_at")
+      .select("is_premium, premium_expires_at, profile_theme")
       .eq("id", userId)
       .maybeSingle();
 
@@ -215,6 +270,14 @@ export default function PublicPlayerProfilePage() {
           premiumExpiresAt.getTime() > Date.now()));
 
     setIsPremium(premiumActive);
+    setProfileTheme(
+      premiumActive &&
+        ["default", "emerald", "gold", "midnight", "champions"].includes(
+          premiumProfile?.profile_theme || ""
+        )
+        ? (premiumProfile!.profile_theme as "default" | "emerald" | "gold" | "midnight" | "champions")
+        : "default"
+    );
 
     if (competitionResult.error) {
       console.error(competitionResult.error);
@@ -326,6 +389,7 @@ export default function PublicPlayerProfilePage() {
     ? Math.min(100, Math.max(0, ((profile.total_points-currentFootballRank.min)/(nextFootballRank.min-currentFootballRank.min))*100))
     : 100;
   const pointsNeeded = profile && nextFootballRank ? Math.max(0,nextFootballRank.min-profile.total_points) : 0;
+  const activePublicTheme = publicProfileThemes[profileTheme];
 
   return (
     <>
@@ -389,6 +453,8 @@ export default function PublicPlayerProfilePage() {
               <section
                 style={{
                   ...cardStyle,
+                  background: activePublicTheme.background,
+                  border: activePublicTheme.border,
                   padding: "30px",
                   marginBottom: "18px",
                 }}
@@ -406,11 +472,11 @@ export default function PublicPlayerProfilePage() {
                       width: "74px",
                       height: "74px",
                       borderRadius: "50%",
-                      background: "#0b3523",
-                      border: "2px solid rgba(65,229,139,0.28)",
+                      background: activePublicTheme.avatarBackground,
+                      border: activePublicTheme.avatarBorder,
                       display: "grid",
                       placeItems: "center",
-                      color: "#41e58b",
+                      color: activePublicTheme.accent,
                       fontSize: "30px",
                       fontWeight: 900,
                       flexShrink: 0,
@@ -422,7 +488,7 @@ export default function PublicPlayerProfilePage() {
                   <div>
                     <div
                       style={{
-                        color: "#83e7ae",
+                        color: activePublicTheme.soft,
                         fontSize: "12px",
                         fontWeight: 900,
                         letterSpacing: "1px",
@@ -467,7 +533,8 @@ export default function PublicPlayerProfilePage() {
                     <p
                       style={{
                         margin: "8px 0 0",
-                        color: "#a9bbb0",
+                        color: activePublicTheme.soft,
+                        opacity: 0.72,
                         fontSize: "14px",
                       }}
                     >
