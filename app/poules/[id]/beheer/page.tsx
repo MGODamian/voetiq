@@ -34,20 +34,20 @@ export default function PoolManagePage() {
 
   const translations: Record<LanguageCode, any> = {
     nl: {
-      back: "{t.back}", loading: "{t.loading}", manage: "{t.manage}",
-      nameTitle: "{t.nameTitle}", nameHelp: "{t.nameHelp}",
-      nameVisible: "{t.nameVisible}", saving: "Opslaan...", saveName: "Naam opslaan",
-      descTitle: "{t.descTitle}", descPremium: "Voeg een persoonlijke beschrijving van maximaal 200 tekens toe aan je poule.",
+      back: "← Terug naar poule", loading: "Poulebeheer laden...", manage: "POULEBEHEER",
+      nameTitle: "Poulenaam wijzigen", nameHelp: "Kies een naam van 2 tot 40 tekens.",
+      nameVisible: "De nieuwe naam is direct zichtbaar.", saving: "Opslaan...", saveName: "Naam opslaan",
+      descTitle: "👑 Poulebeschrijving", descPremium: "Voeg een persoonlijke beschrijving van maximaal 200 tekens toe aan je poule.",
       descLocked: "Met VoetIQ Premium kun je een persoonlijke beschrijving aan je poule toevoegen.",
       descPlaceholder: "Bijvoorbeeld: Ajax-familiepoule 2026/27 – succes allemaal!",
-      descVisible: "{t.descVisible}", descSaving: "Beschrijving opslaan...",
-      descSave: "👑 Beschrijving opslaan", unlock: "{t.unlock}",
-      themeTitle: "{t.themeTitle}", themePremium: "Kies een eigen stijl voor de bovenkant van je poulepagina.",
-      themeLocked: "Met VoetIQ Premium kun je je poule een eigen thema geven.", active: "{t.active}",
-      inviteTitle: "{t.inviteTitle}", inviteHelp: "Vernieuw de code als je niet meer wilt dat de oude uitnodigingslink gebruikt kan worden.",
-      currentCode: "{t.currentCode}", codeSaving: "Nieuwe code maken...", codeRenew: "🔄 {t.inviteTitle} vernieuwen",
-      deleteTitle: "{t.deleteTitle}", deleteHelp: "Verwijder deze poule permanent. De poule verdwijnt voor alle deelnemers en deze actie kan niet ongedaan worden gemaakt.",
-      deleting: "Poule verwijderen...", delete: "{t.deleteTitle}"
+      descVisible: "Deze tekst is zichtbaar op je poulepagina.", descSaving: "Beschrijving opslaan...",
+      descSave: "👑 Beschrijving opslaan", unlock: "👑 Ontgrendel met VoetIQ Premium",
+      themeTitle: "👑 Poulethema", themePremium: "Kies een eigen stijl voor de bovenkant van je poulepagina.",
+      themeLocked: "Met VoetIQ Premium kun je je poule een eigen thema geven.", active: "✓ ACTIEF",
+      inviteTitle: "Uitnodigingscode", inviteHelp: "Vernieuw de code als je niet meer wilt dat de oude uitnodigingslink gebruikt kan worden.",
+      currentCode: "HUIDIGE CODE", codeSaving: "Nieuwe code maken...", codeRenew: "🔄 Uitnodigingscode vernieuwen",
+      deleteTitle: "🗑️ Poule verwijderen", deleteHelp: "Verwijder deze poule permanent. De poule verdwijnt voor alle deelnemers en deze actie kan niet ongedaan worden gemaakt.",
+      deleting: "Poule verwijderen...", delete: "🗑️ Poule verwijderen"
     },
     en: {
       back: "← Back to pool", loading: "Loading pool management...", manage: "POOL MANAGEMENT",
@@ -1038,9 +1038,7 @@ export default function PoolManagePage() {
                     cursor: regeneratingCode ? "default" : "pointer",
                   }}
                 >
-                  {regeneratingCode
-                    ? "Nieuwe code maken..."
-                    : "🔄 {t.inviteTitle} vernieuwen"}
+                  {regeneratingCode ? t.codeSaving : t.codeRenew}
                 </button>
               </section>
 
@@ -1087,7 +1085,7 @@ export default function PoolManagePage() {
                     cursor: deletingPool ? "default" : "pointer",
                   }}
                 >
-                  {deletingPool ? "Poule verwijderen..." : "{t.deleteTitle}"}
+                  {deletingPool ? t.deleting : t.delete}
                 </button>
               </section>
             </>
