@@ -28,6 +28,13 @@ type Prediction = {
   kickoff_at: string | null;
 };
 
+type AchievementStats = {
+  total_points:number; predictions_count:number; played_predictions:number; exact_scores:number; correct_results:number;
+  competitions_played:number; best_correct_streak:number; best_exact_streak:number; best_competition_correct_results:number;
+};
+
+type ProfileRank = { rank:number; total_players:number };
+
 type Pool = {
   id: string;
   name: string;
@@ -96,6 +103,8 @@ export default function DashboardPage() {
   const [predictions,setPredictions] = useState<Prediction[]>([]);
   const [challenges,setChallenges] = useState<Challenge[]>([]);
   const [pools,setPools] = useState<Pool[]>([]);
+  const [achievementStats,setAchievementStats] = useState<AchievementStats|null>(null);
+  const [achievementRank,setAchievementRank] = useState<ProfileRank|null>(null);
   const [rankPosition,setRankPosition] = useState<number|null>(null);
   const [totalPlayers,setTotalPlayers] = useState(0);
   const [loading,setLoading] = useState(true);
@@ -124,7 +133,7 @@ export default function DashboardPage() {
       const membershipResult = await supabase.from("pool_members").select("pool_id").eq("user_id",user.id);
       const poolIds = (membershipResult.data || []).map((row:{pool_id:string})=>row.pool_id);
 
-      const [profileResult,predictionResult,leaderboardResult,challengeResult,poolResult] = await Promise.all([
+      const [profileResult,predictionResult,leaderboardResult,challengeResult,poolResult,achievementStatsResult,achievementRankResult] = await Promise.all([
         supabase.from("profiles").select("username, first_name, last_name, is_premium, premium_expires_at").eq("id",user.id).maybeSingle(),
         supabase.from("predictions").select("id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at, competition_code, kickoff_at").eq("user_id",user.id).order("kickoff_at",{ascending:false}),
         supabase.rpc("get_leaderboard"),
@@ -132,6 +141,8 @@ export default function DashboardPage() {
         poolIds.length > 0
           ? supabase.from("pools").select("id, name, competition_code, created_at").in("id",poolIds).order("created_at",{ascending:false})
           : Promise.resolve({data:[],error:null}),
+        supabase.rpc("get_public_achievement_stats",{requested_user_id:user.id}),
+        supabase.rpc("get_public_profile_rank",{requested_user_id:user.id}),
       ]);
       if (profileResult.error) throw profileResult.error;
       if (predictionResult.error) throw predictionResult.error;
@@ -143,6 +154,8 @@ export default function DashboardPage() {
       setPredictions((predictionResult.data || []) as Prediction[]);
       if (!challengeResult.error) setChallenges((challengeResult.data || []) as Challenge[]);
       if (!poolResult.error) setPools((poolResult.data || []) as Pool[]);
+      if (!achievementStatsResult.error && achievementStatsResult.data?.[0]) setAchievementStats(achievementStatsResult.data[0] as AchievementStats);
+      if (!achievementRankResult.error && achievementRankResult.data?.[0]) setAchievementRank(achievementRankResult.data[0] as ProfileRank);
 
       if (!leaderboardResult.error) {
         const ranking = (leaderboardResult.data || []) as {username:string;total_points:number}[];
@@ -182,6 +195,22 @@ export default function DashboardPage() {
       weekly_score_50: weekly.reduce((n,p)=>n+Number(p.points||0),0),
     } as Record<string,number>;
   },[predictions]);
+
+  const achievementUnlockedCount = useMemo(() => {
+    if (!achievementStats) return 0;
+    const a=achievementStats;
+    const values:[number,number][]=[
+      [a.exact_scores,1],[a.exact_scores,5],[a.exact_scores,10],[a.exact_scores,25],
+      [a.correct_results,1],[a.correct_results,10],[a.correct_results,25],[a.correct_results,50],
+      [a.predictions_count,1],[a.predictions_count,10],[a.predictions_count,50],[a.predictions_count,100],
+      [a.total_points,1],[a.total_points,100],[a.total_points,250],[a.total_points,500],[a.total_points,1000],
+      [a.best_correct_streak,3],[a.best_correct_streak,5],[a.best_exact_streak,3],
+      [achievementRank && achievementRank.rank<=3?1:0,1],[achievementRank?.rank===1?1:0,1],
+      [a.competitions_played,3],[a.competitions_played,8],[a.best_competition_correct_results,10],[a.predictions_count,250]
+    ];
+    return values.filter(([v,target])=>Number(v)>=target).length;
+  },[achievementStats,achievementRank]);
+  const achievementTotal = 26;
 
   const premiumActive = Boolean(profile?.is_premium && (!profile.premium_expires_at || new Date(profile.premium_expires_at).getTime()>Date.now()));
 
@@ -258,6 +287,15 @@ export default function DashboardPage() {
           </div>
         </section>}
 
+        {achievementStats && <section className="achievementBox">
+          <div className="challengeHead"><h2>🏅 {t.achievements}</h2><button onClick={()=>router.push("/achievements")}>{t.open} →</button></div>
+          <button className="achievementSummary" onClick={()=>router.push("/achievements")}>
+            <div><strong>{achievementUnlockedCount} / {achievementTotal}</strong><small>{t.achievements}</small></div>
+            <div className="achievementProgress"><i style={{width:`${Math.round((achievementUnlockedCount/achievementTotal)*100)}%`}} /></div>
+            <span>→</span>
+          </button>
+        </section>}
+
         <section className="quick">
           <Quick icon="⚽" title={t.makePrediction} text={t.upcoming} onClick={()=>router.push("/wedstrijden")} />
           <Quick icon="👥" title={t.pools} text={t.poolsText} onClick={()=>router.push("/poules")} />
@@ -276,6 +314,7 @@ export default function DashboardPage() {
       .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.match{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}.match:last-child{border-bottom:0}.match>div:first-child{display:flex;flex-direction:column;gap:4px}.match b{font-size:13px}.match small{color:#789084;font-size:10px}.score{text-align:right;display:flex;flex-direction:column}.score strong{font-size:16px}.earned{color:#41e58b;font-weight:950;font-size:13px;white-space:nowrap}
       .poolBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.poolGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.poolCard{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:14px;cursor:pointer}.poolCard:hover{border-color:rgba(65,229,139,.4)}.poolCard>span{font-size:22px}.poolCard>div{display:flex;flex-direction:column;gap:3px}.poolCard b{font-size:12px}.poolCard small{color:#81998c;font-size:10px}.poolCard strong{color:#41e58b}
       .challengeBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.challengeHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.challengeHead h2{font-size:16px;margin:0}.challengeHead button{border:0;background:transparent;color:#41e58b;font-size:10px;font-weight:900;cursor:pointer}.challengeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.challengeCard{text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:14px;cursor:pointer}.challengeCard:hover{border-color:rgba(65,229,139,.4)}.challengeTop{display:flex;justify-content:space-between;gap:10px}.challengeTop b{font-size:12px}.challengeValue{margin-top:12px;color:#41e58b;font-weight:950}.challengeBar{height:6px;background:#00170e;border-radius:999px;overflow:hidden;margin:7px 0}.challengeBar i{display:block;height:100%;background:#22c55e;border-radius:999px}.challengeCard small{color:#81998c;font-size:10px}
+      .achievementBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.achievementSummary{width:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:15px;cursor:pointer}.achievementSummary:hover{border-color:rgba(65,229,139,.4)}.achievementSummary>div:first-child{display:flex;flex-direction:column;gap:3px;min-width:85px}.achievementSummary strong{font-size:18px;color:#41e58b}.achievementSummary small{font-size:10px;color:#81998c}.achievementProgress{height:8px;background:#00170e;border-radius:999px;overflow:hidden}.achievementProgress i{display:block;height:100%;background:#22c55e;border-radius:999px}.achievementSummary>span{color:#41e58b;font-weight:950}
       .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
       @media(max-width:850px){.stats,.quick,.challengeGrid,.poolGrid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.hero{flex-direction:column}}
       @media(max-width:520px){.page{padding:28px 14px 70px}.stats,.quick,.challengeGrid,.poolGrid{grid-template-columns:1fr 1fr}.rankTop{align-items:flex-start;flex-direction:column}}
