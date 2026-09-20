@@ -501,7 +501,7 @@ export default function Ranglijst() {
       return;
     }
 
-    setPlayers(mapCompetitionPlayers(data));
+    setPlayers(await addPremiumStatus(mapCompetitionPlayers(data)));
     setLoading(false);
   }
 
@@ -621,7 +621,7 @@ export default function Ranglijst() {
                   onClick={() =>
                     selectCompetition(competition.code)
                   }
-                  className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition ${
+                  className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-all ${
                     active
                       ? "border-green-400 bg-green-500 text-green-950 shadow-lg shadow-green-950/30"
                       : "border-white/10 bg-white/5 text-green-100/70 hover:border-green-400/30 hover:bg-white/10 hover:text-white"
@@ -839,7 +839,7 @@ export default function Ranglijst() {
                         {player.exact_scores || 0}
                       </div>
 
-                      <div className="mt-1 text-[10px] text-green-100/40">
+                      <div className="mt-1 hidden text-[10px] text-green-100/40 sm:block">
                         {t.exact.toLowerCase()}
                       </div>
                     </div>
@@ -849,7 +849,7 @@ export default function Ranglijst() {
                         {player.predictions_count || 0}
                       </div>
 
-                      <div className="mt-1 text-[10px] text-green-100/40">
+                      <div className="mt-1 hidden text-[10px] text-green-100/40 sm:block">
                         {t.predictions}
                       </div>
                     </div>
