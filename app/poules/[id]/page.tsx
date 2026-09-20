@@ -12,6 +12,7 @@ type Pool = {
   invite_code: string;
   owner_id: string;
   created_at: string;
+  description: string | null;
 };
 
 type LeaderboardPlayer = {
@@ -85,7 +86,7 @@ type TranslationKey =
   | "participant" | "participants" | "competition" | "pointsSystem"
   | "predictMatches" | "inviteFriends" | "poolLeaderboard" | "onlyPoints"
   | "noParticipants" | "prediction" | "predictions" | "exact" | "predicted"
-  | "points" | "poolId"
+  | "points" | "poolId" | "poolDescription"
  ;
 
 const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
@@ -97,7 +98,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Puntensysteem", predictMatches:"Voorspel wedstrijden", inviteFriends:"Vrienden uitnodigen",
     poolLeaderboard:"Pouleklassement", onlyPoints:"Alleen punten uit {competition} tellen mee voor deze poule.",
     noParticipants:"Er zijn nog geen deelnemers in deze poule.", prediction:"voorspelling", predictions:"voorspellingen",
-    exact:"exact", predicted:"voorspeld", points:"PUNTEN", poolId:"Poule-ID"
+    exact:"exact", predicted:"voorspeld", points:"PUNTEN", poolId:"Poule-ID", poolDescription:"POULEBESCHRIJVING"
   },
   en: {
     notFound:"This pool could not be found.", loadError:"The details for this pool could not be loaded.",
@@ -107,7 +108,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Points system", predictMatches:"Predict matches", inviteFriends:"Invite friends",
     poolLeaderboard:"Pool leaderboard", onlyPoints:"Only points from {competition} count towards this pool.",
     noParticipants:"There are no participants in this pool yet.", prediction:"prediction", predictions:"predictions",
-    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID"
+    exact:"exact", predicted:"predicted", points:"POINTS", poolId:"Pool ID", poolDescription:"POOL DESCRIPTION"
   },
   de: {
     notFound:"Diese Tipprunde konnte nicht gefunden werden.", loadError:"Die Daten dieser Tipprunde konnten nicht geladen werden.",
@@ -117,7 +118,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Punktesystem", predictMatches:"Spiele tippen", inviteFriends:"Freunde einladen",
     poolLeaderboard:"Tipprunden-Rangliste", onlyPoints:"Für diese Tipprunde zählen nur Punkte aus {competition}.",
     noParticipants:"In dieser Tipprunde gibt es noch keine Teilnehmer.", prediction:"Tipp", predictions:"Tipps",
-    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID"
+    exact:"exakt", predicted:"getippt", points:"PUNKTE", poolId:"Tipprunden-ID", poolDescription:"BESCHREIBUNG"
   },
   es: {
     notFound:"No se ha podido encontrar este grupo.", loadError:"No se han podido cargar los datos de este grupo.",
@@ -127,7 +128,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema de puntos", predictMatches:"Pronosticar partidos", inviteFriends:"Invitar a amigos",
     poolLeaderboard:"Clasificación del grupo", onlyPoints:"Solo cuentan para este grupo los puntos de {competition}.",
     noParticipants:"Todavía no hay participantes en este grupo.", prediction:"pronóstico", predictions:"pronósticos",
-    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo"
+    exact:"exactos", predicted:"pronosticados", points:"PUNTOS", poolId:"ID del grupo", poolDescription:"DESCRIPCIÓN DEL GRUPO"
   },
   fr: {
     notFound:"Cette ligue est introuvable.", loadError:"Les informations de cette ligue n’ont pas pu être chargées.",
@@ -137,7 +138,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Système de points", predictMatches:"Pronostiquer les matchs", inviteFriends:"Inviter des amis",
     poolLeaderboard:"Classement de la ligue", onlyPoints:"Seuls les points de {competition} comptent pour cette ligue.",
     noParticipants:"Il n’y a encore aucun participant dans cette ligue.", prediction:"pronostic", predictions:"pronostics",
-    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue"
+    exact:"exacts", predicted:"pronostiqués", points:"POINTS", poolId:"ID de la ligue", poolDescription:"DESCRIPTION DE LA LIGUE"
   },
   it: {
     notFound:"Questo gruppo non è stato trovato.", loadError:"Non è stato possibile caricare i dati di questo gruppo.",
@@ -147,7 +148,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema di punti", predictMatches:"Pronostica le partite", inviteFriends:"Invita amici",
     poolLeaderboard:"Classifica del gruppo", onlyPoints:"Per questo gruppo contano solo i punti di {competition}.",
     noParticipants:"Non ci sono ancora partecipanti in questo gruppo.", prediction:"pronostico", predictions:"pronostici",
-    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo"
+    exact:"esatti", predicted:"pronosticati", points:"PUNTI", poolId:"ID gruppo", poolDescription:"DESCRIZIONE DEL GRUPPO"
   },
   pt: {
     notFound:"Não foi possível encontrar este grupo.", loadError:"Não foi possível carregar os dados deste grupo.",
@@ -157,7 +158,7 @@ const translations: Record<LanguageCode, Record<TranslationKey, string>> = {
     pointsSystem:"Sistema de pontos", predictMatches:"Prever jogos", inviteFriends:"Convidar amigos",
     poolLeaderboard:"Classificação do grupo", onlyPoints:"Apenas os pontos de {competition} contam para este grupo.",
     noParticipants:"Ainda não há participantes neste grupo.", prediction:"previsão", predictions:"previsões",
-    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo"
+    exact:"exatos", predicted:"previstos", points:"PONTOS", poolId:"ID do grupo", poolDescription:"DESCRIÇÃO DO GRUPO"
   }
 };
 
@@ -319,7 +320,7 @@ export default function PoolDetailPage() {
       await supabase
         .from("pools")
         .select(
-          "id, name, competition_code, invite_code, owner_id, created_at"
+          "id, name, competition_code, invite_code, owner_id, created_at, description"
         )
         .eq("id", id)
         .maybeSingle();
@@ -774,6 +775,42 @@ export default function PoolDetailPage() {
                 >
                   {competition.flag} {competition.name}
                 </div>
+
+                {pool.description && (
+                  <div
+                    style={{
+                      marginTop: "18px",
+                      maxWidth: "620px",
+                      borderLeft: "3px solid rgba(250,204,21,0.65)",
+                      background: "rgba(250,204,21,0.06)",
+                      borderRadius: "0 12px 12px 0",
+                      padding: "12px 15px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        color: "#fde68a",
+                        fontSize: "10px",
+                        fontWeight: 900,
+                        letterSpacing: "0.9px",
+                        marginBottom: "5px",
+                      }}
+                    >
+                      👑 {t("poolDescription")}
+                    </div>
+                    <div
+                      style={{
+                        color: "#e5eee9",
+                        fontSize: "14px",
+                        lineHeight: 1.55,
+                        whiteSpace: "pre-wrap",
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      {pool.description}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div
