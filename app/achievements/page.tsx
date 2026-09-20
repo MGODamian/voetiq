@@ -164,6 +164,20 @@ export default function AchievementsPage() {
     (a) => a.unlocked ?? a.progress >= a.target
   ).length;
 
+  const orderedAchievements = useMemo(() => {
+    return [...achievements].sort((a, b) => {
+      const aDone = a.unlocked ?? a.progress >= a.target;
+      const bDone = b.unlocked ?? b.progress >= b.target;
+
+      if (aDone !== bDone) return aDone ? -1 : 1;
+      if (aDone && bDone) return 0;
+
+      const aPercentage = a.target > 0 ? Math.min(1, a.progress / a.target) : 0;
+      const bPercentage = b.target > 0 ? Math.min(1, b.progress / b.target) : 0;
+      return bPercentage - aPercentage;
+    });
+  }, [achievements]);
+
   return (
     <>
       <Navbar />
@@ -202,7 +216,7 @@ export default function AchievementsPage() {
               </section>
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "13px" }}>
-                {achievements.map((achievement) => {
+                {orderedAchievements.map((achievement) => {
                   const done = achievement.unlocked ?? achievement.progress >= achievement.target;
                   return (
                     <article
