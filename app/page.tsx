@@ -398,7 +398,7 @@ export default function Home() {
           }}
         >
           <button
-            onClick={() => router.push("/hoe-het-werkt")}
+            onClick={() => router.push("/hoe-werkt-het")}
             style={discoverCardStyle}
           >
             <span style={{ fontSize: "30px" }}>🎯</span>
