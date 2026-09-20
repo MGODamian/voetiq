@@ -28,6 +28,14 @@ type Prediction = {
   kickoff_at: string | null;
 };
 
+type Challenge = {
+  id: number;
+  challenge_key: string;
+  challenge_type: "daily" | "weekly";
+  target: number;
+  reward_points: number;
+};
+
 type FootballRank = {
   min: number;
   max: number | null;
@@ -73,6 +81,7 @@ export default function DashboardPage() {
   const [language,setLanguage] = useState<LanguageCode>("nl");
   const [profile,setProfile] = useState<Profile|null>(null);
   const [predictions,setPredictions] = useState<Prediction[]>([]);
+  const [challenges,setChallenges] = useState<Challenge[]>([]);
   const [rankPosition,setRankPosition] = useState<number|null>(null);
   const [totalPlayers,setTotalPlayers] = useState(0);
   const [loading,setLoading] = useState(true);
@@ -98,10 +107,11 @@ export default function DashboardPage() {
       if (userError) throw userError;
       if (!user) { router.replace("/inloggen?redirect=/dashboard"); return; }
 
-      const [profileResult,predictionResult,leaderboardResult] = await Promise.all([
+      const [profileResult,predictionResult,leaderboardResult,challengeResult] = await Promise.all([
         supabase.from("profiles").select("username, first_name, last_name, is_premium, premium_expires_at").eq("id",user.id).maybeSingle(),
         supabase.from("predictions").select("id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at, competition_code, kickoff_at").eq("user_id",user.id).order("kickoff_at",{ascending:false}),
         supabase.rpc("get_leaderboard"),
+        supabase.from("challenges").select("id, challenge_key, challenge_type, target, reward_points").eq("active",true).order("id"),
       ]);
       if (profileResult.error) throw profileResult.error;
       if (predictionResult.error) throw predictionResult.error;
@@ -111,6 +121,7 @@ export default function DashboardPage() {
 
       setProfile(loadedProfile);
       setPredictions((predictionResult.data || []) as Prediction[]);
+      if (!challengeResult.error) setChallenges((challengeResult.data || []) as Challenge[]);
 
       if (!leaderboardResult.error) {
         const ranking = (leaderboardResult.data || []) as {username:string;total_points:number}[];
@@ -132,7 +143,36 @@ export default function DashboardPage() {
 
   const upcoming = useMemo(()=>[...predictions].filter(p=>!played(p)).sort((a,b)=>new Date(a.kickoff_at||0).getTime()-new Date(b.kickoff_at||0).getTime()).slice(0,3),[predictions]);
   const recent = useMemo(()=>[...predictions].filter(played).sort((a,b)=>new Date(b.kickoff_at||b.created_at).getTime()-new Date(a.kickoff_at||a.created_at).getTime()).slice(0,3),[predictions]);
+  const challengeProgress = useMemo(() => {
+    const dayStart = new Date(); dayStart.setHours(0,0,0,0);
+    const weekStart = new Date(dayStart); const day = weekStart.getDay(); weekStart.setDate(weekStart.getDate() - (day === 0 ? 6 : day - 1));
+    const correct = (p:Prediction) => {
+      if (!played(p)) return false;
+      const predicted = p.home_score === p.away_score ? 0 : p.home_score > p.away_score ? 1 : -1;
+      const actual = p.actual_home_score === p.actual_away_score ? 0 : Number(p.actual_home_score) > Number(p.actual_away_score) ? 1 : -1;
+      return predicted === actual;
+    };
+    const daily = predictions.filter(p => new Date(p.created_at).getTime() >= dayStart.getTime());
+    const weekly = predictions.filter(p => new Date(p.created_at).getTime() >= weekStart.getTime());
+    return {
+      daily_predict_3: daily.length,
+      daily_correct_2: daily.filter(correct).length,
+      weekly_predict_10: weekly.length,
+      weekly_score_50: weekly.reduce((n,p)=>n+Number(p.points||0),0),
+    } as Record<string,number>;
+  },[predictions]);
+
   const premiumActive = Boolean(profile?.is_premium && (!profile.premium_expires_at || new Date(profile.premium_expires_at).getTime()>Date.now()));
+
+  const challengeNames: Record<LanguageCode,Record<string,string>> = {
+    nl:{daily_predict_3:"Doe 3 voorspellingen",daily_correct_2:"Voorspel 2 juiste uitslagen",weekly_predict_10:"Doe 10 voorspellingen",weekly_score_50:"Verdien 50 punten"},
+    en:{daily_predict_3:"Make 3 predictions",daily_correct_2:"Predict 2 correct results",weekly_predict_10:"Make 10 predictions",weekly_score_50:"Earn 50 points"},
+    de:{daily_predict_3:"Gib 3 Tipps ab",daily_correct_2:"Tippe 2 richtige Ausgänge",weekly_predict_10:"Gib 10 Tipps ab",weekly_score_50:"Verdiene 50 Punkte"},
+    es:{daily_predict_3:"Haz 3 predicciones",daily_correct_2:"Predice 2 resultados correctos",weekly_predict_10:"Haz 10 predicciones",weekly_score_50:"Consigue 50 puntos"},
+    fr:{daily_predict_3:"Fais 3 pronostics",daily_correct_2:"Pronostique 2 bons résultats",weekly_predict_10:"Fais 10 pronostics",weekly_score_50:"Gagne 50 points"},
+    it:{daily_predict_3:"Fai 3 pronostici",daily_correct_2:"Pronostica 2 esiti corretti",weekly_predict_10:"Fai 10 pronostici",weekly_score_50:"Guadagna 50 punti"},
+    pt:{daily_predict_3:"Faz 3 previsões",daily_correct_2:"Prevê 2 resultados corretos",weekly_predict_10:"Faz 10 previsões",weekly_score_50:"Ganha 50 pontos"}
+  };
 
   const locale = language==="nl"?"nl-NL":language==="en"?"en-GB":language==="de"?"de-DE":language==="es"?"es-ES":language==="fr"?"fr-FR":language==="it"?"it-IT":"pt-PT";
   const date = (value:string|null) => value ? new Date(value).toLocaleString(locale,{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "";
@@ -167,6 +207,24 @@ export default function DashboardPage() {
           </DashboardList>
         </div>
 
+        {challenges.length > 0 && <section className="challengeBox">
+          <div className="challengeHead"><h2>🎯 {t.challenges}</h2><button onClick={()=>router.push("/challenges")}>{t.open} →</button></div>
+          <div className="challengeGrid">
+            {challenges.map(ch=>{
+              const value=challengeProgress[ch.challenge_key]||0;
+              const shown=Math.min(value,ch.target);
+              const pct=Math.min(100,(value/ch.target)*100);
+              const done=value>=ch.target;
+              return <button key={ch.id} className="challengeCard" onClick={()=>router.push("/challenges")}>
+                <div className="challengeTop"><b>{challengeNames[language][ch.challenge_key]||ch.challenge_key}</b><span>{done?"✅":ch.challenge_type==="daily"?"☀️":"📅"}</span></div>
+                <div className="challengeValue">{shown}/{ch.target}</div>
+                <div className="challengeBar"><i style={{width:`${pct}%`}} /></div>
+                <small>🎁 +{ch.reward_points}</small>
+              </button>
+            })}
+          </div>
+        </section>}
+
         <section className="quick">
           <Quick icon="⚽" title={t.makePrediction} text={t.upcoming} onClick={()=>router.push("/wedstrijden")} />
           <Quick icon="👥" title={t.pools} text={t.poolsText} onClick={()=>router.push("/poules")} />
@@ -183,9 +241,10 @@ export default function DashboardPage() {
       .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}.stats button{cursor:pointer;text-align:left;border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,#06271a,#00170e);border-radius:16px;padding:17px;color:white;display:flex;flex-direction:column;gap:5px}.stats button:hover{border-color:rgba(65,229,139,.4)}.stats span{font-size:20px}.stats strong{font-size:21px}.stats small{color:#81998c;font-weight:800}
       .rankCard{border:1px solid rgba(80,190,130,.18);background:rgba(6,39,26,.72);border-radius:16px;padding:17px;margin-bottom:24px}.rankTop{display:flex;justify-content:space-between;gap:15px;align-items:center}.rankTop>div{display:flex;flex-direction:column;gap:4px}.rankTop small,.rankTop strong{color:#8da397;font-size:11px}.bar{height:8px;background:#00170e;border-radius:999px;overflow:hidden;margin-top:13px}.bar i{display:block;height:100%;background:#22c55e;border-radius:999px}
       .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.match{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}.match:last-child{border-bottom:0}.match>div:first-child{display:flex;flex-direction:column;gap:4px}.match b{font-size:13px}.match small{color:#789084;font-size:10px}.score{text-align:right;display:flex;flex-direction:column}.score strong{font-size:16px}.earned{color:#41e58b;font-weight:950;font-size:13px;white-space:nowrap}
+      .challengeBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.challengeHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.challengeHead h2{font-size:16px;margin:0}.challengeHead button{border:0;background:transparent;color:#41e58b;font-size:10px;font-weight:900;cursor:pointer}.challengeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.challengeCard{text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:14px;cursor:pointer}.challengeCard:hover{border-color:rgba(65,229,139,.4)}.challengeTop{display:flex;justify-content:space-between;gap:10px}.challengeTop b{font-size:12px}.challengeValue{margin-top:12px;color:#41e58b;font-weight:950}.challengeBar{height:6px;background:#00170e;border-radius:999px;overflow:hidden;margin:7px 0}.challengeBar i{display:block;height:100%;background:#22c55e;border-radius:999px}.challengeCard small{color:#81998c;font-size:10px}
       .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-      @media(max-width:850px){.stats,.quick{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.hero{flex-direction:column}}
-      @media(max-width:520px){.page{padding:28px 14px 70px}.stats,.quick{grid-template-columns:1fr 1fr}.rankTop{align-items:flex-start;flex-direction:column}}
+      @media(max-width:850px){.stats,.quick,.challengeGrid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.hero{flex-direction:column}}
+      @media(max-width:520px){.page{padding:28px 14px 70px}.stats,.quick,.challengeGrid{grid-template-columns:1fr 1fr}.rankTop{align-items:flex-start;flex-direction:column}}
     `}</style>
   </>;
 }
