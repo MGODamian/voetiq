@@ -28,6 +28,13 @@ type Prediction = {
   kickoff_at: string | null;
 };
 
+type Pool = {
+  id: string;
+  name: string;
+  competition_code: string;
+  created_at: string;
+};
+
 type Challenge = {
   id: number;
   challenge_key: string;
@@ -76,12 +83,19 @@ function played(p:Prediction) {
   return p.actual_home_score !== null && p.actual_away_score !== null;
 }
 
+const competitionInfo: Record<string,{name:string;flag:string}> = {
+  DED:{name:"Eredivisie",flag:"🇳🇱"}, PL:{name:"Premier League",flag:"🏴"}, PD:{name:"La Liga",flag:"🇪🇸"},
+  BL1:{name:"Bundesliga",flag:"🇩🇪"}, SA:{name:"Serie A",flag:"🇮🇹"}, FL1:{name:"Ligue 1",flag:"🇫🇷"},
+  PPL:{name:"Primeira Liga",flag:"🇵🇹"}, CL:{name:"Champions League",flag:"🏆"}
+};
+
 export default function DashboardPage() {
   const router = useRouter();
   const [language,setLanguage] = useState<LanguageCode>("nl");
   const [profile,setProfile] = useState<Profile|null>(null);
   const [predictions,setPredictions] = useState<Prediction[]>([]);
   const [challenges,setChallenges] = useState<Challenge[]>([]);
+  const [pools,setPools] = useState<Pool[]>([]);
   const [rankPosition,setRankPosition] = useState<number|null>(null);
   const [totalPlayers,setTotalPlayers] = useState(0);
   const [loading,setLoading] = useState(true);
@@ -107,11 +121,17 @@ export default function DashboardPage() {
       if (userError) throw userError;
       if (!user) { router.replace("/inloggen?redirect=/dashboard"); return; }
 
-      const [profileResult,predictionResult,leaderboardResult,challengeResult] = await Promise.all([
+      const membershipResult = await supabase.from("pool_members").select("pool_id").eq("user_id",user.id);
+      const poolIds = (membershipResult.data || []).map((row:{pool_id:string})=>row.pool_id);
+
+      const [profileResult,predictionResult,leaderboardResult,challengeResult,poolResult] = await Promise.all([
         supabase.from("profiles").select("username, first_name, last_name, is_premium, premium_expires_at").eq("id",user.id).maybeSingle(),
         supabase.from("predictions").select("id, match_name, home_score, away_score, actual_home_score, actual_away_score, points, created_at, competition_code, kickoff_at").eq("user_id",user.id).order("kickoff_at",{ascending:false}),
         supabase.rpc("get_leaderboard"),
         supabase.from("challenges").select("id, challenge_key, challenge_type, target, reward_points").eq("active",true).order("id"),
+        poolIds.length > 0
+          ? supabase.from("pools").select("id, name, competition_code, created_at").in("id",poolIds).order("created_at",{ascending:false})
+          : Promise.resolve({data:[],error:null}),
       ]);
       if (profileResult.error) throw profileResult.error;
       if (predictionResult.error) throw predictionResult.error;
@@ -122,6 +142,7 @@ export default function DashboardPage() {
       setProfile(loadedProfile);
       setPredictions((predictionResult.data || []) as Prediction[]);
       if (!challengeResult.error) setChallenges((challengeResult.data || []) as Challenge[]);
+      if (!poolResult.error) setPools((poolResult.data || []) as Pool[]);
 
       if (!leaderboardResult.error) {
         const ranking = (leaderboardResult.data || []) as {username:string;total_points:number}[];
@@ -207,6 +228,18 @@ export default function DashboardPage() {
           </DashboardList>
         </div>
 
+        {pools.length > 0 && <section className="poolBox">
+          <div className="challengeHead"><h2>👥 {t.pools}</h2><button onClick={()=>router.push("/poules")}>{t.open} →</button></div>
+          <div className="poolGrid">
+            {pools.slice(0,4).map(pool=>{
+              const comp=competitionInfo[pool.competition_code] || {name:pool.competition_code,flag:"⚽"};
+              return <button key={pool.id} className="poolCard" onClick={()=>router.push(`/poules/${pool.id}`)}>
+                <span>{comp.flag}</span><div><b>{pool.name}</b><small>{comp.name}</small></div><strong>→</strong>
+              </button>
+            })}
+          </div>
+        </section>}
+
         {challenges.length > 0 && <section className="challengeBox">
           <div className="challengeHead"><h2>🎯 {t.challenges}</h2><button onClick={()=>router.push("/challenges")}>{t.open} →</button></div>
           <div className="challengeGrid">
@@ -241,10 +274,11 @@ export default function DashboardPage() {
       .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}.stats button{cursor:pointer;text-align:left;border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,#06271a,#00170e);border-radius:16px;padding:17px;color:white;display:flex;flex-direction:column;gap:5px}.stats button:hover{border-color:rgba(65,229,139,.4)}.stats span{font-size:20px}.stats strong{font-size:21px}.stats small{color:#81998c;font-weight:800}
       .rankCard{border:1px solid rgba(80,190,130,.18);background:rgba(6,39,26,.72);border-radius:16px;padding:17px;margin-bottom:24px}.rankTop{display:flex;justify-content:space-between;gap:15px;align-items:center}.rankTop>div{display:flex;flex-direction:column;gap:4px}.rankTop small,.rankTop strong{color:#8da397;font-size:11px}.bar{height:8px;background:#00170e;border-radius:999px;overflow:hidden;margin-top:13px}.bar i{display:block;height:100%;background:#22c55e;border-radius:999px}
       .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.match{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}.match:last-child{border-bottom:0}.match>div:first-child{display:flex;flex-direction:column;gap:4px}.match b{font-size:13px}.match small{color:#789084;font-size:10px}.score{text-align:right;display:flex;flex-direction:column}.score strong{font-size:16px}.earned{color:#41e58b;font-weight:950;font-size:13px;white-space:nowrap}
+      .poolBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.poolGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.poolCard{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:14px;cursor:pointer}.poolCard:hover{border-color:rgba(65,229,139,.4)}.poolCard>span{font-size:22px}.poolCard>div{display:flex;flex-direction:column;gap:3px}.poolCard b{font-size:12px}.poolCard small{color:#81998c;font-size:10px}.poolCard strong{color:#41e58b}
       .challengeBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.challengeHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.challengeHead h2{font-size:16px;margin:0}.challengeHead button{border:0;background:transparent;color:#41e58b;font-size:10px;font-weight:900;cursor:pointer}.challengeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.challengeCard{text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:14px;cursor:pointer}.challengeCard:hover{border-color:rgba(65,229,139,.4)}.challengeTop{display:flex;justify-content:space-between;gap:10px}.challengeTop b{font-size:12px}.challengeValue{margin-top:12px;color:#41e58b;font-weight:950}.challengeBar{height:6px;background:#00170e;border-radius:999px;overflow:hidden;margin:7px 0}.challengeBar i{display:block;height:100%;background:#22c55e;border-radius:999px}.challengeCard small{color:#81998c;font-size:10px}
       .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-      @media(max-width:850px){.stats,.quick,.challengeGrid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.hero{flex-direction:column}}
-      @media(max-width:520px){.page{padding:28px 14px 70px}.stats,.quick,.challengeGrid{grid-template-columns:1fr 1fr}.rankTop{align-items:flex-start;flex-direction:column}}
+      @media(max-width:850px){.stats,.quick,.challengeGrid,.poolGrid{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.hero{flex-direction:column}}
+      @media(max-width:520px){.page{padding:28px 14px 70px}.stats,.quick,.challengeGrid,.poolGrid{grid-template-columns:1fr 1fr}.rankTop{align-items:flex-start;flex-direction:column}}
     `}</style>
   </>;
 }
