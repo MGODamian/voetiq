@@ -29,6 +29,126 @@ const competitions: Record<string, string> = {
 export default function PoolManagePage() {
   const router = useRouter();
 
+  type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+  const [language, setLanguage] = useState<LanguageCode>("nl");
+
+  const translations: Record<LanguageCode, any> = {
+    nl: {
+      back: "{t.back}", loading: "{t.loading}", manage: "{t.manage}",
+      nameTitle: "{t.nameTitle}", nameHelp: "{t.nameHelp}",
+      nameVisible: "{t.nameVisible}", saving: "Opslaan...", saveName: "Naam opslaan",
+      descTitle: "{t.descTitle}", descPremium: "Voeg een persoonlijke beschrijving van maximaal 200 tekens toe aan je poule.",
+      descLocked: "Met VoetIQ Premium kun je een persoonlijke beschrijving aan je poule toevoegen.",
+      descPlaceholder: "Bijvoorbeeld: Ajax-familiepoule 2026/27 – succes allemaal!",
+      descVisible: "{t.descVisible}", descSaving: "Beschrijving opslaan...",
+      descSave: "👑 Beschrijving opslaan", unlock: "{t.unlock}",
+      themeTitle: "{t.themeTitle}", themePremium: "Kies een eigen stijl voor de bovenkant van je poulepagina.",
+      themeLocked: "Met VoetIQ Premium kun je je poule een eigen thema geven.", active: "{t.active}",
+      inviteTitle: "{t.inviteTitle}", inviteHelp: "Vernieuw de code als je niet meer wilt dat de oude uitnodigingslink gebruikt kan worden.",
+      currentCode: "{t.currentCode}", codeSaving: "Nieuwe code maken...", codeRenew: "🔄 {t.inviteTitle} vernieuwen",
+      deleteTitle: "{t.deleteTitle}", deleteHelp: "Verwijder deze poule permanent. De poule verdwijnt voor alle deelnemers en deze actie kan niet ongedaan worden gemaakt.",
+      deleting: "Poule verwijderen...", delete: "{t.deleteTitle}"
+    },
+    en: {
+      back: "← Back to pool", loading: "Loading pool management...", manage: "POOL MANAGEMENT",
+      nameTitle: "Change pool name", nameHelp: "Choose a name between 2 and 40 characters.",
+      nameVisible: "The new name will be visible immediately.", saving: "Saving...", saveName: "Save name",
+      descTitle: "👑 Pool description", descPremium: "Add a personal description of up to 200 characters to your pool.",
+      descLocked: "With VoetIQ Premium you can add a personal description to your pool.",
+      descPlaceholder: "For example: Ajax family pool 2026/27 – good luck everyone!",
+      descVisible: "This text will be visible on your pool page.", descSaving: "Saving description...",
+      descSave: "👑 Save description", unlock: "👑 Unlock with VoetIQ Premium",
+      themeTitle: "👑 Pool theme", themePremium: "Choose your own style for the top of your pool page.",
+      themeLocked: "With VoetIQ Premium you can give your pool its own theme.", active: "✓ ACTIVE",
+      inviteTitle: "Invitation code", inviteHelp: "Renew the code if you no longer want the old invitation link to work.",
+      currentCode: "CURRENT CODE", codeSaving: "Creating new code...", codeRenew: "🔄 Renew invitation code",
+      deleteTitle: "🗑️ Delete pool", deleteHelp: "Permanently delete this pool. It will disappear for all participants and this action cannot be undone.",
+      deleting: "Deleting pool...", delete: "🗑️ Delete pool"
+    },
+    de: {
+      back: "← Zurück zum Tippspiel", loading: "Tippspielverwaltung wird geladen...", manage: "TIPPSPIELVERWALTUNG",
+      nameTitle: "Tippspielname ändern", nameHelp: "Wähle einen Namen mit 2 bis 40 Zeichen.",
+      nameVisible: "Der neue Name ist sofort sichtbar.", saving: "Speichern...", saveName: "Namen speichern",
+      descTitle: "👑 Beschreibung", descPremium: "Füge deinem Tippspiel eine persönliche Beschreibung mit bis zu 200 Zeichen hinzu.",
+      descLocked: "Mit VoetIQ Premium kannst du deinem Tippspiel eine persönliche Beschreibung hinzufügen.",
+      descPlaceholder: "Zum Beispiel: Ajax-Familientippspiel 2026/27 – viel Erfolg!",
+      descVisible: "Dieser Text wird auf deiner Tippspielseite angezeigt.", descSaving: "Beschreibung speichern...",
+      descSave: "👑 Beschreibung speichern", unlock: "👑 Mit VoetIQ Premium freischalten",
+      themeTitle: "👑 Tippspiel-Theme", themePremium: "Wähle einen eigenen Stil für den oberen Bereich deiner Tippspielseite.",
+      themeLocked: "Mit VoetIQ Premium kannst du deinem Tippspiel ein eigenes Theme geben.", active: "✓ AKTIV",
+      inviteTitle: "Einladungscode", inviteHelp: "Erneuere den Code, wenn der alte Einladungslink nicht mehr funktionieren soll.",
+      currentCode: "AKTUELLER CODE", codeSaving: "Neuen Code erstellen...", codeRenew: "🔄 Einladungscode erneuern",
+      deleteTitle: "🗑️ Tippspiel löschen", deleteHelp: "Lösche dieses Tippspiel dauerhaft. Es verschwindet für alle Teilnehmer und kann nicht wiederhergestellt werden.",
+      deleting: "Tippspiel löschen...", delete: "🗑️ Tippspiel löschen"
+    },
+    es: {
+      back: "← Volver a la porra", loading: "Cargando gestión de la porra...", manage: "GESTIÓN DE LA PORRA",
+      nameTitle: "Cambiar nombre de la porra", nameHelp: "Elige un nombre de entre 2 y 40 caracteres.",
+      nameVisible: "El nuevo nombre será visible inmediatamente.", saving: "Guardando...", saveName: "Guardar nombre",
+      descTitle: "👑 Descripción de la porra", descPremium: "Añade una descripción personal de hasta 200 caracteres a tu porra.",
+      descLocked: "Con VoetIQ Premium puedes añadir una descripción personal a tu porra.",
+      descPlaceholder: "Por ejemplo: Porra familiar Ajax 2026/27 – ¡mucha suerte!",
+      descVisible: "Este texto aparecerá en la página de tu porra.", descSaving: "Guardando descripción...",
+      descSave: "👑 Guardar descripción", unlock: "👑 Desbloquear con VoetIQ Premium",
+      themeTitle: "👑 Tema de la porra", themePremium: "Elige un estilo propio para la parte superior de tu página.",
+      themeLocked: "Con VoetIQ Premium puedes darle a tu porra su propio tema.", active: "✓ ACTIVO",
+      inviteTitle: "Código de invitación", inviteHelp: "Renueva el código si ya no quieres que funcione el enlace de invitación anterior.",
+      currentCode: "CÓDIGO ACTUAL", codeSaving: "Creando nuevo código...", codeRenew: "🔄 Renovar código de invitación",
+      deleteTitle: "🗑️ Eliminar porra", deleteHelp: "Elimina esta porra permanentemente. Desaparecerá para todos los participantes y no se puede deshacer.",
+      deleting: "Eliminando porra...", delete: "🗑️ Eliminar porra"
+    },
+    fr: {
+      back: "← Retour au groupe", loading: "Chargement de la gestion du groupe...", manage: "GESTION DU GROUPE",
+      nameTitle: "Modifier le nom du groupe", nameHelp: "Choisissez un nom de 2 à 40 caractères.",
+      nameVisible: "Le nouveau nom sera visible immédiatement.", saving: "Enregistrement...", saveName: "Enregistrer le nom",
+      descTitle: "👑 Description du groupe", descPremium: "Ajoutez une description personnelle de 200 caractères maximum à votre groupe.",
+      descLocked: "Avec VoetIQ Premium, vous pouvez ajouter une description personnelle à votre groupe.",
+      descPlaceholder: "Par exemple : Groupe familial Ajax 2026/27 – bonne chance à tous !",
+      descVisible: "Ce texte sera visible sur la page de votre groupe.", descSaving: "Enregistrement de la description...",
+      descSave: "👑 Enregistrer la description", unlock: "👑 Débloquer avec VoetIQ Premium",
+      themeTitle: "👑 Thème du groupe", themePremium: "Choisissez un style personnalisé pour le haut de la page de votre groupe.",
+      themeLocked: "Avec VoetIQ Premium, vous pouvez donner un thème personnalisé à votre groupe.", active: "✓ ACTIF",
+      inviteTitle: "Code d’invitation", inviteHelp: "Renouvelez le code si vous ne voulez plus que l’ancien lien d’invitation fonctionne.",
+      currentCode: "CODE ACTUEL", codeSaving: "Création du nouveau code...", codeRenew: "🔄 Renouveler le code d’invitation",
+      deleteTitle: "🗑️ Supprimer le groupe", deleteHelp: "Supprimez définitivement ce groupe. Il disparaîtra pour tous les participants et cette action est irréversible.",
+      deleting: "Suppression du groupe...", delete: "🗑️ Supprimer le groupe"
+    },
+    it: {
+      back: "← Torna al gruppo", loading: "Caricamento gestione gruppo...", manage: "GESTIONE GRUPPO",
+      nameTitle: "Modifica nome del gruppo", nameHelp: "Scegli un nome da 2 a 40 caratteri.",
+      nameVisible: "Il nuovo nome sarà visibile immediatamente.", saving: "Salvataggio...", saveName: "Salva nome",
+      descTitle: "👑 Descrizione del gruppo", descPremium: "Aggiungi al gruppo una descrizione personale di massimo 200 caratteri.",
+      descLocked: "Con VoetIQ Premium puoi aggiungere una descrizione personale al tuo gruppo.",
+      descPlaceholder: "Ad esempio: Gruppo famiglia Ajax 2026/27 – buona fortuna a tutti!",
+      descVisible: "Questo testo sarà visibile nella pagina del gruppo.", descSaving: "Salvataggio descrizione...",
+      descSave: "👑 Salva descrizione", unlock: "👑 Sblocca con VoetIQ Premium",
+      themeTitle: "👑 Tema del gruppo", themePremium: "Scegli uno stile personalizzato per la parte superiore della pagina del gruppo.",
+      themeLocked: "Con VoetIQ Premium puoi dare al tuo gruppo un tema personalizzato.", active: "✓ ATTIVO",
+      inviteTitle: "Codice di invito", inviteHelp: "Rinnova il codice se non vuoi più che il vecchio link di invito funzioni.",
+      currentCode: "CODICE ATTUALE", codeSaving: "Creazione nuovo codice...", codeRenew: "🔄 Rinnova codice di invito",
+      deleteTitle: "🗑️ Elimina gruppo", deleteHelp: "Elimina definitivamente questo gruppo. Scomparirà per tutti i partecipanti e l’azione non può essere annullata.",
+      deleting: "Eliminazione gruppo...", delete: "🗑️ Elimina gruppo"
+    },
+    pt: {
+      back: "← Voltar ao grupo", loading: "A carregar gestão do grupo...", manage: "GESTÃO DO GRUPO",
+      nameTitle: "Alterar nome do grupo", nameHelp: "Escolhe um nome entre 2 e 40 caracteres.",
+      nameVisible: "O novo nome ficará visível imediatamente.", saving: "A guardar...", saveName: "Guardar nome",
+      descTitle: "👑 Descrição do grupo", descPremium: "Adiciona uma descrição pessoal de até 200 caracteres ao teu grupo.",
+      descLocked: "Com o VoetIQ Premium podes adicionar uma descrição pessoal ao teu grupo.",
+      descPlaceholder: "Por exemplo: Grupo familiar Ajax 2026/27 – boa sorte a todos!",
+      descVisible: "Este texto ficará visível na página do teu grupo.", descSaving: "A guardar descrição...",
+      descSave: "👑 Guardar descrição", unlock: "👑 Desbloquear com VoetIQ Premium",
+      themeTitle: "👑 Tema do grupo", themePremium: "Escolhe um estilo próprio para o topo da página do teu grupo.",
+      themeLocked: "Com o VoetIQ Premium podes dar ao teu grupo um tema próprio.", active: "✓ ATIVO",
+      inviteTitle: "Código de convite", inviteHelp: "Renova o código se já não quiseres que o link de convite antigo funcione.",
+      currentCode: "CÓDIGO ATUAL", codeSaving: "A criar novo código...", codeRenew: "🔄 Renovar código de convite",
+      deleteTitle: "🗑️ Eliminar grupo", deleteHelp: "Elimina este grupo permanentemente. Desaparecerá para todos os participantes e esta ação não pode ser anulada.",
+      deleting: "A eliminar grupo...", delete: "🗑️ Eliminar grupo"
+    }
+  };
+
+  const t = translations[language];
+
   const [poolId, setPoolId] = useState("");
   const [pool, setPool] = useState<Pool | null>(null);
   const [name, setName] = useState("");
@@ -49,6 +169,20 @@ export default function PoolManagePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const savedLanguage = localStorage.getItem("voetiq-language") as LanguageCode | null;
+    if (savedLanguage && ["nl", "en", "de", "es", "fr", "it", "pt"].includes(savedLanguage)) {
+      setLanguage(savedLanguage);
+    }
+
+    const handleLanguageChange = () => {
+      const nextLanguage = localStorage.getItem("voetiq-language") as LanguageCode | null;
+      if (nextLanguage && ["nl", "en", "de", "es", "fr", "it", "pt"].includes(nextLanguage)) {
+        setLanguage(nextLanguage);
+      }
+    };
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+
     const parts = window.location.pathname.split("/").filter(Boolean);
     const id = parts[1];
 
@@ -60,6 +194,10 @@ export default function PoolManagePage() {
 
     setPoolId(id);
     loadPool(id);
+
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+    };
   }, []);
 
   async function loadPool(id: string) {
@@ -331,7 +469,7 @@ export default function PoolManagePage() {
               fontSize: "14px",
             }}
           >
-            ← Terug naar poule
+            {t.back}
           </button>
 
           {loading ? (
@@ -344,7 +482,7 @@ export default function PoolManagePage() {
                 padding: "28px",
               }}
             >
-              Poulebeheer laden...
+              {t.loading}
             </div>
           ) : error && !pool ? (
             <div
@@ -380,7 +518,7 @@ export default function PoolManagePage() {
                     marginBottom: "7px",
                   }}
                 >
-                  POULEBEHEER
+                  {t.manage}
                 </div>
 
                 <h1
@@ -420,7 +558,7 @@ export default function PoolManagePage() {
                     fontSize: "22px",
                   }}
                 >
-                  Poulenaam wijzigen
+                  {t.nameTitle}
                 </h2>
 
                 <p
@@ -430,7 +568,7 @@ export default function PoolManagePage() {
                     fontSize: "14px",
                   }}
                 >
-                  Kies een naam van 2 tot en met 40 tekens.
+                  {t.nameHelp}
                 </p>
 
                 <input
@@ -471,7 +609,7 @@ export default function PoolManagePage() {
                     fontSize: "12px",
                   }}
                 >
-                  <span>De nieuwe naam wordt direct zichtbaar.</span>
+                  <span>{t.nameVisible}</span>
                   <span>{name.length}/40</span>
                 </div>
 
@@ -542,7 +680,7 @@ export default function PoolManagePage() {
                         : "pointer",
                   }}
                 >
-                  {saving ? "Opslaan..." : "Naam opslaan"}
+                  {saving ? t.saving : t.saveName}
                 </button>
               </section>
 
@@ -570,7 +708,7 @@ export default function PoolManagePage() {
                   }}
                 >
                   <h2 style={{ margin: 0, fontSize: "22px" }}>
-                    👑 Poulebeschrijving
+                    {t.descTitle}
                   </h2>
 
                   <span
@@ -599,9 +737,7 @@ export default function PoolManagePage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  {isPremium
-                    ? "Voeg een persoonlijke beschrijving van maximaal 200 tekens toe aan je poule."
-                    : "Met VoetIQ Premium kun je een persoonlijke beschrijving aan je poule toevoegen."}
+                  {isPremium ? t.descPremium : t.descLocked}
                 </p>
 
                 {isPremium ? (
@@ -615,7 +751,7 @@ export default function PoolManagePage() {
                         setDescriptionError("");
                         setDescriptionMessage("");
                       }}
-                      placeholder="Bijvoorbeeld: Ajax-familiepoule 2026/27 – succes allemaal!"
+                      placeholder={t.descPlaceholder}
                       style={{
                         width: "100%",
                         boxSizing: "border-box",
@@ -643,7 +779,7 @@ export default function PoolManagePage() {
                         fontSize: "12px",
                       }}
                     >
-                      <span>Deze tekst wordt zichtbaar op je poulepagina.</span>
+                      <span>{t.descVisible}</span>
                       <span>{description.length}/200</span>
                     </div>
 
@@ -710,9 +846,7 @@ export default function PoolManagePage() {
                             : "pointer",
                       }}
                     >
-                      {savingDescription
-                        ? "Beschrijving opslaan..."
-                        : "👑 Beschrijving opslaan"}
+                      {savingDescription ? t.descSaving : t.descSave}
                     </button>
                   </>
                 ) : (
@@ -728,7 +862,7 @@ export default function PoolManagePage() {
                       cursor: "pointer",
                     }}
                   >
-                    👑 Ontgrendel met VoetIQ Premium
+                    {t.unlock}
                   </button>
                 )}
               </section>
@@ -747,16 +881,14 @@ export default function PoolManagePage() {
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                  <h2 style={{ margin: 0, fontSize: "22px" }}>👑 Poulethema</h2>
+                  <h2 style={{ margin: 0, fontSize: "22px" }}>{t.themeTitle}</h2>
                   <span style={{ display: "inline-flex", borderRadius: "999px", border: "1px solid rgba(250,204,21,0.30)", background: "rgba(250,204,21,0.10)", padding: "6px 9px", color: "#fde047", fontSize: "10px", fontWeight: 900, letterSpacing: "0.8px" }}>
                     PREMIUM
                   </span>
                 </div>
 
                 <p style={{ margin: "8px 0 18px", color: "#a9bbb0", fontSize: "14px", lineHeight: 1.5 }}>
-                  {isPremium
-                    ? "Kies een eigen stijl voor de bovenkant van je poulepagina."
-                    : "Met VoetIQ Premium kun je je poule een eigen thema geven."}
+                  {isPremium ? t.themePremium : t.themeLocked}
                 </p>
 
                 {isPremium ? (
@@ -800,7 +932,7 @@ export default function PoolManagePage() {
                             </div>
                             {selected && (
                               <div style={{ marginTop: "4px", fontSize: "10px", fontWeight: 900, color: theme.accent }}>
-                                ✓ ACTIEF
+                                {t.active}
                               </div>
                             )}
                           </button>
@@ -825,7 +957,7 @@ export default function PoolManagePage() {
                     onClick={() => router.push("/premium")}
                     style={{ border: "1px solid rgba(250,204,21,0.30)", borderRadius: "11px", padding: "12px 18px", background: "rgba(250,204,21,0.10)", color: "#fde047", fontWeight: 900, cursor: "pointer" }}
                   >
-                    👑 Ontgrendel met VoetIQ Premium
+                    {t.unlock}
                   </button>
                 )}
               </section>
@@ -846,7 +978,7 @@ export default function PoolManagePage() {
                     fontSize: "22px",
                   }}
                 >
-                  Uitnodigingscode
+                  {t.inviteTitle}
                 </h2>
 
                 <p
@@ -857,8 +989,7 @@ export default function PoolManagePage() {
                     lineHeight: 1.5,
                   }}
                 >
-                  Vernieuw de code als je niet meer wilt dat de oude
-                  uitnodigingslink gebruikt kan worden.
+                  {t.inviteHelp}
                 </p>
 
                 <div
@@ -879,7 +1010,7 @@ export default function PoolManagePage() {
                       letterSpacing: "0.8px",
                     }}
                   >
-                    HUIDIGE CODE
+                    {t.currentCode}
                   </div>
 
                   <div
@@ -909,7 +1040,7 @@ export default function PoolManagePage() {
                 >
                   {regeneratingCode
                     ? "Nieuwe code maken..."
-                    : "🔄 Uitnodigingscode vernieuwen"}
+                    : "🔄 {t.inviteTitle} vernieuwen"}
                 </button>
               </section>
 
@@ -929,7 +1060,7 @@ export default function PoolManagePage() {
                     color: "#ffb4b4",
                   }}
                 >
-                  🗑️ Poule verwijderen
+                  {t.deleteTitle}
                 </h2>
 
                 <p
@@ -940,8 +1071,7 @@ export default function PoolManagePage() {
                     lineHeight: 1.55,
                   }}
                 >
-                  Verwijder deze poule permanent. De poule verdwijnt voor alle
-                  deelnemers en deze actie kan niet ongedaan worden gemaakt.
+                  {t.deleteHelp}
                 </p>
 
                 <button
@@ -957,7 +1087,7 @@ export default function PoolManagePage() {
                     cursor: deletingPool ? "default" : "pointer",
                   }}
                 >
-                  {deletingPool ? "Poule verwijderen..." : "🗑️ Poule verwijderen"}
+                  {deletingPool ? "Poule verwijderen..." : "{t.deleteTitle}"}
                 </button>
               </section>
             </>
