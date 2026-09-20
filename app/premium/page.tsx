@@ -581,7 +581,11 @@ export default function PremiumPage() {
 
         @media (max-width: 760px) {
           .premium-page {
-            padding-top: 45px;
+            padding: 45px 16px 72px;
+          }
+
+          .premium-hero {
+            margin-bottom: 30px;
           }
 
           .premium-grid {
@@ -589,12 +593,38 @@ export default function PremiumPage() {
           }
 
           h1 {
+            font-size: clamp(36px, 11vw, 52px);
             letter-spacing: -1.7px;
           }
 
           .plan-card,
           .features-card {
             padding: 22px;
+          }
+
+          .price {
+            flex-wrap: wrap;
+            align-items: baseline;
+          }
+
+          .fair-card {
+            align-items: flex-start;
+          }
+        }
+
+        @media (max-width: 420px) {
+          .plan-top {
+            align-items: flex-start;
+            gap: 12px;
+            flex-wrap: wrap;
+          }
+
+          .price strong {
+            font-size: 42px;
+          }
+
+          .feature {
+            grid-template-columns: 25px minmax(0, 1fr);
           }
         }
       `}</style>
