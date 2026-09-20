@@ -11,6 +11,7 @@ type Player = {
   total_points: number;
   predictions_count?: number;
   exact_scores?: number;
+  is_premium?: boolean;
 };
 
 type Competition = {
@@ -422,15 +423,30 @@ export default function Ranglijst() {
         usernames.length > 0
           ? await supabase
               .from("profiles")
-              .select("id, username")
+              .select("id, username, is_premium, premium_expires_at")
               .in("username", usernames)
           : { data: [] };
 
-      const profileIds = new Map(
-        (profiles || []).map((profile) => [
-          profile.username,
-          profile.id,
-        ])
+      const profileMap = new Map(
+        (profiles || []).map((profile) => {
+          const expiresAt = profile.premium_expires_at
+            ? new Date(profile.premium_expires_at)
+            : null;
+
+          const premiumActive =
+            profile.is_premium === true &&
+            (expiresAt === null ||
+              (!Number.isNaN(expiresAt.getTime()) &&
+                expiresAt.getTime() > Date.now()));
+
+          return [
+            profile.username,
+            {
+              id: profile.id,
+              is_premium: premiumActive,
+            },
+          ];
+        })
       );
 
       const leaderboard: Player[] = generalRows.map(
@@ -438,9 +454,10 @@ export default function Ranglijst() {
           username: string;
           total_points: number;
         }) => ({
-          user_id: profileIds.get(player.username),
+          user_id: profileMap.get(player.username)?.id,
           username: player.username,
           total_points: Number(player.total_points) || 0,
+          is_premium: profileMap.get(player.username)?.is_premium || false,
         })
       );
 
@@ -465,7 +482,7 @@ export default function Ranglijst() {
         return;
       }
 
-      setPlayers(mapCompetitionPlayers(data));
+      setPlayers(await addPremiumStatus(mapCompetitionPlayers(data)));
       setLoading(false);
       return;
     }
@@ -486,6 +503,47 @@ export default function Ranglijst() {
 
     setPlayers(mapCompetitionPlayers(data));
     setLoading(false);
+  }
+
+  async function addPremiumStatus(rows: Player[]): Promise<Player[]> {
+    const userIds = rows
+      .map((player) => player.user_id)
+      .filter((id): id is string => Boolean(id));
+
+    if (userIds.length === 0) return rows;
+
+    const { data: profiles, error } = await supabase
+      .from("profiles")
+      .select("id, is_premium, premium_expires_at")
+      .in("id", userIds);
+
+    if (error) {
+      console.error("Premium-status ranglijst fout:", error);
+      return rows;
+    }
+
+    const premiumById = new Map(
+      (profiles || []).map((profile) => {
+        const expiresAt = profile.premium_expires_at
+          ? new Date(profile.premium_expires_at)
+          : null;
+
+        const premiumActive =
+          profile.is_premium === true &&
+          (expiresAt === null ||
+            (!Number.isNaN(expiresAt.getTime()) &&
+              expiresAt.getTime() > Date.now()));
+
+        return [profile.id, premiumActive];
+      })
+    );
+
+    return rows.map((player) => ({
+      ...player,
+      is_premium: player.user_id
+        ? premiumById.get(player.user_id) || false
+        : false,
+    }));
   }
 
   function mapCompetitionPlayers(data: unknown): Player[] {
@@ -737,18 +795,26 @@ export default function Ranglijst() {
                 </div>
 
                 <div>
-                  {player.user_id ? (
-                    <button
-                      onClick={() => router.push(`/speler/${player.user_id}`)}
-                      className="font-bold text-green-300 transition hover:text-green-200 hover:underline"
-                    >
-                      {player.username}
-                    </button>
-                  ) : (
-                    <p className="font-bold text-white">
-                      {player.username}
-                    </p>
-                  )}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {player.user_id ? (
+                      <button
+                        onClick={() => router.push(`/speler/${player.user_id}`)}
+                        className="font-bold text-green-300 transition hover:text-green-200 hover:underline"
+                      >
+                        {player.username}
+                      </button>
+                    ) : (
+                      <p className="font-bold text-white">
+                        {player.username}
+                      </p>
+                    )}
+
+                    {player.is_premium && (
+                      <span className="inline-flex items-center rounded-full border border-yellow-300/25 bg-yellow-300/10 px-2 py-0.5 text-[10px] font-black tracking-wide text-yellow-200">
+                        👑 PREMIUM
+                      </span>
+                    )}
+                  </div>
 
                   {index === 0 && (
                     <p className="mt-1 text-xs font-medium text-yellow-300">
