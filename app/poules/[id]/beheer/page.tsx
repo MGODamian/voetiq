@@ -11,6 +11,7 @@ type Pool = {
   competition_code: string;
   invite_code: string;
   owner_id: string;
+  description: string | null;
 };
 
 const competitions: Record<string, string> = {
@@ -30,6 +31,11 @@ export default function PoolManagePage() {
   const [poolId, setPoolId] = useState("");
   const [pool, setPool] = useState<Pool | null>(null);
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
+  const [savingDescription, setSavingDescription] = useState(false);
+  const [descriptionMessage, setDescriptionMessage] = useState("");
+  const [descriptionError, setDescriptionError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [regeneratingCode, setRegeneratingCode] = useState(false);
@@ -66,7 +72,7 @@ export default function PoolManagePage() {
 
     const { data, error: poolError } = await supabase
       .from("pools")
-      .select("id, name, competition_code, invite_code, owner_id")
+      .select("id, name, competition_code, invite_code, owner_id, description")
       .eq("id", id)
       .maybeSingle();
 
@@ -82,8 +88,30 @@ export default function PoolManagePage() {
       return;
     }
 
+    const { data: premiumProfile, error: premiumError } = await supabase
+      .from("profiles")
+      .select("is_premium, premium_expires_at")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (premiumError) {
+      console.error(premiumError);
+    }
+
+    const premiumExpiresAt = premiumProfile?.premium_expires_at
+      ? new Date(premiumProfile.premium_expires_at)
+      : null;
+
+    const premiumActive =
+      premiumProfile?.is_premium === true &&
+      (premiumExpiresAt === null ||
+        (!Number.isNaN(premiumExpiresAt.getTime()) &&
+          premiumExpiresAt.getTime() > Date.now()));
+
+    setIsPremium(premiumActive);
     setPool(data);
     setName(data.name);
+    setDescription(data.description || "");
     setLoading(false);
   }
 
@@ -124,6 +152,47 @@ export default function PoolManagePage() {
     setName(cleanName);
     setMessage("✓ Poulenaam succesvol gewijzigd.");
     setSaving(false);
+  }
+
+  async function saveDescription() {
+    if (!pool || !isPremium) return;
+
+    const cleanDescription = description.trim();
+
+    if (cleanDescription.length > 200) {
+      setDescriptionError("De poulebeschrijving mag maximaal 200 tekens bevatten.");
+      setDescriptionMessage("");
+      return;
+    }
+
+    setSavingDescription(true);
+    setDescriptionError("");
+    setDescriptionMessage("");
+
+    const { error: updateError } = await supabase.rpc(
+      "update_pool_description",
+      {
+        requested_pool_id: pool.id,
+        new_description: cleanDescription,
+      }
+    );
+
+    if (updateError) {
+      console.error(updateError);
+      setDescriptionError(
+        updateError.message || "De poulebeschrijving kon niet worden opgeslagen."
+      );
+      setSavingDescription(false);
+      return;
+    }
+
+    setPool({
+      ...pool,
+      description: cleanDescription || null,
+    });
+    setDescription(cleanDescription);
+    setDescriptionMessage("✓ Poulebeschrijving succesvol opgeslagen.");
+    setSavingDescription(false);
   }
 
   async function regenerateInviteCode() {
@@ -440,6 +509,193 @@ export default function PoolManagePage() {
                 >
                   {saving ? "Opslaan..." : "Naam opslaan"}
                 </button>
+              </section>
+
+              <section
+                style={{
+                  background: isPremium
+                    ? "linear-gradient(145deg, rgba(82,57,8,0.88) 0%, rgba(20,18,8,0.98) 58%, #00170e 100%)"
+                    : "linear-gradient(145deg, #06271a 0%, #00170e 100%)",
+                  border: isPremium
+                    ? "1px solid rgba(250,204,21,0.28)"
+                    : "1px solid rgba(80,190,130,0.20)",
+                  borderRadius: "20px",
+                  padding: "24px",
+                  marginTop: "18px",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                    marginBottom: "6px",
+                  }}
+                >
+                  <h2 style={{ margin: 0, fontSize: "22px" }}>
+                    👑 Poulebeschrijving
+                  </h2>
+
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      borderRadius: "999px",
+                      border: "1px solid rgba(250,204,21,0.30)",
+                      background: "rgba(250,204,21,0.10)",
+                      padding: "6px 9px",
+                      color: "#fde047",
+                      fontSize: "10px",
+                      fontWeight: 900,
+                      letterSpacing: "0.8px",
+                    }}
+                  >
+                    PREMIUM
+                  </span>
+                </div>
+
+                <p
+                  style={{
+                    margin: "0 0 18px",
+                    color: "#a9bbb0",
+                    fontSize: "14px",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {isPremium
+                    ? "Voeg een persoonlijke beschrijving van maximaal 200 tekens toe aan je poule."
+                    : "Met VoetIQ Premium kun je een persoonlijke beschrijving aan je poule toevoegen."}
+                </p>
+
+                {isPremium ? (
+                  <>
+                    <textarea
+                      value={description}
+                      maxLength={200}
+                      rows={4}
+                      onChange={(event) => {
+                        setDescription(event.target.value);
+                        setDescriptionError("");
+                        setDescriptionMessage("");
+                      }}
+                      placeholder="Bijvoorbeeld: Ajax-familiepoule 2026/27 – succes allemaal!"
+                      style={{
+                        width: "100%",
+                        boxSizing: "border-box",
+                        resize: "vertical",
+                        minHeight: "105px",
+                        background: "#00170e",
+                        border: "1px solid rgba(250,204,21,0.25)",
+                        borderRadius: "11px",
+                        padding: "13px 14px",
+                        color: "white",
+                        outline: "none",
+                        fontSize: "14px",
+                        lineHeight: 1.5,
+                        fontFamily: "inherit",
+                      }}
+                    />
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: "12px",
+                        marginTop: "8px",
+                        color: "#9f9b80",
+                        fontSize: "12px",
+                      }}
+                    >
+                      <span>Deze tekst wordt zichtbaar op je poulepagina.</span>
+                      <span>{description.length}/200</span>
+                    </div>
+
+                    {descriptionError && (
+                      <div
+                        style={{
+                          marginTop: "14px",
+                          padding: "11px 13px",
+                          borderRadius: "10px",
+                          background: "#2a1114",
+                          border: "1px solid rgba(255,100,100,0.20)",
+                          color: "#ffb4b4",
+                          fontSize: "13px",
+                          fontWeight: 700,
+                        }}
+                      >
+                        {descriptionError}
+                      </div>
+                    )}
+
+                    {descriptionMessage && (
+                      <div
+                        style={{
+                          marginTop: "14px",
+                          padding: "11px 13px",
+                          borderRadius: "10px",
+                          background: "rgba(250,204,21,0.08)",
+                          border: "1px solid rgba(250,204,21,0.20)",
+                          color: "#fde68a",
+                          fontSize: "13px",
+                          fontWeight: 800,
+                        }}
+                      >
+                        {descriptionMessage}
+                      </div>
+                    )}
+
+                    <button
+                      onClick={saveDescription}
+                      disabled={
+                        savingDescription ||
+                        description.trim() === (pool.description || "")
+                      }
+                      style={{
+                        marginTop: "18px",
+                        border: 0,
+                        borderRadius: "11px",
+                        padding: "12px 18px",
+                        background:
+                          savingDescription ||
+                          description.trim() === (pool.description || "")
+                            ? "#4a4120"
+                            : "#a16207",
+                        color:
+                          savingDescription ||
+                          description.trim() === (pool.description || "")
+                            ? "#9f9871"
+                            : "white",
+                        fontWeight: 900,
+                        cursor:
+                          savingDescription ||
+                          description.trim() === (pool.description || "")
+                            ? "default"
+                            : "pointer",
+                      }}
+                    >
+                      {savingDescription
+                        ? "Beschrijving opslaan..."
+                        : "👑 Beschrijving opslaan"}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => router.push("/premium")}
+                    style={{
+                      border: "1px solid rgba(250,204,21,0.30)",
+                      borderRadius: "11px",
+                      padding: "12px 18px",
+                      background: "rgba(250,204,21,0.10)",
+                      color: "#fde047",
+                      fontWeight: 900,
+                      cursor: "pointer",
+                    }}
+                  >
+                    👑 Ontgrendel met VoetIQ Premium
+                  </button>
+                )}
               </section>
 
               <section
