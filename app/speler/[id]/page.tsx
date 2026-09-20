@@ -12,6 +12,8 @@ type PublicProfile = {
   predictions_count: number;
   exact_scores: number;
   correct_results: number;
+  is_premium?: boolean;
+  premium_expires_at?: string | null;
 };
 
 type CompetitionStats = {
@@ -119,6 +121,7 @@ export default function PublicPlayerProfilePage() {
   const [loading, setLoading] = useState(true);
   const [language, setLanguage] = useState<LanguageCode>("nl");
   const [error, setError] = useState("");
+  const [isPremium, setIsPremium] = useState(false);
 
   useEffect(() => {
     const stored = window.localStorage.getItem("voetiq-language");
@@ -190,6 +193,28 @@ export default function PublicPlayerProfilePage() {
       setLoading(false);
       return;
     }
+
+    const { data: premiumProfile, error: premiumProfileError } = await supabase
+      .from("profiles")
+      .select("is_premium, premium_expires_at")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (premiumProfileError) {
+      console.error(premiumProfileError);
+    }
+
+    const premiumExpiresAt = premiumProfile?.premium_expires_at
+      ? new Date(premiumProfile.premium_expires_at)
+      : null;
+
+    const premiumActive =
+      premiumProfile?.is_premium === true &&
+      (premiumExpiresAt === null ||
+        (!Number.isNaN(premiumExpiresAt.getTime()) &&
+          premiumExpiresAt.getTime() > Date.now()));
+
+    setIsPremium(premiumActive);
 
     if (competitionResult.error) {
       console.error(competitionResult.error);
@@ -414,7 +439,29 @@ export default function PublicPlayerProfilePage() {
                         lineHeight: 1.15,
                       }}
                     >
-                      {profile.username}
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                        <span>{profile.username}</span>
+                        {isPremium && (
+                          <span
+                            style={{
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: "5px",
+                              borderRadius: "999px",
+                              border: "1px solid rgba(250,204,21,0.32)",
+                              background: "rgba(250,204,21,0.10)",
+                              padding: "5px 9px",
+                              color: "#fde047",
+                              fontSize: "10px",
+                              fontWeight: 900,
+                              letterSpacing: "0.8px",
+                              lineHeight: 1,
+                            }}
+                          >
+                            👑 PREMIUM
+                          </span>
+                        )}
+                      </span>
                     </h1>
 
                     <p
