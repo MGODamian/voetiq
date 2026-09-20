@@ -112,6 +112,20 @@ export default function ChallengesPage() {
 
   const t=ui[language];
 
+  const orderedChallenges = useMemo(() => {
+    return [...challenges].sort((a,b) => {
+      if (a.challenge_type !== b.challenge_type) {
+        return a.challenge_type === "daily" ? -1 : 1;
+      }
+
+      const aDone = (progress[a.challenge_key] || 0) >= a.target;
+      const bDone = (progress[b.challenge_key] || 0) >= b.target;
+      if (aDone !== bDone) return aDone ? -1 : 1;
+
+      return a.id - b.id;
+    });
+  }, [challenges, progress]);
+
   return (
     <main className="min-h-screen bg-[linear-gradient(180deg,#07110e_0%,#091713_50%,#050a08_100%)] text-white">
       <Navbar/>
@@ -126,7 +140,7 @@ export default function ChallengesPage() {
 
         {!loading && !error && challenges.length>0 && (
           <div className="mt-8 grid gap-5 md:grid-cols-2">
-            {challenges.map(ch=>{
+            {orderedChallenges.map(ch=>{
               const value=progress[ch.challenge_key] || 0;
               const shown=Math.min(value,ch.target);
               const percentage=Math.min(100,(value/ch.target)*100);
@@ -152,7 +166,7 @@ export default function ChallengesPage() {
                     <div className="h-full rounded-full bg-green-400 transition-all duration-500" style={{width:`${percentage}%`}}/>
                   </div>
 
-                  <div className="mt-5 flex items-center justify-between border-t border-white/5 pt-4">
+                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-4">
                     <span className="text-sm text-green-100/45">🎁 +{ch.reward_points} {t.reward}</span>
                     {done && <span className="rounded-lg bg-green-500/10 px-3 py-1.5 text-xs font-black text-green-300 ring-1 ring-green-400/15">{t.complete}</span>}
                   </div>
