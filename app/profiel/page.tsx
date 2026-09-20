@@ -345,6 +345,68 @@ const profileThemes: Array<{
   { id:"champions", name:"Champions", icon:"🏆", preview:"linear-gradient(135deg,#312e81,#172554,#020617)" },
 ];
 
+const profileHeaderThemes: Record<ProfileTheme, {
+  background: string;
+  borderColor: string;
+  accent: string;
+  accentSoft: string;
+  avatarBackground: string;
+  avatarRing: string;
+  rankBackground: string;
+  rankBorder: string;
+}> = {
+  default: {
+    background: "linear-gradient(135deg, rgba(22,101,52,0.82), rgba(5,46,22,0.92) 55%, rgba(3,7,18,0.98))",
+    borderColor: "rgba(74,222,128,0.10)",
+    accent: "#86efac",
+    accentSoft: "rgba(220,252,231,0.60)",
+    avatarBackground: "rgba(34,197,94,0.15)",
+    avatarRing: "rgba(74,222,128,0.20)",
+    rankBackground: "rgba(74,222,128,0.10)",
+    rankBorder: "rgba(74,222,128,0.20)",
+  },
+  emerald: {
+    background: "linear-gradient(135deg, rgba(6,95,70,0.95), rgba(6,78,59,0.94) 52%, rgba(2,44,34,0.98))",
+    borderColor: "rgba(52,211,153,0.24)",
+    accent: "#6ee7b7",
+    accentSoft: "rgba(209,250,229,0.64)",
+    avatarBackground: "rgba(16,185,129,0.18)",
+    avatarRing: "rgba(52,211,153,0.28)",
+    rankBackground: "rgba(16,185,129,0.13)",
+    rankBorder: "rgba(52,211,153,0.26)",
+  },
+  gold: {
+    background: "linear-gradient(135deg, rgba(120,53,15,0.96), rgba(66,32,6,0.94) 52%, rgba(17,24,39,0.99))",
+    borderColor: "rgba(253,224,71,0.30)",
+    accent: "#fde68a",
+    accentSoft: "rgba(254,243,199,0.65)",
+    avatarBackground: "rgba(245,158,11,0.18)",
+    avatarRing: "rgba(253,224,71,0.30)",
+    rankBackground: "rgba(245,158,11,0.13)",
+    rankBorder: "rgba(253,224,71,0.28)",
+  },
+  midnight: {
+    background: "linear-gradient(135deg, rgba(23,37,84,0.98), rgba(15,23,42,0.96) 55%, rgba(2,6,23,0.99))",
+    borderColor: "rgba(129,140,248,0.24)",
+    accent: "#c7d2fe",
+    accentSoft: "rgba(224,231,255,0.62)",
+    avatarBackground: "rgba(99,102,241,0.16)",
+    avatarRing: "rgba(129,140,248,0.28)",
+    rankBackground: "rgba(99,102,241,0.12)",
+    rankBorder: "rgba(129,140,248,0.25)",
+  },
+  champions: {
+    background: "linear-gradient(135deg, rgba(49,46,129,0.98), rgba(30,58,138,0.94) 50%, rgba(2,6,23,0.99))",
+    borderColor: "rgba(165,180,252,0.28)",
+    accent: "#ddd6fe",
+    accentSoft: "rgba(237,233,254,0.64)",
+    avatarBackground: "rgba(139,92,246,0.17)",
+    avatarRing: "rgba(196,181,253,0.30)",
+    rankBackground: "rgba(99,102,241,0.14)",
+    rankBorder: "rgba(196,181,253,0.27)",
+  },
+};
+
 export default function ProfielPage() {
   const router = useRouter();
 
@@ -794,6 +856,11 @@ export default function ProfielPage() {
     (!profile.premium_expires_at || new Date(profile.premium_expires_at).getTime() > Date.now())
   );
   const pui = premiumInsightsUi[language];
+  const selectedProfileTheme: ProfileTheme =
+    premiumActive && profile?.profile_theme
+      ? profile.profile_theme
+      : "default";
+  const activeHeaderTheme = profileHeaderThemes[selectedProfileTheme];
 
   const recentPlayed = [...playedPredictions]
     .sort((a,b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -967,7 +1034,13 @@ export default function ProfielPage() {
           !errorMessage &&
           profile && (
             <>
-              <section className="overflow-hidden rounded-3xl border border-green-400/10 bg-gradient-to-br from-green-800/80 via-green-950/90 to-gray-950 shadow-2xl">
+              <section
+                className="overflow-hidden rounded-3xl border shadow-2xl transition-all duration-300"
+                style={{
+                  background: activeHeaderTheme.background,
+                  borderColor: activeHeaderTheme.borderColor,
+                }}
+              >
                 <div className="p-6 sm:p-8">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-5">
