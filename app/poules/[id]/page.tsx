@@ -13,6 +13,7 @@ type Pool = {
   owner_id: string;
   created_at: string;
   description: string | null;
+  pool_theme: "default" | "emerald" | "gold" | "midnight" | "champions";
 };
 
 type LeaderboardPlayer = {
@@ -234,6 +235,44 @@ const competitionThemes: Record<
   },
 };
 
+type PoolTheme = "default" | "emerald" | "gold" | "midnight" | "champions";
+
+const poolThemes: Record<
+  PoolTheme,
+  { background: string; border: string; accent: string; soft: string }
+> = {
+  default: {
+    background: "linear-gradient(145deg, #06271a 0%, #00170e 100%)",
+    border: "1px solid rgba(80,190,130,0.20)",
+    accent: "#83e7ae",
+    soft: "rgba(65,229,139,0.07)",
+  },
+  emerald: {
+    background: "radial-gradient(circle at 85% 15%, rgba(31,220,128,0.18) 0%, transparent 34%), linear-gradient(145deg, #063522 0%, #042719 48%, #00170e 100%)",
+    border: "1px solid rgba(110,231,168,0.30)",
+    accent: "#6ee7a8",
+    soft: "rgba(110,231,168,0.08)",
+  },
+  gold: {
+    background: "radial-gradient(circle at 85% 15%, rgba(250,204,21,0.18) 0%, transparent 34%), linear-gradient(145deg, #2a2107 0%, #171306 52%, #090800 100%)",
+    border: "1px solid rgba(250,204,21,0.30)",
+    accent: "#fde047",
+    soft: "rgba(250,204,21,0.08)",
+  },
+  midnight: {
+    background: "radial-gradient(circle at 85% 15%, rgba(59,130,246,0.20) 0%, transparent 34%), linear-gradient(145deg, #07111f 0%, #0b1c33 52%, #050a12 100%)",
+    border: "1px solid rgba(147,197,253,0.28)",
+    accent: "#93c5fd",
+    soft: "rgba(147,197,253,0.08)",
+  },
+  champions: {
+    background: "radial-gradient(circle at 85% 15%, rgba(139,92,246,0.24) 0%, transparent 34%), linear-gradient(145deg, #070b2b 0%, #111951 52%, #080b24 100%)",
+    border: "1px solid rgba(196,181,253,0.30)",
+    accent: "#c4b5fd",
+    soft: "rgba(196,181,253,0.08)",
+  },
+};
+
 export default function PoolDetailPage() {
   const router = useRouter();
 
@@ -320,7 +359,7 @@ export default function PoolDetailPage() {
       await supabase
         .from("pools")
         .select(
-          "id, name, competition_code, invite_code, owner_id, created_at, description"
+          "id, name, competition_code, invite_code, owner_id, created_at, description, pool_theme"
         )
         .eq("id", id)
         .maybeSingle();
@@ -691,6 +730,9 @@ export default function PoolDetailPage() {
       flag: "⚽",
     };
 
+  const activePoolTheme =
+    poolThemes[(pool.pool_theme || "default") as PoolTheme] || poolThemes.default;
+
   return (
     <>
       <Navbar />
@@ -726,13 +768,13 @@ export default function PoolDetailPage() {
 
           <section
             style={{
-              background: "linear-gradient(145deg, #06271a 0%, #00170e 100%)",
+              background: activePoolTheme.background,
               color: "white",
+              border: activePoolTheme.border,
               borderRadius: "24px",
               padding: "32px",
               marginBottom: "22px",
-              boxShadow:
-                "0 12px 35px rgba(13,61,39,0.16)",
+              boxShadow: `0 12px 35px ${activePoolTheme.soft}`,
             }}
           >
             <div
@@ -747,7 +789,7 @@ export default function PoolDetailPage() {
               <div>
                 <div
                   style={{
-                    color: "#83e7ae",
+                    color: activePoolTheme.accent,
                     fontWeight: 900,
                     fontSize: "13px",
                     letterSpacing: "1px",
@@ -781,15 +823,15 @@ export default function PoolDetailPage() {
                     style={{
                       marginTop: "18px",
                       maxWidth: "620px",
-                      borderLeft: "3px solid rgba(250,204,21,0.65)",
-                      background: "rgba(250,204,21,0.06)",
+                      borderLeft: `3px solid ${activePoolTheme.accent}`,
+                      background: activePoolTheme.soft,
                       borderRadius: "0 12px 12px 0",
                       padding: "12px 15px",
                     }}
                   >
                     <div
                       style={{
-                        color: "#fde68a",
+                        color: activePoolTheme.accent,
                         fontSize: "10px",
                         fontWeight: 900,
                         letterSpacing: "0.9px",
