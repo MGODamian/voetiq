@@ -1285,7 +1285,16 @@ export default function Navbar() {
         }
 
         .account-stack .language-picker {
-          order: -1;
+          order: 3;
+        }
+
+        .account-stack .login-link,
+        .account-stack .profile-button {
+          order: 1;
+        }
+
+        .account-stack .notification-picker {
+          order: 2;
         }
 
         .nav-dropdown {
