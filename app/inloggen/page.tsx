@@ -203,6 +203,8 @@ export default function Inloggen() {
   }, []);
 
   async function login() {
+    if (loading) return;
+
     setMessage("");
 
     if (!email || !password) {
@@ -346,6 +348,7 @@ export default function Inloggen() {
 
           <input
             type="email"
+            autoComplete="email"
             placeholder={t.emailPlaceholder}
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -377,11 +380,12 @@ export default function Inloggen() {
 
           <input
             type="password"
+            autoComplete="current-password"
             placeholder={t.passwordPlaceholder}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
+              if (event.key === "Enter" && !loading) {
                 login();
               }
             }}
@@ -504,6 +508,19 @@ export default function Inloggen() {
           {t.footer}
         </p>
       </div>
+
+      <style jsx>{`
+        @media (max-width: 480px) {
+          main {
+            padding: 22px 14px !important;
+            align-items: flex-start !important;
+          }
+
+          section {
+            padding: 22px 18px !important;
+          }
+        }
+      `}</style>
     </main>
   );
 }
