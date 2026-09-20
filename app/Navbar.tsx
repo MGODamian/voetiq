@@ -157,6 +157,8 @@ type NavbarTranslation = {
   playFree: string;
   language: string;
   openMenu: string;
+  progress: string;
+  more: string;
 };
 
 const languages: {
@@ -192,6 +194,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     playFree: "Speel gratis",
     language: "Taal",
     openMenu: "Menu openen",
+    progress: "Voortgang",
+    more: "Meer",
   },
   en: {
     home: "Home",
@@ -210,6 +214,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     playFree: "Play for free",
     language: "Language",
     openMenu: "Open menu",
+    progress: "Progress",
+    more: "More",
   },
   de: {
     home: "Startseite",
@@ -228,6 +234,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     playFree: "Kostenlos spielen",
     language: "Sprache",
     openMenu: "Menü öffnen",
+    progress: "Fortschritt",
+    more: "Mehr",
   },
   es: {
     home: "Inicio",
@@ -246,6 +254,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     playFree: "Jugar gratis",
     language: "Idioma",
     openMenu: "Abrir menú",
+    progress: "Progreso",
+    more: "Más",
   },
   fr: {
     home: "Accueil",
@@ -264,6 +274,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     playFree: "Jouer gratuitement",
     language: "Langue",
     openMenu: "Ouvrir le menu",
+    progress: "Progression",
+    more: "Plus",
   },
   it: {
     home: "Home",
@@ -282,6 +294,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     playFree: "Gioca gratis",
     language: "Lingua",
     openMenu: "Apri menu",
+    progress: "Progressi",
+    more: "Altro",
   },
   pt: {
     home: "Início",
@@ -300,6 +314,8 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     playFree: "Jogar grátis",
     language: "Idioma",
     openMenu: "Abrir menu",
+    progress: "Progresso",
+    more: "Mais",
   },
 };
 
@@ -319,11 +335,15 @@ export default function Navbar() {
   const [promotionUserId, setPromotionUserId] = useState("");
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [progressOpen, setProgressOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [readNotificationIds, setReadNotificationIds] = useState<string[]>([]);
   const [notificationUserId, setNotificationUserId] = useState("");
 
   const languageRef = useRef<HTMLDivElement>(null);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const moreRef = useRef<HTMLDivElement>(null);
 
   const t = translations[language];
   const currentLanguage =
@@ -380,6 +400,20 @@ export default function Navbar() {
         !notificationRef.current.contains(event.target as Node)
       ) {
         setNotificationsOpen(false);
+      }
+
+      if (
+        progressRef.current &&
+        !progressRef.current.contains(event.target as Node)
+      ) {
+        setProgressOpen(false);
+      }
+
+      if (
+        moreRef.current &&
+        !moreRef.current.contains(event.target as Node)
+      ) {
+        setMoreOpen(false);
       }
     }
 
@@ -744,19 +778,7 @@ export default function Navbar() {
               active={isActive("/wedstrijden")}
             />
 
-            {loggedIn && (
-              <NavLink
-                href="/mijn-voorspellingen"
-                label={`⚽ ${t.predictions}`}
-                active={isActive("/mijn-voorspellingen")}
-              />
-            )}
-
-            <NavLink
-              href="/poules"
-              label={t.pools}
-              active={isActive("/poules")}
-            />
+            <NavLink href="/poules" label={t.pools} active={isActive("/poules")} />
 
             <NavLink
               href="/ranglijst"
@@ -765,156 +787,190 @@ export default function Navbar() {
             />
 
             {loggedIn && (
-              <>
-                <NavLink
-                  href="/achievements"
-                  label={`🏅 ${t.achievements}`}
-                  active={isActive("/achievements")}
-                />
-                <NavLink
-                  href="/challenges"
-                  label={`🔥 ${t.challenges}`}
-                  active={isActive("/challenges")}
-                />
-                <NavLink
-                  href="/premium"
-                  label={`👑 ${t.premium}`}
-                  active={isActive("/premium")}
-                />
-              </>
-            )}
-
-            <NavLink
-              href="/hoe-werkt-het"
-              label={t.howItWorks}
-              active={isActive("/hoe-werkt-het")}
-            />
-          </nav>
-
-          <div className="desktop-account">
-            {loggedIn && (
-              <div className="notification-picker" ref={notificationRef}>
+              <div className="nav-dropdown" ref={progressRef}>
                 <button
                   type="button"
-                  className="notification-button"
-                  onClick={() => setNotificationsOpen((current) => !current)}
-                  aria-label={notificationCopy[language].title}
-                  aria-expanded={notificationsOpen}
+                  className={
+                    isActive("/achievements") || isActive("/challenges")
+                      ? "nav-dropdown-button active"
+                      : "nav-dropdown-button"
+                  }
+                  onClick={() => {
+                    setProgressOpen((current) => !current);
+                    setMoreOpen(false);
+                  }}
+                  aria-expanded={progressOpen}
                 >
-                  <span>🔔</span>
-                  {notifications.filter((item) => !readNotificationIds.includes(item.id)).length > 0 && (
-                    <span className="notification-count">
-                      {Math.min(9, notifications.filter((item) => !readNotificationIds.includes(item.id)).length)}
-                    </span>
-                  )}
+                  {t.progress} <span>⌄</span>
                 </button>
 
-                {notificationsOpen && (
-                  <div className="notification-dropdown">
-                    <div className="notification-header">
-                      <strong>{notificationCopy[language].title}</strong>
-                      {notifications.length > 0 && (
-                        <button type="button" onClick={markAllNotificationsRead}>
-                          {notificationCopy[language].markRead}
-                        </button>
-                      )}
-                    </div>
-
-                    {notifications.length === 0 ? (
-                      <div className="notification-empty">
-                        {notificationCopy[language].empty}
-                      </div>
-                    ) : (
-                      <div className="notification-list">
-                        {notifications.map((item) => (
-                          <Link
-                            key={item.id}
-                            href={item.href}
-                            onClick={() => setNotificationsOpen(false)}
-                            className={
-                              readNotificationIds.includes(item.id)
-                                ? "notification-item"
-                                : "notification-item unread"
-                            }
-                          >
-                            <span className="notification-icon">{item.icon}</span>
-                            <span>{item.text}</span>
-                          </Link>
-                        ))}
-                      </div>
-                    )}
+                {progressOpen && (
+                  <div className="nav-dropdown-menu">
+                    <Link href="/achievements" onClick={() => setProgressOpen(false)}>
+                      <span>🏅</span>
+                      <div><strong>{t.achievements}</strong></div>
+                    </Link>
+                    <Link href="/challenges" onClick={() => setProgressOpen(false)}>
+                      <span>🔥</span>
+                      <div><strong>{t.challenges}</strong></div>
+                    </Link>
                   </div>
                 )}
               </div>
             )}
 
-            <div className="language-picker" ref={languageRef}>
+            <div className="nav-dropdown" ref={moreRef}>
               <button
                 type="button"
-                className="language-button"
-                onClick={() => setLanguageOpen((current) => !current)}
-                aria-expanded={languageOpen}
-                aria-label={t.language}
+                className={
+                  (loggedIn && (isActive("/mijn-voorspellingen") || isActive("/premium"))) ||
+                  isActive("/hoe-werkt-het")
+                    ? "nav-dropdown-button active"
+                    : "nav-dropdown-button"
+                }
+                onClick={() => {
+                  setMoreOpen((current) => !current);
+                  setProgressOpen(false);
+                }}
+                aria-expanded={moreOpen}
               >
-                <span className="language-flag">{currentLanguage.flag}</span>
-                <span>{currentLanguage.short}</span>
-                <span className="language-chevron">⌄</span>
+                {t.more} <span>⌄</span>
               </button>
 
-              {languageOpen && (
-                <div className="language-dropdown">
-                  <div className="language-dropdown-title">{t.language}</div>
-
-                  {languages.map((item) => (
+              {moreOpen && (
+                <div className="nav-dropdown-menu nav-dropdown-menu-right">
+                  {loggedIn && (
+                    <Link href="/mijn-voorspellingen" onClick={() => setMoreOpen(false)}>
+                      <span>⚽</span>
+                      <div><strong>{t.predictions}</strong></div>
+                    </Link>
+                  )}
+                  {loggedIn && (
+                    <Link href="/premium" onClick={() => setMoreOpen(false)}>
+                      <span>👑</span>
+                      <div><strong>{t.premium}</strong></div>
+                    </Link>
+                  )}
+                  <Link href="/hoe-werkt-het" onClick={() => setMoreOpen(false)}>
+                    <span>❓</span>
+                    <div><strong>{t.howItWorks}</strong></div>
+                  </Link>
+                  {loggedIn && (
                     <button
-                      key={item.code}
                       type="button"
-                      className={
-                        item.code === language
-                          ? "language-option active-language"
-                          : "language-option"
-                      }
-                      onClick={() => changeLanguage(item.code)}
+                      className="dropdown-logout"
+                      onClick={handleLogout}
                     >
-                      <span>{item.flag}</span>
-                      <span>{item.name}</span>
-                      {item.code === language && (
-                        <span className="language-check">✓</span>
-                      )}
+                      <span>↪</span>
+                      <div><strong>{t.logout}</strong></div>
                     </button>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
+          </nav>
 
-            {loggedIn ? (
-              <>
+          <div className="desktop-account">
+            <div className="account-stack">
+              <div className="language-picker" ref={languageRef}>
+                <button
+                  type="button"
+                  className="language-button"
+                  onClick={() => setLanguageOpen((current) => !current)}
+                  aria-expanded={languageOpen}
+                  aria-label={t.language}
+                >
+                  <span className="language-flag">{currentLanguage.flag}</span>
+                  <span>{currentLanguage.short}</span>
+                  <span className="language-chevron">⌄</span>
+                </button>
+
+                {languageOpen && (
+                  <div className="language-dropdown">
+                    <div className="language-dropdown-title">{t.language}</div>
+                    {languages.map((item) => (
+                      <button
+                        key={item.code}
+                        type="button"
+                        className={item.code === language ? "language-option active-language" : "language-option"}
+                        onClick={() => changeLanguage(item.code)}
+                      >
+                        <span>{item.flag}</span>
+                        <span>{item.name}</span>
+                        {item.code === language && <span className="language-check">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {loggedIn ? (
                 <Link
                   href="/profiel"
-                  className={
-                    isActive("/profiel")
-                      ? "profile-button active-profile"
-                      : "profile-button"
-                  }
+                  className={isActive("/profiel") ? "profile-button active-profile" : "profile-button"}
                 >
-                  {t.profile}
+                  👤 {t.profile}
                 </Link>
-
-                <button onClick={handleLogout} className="logout-button">
-                  {t.logout}
-                </button>
-              </>
-            ) : (
-              <>
+              ) : (
                 <Link href="/inloggen" className="login-link">
                   {t.login}
                 </Link>
+              )}
 
+              {loggedIn ? (
+                <div className="notification-picker" ref={notificationRef}>
+                  <button
+                    type="button"
+                    className="notification-button"
+                    onClick={() => setNotificationsOpen((current) => !current)}
+                    aria-label={notificationCopy[language].title}
+                    aria-expanded={notificationsOpen}
+                  >
+                    <span>🔔</span>
+                    <span className="notification-label">{notificationCopy[language].title}</span>
+                    {notifications.filter((item) => !readNotificationIds.includes(item.id)).length > 0 && (
+                      <span className="notification-count">
+                        {Math.min(9, notifications.filter((item) => !readNotificationIds.includes(item.id)).length)}
+                      </span>
+                    )}
+                  </button>
+
+                  {notificationsOpen && (
+                    <div className="notification-dropdown">
+                      <div className="notification-header">
+                        <strong>{notificationCopy[language].title}</strong>
+                        {notifications.length > 0 && (
+                          <button type="button" onClick={markAllNotificationsRead}>
+                            {notificationCopy[language].markRead}
+                          </button>
+                        )}
+                      </div>
+                      {notifications.length === 0 ? (
+                        <div className="notification-empty">{notificationCopy[language].empty}</div>
+                      ) : (
+                        <div className="notification-list">
+                          {notifications.map((item) => (
+                            <Link
+                              key={item.id}
+                              href={item.href}
+                              onClick={() => setNotificationsOpen(false)}
+                              className={readNotificationIds.includes(item.id) ? "notification-item" : "notification-item unread"}
+                            >
+                              <span className="notification-icon">{item.icon}</span>
+                              <span>{item.text}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
                 <Link href="/registreren" className="register-button">
                   {t.playFree}
                 </Link>
-              </>
-            )}
+              )}
+            </div>
           </div>
 
           <button
@@ -1148,13 +1204,13 @@ export default function Navbar() {
         }
 
         .voetiq-navbar {
-          max-width: 1260px;
-          min-height: 72px;
+          max-width: 1320px;
+          min-height: 86px;
           margin: 0 auto;
           padding: 0 24px;
           display: flex;
           align-items: center;
-          gap: 26px;
+          gap: 24px;
         }
 
         .voetiq-logo {
@@ -1173,16 +1229,17 @@ export default function Navbar() {
         .desktop-nav {
           display: flex;
           align-items: center;
-          gap: 2px;
+          gap: 3px;
           flex: 1;
+          min-width: 0;
         }
 
         .nav-link {
           position: relative;
           display: flex;
           align-items: center;
-          height: 72px;
-          padding: 0 11px;
+          height: 86px;
+          padding: 0 12px;
           color: #c9d8d0;
           text-decoration: none;
           font-size: 13px;
@@ -1214,10 +1271,111 @@ export default function Navbar() {
 
         .desktop-account {
           display: flex;
+          align-items: stretch;
+          justify-content: flex-end;
+          flex: 0 0 142px;
+          align-self: stretch;
+          white-space: nowrap;
+          border-left: 1px solid rgba(255,255,255,0.07);
+          padding-left: 14px;
+        }
+
+        .account-stack {
+          width: 100%;
+          display: grid;
+          grid-template-rows: repeat(3, minmax(0, 1fr));
           align-items: center;
-          gap: 8px;
+          padding: 6px 0;
+          gap: 2px;
+        }
+
+        .account-stack > * {
+          width: 100%;
+          min-width: 0;
+        }
+
+        .nav-dropdown {
+          position: relative;
+          height: 86px;
+          display: flex;
+          align-items: center;
+        }
+
+        .nav-dropdown-button {
+          position: relative;
+          height: 86px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          padding: 0 12px;
+          border: 0;
+          background: transparent;
+          color: #c9d8d0;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
           white-space: nowrap;
         }
+
+        .nav-dropdown-button:hover,
+        .nav-dropdown-button.active { color: #62ef9d; }
+
+        .nav-dropdown-button.active::after {
+          content: "";
+          position: absolute;
+          left: 12px;
+          right: 12px;
+          bottom: 0;
+          height: 3px;
+          background: #2ee681;
+          border-radius: 5px 5px 0 0;
+        }
+
+        .nav-dropdown-button span {
+          color: #7e9789;
+          font-size: 12px;
+        }
+
+        .nav-dropdown-menu {
+          position: absolute;
+          top: calc(100% + 8px);
+          left: 0;
+          z-index: 1200;
+          width: 235px;
+          padding: 7px;
+          background: #061b11;
+          border: 1px solid rgba(46,230,129,0.18);
+          border-radius: 13px;
+          box-shadow: 0 22px 60px rgba(0,0,0,0.45);
+        }
+
+        .nav-dropdown-menu-right { left: auto; right: 0; }
+
+        .nav-dropdown-menu a,
+        .nav-dropdown-menu .dropdown-logout {
+          width: 100%;
+          box-sizing: border-box;
+          display: grid;
+          grid-template-columns: 27px 1fr;
+          align-items: center;
+          gap: 9px;
+          padding: 11px 10px;
+          border: 0;
+          border-radius: 8px;
+          background: transparent;
+          color: #e8f4ed;
+          text-decoration: none;
+          text-align: left;
+          font-size: 12px;
+          cursor: pointer;
+        }
+
+        .nav-dropdown-menu a:hover,
+        .nav-dropdown-menu .dropdown-logout:hover {
+          background: rgba(46,230,129,0.08);
+        }
+
+        .nav-dropdown-menu strong { font-weight: 850; }
 
         .notification-picker {
           position: relative;
@@ -1225,21 +1383,29 @@ export default function Navbar() {
 
         .notification-button {
           position: relative;
-          width: 39px;
-          height: 39px;
-          display: grid;
-          place-items: center;
+          width: 100%;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
           border: 1px solid rgba(255,255,255,0.12);
           background: rgba(255,255,255,0.05);
-          border-radius: 9px;
+          border-radius: 7px;
           cursor: pointer;
-          font-size: 16px;
+          font-size: 12px;
+        }
+
+        .notification-label {
+          font-size: 10px;
+          font-weight: 800;
+          color: #dce9e2;
         }
 
         .notification-count {
           position: absolute;
           top: -5px;
-          right: -5px;
+          right: -4px;
           min-width: 18px;
           height: 18px;
           padding: 0 4px;
@@ -1341,16 +1507,18 @@ export default function Navbar() {
         }
 
         .language-button {
-          height: 39px;
+          width: 100%;
+          height: 24px;
           display: flex;
           align-items: center;
           gap: 6px;
           border: 1px solid rgba(255, 255, 255, 0.12);
           background: rgba(255, 255, 255, 0.05);
           color: #eef8f2;
-          border-radius: 9px;
-          padding: 0 10px;
-          font-size: 12px;
+          border-radius: 7px;
+          padding: 0 8px;
+          justify-content: center;
+          font-size: 10px;
           font-weight: 900;
           cursor: pointer;
         }
@@ -1375,8 +1543,8 @@ export default function Navbar() {
           right: 0;
           width: 215px;
           padding: 8px;
-          background: #ffffff;
-          border: 1px solid #e7ece9;
+          background: #061b11;
+          border: 1px solid rgba(46,230,129,0.18);
           border-radius: 13px;
           box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
           overflow: hidden;
@@ -1384,7 +1552,7 @@ export default function Navbar() {
 
         .language-dropdown-title {
           padding: 8px 10px 7px;
-          color: #829087;
+          color: #8fa79a;
           font-size: 10px;
           font-weight: 900;
           text-transform: uppercase;
@@ -1401,7 +1569,7 @@ export default function Navbar() {
           border: none;
           border-radius: 8px;
           background: transparent;
-          color: #26322c;
+          color: #dce9e2;
           font-size: 13px;
           font-weight: 750;
           text-align: left;
@@ -1409,12 +1577,12 @@ export default function Navbar() {
         }
 
         .language-option:hover {
-          background: #f2f7f4;
+          background: rgba(255,255,255,0.05);
         }
 
         .language-option.active-language {
-          background: #e9faf1;
-          color: #08763e;
+          background: rgba(46,230,129,0.12);
+          color: #67efa2;
         }
 
         .language-check {
@@ -1424,20 +1592,27 @@ export default function Navbar() {
         }
 
         .login-link {
+          display: flex;
+          align-items: center;
+          justify-content: center;
           color: #e7f3ec;
           text-decoration: none;
-          font-size: 13px;
-          font-weight: 800;
-          padding: 10px 9px;
+          font-size: 10px;
+          font-weight: 850;
+          padding: 3px 6px;
+          border-radius: 7px;
         }
 
         .register-button {
           background: #2ee681;
           color: #052c1b;
           text-decoration: none;
-          padding: 11px 14px;
-          border-radius: 9px;
-          font-size: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px 7px;
+          border-radius: 7px;
+          font-size: 10px;
           font-weight: 900;
           transition:
             transform 0.18s ease,
@@ -1450,11 +1625,14 @@ export default function Navbar() {
         }
 
         .profile-button {
+          display: flex;
+          align-items: center;
+          justify-content: center;
           color: #e9f5ee;
           text-decoration: none;
-          padding: 10px 10px;
-          border-radius: 8px;
-          font-size: 12px;
+          padding: 3px 6px;
+          border-radius: 7px;
+          font-size: 10px;
           font-weight: 800;
         }
 
