@@ -1172,67 +1172,6 @@ export default function ProfielPage() {
                 </div>
               </section>
 
-              {premiumActive && (
-                <section className="mt-8 overflow-hidden rounded-3xl border border-amber-300/20 bg-gradient-to-br from-amber-400/[0.08] via-green-950/70 to-gray-950 p-6 sm:p-7">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
-                      {profileThemeUi[language].eyebrow}
-                    </p>
-                    <h2 className="mt-1 text-2xl font-black">
-                      {profileThemeUi[language].title}
-                    </h2>
-                    <p className="mt-1 text-sm text-green-100/50">
-                      {profileThemeUi[language].intro}
-                    </p>
-                  </div>
-
-                  <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-                    {profileThemes.map((theme) => {
-                      const selected = (profile.profile_theme || "default") === theme.id;
-                      return (
-                        <button
-                          key={theme.id}
-                          type="button"
-                          disabled={themeSaving}
-                          onClick={() => saveProfileTheme(theme.id)}
-                          className={`overflow-hidden rounded-2xl border text-left transition ${
-                            selected
-                              ? "border-amber-300/70 ring-2 ring-amber-300/20"
-                              : "border-white/10 hover:border-amber-300/30"
-                          }`}
-                        >
-                          <div
-                            className="h-20"
-                            style={{ background: theme.preview }}
-                          />
-                          <div className="bg-black/30 px-4 py-3">
-                            <div className="flex items-center justify-between gap-2">
-                              <span className="font-black text-white">
-                                {theme.icon} {theme.name}
-                              </span>
-                              {selected && (
-                                <span className="text-xs font-black text-amber-300">✓</span>
-                              )}
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {themeMessage && (
-                    <p className="mt-4 text-sm font-bold text-amber-200">
-                      {themeMessage}
-                    </p>
-                  )}
-                  {themeSaving && (
-                    <p className="mt-4 text-sm text-green-100/50">
-                      {profileThemeUi[language].saving}
-                    </p>
-                  )}
-                </section>
-              )}
-
               <section className="mt-8 rounded-3xl border border-green-400/15 bg-gradient-to-br from-green-900/70 via-green-950/80 to-gray-950 p-6 sm:p-7">
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -1300,7 +1239,7 @@ export default function ProfielPage() {
                     {activityItems.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-4"
+                        className="flex items-start gap-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-4 sm:items-center"
                       >
                         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-500/10 text-xl ring-1 ring-green-400/10">
                           {item.icon}
@@ -1495,6 +1434,67 @@ export default function ProfielPage() {
                   </div>
                 )}
               </section>
+
+              {premiumActive && (
+                <section className="mt-10 overflow-hidden rounded-3xl border border-amber-300/20 bg-gradient-to-br from-amber-400/[0.08] via-green-950/70 to-gray-950 p-6 sm:p-7">
+                  <div>
+                    <p className="text-xs font-black uppercase tracking-[0.18em] text-amber-300">
+                      {profileThemeUi[language].eyebrow}
+                    </p>
+                    <h2 className="mt-1 text-2xl font-black">
+                      {profileThemeUi[language].title}
+                    </h2>
+                    <p className="mt-1 text-sm text-green-100/50">
+                      {profileThemeUi[language].intro}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    {profileThemes.map((theme) => {
+                      const selected = (profile.profile_theme || "default") === theme.id;
+                      return (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          disabled={themeSaving}
+                          onClick={() => saveProfileTheme(theme.id)}
+                          className={`overflow-hidden rounded-2xl border text-left transition ${
+                            selected
+                              ? "border-amber-300/70 ring-2 ring-amber-300/20"
+                              : "border-white/10 hover:border-amber-300/30"
+                          }`}
+                        >
+                          <div
+                            className="h-20"
+                            style={{ background: theme.preview }}
+                          />
+                          <div className="bg-black/30 px-4 py-3">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-black text-white">
+                                {theme.icon} {theme.name}
+                              </span>
+                              {selected && (
+                                <span className="text-xs font-black text-amber-300">✓</span>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {themeMessage && (
+                    <p className="mt-4 text-sm font-bold text-amber-200">
+                      {themeMessage}
+                    </p>
+                  )}
+                  {themeSaving && (
+                    <p className="mt-4 text-sm text-green-100/50">
+                      {profileThemeUi[language].saving}
+                    </p>
+                  )}
+                </section>
+              )}
 
               <section className="mt-10">
                 <div className="mb-5">
