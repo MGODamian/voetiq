@@ -12,6 +12,7 @@ type Pool = {
   invite_code: string;
   owner_id: string;
   description: string | null;
+  pool_theme: "default" | "emerald" | "gold" | "midnight" | "champions";
 };
 
 const competitions: Record<string, string> = {
@@ -36,6 +37,10 @@ export default function PoolManagePage() {
   const [savingDescription, setSavingDescription] = useState(false);
   const [descriptionMessage, setDescriptionMessage] = useState("");
   const [descriptionError, setDescriptionError] = useState("");
+  const [poolTheme, setPoolTheme] = useState<"default" | "emerald" | "gold" | "midnight" | "champions">("default");
+  const [savingTheme, setSavingTheme] = useState(false);
+  const [themeMessage, setThemeMessage] = useState("");
+  const [themeError, setThemeError] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [regeneratingCode, setRegeneratingCode] = useState(false);
@@ -72,7 +77,7 @@ export default function PoolManagePage() {
 
     const { data, error: poolError } = await supabase
       .from("pools")
-      .select("id, name, competition_code, invite_code, owner_id, description")
+      .select("id, name, competition_code, invite_code, owner_id, description, pool_theme")
       .eq("id", id)
       .maybeSingle();
 
@@ -112,6 +117,7 @@ export default function PoolManagePage() {
     setPool(data);
     setName(data.name);
     setDescription(data.description || "");
+    setPoolTheme(data.pool_theme || "default");
     setLoading(false);
   }
 
@@ -193,6 +199,35 @@ export default function PoolManagePage() {
     setDescription(cleanDescription);
     setDescriptionMessage("✓ Poulebeschrijving succesvol opgeslagen.");
     setSavingDescription(false);
+  }
+
+  async function savePoolTheme(
+    theme: "default" | "emerald" | "gold" | "midnight" | "champions"
+  ) {
+    if (!pool || !isPremium || savingTheme) return;
+
+    setSavingTheme(true);
+    setThemeError("");
+    setThemeMessage("");
+
+    const { error: updateError } = await supabase.rpc("update_pool_theme", {
+      requested_pool_id: pool.id,
+      new_theme: theme,
+    });
+
+    if (updateError) {
+      console.error(updateError);
+      setThemeError(
+        updateError.message || "Het poulethema kon niet worden gewijzigd."
+      );
+      setSavingTheme(false);
+      return;
+    }
+
+    setPoolTheme(theme);
+    setPool({ ...pool, pool_theme: theme });
+    setThemeMessage("✓ Poulethema succesvol gewijzigd.");
+    setSavingTheme(false);
   }
 
   async function regenerateInviteCode() {
@@ -692,6 +727,103 @@ export default function PoolManagePage() {
                       fontWeight: 900,
                       cursor: "pointer",
                     }}
+                  >
+                    👑 Ontgrendel met VoetIQ Premium
+                  </button>
+                )}
+              </section>
+
+              <section
+                style={{
+                  background: isPremium
+                    ? "linear-gradient(145deg, rgba(82,57,8,0.72) 0%, rgba(20,18,8,0.96) 58%, #00170e 100%)"
+                    : "linear-gradient(145deg, #06271a 0%, #00170e 100%)",
+                  border: isPremium
+                    ? "1px solid rgba(250,204,21,0.28)"
+                    : "1px solid rgba(80,190,130,0.20)",
+                  borderRadius: "20px",
+                  padding: "24px",
+                  marginTop: "18px",
+                }}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                  <h2 style={{ margin: 0, fontSize: "22px" }}>👑 Poulethema</h2>
+                  <span style={{ display: "inline-flex", borderRadius: "999px", border: "1px solid rgba(250,204,21,0.30)", background: "rgba(250,204,21,0.10)", padding: "6px 9px", color: "#fde047", fontSize: "10px", fontWeight: 900, letterSpacing: "0.8px" }}>
+                    PREMIUM
+                  </span>
+                </div>
+
+                <p style={{ margin: "8px 0 18px", color: "#a9bbb0", fontSize: "14px", lineHeight: 1.5 }}>
+                  {isPremium
+                    ? "Kies een eigen stijl voor de bovenkant van je poulepagina."
+                    : "Met VoetIQ Premium kun je je poule een eigen thema geven."}
+                </p>
+
+                {isPremium ? (
+                  <>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(125px, 1fr))", gap: "10px" }}>
+                      {[
+                        { id: "default", label: "Default", icon: "⚽", bg: "linear-gradient(135deg,#06271a,#00170e)", accent: "#41e58b" },
+                        { id: "emerald", label: "Emerald", icon: "💚", bg: "linear-gradient(135deg,#063522,#075b36)", accent: "#6ee7a8" },
+                        { id: "gold", label: "Gold", icon: "👑", bg: "linear-gradient(135deg,#2a2107,#6a4b08)", accent: "#fde047" },
+                        { id: "midnight", label: "Midnight", icon: "🌙", bg: "linear-gradient(135deg,#07111f,#142b4a)", accent: "#93c5fd" },
+                        { id: "champions", label: "Champions", icon: "🏆", bg: "linear-gradient(135deg,#070b2b,#27338c)", accent: "#c4b5fd" },
+                      ].map((theme) => {
+                        const selected = poolTheme === theme.id;
+                        return (
+                          <button
+                            key={theme.id}
+                            onClick={() =>
+                              savePoolTheme(
+                                theme.id as "default" | "emerald" | "gold" | "midnight" | "champions"
+                              )
+                            }
+                            disabled={savingTheme}
+                            style={{
+                              minHeight: "86px",
+                              border: selected
+                                ? `2px solid ${theme.accent}`
+                                : "1px solid rgba(255,255,255,0.10)",
+                              borderRadius: "13px",
+                              background: theme.bg,
+                              color: "white",
+                              cursor: savingTheme ? "default" : "pointer",
+                              padding: "12px",
+                              textAlign: "left",
+                              boxShadow: selected ? `0 0 0 2px ${theme.accent}22` : "none",
+                              opacity: savingTheme ? 0.75 : 1,
+                            }}
+                          >
+                            <div style={{ fontSize: "20px", marginBottom: "7px" }}>{theme.icon}</div>
+                            <div style={{ fontWeight: 900, color: selected ? theme.accent : "white" }}>
+                              {theme.label}
+                            </div>
+                            {selected && (
+                              <div style={{ marginTop: "4px", fontSize: "10px", fontWeight: 900, color: theme.accent }}>
+                                ✓ ACTIEF
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {themeError && (
+                      <div style={{ marginTop: "14px", padding: "11px 13px", borderRadius: "10px", background: "#2a1114", border: "1px solid rgba(255,100,100,0.20)", color: "#ffb4b4", fontSize: "13px", fontWeight: 700 }}>
+                        {themeError}
+                      </div>
+                    )}
+
+                    {themeMessage && (
+                      <div style={{ marginTop: "14px", padding: "11px 13px", borderRadius: "10px", background: "rgba(250,204,21,0.08)", border: "1px solid rgba(250,204,21,0.20)", color: "#fde68a", fontSize: "13px", fontWeight: 800 }}>
+                        {themeMessage}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <button
+                    onClick={() => router.push("/premium")}
+                    style={{ border: "1px solid rgba(250,204,21,0.30)", borderRadius: "11px", padding: "12px 18px", background: "rgba(250,204,21,0.10)", color: "#fde047", fontWeight: 900, cursor: "pointer" }}
                   >
                     👑 Ontgrendel met VoetIQ Premium
                   </button>
