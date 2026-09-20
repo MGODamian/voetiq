@@ -934,6 +934,13 @@ export default function MyPredictionsPage() {
             flex-direction: column;
           }
 
+          .filter-buttons {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scrollbar-width: thin;
+          }
+
           select {
             width: 100%;
           }
@@ -950,6 +957,14 @@ export default function MyPredictionsPage() {
 
           .prediction-card {
             padding: 16px;
+          }
+
+          .day-heading {
+            align-items: flex-start;
+          }
+
+          .day-heading span {
+            white-space: nowrap;
           }
 
           .prediction-card h2 {
@@ -1054,6 +1069,8 @@ function FilterButton({
           font-size: 11px;
           font-weight: 900;
           cursor: pointer;
+          white-space: nowrap;
+          flex-shrink: 0;
         }
 
         .filter:hover {
