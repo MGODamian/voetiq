@@ -1274,7 +1274,7 @@ export default function Navbar() {
           flex-direction: row;
           align-items: center;
           justify-content: flex-end;
-          gap: 8px;
+          gap: 13px;
         }
 
         .account-stack > * {
