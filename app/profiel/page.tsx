@@ -101,7 +101,7 @@ const profileUi = {
     predicted:"Voorspeld", history:"Mijn geschiedenis", noPredictions:"Je hebt nog geen voorspellingen gedaan.", noPredictionsDesc:"Ga naar Wedstrijden en doe je eerste voorspelling.",
     predictionCount:(n:number)=>`${n} voorspelling${n===1?"":"en"}`, predictedOn:"Voorspeld op", yourPrediction:"Jouw voorspelling", result:"Uitslag",
     notPlayed:"⏳ Nog niet gespeeld", correct:"✅ Juiste uitslag", noPoints:"❌ Geen punten", unknownCompetition:"Onbekende competitie",
-    career:"🏆 Jouw VoetIQ-carrière", careerDesc:"Blijf voorspellen, verbeter je accuracy en klim op de ranglijst.", totalPoints:"Totaalpunten"
+    career:"🏆 Jouw VoetIQ-carrière", careerDesc:"Blijf voorspellen, verbeter je accuracy en klim op de ranglijst.", totalPoints:"Totaalpunten", viewAllPredictions:"⚽ Bekijk al mijn voorspellingen"
   },
   en: {
     profileNotFound:"No profile was found for this account.", unknownError:"Unknown error while loading your profile.",
@@ -114,7 +114,7 @@ const profileUi = {
     predicted:"Predicted", history:"My history", noPredictions:"You haven't made any predictions yet.", noPredictionsDesc:"Go to Matches and make your first prediction.",
     predictionCount:(n:number)=>`${n} prediction${n===1?"":"s"}`, predictedOn:"Predicted on", yourPrediction:"Your prediction", result:"Result",
     notPlayed:"⏳ Not played yet", correct:"✅ Correct result", noPoints:"❌ No points", unknownCompetition:"Unknown competition",
-    career:"🏆 Your VoetIQ career", careerDesc:"Keep predicting, improve your accuracy and climb the leaderboard.", totalPoints:"Total points"
+    career:"🏆 Your VoetIQ career", careerDesc:"Keep predicting, improve your accuracy and climb the leaderboard.", totalPoints:"Total points", viewAllPredictions:"⚽ View all my predictions"
   },
   de: {
     profileNotFound:"Für dieses Konto wurde kein Profil gefunden.", unknownError:"Unbekannter Fehler beim Laden deines Profils.",
@@ -127,7 +127,7 @@ const profileUi = {
     predicted:"Getippt", history:"Mein Verlauf", noPredictions:"Du hast noch keine Tipps abgegeben.", noPredictionsDesc:"Gehe zu Spiele und gib deinen ersten Tipp ab.",
     predictionCount:(n:number)=>`${n} Tipp${n===1?"":"s"}`, predictedOn:"Getippt am", yourPrediction:"Dein Tipp", result:"Ergebnis",
     notPlayed:"⏳ Noch nicht gespielt", correct:"✅ Richtiger Ausgang", noPoints:"❌ Keine Punkte", unknownCompetition:"Unbekannter Wettbewerb",
-    career:"🏆 Deine VoetIQ-Karriere", careerDesc:"Tippe weiter, verbessere deine Genauigkeit und steige in der Rangliste.", totalPoints:"Gesamtpunkte"
+    career:"🏆 Deine VoetIQ-Karriere", careerDesc:"Tippe weiter, verbessere deine Genauigkeit und steige in der Rangliste.", totalPoints:"Gesamtpunkte", viewAllPredictions:"⚽ Alle meine Tipps ansehen"
   },
   es: {
     profileNotFound:"No se encontró ningún perfil para esta cuenta.", unknownError:"Error desconocido al cargar tu perfil.",
@@ -140,7 +140,7 @@ const profileUi = {
     predicted:"Pronosticado", history:"Mi historial", noPredictions:"Aún no has hecho ninguna predicción.", noPredictionsDesc:"Ve a Partidos y haz tu primera predicción.",
     predictionCount:(n:number)=>`${n} predicci${n===1?"ón":"ones"}`, predictedOn:"Pronosticado el", yourPrediction:"Tu predicción", result:"Resultado",
     notPlayed:"⏳ Aún no jugado", correct:"✅ Resultado correcto", noPoints:"❌ Sin puntos", unknownCompetition:"Competición desconocida",
-    career:"🏆 Tu carrera en VoetIQ", careerDesc:"Sigue pronosticando, mejora tu precisión y sube en la clasificación.", totalPoints:"Puntos totales"
+    career:"🏆 Tu carrera en VoetIQ", careerDesc:"Sigue pronosticando, mejora tu precisión y sube en la clasificación.", totalPoints:"Puntos totales", viewAllPredictions:"⚽ Ver todos mis pronósticos"
   },
   fr: {
     profileNotFound:"Aucun profil n’a été trouvé pour ce compte.", unknownError:"Erreur inconnue lors du chargement de ton profil.",
@@ -153,7 +153,7 @@ const profileUi = {
     predicted:"Pronostiqué", history:"Mon historique", noPredictions:"Tu n’as encore fait aucun pronostic.", noPredictionsDesc:"Va dans Matchs et fais ton premier pronostic.",
     predictionCount:(n:number)=>`${n} pronostic${n===1?"":"s"}`, predictedOn:"Pronostiqué le", yourPrediction:"Ton pronostic", result:"Résultat",
     notPlayed:"⏳ Pas encore joué", correct:"✅ Bon résultat", noPoints:"❌ Aucun point", unknownCompetition:"Compétition inconnue",
-    career:"🏆 Ta carrière VoetIQ", careerDesc:"Continue à pronostiquer, améliore ta précision et grimpe au classement.", totalPoints:"Points totaux"
+    career:"🏆 Ta carrière VoetIQ", careerDesc:"Continue à pronostiquer, améliore ta précision et grimpe au classement.", totalPoints:"Points totaux", viewAllPredictions:"⚽ Voir tous mes pronostics"
   },
   it: {
     profileNotFound:"Nessun profilo trovato per questo account.", unknownError:"Errore sconosciuto durante il caricamento del profilo.",
@@ -166,7 +166,7 @@ const profileUi = {
     predicted:"Pronosticato", history:"La mia cronologia", noPredictions:"Non hai ancora fatto pronostici.", noPredictionsDesc:"Vai su Partite e fai il tuo primo pronostico.",
     predictionCount:(n:number)=>`${n} pronostic${n===1?"o":"i"}`, predictedOn:"Pronosticato il", yourPrediction:"Il tuo pronostico", result:"Risultato",
     notPlayed:"⏳ Non ancora giocata", correct:"✅ Esito corretto", noPoints:"❌ Nessun punto", unknownCompetition:"Competizione sconosciuta",
-    career:"🏆 La tua carriera VoetIQ", careerDesc:"Continua a pronosticare, migliora la precisione e scala la classifica.", totalPoints:"Punti totali"
+    career:"🏆 La tua carriera VoetIQ", careerDesc:"Continua a pronosticare, migliora la precisione e scala la classifica.", totalPoints:"Punti totali", viewAllPredictions:"⚽ Vedi tutti i miei pronostici"
   },
   pt: {
     profileNotFound:"Não foi encontrado nenhum perfil para esta conta.", unknownError:"Erro desconhecido ao carregar o teu perfil.",
@@ -179,7 +179,7 @@ const profileUi = {
     predicted:"Previsto", history:"O meu histórico", noPredictions:"Ainda não fizeste nenhuma previsão.", noPredictionsDesc:"Vai a Jogos e faz a tua primeira previsão.",
     predictionCount:(n:number)=>`${n} previs${n===1?"ão":"ões"}`, predictedOn:"Previsto em", yourPrediction:"A tua previsão", result:"Resultado",
     notPlayed:"⏳ Ainda não disputado", correct:"✅ Resultado correto", noPoints:"❌ Sem pontos", unknownCompetition:"Competição desconhecida",
-    career:"🏆 A tua carreira VoetIQ", careerDesc:"Continua a prever, melhora a tua precisão e sobe na classificação.", totalPoints:"Pontos totais"
+    career:"🏆 A tua carreira VoetIQ", careerDesc:"Continua a prever, melhora a tua precisão e sobe na classificação.", totalPoints:"Pontos totais", viewAllPredictions:"⚽ Ver todas as minhas previsões"
   }
 } satisfies Record<LanguageCode, Record<string, any>>;
 
@@ -1575,6 +1575,22 @@ export default function ProfielPage() {
                     <h2 className="mt-1 text-2xl font-black">
                       {t.predictions}
                     </h2>
+              <button
+                type="button"
+                onClick={() => router.push("/mijn-voorspellingen")}
+                style={{
+                  marginTop: "12px",
+                  border: "1px solid rgba(74,222,128,0.22)",
+                  borderRadius: "10px",
+                  padding: "10px 14px",
+                  background: "rgba(22,101,52,0.24)",
+                  color: "#dcfce7",
+                  fontWeight: 900,
+                  cursor: "pointer",
+                }}
+              >
+                {t.viewAllPredictions} →
+              </button>
                   </div>
 
                   <p className="text-sm text-green-100/40">
