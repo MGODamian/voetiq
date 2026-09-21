@@ -54,7 +54,7 @@ const ui: Record<LanguageCode, Translation> = {
     firstName: "Voornaam",
     lastName: "Achternaam",
     username: "Gebruikersnaam",
-    usernamePlaceholder: "Bijv. AjaxFan1907",
+    usernamePlaceholder: "Kies een gebruikersnaam",
     usernameHelp: "Dit is de naam die andere spelers op VoetIQ zien.",
     email: "E-mailadres",
     emailPlaceholder: "jij@email.nl",
@@ -95,7 +95,7 @@ const ui: Record<LanguageCode, Translation> = {
     firstName: "First name",
     lastName: "Last name",
     username: "Username",
-    usernamePlaceholder: "E.g. AjaxFan1907",
+    usernamePlaceholder: "Choose a username",
     usernameHelp: "This is the name other players will see on VoetIQ.",
     email: "Email address",
     emailPlaceholder: "you@email.com",
@@ -136,7 +136,7 @@ const ui: Record<LanguageCode, Translation> = {
     firstName: "Vorname",
     lastName: "Nachname",
     username: "Benutzername",
-    usernamePlaceholder: "Z. B. AjaxFan1907",
+    usernamePlaceholder: "Wähle einen Benutzernamen",
     usernameHelp:
       "Diesen Namen sehen andere Spieler auf VoetIQ.",
     email: "E-Mail-Adresse",
@@ -181,7 +181,7 @@ const ui: Record<LanguageCode, Translation> = {
     firstName: "Nombre",
     lastName: "Apellido",
     username: "Nombre de usuario",
-    usernamePlaceholder: "Ej. AjaxFan1907",
+    usernamePlaceholder: "Elige un nombre de usuario",
     usernameHelp:
       "Este es el nombre que verán los demás jugadores en VoetIQ.",
     email: "Correo electrónico",
@@ -226,7 +226,7 @@ const ui: Record<LanguageCode, Translation> = {
     firstName: "Prénom",
     lastName: "Nom",
     username: "Nom d'utilisateur",
-    usernamePlaceholder: "Ex. AjaxFan1907",
+    usernamePlaceholder: "Choisissez un nom d’utilisateur",
     usernameHelp:
       "C'est le nom que les autres joueurs verront sur VoetIQ.",
     email: "Adresse e-mail",
@@ -271,7 +271,7 @@ const ui: Record<LanguageCode, Translation> = {
     firstName: "Nome",
     lastName: "Cognome",
     username: "Nome utente",
-    usernamePlaceholder: "Es. AjaxFan1907",
+    usernamePlaceholder: "Scegli un nome utente",
     usernameHelp:
       "Questo è il nome che gli altri giocatori vedranno su VoetIQ.",
     email: "Indirizzo email",
@@ -316,7 +316,7 @@ const ui: Record<LanguageCode, Translation> = {
     firstName: "Nome",
     lastName: "Apelido",
     username: "Nome de utilizador",
-    usernamePlaceholder: "Ex. AjaxFan1907",
+    usernamePlaceholder: "Escolhe um nome de utilizador",
     usernameHelp:
       "Este é o nome que os outros jogadores verão no VoetIQ.",
     email: "Endereço de email",
