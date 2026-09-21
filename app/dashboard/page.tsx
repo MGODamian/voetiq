@@ -96,6 +96,47 @@ const competitionInfo: Record<string,{name:string;flag:string}> = {
   PPL:{name:"Primeira Liga",flag:"🇵🇹"}, CL:{name:"Champions League",flag:"🏆"}
 };
 
+
+function localDayStart() {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function localWeekStart() {
+  const d = localDayStart();
+  const day = d.getDay();
+  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return d;
+}
+
+function localDateKey() {
+  const d = localDayStart();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function localWeekKey() {
+  const d = localWeekStart();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function hashString(value:string) {
+  let hash = 2166136261;
+  for (let i=0;i<value.length;i+=1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash,16777619);
+  }
+  return hash >>> 0;
+}
+
+function selectForPeriod(items:Challenge[],periodKey:string,amount=2) {
+  return [...items]
+    .map(item=>({item,score:hashString(`${periodKey}:${item.challenge_key}`)}))
+    .sort((a,b)=>a.score-b.score || a.item.id-b.item.id)
+    .slice(0,amount)
+    .map(({item})=>item);
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [language,setLanguage] = useState<LanguageCode>("nl");
@@ -178,8 +219,8 @@ export default function DashboardPage() {
   const upcoming = useMemo(()=>[...predictions].filter(p=>!played(p)).sort((a,b)=>new Date(a.kickoff_at||0).getTime()-new Date(b.kickoff_at||0).getTime()).slice(0,3),[predictions]);
   const recent = useMemo(()=>[...predictions].filter(played).sort((a,b)=>new Date(b.kickoff_at||b.created_at).getTime()-new Date(a.kickoff_at||a.created_at).getTime()).slice(0,3),[predictions]);
   const challengeProgress = useMemo(() => {
-    const dayStart = new Date(); dayStart.setHours(0,0,0,0);
-    const weekStart = new Date(dayStart); const day = weekStart.getDay(); weekStart.setDate(weekStart.getDate() - (day === 0 ? 6 : day - 1));
+    const dayStart = localDayStart();
+    const weekStart = localWeekStart();
     const correct = (p:Prediction) => {
       if (!played(p)) return false;
       const predicted = p.home_score === p.away_score ? 0 : p.home_score > p.away_score ? 1 : -1;
@@ -188,13 +229,46 @@ export default function DashboardPage() {
     };
     const daily = predictions.filter(p => new Date(p.created_at).getTime() >= dayStart.getTime());
     const weekly = predictions.filter(p => new Date(p.created_at).getTime() >= weekStart.getTime());
+    const dailyCorrect = daily.filter(correct).length;
+    const weeklyCorrect = weekly.filter(correct).length;
+    const dailyPoints = daily.reduce((n,p)=>n+Number(p.points||0),0);
+    const weeklyPoints = weekly.reduce((n,p)=>n+Number(p.points||0),0);
+
     return {
+      daily_predict_2: daily.length,
       daily_predict_3: daily.length,
-      daily_correct_2: daily.filter(correct).length,
+      daily_predict_5: daily.length,
+      daily_correct_1: dailyCorrect,
+      daily_correct_2: dailyCorrect,
+      daily_score_10: dailyPoints,
+      daily_score_20: dailyPoints,
+      daily_score_30: dailyPoints,
+      weekly_predict_5: weekly.length,
       weekly_predict_10: weekly.length,
-      weekly_score_50: weekly.reduce((n,p)=>n+Number(p.points||0),0),
+      weekly_predict_15: weekly.length,
+      weekly_predict_20: weekly.length,
+      weekly_correct_3: weeklyCorrect,
+      weekly_correct_5: weeklyCorrect,
+      weekly_score_50: weeklyPoints,
+      weekly_score_100: weeklyPoints,
     } as Record<string,number>;
   },[predictions]);
+
+  const visibleChallenges = useMemo(() => {
+    const dailyPool = challenges.filter(ch=>ch.challenge_type==="daily");
+    const weeklyPool = challenges.filter(ch=>ch.challenge_type==="weekly");
+    const daily = selectForPeriod(dailyPool,`daily:${localDateKey()}`,2);
+    const weekly = selectForPeriod(weeklyPool,`weekly:${localWeekKey()}`,2);
+
+    const completedFirst = (items:Challenge[]) => [...items].sort((a,b)=>{
+      const aDone=(challengeProgress[a.challenge_key]||0)>=a.target;
+      const bDone=(challengeProgress[b.challenge_key]||0)>=b.target;
+      if(aDone!==bDone) return aDone ? -1 : 1;
+      return a.id-b.id;
+    });
+
+    return [...completedFirst(daily),...completedFirst(weekly)];
+  },[challenges,challengeProgress]);
 
   const achievementUnlockedCount = useMemo(() => {
     if (!achievementStats) return 0;
@@ -222,13 +296,13 @@ export default function DashboardPage() {
   const onboardingComplete = onboardingSteps.every(step=>step.done);
 
   const challengeNames: Record<LanguageCode,Record<string,string>> = {
-    nl:{daily_predict_3:"Doe 3 voorspellingen",daily_correct_2:"Voorspel 2 juiste uitslagen",weekly_predict_10:"Doe 10 voorspellingen",weekly_score_50:"Verdien 50 punten"},
-    en:{daily_predict_3:"Make 3 predictions",daily_correct_2:"Predict 2 correct results",weekly_predict_10:"Make 10 predictions",weekly_score_50:"Earn 50 points"},
-    de:{daily_predict_3:"Gib 3 Tipps ab",daily_correct_2:"Tippe 2 richtige Ausgänge",weekly_predict_10:"Gib 10 Tipps ab",weekly_score_50:"Verdiene 50 Punkte"},
-    es:{daily_predict_3:"Haz 3 predicciones",daily_correct_2:"Predice 2 resultados correctos",weekly_predict_10:"Haz 10 predicciones",weekly_score_50:"Consigue 50 puntos"},
-    fr:{daily_predict_3:"Fais 3 pronostics",daily_correct_2:"Pronostique 2 bons résultats",weekly_predict_10:"Fais 10 pronostics",weekly_score_50:"Gagne 50 points"},
-    it:{daily_predict_3:"Fai 3 pronostici",daily_correct_2:"Pronostica 2 esiti corretti",weekly_predict_10:"Fai 10 pronostici",weekly_score_50:"Guadagna 50 punti"},
-    pt:{daily_predict_3:"Faz 3 previsões",daily_correct_2:"Prevê 2 resultados corretos",weekly_predict_10:"Faz 10 previsões",weekly_score_50:"Ganha 50 pontos"}
+    nl:{daily_predict_2:"Doe 2 voorspellingen",daily_predict_3:"Doe 3 voorspellingen",daily_predict_5:"Doe 5 voorspellingen",daily_correct_1:"Voorspel 1 juiste uitslag",daily_correct_2:"Voorspel 2 juiste uitslagen",daily_score_10:"Verdien 10 punten",daily_score_20:"Verdien 20 punten",daily_score_30:"Verdien 30 punten",weekly_predict_5:"Doe 5 voorspellingen",weekly_predict_10:"Doe 10 voorspellingen",weekly_predict_15:"Doe 15 voorspellingen",weekly_predict_20:"Doe 20 voorspellingen",weekly_correct_3:"Voorspel 3 juiste uitslagen",weekly_correct_5:"Voorspel 5 juiste uitslagen",weekly_score_50:"Verdien 50 punten",weekly_score_100:"Verdien 100 punten"},
+    en:{daily_predict_2:"Make 2 predictions",daily_predict_3:"Make 3 predictions",daily_predict_5:"Make 5 predictions",daily_correct_1:"Predict 1 correct result",daily_correct_2:"Predict 2 correct results",daily_score_10:"Earn 10 points",daily_score_20:"Earn 20 points",daily_score_30:"Earn 30 points",weekly_predict_5:"Make 5 predictions",weekly_predict_10:"Make 10 predictions",weekly_predict_15:"Make 15 predictions",weekly_predict_20:"Make 20 predictions",weekly_correct_3:"Predict 3 correct results",weekly_correct_5:"Predict 5 correct results",weekly_score_50:"Earn 50 points",weekly_score_100:"Earn 100 points"},
+    de:{daily_predict_2:"Gib 2 Tipps ab",daily_predict_3:"Gib 3 Tipps ab",daily_predict_5:"Gib 5 Tipps ab",daily_correct_1:"Tippe 1 richtigen Ausgang",daily_correct_2:"Tippe 2 richtige Ausgänge",daily_score_10:"Verdiene 10 Punkte",daily_score_20:"Verdiene 20 Punkte",daily_score_30:"Verdiene 30 Punkte",weekly_predict_5:"Gib 5 Tipps ab",weekly_predict_10:"Gib 10 Tipps ab",weekly_predict_15:"Gib 15 Tipps ab",weekly_predict_20:"Gib 20 Tipps ab",weekly_correct_3:"Tippe 3 richtige Ausgänge",weekly_correct_5:"Tippe 5 richtige Ausgänge",weekly_score_50:"Verdiene 50 Punkte",weekly_score_100:"Verdiene 100 Punkte"},
+    es:{daily_predict_2:"Haz 2 predicciones",daily_predict_3:"Haz 3 predicciones",daily_predict_5:"Haz 5 predicciones",daily_correct_1:"Predice 1 resultado correcto",daily_correct_2:"Predice 2 resultados correctos",daily_score_10:"Consigue 10 puntos",daily_score_20:"Consigue 20 puntos",daily_score_30:"Consigue 30 puntos",weekly_predict_5:"Haz 5 predicciones",weekly_predict_10:"Haz 10 predicciones",weekly_predict_15:"Haz 15 predicciones",weekly_predict_20:"Haz 20 predicciones",weekly_correct_3:"Predice 3 resultados correctos",weekly_correct_5:"Predice 5 resultados correctos",weekly_score_50:"Consigue 50 puntos",weekly_score_100:"Consigue 100 puntos"},
+    fr:{daily_predict_2:"Fais 2 pronostics",daily_predict_3:"Fais 3 pronostics",daily_predict_5:"Fais 5 pronostics",daily_correct_1:"Pronostique 1 bon résultat",daily_correct_2:"Pronostique 2 bons résultats",daily_score_10:"Gagne 10 points",daily_score_20:"Gagne 20 points",daily_score_30:"Gagne 30 points",weekly_predict_5:"Fais 5 pronostics",weekly_predict_10:"Fais 10 pronostics",weekly_predict_15:"Fais 15 pronostics",weekly_predict_20:"Fais 20 pronostics",weekly_correct_3:"Pronostique 3 bons résultats",weekly_correct_5:"Pronostique 5 bons résultats",weekly_score_50:"Gagne 50 points",weekly_score_100:"Gagne 100 points"},
+    it:{daily_predict_2:"Fai 2 pronostici",daily_predict_3:"Fai 3 pronostici",daily_predict_5:"Fai 5 pronostici",daily_correct_1:"Pronostica 1 esito corretto",daily_correct_2:"Pronostica 2 esiti corretti",daily_score_10:"Guadagna 10 punti",daily_score_20:"Guadagna 20 punti",daily_score_30:"Guadagna 30 punti",weekly_predict_5:"Fai 5 pronostici",weekly_predict_10:"Fai 10 pronostici",weekly_predict_15:"Fai 15 pronostici",weekly_predict_20:"Fai 20 pronostici",weekly_correct_3:"Pronostica 3 esiti corretti",weekly_correct_5:"Pronostica 5 esiti corretti",weekly_score_50:"Guadagna 50 punti",weekly_score_100:"Guadagna 100 punti"},
+    pt:{daily_predict_2:"Faz 2 previsões",daily_predict_3:"Faz 3 previsões",daily_predict_5:"Faz 5 previsões",daily_correct_1:"Prevê 1 resultado correto",daily_correct_2:"Prevê 2 resultados corretos",daily_score_10:"Ganha 10 pontos",daily_score_20:"Ganha 20 pontos",daily_score_30:"Ganha 30 pontos",weekly_predict_5:"Faz 5 previsões",weekly_predict_10:"Faz 10 previsões",weekly_predict_15:"Faz 15 previsões",weekly_predict_20:"Faz 20 previsões",weekly_correct_3:"Prevê 3 resultados corretos",weekly_correct_5:"Prevê 5 resultados corretos",weekly_score_50:"Ganha 50 pontos",weekly_score_100:"Ganha 100 pontos"}
   };
 
   const locale = language==="nl"?"nl-NL":language==="en"?"en-GB":language==="de"?"de-DE":language==="es"?"es-ES":language==="fr"?"fr-FR":language==="it"?"it-IT":"pt-PT";
@@ -285,10 +359,10 @@ export default function DashboardPage() {
           </div>
         </section>}
 
-        {challenges.length > 0 && <section className="challengeBox">
+        {visibleChallenges.length > 0 && <section className="challengeBox">
           <div className="challengeHead"><h2>🎯 {t.challenges}</h2><button onClick={()=>router.push("/challenges")}>{t.open} →</button></div>
           <div className="challengeGrid">
-            {challenges.map(ch=>{
+            {visibleChallenges.map(ch=>{
               const value=challengeProgress[ch.challenge_key]||0;
               const shown=Math.min(value,ch.target);
               const pct=Math.min(100,(value/ch.target)*100);
@@ -326,11 +400,11 @@ export default function DashboardPage() {
       .state{padding:30px;border:1px solid rgba(74,222,128,.18);background:#06271a;border-radius:18px;text-align:center;color:#a9bbb0}.error{color:#fecaca;border-color:#7f1d1d}
       .hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;margin-bottom:24px}.kicker{color:#41e58b;font-size:12px;font-weight:950;letter-spacing:1.2px}.hero h1{font-size:clamp(30px,5vw,44px);margin:7px 0 8px}.hero p{color:#9fb5a9;margin:0;max-width:650px}.premium{padding:9px 12px;border:1px solid rgba(250,204,21,.24);background:rgba(250,204,21,.08);color:#fde68a;border-radius:999px;font-weight:900;font-size:12px}
       .onboarding{border:1px solid rgba(65,229,139,.24);background:linear-gradient(145deg,rgba(7,52,33,.96),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:16px}.onboardingIntro{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:14px}.onboardingIntro h2{font-size:17px;margin:0 0 5px}.onboardingIntro p{color:#8da397;font-size:11px;margin:0}.onboardingIntro>strong{color:#41e58b;font-size:14px}.onboardingSteps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.onboardingStep{border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:13px;padding:12px;text-align:left;cursor:pointer;display:grid;grid-template-columns:auto 1fr;gap:5px 8px;align-items:center}.onboardingStep:hover{border-color:rgba(65,229,139,.4)}.onboardingStep.done{opacity:.68}.stepNumber{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#0b4b30;color:#83e7ae;font-size:10px;font-weight:950}.stepIcon{font-size:17px}.onboardingStep b{grid-column:1/-1;font-size:11px}.onboardingStep small{grid-column:1/-1;color:#41e58b;font-size:9px;font-weight:900}
-      .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}.stats button{cursor:pointer;text-align:left;border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,#06271a,#00170e);border-radius:16px;padding:17px;color:white;display:flex;flex-direction:column;gap:5px}.stats button:hover{border-color:rgba(65,229,139,.4)}.stats span{font-size:20px}.stats strong{font-size:21px}.stats small{color:#81998c;font-weight:800}
-      .rankCard{border:1px solid rgba(80,190,130,.18);background:rgba(6,39,26,.72);border-radius:16px;padding:17px;margin-bottom:24px}.rankTop{display:flex;justify-content:space-between;gap:15px;align-items:center}.rankTop>div{display:flex;flex-direction:column;gap:4px}.rankTop small,.rankTop strong{color:#8da397;font-size:11px}.bar{height:8px;background:#00170e;border-radius:999px;overflow:hidden;margin-top:13px}.bar i{display:block;height:100%;background:#22c55e;border-radius:999px}
+      .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}.stats button{cursor:pointer;text-align:left;border:1px solid rgba(80,190,130,.2);background:linear-gradient(145deg,#0a301f,#00170e);border-radius:16px;padding:17px;color:white;display:flex;flex-direction:column;gap:5px;box-shadow:0 12px 32px rgba(0,0,0,.16),inset 0 1px 0 rgba(255,255,255,.02)}.stats button:hover{border-color:rgba(65,229,139,.4)}.stats span{font-size:20px}.stats strong{font-size:22px;letter-spacing:-.2px}.stats small{color:#81998c;font-weight:800}
+      .rankCard{border:1px solid rgba(80,190,130,.2);background:linear-gradient(145deg,rgba(8,48,31,.9),rgba(1,27,17,.92));border-radius:16px;padding:17px;margin-bottom:24px;box-shadow:0 12px 34px rgba(0,0,0,.14)}.rankTop{display:flex;justify-content:space-between;gap:15px;align-items:center}.rankTop>div{display:flex;flex-direction:column;gap:4px}.rankTop small,.rankTop strong{color:#8da397;font-size:11px}.bar{height:8px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin-top:13px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#6ee7a0);border-radius:999px;box-shadow:0 0 12px rgba(65,229,139,.24)}
       .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}.match{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.06)}.match:last-child{border-bottom:0}.match>div:first-child{display:flex;flex-direction:column;gap:4px}.match b{font-size:13px}.match small{color:#789084;font-size:10px}.score{text-align:right;display:flex;flex-direction:column}.score strong{font-size:16px}.earned{color:#41e58b;font-weight:950;font-size:13px;white-space:nowrap}
       .poolBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.poolGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.poolCard{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:14px;cursor:pointer}.poolCard:hover{border-color:rgba(65,229,139,.4)}.poolCard>span{font-size:22px}.poolCard>div{display:flex;flex-direction:column;gap:3px}.poolCard b{font-size:12px}.poolCard small{color:#81998c;font-size:10px}.poolCard strong{color:#41e58b}
-      .challengeBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.challengeHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.challengeHead h2{font-size:16px;margin:0}.challengeHead button{border:0;background:transparent;color:#41e58b;font-size:10px;font-weight:900;cursor:pointer}.challengeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.challengeCard{text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:14px;cursor:pointer}.challengeCard:hover{border-color:rgba(65,229,139,.4)}.challengeTop{display:flex;justify-content:space-between;gap:10px}.challengeTop b{font-size:12px}.challengeValue{margin-top:12px;color:#41e58b;font-weight:950}.challengeBar{height:6px;background:#00170e;border-radius:999px;overflow:hidden;margin:7px 0}.challengeBar i{display:block;height:100%;background:#22c55e;border-radius:999px}.challengeCard small{color:#81998c;font-size:10px}
+      .challengeBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.challengeHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.challengeHead h2{font-size:16px;margin:0}.challengeHead button{border:0;background:transparent;color:#41e58b;font-size:10px;font-weight:900;cursor:pointer}.challengeGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.challengeCard{text-align:left;border:1px solid rgba(80,190,130,.15);background:linear-gradient(145deg,#08271a,#031b12);color:white;border-radius:14px;padding:14px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.015)}.challengeCard:hover{border-color:rgba(65,229,139,.4)}.challengeTop{display:flex;justify-content:space-between;gap:10px}.challengeTop b{font-size:12px}.challengeValue{margin-top:12px;color:#41e58b;font-weight:950}.challengeBar{height:6px;background:rgba(255,255,255,.08);border-radius:999px;overflow:hidden;margin:7px 0}.challengeBar i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#6ee7a0);border-radius:999px}.challengeCard small{color:#81998c;font-size:10px}
       .achievementBox{border:1px solid rgba(80,190,130,.18);background:linear-gradient(145deg,rgba(6,39,26,.97),rgba(0,23,14,.98));border-radius:18px;padding:18px;margin-bottom:14px}.achievementSummary{width:100%;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;text-align:left;border:1px solid rgba(80,190,130,.14);background:#041e14;color:white;border-radius:14px;padding:15px;cursor:pointer}.achievementSummary:hover{border-color:rgba(65,229,139,.4)}.achievementSummary>div:first-child{display:flex;flex-direction:column;gap:3px;min-width:85px}.achievementSummary strong{font-size:18px;color:#41e58b}.achievementSummary small{font-size:10px;color:#81998c}.achievementProgress{height:8px;background:#00170e;border-radius:999px;overflow:hidden}.achievementProgress i{display:block;height:100%;background:#22c55e;border-radius:999px}.achievementSummary>span{color:#41e58b;font-weight:950}
       .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
       @media(max-width:850px){.stats,.quick,.challengeGrid,.poolGrid,.onboardingSteps{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}.hero{flex-direction:column}}
