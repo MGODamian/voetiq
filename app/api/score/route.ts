@@ -7,6 +7,16 @@ type Prediction = {
   home_score: number;
   away_score: number;
   kickoff_at: string | null;
+  competition_code: string | null;
+};
+
+type ZafronixCompetition = "EL" | "ECL";
+
+type ZafronixMatch = {
+  id: number;
+  status: "FINISHED" | "SCHEDULED";
+  homeScore: number | null;
+  awayScore: number | null;
 };
 
 function getOutcome(
@@ -42,6 +52,127 @@ function calculatePoints(
     2,
     maximumPoints - goalDifference * 2
   );
+}
+
+function zafronixNumericId(
+  competition: ZafronixCompetition,
+  id: unknown,
+  index: number
+) {
+  const text = String(id ?? "");
+  const number = Number(
+    text.match(/(\d+)$/)?.[1] ?? index + 1
+  );
+
+  return (
+    (competition === "EL" ? 300000000 : 848000000) +
+    number
+  );
+}
+
+function zafronixStatus(item: any): "FINISHED" | "SCHEDULED" {
+  if (
+    item.homeScore !== null &&
+    item.homeScore !== undefined &&
+    item.awayScore !== null &&
+    item.awayScore !== undefined
+  ) {
+    return "FINISHED";
+  }
+
+  return "SCHEDULED";
+}
+
+/**
+ * Haalt per competitie in één keer alle Zafronix-wedstrijden op.
+ *
+ * BELANGRIJK VOOR DE GRATIS ZAFRONIX-LIMIET:
+ * - De cron mag iedere 5 minuten blijven draaien.
+ * - Next.js cachet deze externe response 6 uur.
+ * - Daardoor veroorzaakt deze route per competitie maximaal ongeveer
+ *   4 echte Zafronix-originrequests per dag.
+ * - EL + ECL samen is dus ongeveer 8 per dag in het slechtste geval.
+ *
+ * We halen dus NIET per voorspelling of per wedstrijd apart Zafronix op.
+ */
+async function getZafronixMatches(
+  competition: ZafronixCompetition
+): Promise<ZafronixMatch[]> {
+  const apiKey = process.env.ZAFRONIX_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("ZAFRONIX_API_KEY ontbreekt in Vercel.");
+  }
+
+  const endpoint =
+    competition === "EL"
+      ? "https://api.zafronix.com/uefa/europaleague/v1/matches?season=2026"
+      : "https://api.zafronix.com/uefa/conferenceleague/v1/matches?season=2026";
+
+  const response = await fetch(endpoint, {
+    headers: {
+      "X-API-Key": apiKey,
+      Accept: "application/json",
+    },
+    next: {
+      revalidate: 21600, // 6 uur
+    },
+  });
+
+  const rawText = await response.text();
+
+  let payload: any;
+
+  try {
+    payload = JSON.parse(rawText);
+  } catch {
+    throw new Error(
+      `Zafronix gaf voor ${competition} geen geldige JSON terug.`
+    );
+  }
+
+  if (!response.ok) {
+    console.error(
+      `Zafronix fout voor ${competition}:`,
+      response.status,
+      payload
+    );
+
+    throw new Error(
+      `Zafronix status ${response.status} voor ${competition}.`
+    );
+  }
+
+  const sourceMatches = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload)
+      ? payload
+      : [];
+
+  return sourceMatches.map((item: any, index: number) => ({
+    id: zafronixNumericId(
+      competition,
+      item?.id,
+      index
+    ),
+    status: zafronixStatus(item),
+    homeScore:
+      typeof item?.homeScore === "number"
+        ? item.homeScore
+        : item?.homeScore !== null &&
+            item?.homeScore !== undefined &&
+            Number.isFinite(Number(item.homeScore))
+          ? Number(item.homeScore)
+          : null,
+    awayScore:
+      typeof item?.awayScore === "number"
+        ? item.awayScore
+        : item?.awayScore !== null &&
+            item?.awayScore !== undefined &&
+            Number.isFinite(Number(item.awayScore))
+          ? Number(item.awayScore)
+          : null,
+  }));
 }
 
 export async function GET(request: Request) {
@@ -98,13 +229,15 @@ export async function GET(request: Request) {
     const now = new Date();
 
     // Alleen voorspellingen ophalen die nog geen einduitslag hebben.
+    // competition_code is nu nodig om football-data en Zafronix
+    // van elkaar te kunnen scheiden.
     const {
       data: pendingPredictions,
       error: predictionsError,
     } = await supabase
       .from("predictions")
       .select(
-        "id, match_id, home_score, away_score, kickoff_at"
+        "id, match_id, home_score, away_score, kickoff_at, competition_code"
       )
       .is("actual_home_score", null)
       .not("match_id", "is", null);
@@ -134,8 +267,9 @@ export async function GET(request: Request) {
      * - kickoff_at ontbreekt of is ongeldig
      * - match_id bestaat wel
      *
-     * Die herstelgevallen controleren we óók bij football-data.
-     * Zo blijft een oude/onjuiste voorspelling niet voor altijd hangen.
+     * Voor football-data blijven herstelgevallen automatisch werken.
+     * EL/ECL met ontbrekende kickoff_at worden niet blind als toekomstig
+     * gezien; ze mogen wel tegen de Zafronix-dataset worden gecontroleerd.
      */
     const predictionsToCheck =
       allPredictions.filter((prediction) => {
@@ -166,11 +300,25 @@ export async function GET(request: Request) {
         return Number.isNaN(kickoff.getTime());
       }).length;
 
-    // Eén wedstrijd kan voorspellingen van honderden gebruikers hebben.
-    // Daarom controleren we ieder uniek match_id maar één keer.
-    const uniqueMatchIds = [
+    // Zafronix-wedstrijden apart houden.
+    const zafronixPredictions =
+      predictionsToCheck.filter(
+        (prediction) =>
+          prediction.competition_code === "EL" ||
+          prediction.competition_code === "ECL"
+      );
+
+    // Alles behalve EL/ECL blijft exact via football-data lopen.
+    const footballPredictions =
+      predictionsToCheck.filter(
+        (prediction) =>
+          prediction.competition_code !== "EL" &&
+          prediction.competition_code !== "ECL"
+      );
+
+    const uniqueFootballMatchIds = [
       ...new Set(
-        predictionsToCheck.map(
+        footballPredictions.map(
           (prediction) => prediction.match_id
         )
       ),
@@ -181,8 +329,14 @@ export async function GET(request: Request) {
     let unfinishedMatches = 0;
     let updatedPredictions = 0;
 
+    let footballDataMatchesChecked = 0;
+    let zafronixMatchesChecked = 0;
+    let zafronixApiDatasetsLoaded = 0;
+
     const results: Array<{
       matchId: number;
+      provider: "football-data" | "zafronix";
+      competition?: string | null;
       status:
         | "finished"
         | "not-finished"
@@ -192,7 +346,10 @@ export async function GET(request: Request) {
       error?: string;
     }> = [];
 
-    for (const matchId of uniqueMatchIds) {
+    // ------------------------------------------------
+    // 1. BESTAANDE COMPETITIES VIA FOOTBALL-DATA
+    // ------------------------------------------------
+    for (const matchId of uniqueFootballMatchIds) {
       try {
         const footballResponse =
           await fetch(
@@ -206,6 +363,7 @@ export async function GET(request: Request) {
           );
 
         checkedMatches++;
+        footballDataMatchesChecked++;
 
         if (!footballResponse.ok) {
           const errorText =
@@ -219,6 +377,7 @@ export async function GET(request: Request) {
 
           results.push({
             matchId,
+            provider: "football-data",
             status: "error",
             error:
               `Football-data status ${footballResponse.status}`,
@@ -239,7 +398,7 @@ export async function GET(request: Request) {
 
         if (apiKickoff) {
           const predictionsForKickoffRepair =
-            predictionsToCheck.filter(
+            footballPredictions.filter(
               (prediction) => {
                 if (
                   prediction.match_id !== matchId
@@ -282,12 +441,12 @@ export async function GET(request: Request) {
           }
         }
 
-        // Wedstrijd is nog niet afgelopen.
         if (match.status !== "FINISHED") {
           unfinishedMatches++;
 
           results.push({
             matchId,
+            provider: "football-data",
             status: "not-finished",
           });
 
@@ -306,6 +465,7 @@ export async function GET(request: Request) {
         ) {
           results.push({
             matchId,
+            provider: "football-data",
             status: "error",
             error:
               "Geen geldige einduitslag ontvangen.",
@@ -316,9 +476,8 @@ export async function GET(request: Request) {
 
         finishedMatches++;
 
-        // Alle openstaande voorspellingen voor deze wedstrijd.
         const matchPredictions =
-          predictionsToCheck.filter(
+          footballPredictions.filter(
             (prediction) =>
               prediction.match_id === matchId
           );
@@ -363,6 +522,7 @@ export async function GET(request: Request) {
 
         results.push({
           matchId,
+          provider: "football-data",
           status: "finished",
           predictionsUpdated:
             updatedForMatch,
@@ -371,12 +531,13 @@ export async function GET(request: Request) {
         });
       } catch (matchError) {
         console.error(
-          `Fout bij wedstrijd ${matchId}:`,
+          `Fout bij football-data wedstrijd ${matchId}:`,
           matchError
         );
 
         results.push({
           matchId,
+          provider: "football-data",
           status: "error",
           error:
             "Onverwachte fout bij het controleren van de wedstrijd.",
@@ -384,30 +545,202 @@ export async function GET(request: Request) {
       }
     }
 
+    // ------------------------------------------------
+    // 2. EUROPA LEAGUE + CONFERENCE LEAGUE VIA ZAFRONIX
+    // ------------------------------------------------
+    for (const competition of ["EL", "ECL"] as const) {
+      const competitionPredictions =
+        zafronixPredictions.filter(
+          (prediction) =>
+            prediction.competition_code === competition
+        );
+
+      if (competitionPredictions.length === 0) {
+        continue;
+      }
+
+      let zafronixMatches: ZafronixMatch[];
+
+      try {
+        zafronixMatches =
+          await getZafronixMatches(competition);
+
+        zafronixApiDatasetsLoaded++;
+      } catch (zafronixError) {
+        console.error(
+          `Zafronix dataset ${competition} kon niet worden geladen:`,
+          zafronixError
+        );
+
+        const uniqueIds = [
+          ...new Set(
+            competitionPredictions.map(
+              (prediction) => prediction.match_id
+            )
+          ),
+        ];
+
+        for (const matchId of uniqueIds) {
+          results.push({
+            matchId,
+            provider: "zafronix",
+            competition,
+            status: "error",
+            error:
+              `Zafronix ${competition} kon niet worden geladen.`,
+          });
+        }
+
+        continue;
+      }
+
+      const matchesById =
+        new Map<number, ZafronixMatch>(
+          zafronixMatches.map(
+            (match) => [match.id, match]
+          )
+        );
+
+      const uniqueMatchIds = [
+        ...new Set(
+          competitionPredictions.map(
+            (prediction) => prediction.match_id
+          )
+        ),
+      ];
+
+      for (const matchId of uniqueMatchIds) {
+        checkedMatches++;
+        zafronixMatchesChecked++;
+
+        const match =
+          matchesById.get(matchId);
+
+        if (!match) {
+          results.push({
+            matchId,
+            provider: "zafronix",
+            competition,
+            status: "error",
+            error:
+              "Wedstrijd niet gevonden in de Zafronix-dataset.",
+          });
+
+          continue;
+        }
+
+        if (
+          match.status !== "FINISHED" ||
+          typeof match.homeScore !== "number" ||
+          typeof match.awayScore !== "number"
+        ) {
+          unfinishedMatches++;
+
+          results.push({
+            matchId,
+            provider: "zafronix",
+            competition,
+            status: "not-finished",
+          });
+
+          continue;
+        }
+
+        const actualHomeScore =
+          match.homeScore;
+
+        const actualAwayScore =
+          match.awayScore;
+
+        finishedMatches++;
+
+        const matchPredictions =
+          competitionPredictions.filter(
+            (prediction) =>
+              prediction.match_id === matchId
+          );
+
+        let updatedForMatch = 0;
+
+        for (const prediction of matchPredictions) {
+          const points = calculatePoints(
+            prediction.home_score,
+            prediction.away_score,
+            actualHomeScore,
+            actualAwayScore
+          );
+
+          const { error: updateError } =
+            await supabase
+              .from("predictions")
+              .update({
+                actual_home_score:
+                  actualHomeScore,
+                actual_away_score:
+                  actualAwayScore,
+                points,
+              })
+              .eq("id", prediction.id);
+
+          if (updateError) {
+            console.error(
+              `Zafronix-voorspelling ${prediction.id} kon niet worden bijgewerkt:`,
+              updateError
+            );
+
+            continue;
+          }
+
+          updatedForMatch++;
+          updatedPredictions++;
+        }
+
+        results.push({
+          matchId,
+          provider: "zafronix",
+          competition,
+          status: "finished",
+          predictionsUpdated:
+            updatedForMatch,
+          score:
+            `${actualHomeScore}-${actualAwayScore}`,
+        });
+      }
+    }
+
     return NextResponse.json({
       success: true,
 
-      // Alle voorspellingen zonder einduitslag.
       openPredictions:
         allPredictions.length,
 
-      // Alleen echte toekomstige wedstrijden worden overgeslagen.
       skippedPredictions:
         skippedFuturePredictions,
 
-      // Handig om oude/onvolledige records terug te vinden.
       predictionsMissingKickoff,
 
       predictionsToCheck:
         predictionsToCheck.length,
 
       uniqueMatches:
-        uniqueMatchIds.length,
+        new Set(
+          predictionsToCheck.map(
+            (prediction) => prediction.match_id
+          )
+        ).size,
 
       checkedMatches,
       finishedMatches,
       unfinishedMatches,
       updatedPredictions,
+
+      providers: {
+        footballDataMatchesChecked,
+        zafronixMatchesChecked,
+        zafronixApiDatasetsLoaded,
+        zafronixCacheSeconds: 21600,
+      },
+
       results,
     });
   } catch (error) {
