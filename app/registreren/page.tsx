@@ -587,6 +587,7 @@ export default function RegistrerenPage() {
   const [country, setCountry] = useState("");
   const [timezone, setTimezone] = useState("");
   const [countrySearch, setCountrySearch] = useState("");
+  const [countryOpen, setCountryOpen] = useState(false);
 
   const t = ui[language];
 
@@ -1055,34 +1056,94 @@ export default function RegistrerenPage() {
             <div style={{ marginTop: "14px" }}>
               <label style={labelStyle}>{t.country}</label>
 
-              <input
-                type="text"
-                value={countrySearch}
-                onChange={(e) => setCountrySearch(e.target.value)}
-                placeholder={t.searchCountry}
-                style={inputStyle}
-              />
+              <div style={{ position: "relative" }}>
+                <button
+                  type="button"
+                  onClick={() => setCountryOpen((open) => !open)}
+                  style={{
+                    ...inputStyle,
+                    width: "100%",
+                    textAlign: "left",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    cursor: "pointer",
+                    color: country ? "#ffffff" : "#8fa79a",
+                  }}
+                >
+                  <span>
+                    {country
+                      ? `${COUNTRIES.find((item) => item.code === country)?.flag ?? ""} ${COUNTRIES.find((item) => item.code === country)?.name ?? ""}`
+                      : t.countryPlaceholder}
+                  </span>
+                  <span style={{ fontSize: "14px" }}>{countryOpen ? "▲" : "▼"}</span>
+                </button>
 
-              <select
-                value={country}
-                onChange={(e) => {
-                  const nextCountry = e.target.value;
-                  setCountry(nextCountry);
+                {countryOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: 0,
+                      right: 0,
+                      top: "calc(100% + 6px)",
+                      zIndex: 50,
+                      background: "#10241a",
+                      border: "1px solid #294a37",
+                      borderRadius: "12px",
+                      boxShadow: "0 16px 40px rgba(0,0,0,0.45)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <div style={{ padding: "10px", borderBottom: "1px solid #294a37" }}>
+                      <input
+                        type="text"
+                        autoFocus
+                        value={countrySearch}
+                        onChange={(e) => setCountrySearch(e.target.value)}
+                        placeholder={t.searchCountry}
+                        style={{ ...inputStyle, margin: 0, width: "100%" }}
+                      />
+                    </div>
 
-                  const options = MULTI_TIMEZONE_OPTIONS[nextCountry];
-                  const defaultCountry = COUNTRIES.find((item) => item.code === nextCountry);
+                    <div style={{ maxHeight: "260px", overflowY: "auto", padding: "6px" }}>
+                      {filteredCountries.length > 0 ? (
+                        filteredCountries.map((item) => (
+                          <button
+                            key={item.code}
+                            type="button"
+                            onClick={() => {
+                              setCountry(item.code);
 
-                  setTimezone(options?.[0]?.value ?? defaultCountry?.timezone ?? "");
-                }}
-                style={{ ...inputStyle, marginTop: "8px" }}
-              >
-                <option value="">{t.countryPlaceholder}</option>
-                {filteredCountries.map((item) => (
-                  <option key={item.code} value={item.code}>
-                    {item.flag} {item.name}
-                  </option>
-                ))}
-              </select>
+                              const options = MULTI_TIMEZONE_OPTIONS[item.code];
+                              setTimezone(options?.[0]?.value ?? item.timezone ?? "");
+
+                              setCountrySearch("");
+                              setCountryOpen(false);
+                            }}
+                            style={{
+                              width: "100%",
+                              border: "none",
+                              background: item.code === country ? "#1c4930" : "transparent",
+                              color: "#ffffff",
+                              padding: "10px 12px",
+                              borderRadius: "8px",
+                              textAlign: "left",
+                              cursor: "pointer",
+                              fontSize: "14px",
+                            }}
+                          >
+                            {item.flag} {item.name}
+                          </button>
+                        ))
+                      ) : (
+                        <div style={{ padding: "12px", color: "#8fa79a", fontSize: "14px" }}>
+                          Geen land gevonden.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {country && (
