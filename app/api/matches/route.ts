@@ -13,7 +13,6 @@ const FOOTBALL_DATA_COMPETITIONS = [
 
 const API_FOOTBALL_COMPETITIONS: Record<string, number> = {
   EL: 3,
-  ECL: 848,
 };
 
 function formatDate(date: Date) {
@@ -59,7 +58,7 @@ function mapApiFootballStatus(shortStatus?: string) {
 }
 
 async function getApiFootballMatches(
-  competition: "EL" | "ECL",
+  competition: "EL",
   dateFrom: string,
   dateTo: string
 ) {
@@ -141,11 +140,7 @@ async function getApiFootballMatches(
 
     competition: {
       id: item.league?.id,
-      name:
-        item.league?.name ||
-        (competition === "EL"
-          ? "UEFA Europa League"
-          : "UEFA Conference League"),
+      name: item.league?.name || "UEFA Europa League",
       code: competition,
     },
 
@@ -173,12 +168,69 @@ async function getApiFootballMatches(
   return NextResponse.json({
     competition: {
       code: competition,
-      name:
-        competition === "EL"
-          ? "UEFA Europa League"
-          : "UEFA Conference League",
+      name: "UEFA Europa League",
     },
     matches,
+  });
+}
+
+/**
+ * Tijdelijke test voor Zafronix Conference League 2026/27.
+ * We geven de Zafronix-response bewust vrijwel ongewijzigd terug.
+ * Zo kunnen we eerst exact zien welke JSON-vorm hun actuele ECL-data heeft,
+ * zonder de bestaande VoetIQ-competities aan te raken.
+ */
+async function testZafronixConferenceLeague() {
+  const apiKey = process.env.ZAFRONIX_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "ZAFRONIX_API_KEY ontbreekt in Vercel." },
+      { status: 500 }
+    );
+  }
+
+  const url =
+    "https://api.zafronix.com/uefa/conferenceleague/v1/matches?season=2026";
+
+  const response = await fetch(url, {
+    headers: {
+      "X-API-Key": apiKey,
+      Accept: "application/json",
+    },
+    next: {
+      revalidate: 3600,
+    },
+  });
+
+  const rawText = await response.text();
+
+  let data: unknown;
+
+  try {
+    data = JSON.parse(rawText);
+  } catch {
+    data = rawText;
+  }
+
+  if (!response.ok) {
+    return NextResponse.json(
+      {
+        error: "Zafronix fout",
+        competition: "ECL",
+        status: response.status,
+        details: data,
+      },
+      { status: response.status }
+    );
+  }
+
+  return NextResponse.json({
+    test: true,
+    provider: "Zafronix",
+    competition: "ECL",
+    season: 2026,
+    data,
   });
 }
 
@@ -230,6 +282,7 @@ export async function GET(request: Request) {
   const supportedCompetitions = [
     ...FOOTBALL_DATA_COMPETITIONS,
     ...Object.keys(API_FOOTBALL_COMPETITIONS),
+    "ECL",
   ];
 
   if (!supportedCompetitions.includes(competition)) {
@@ -251,7 +304,11 @@ export async function GET(request: Request) {
   const dateTo = formatDate(nextMonth);
 
   try {
-    if (competition === "EL" || competition === "ECL") {
+    if (competition === "ECL") {
+      return await testZafronixConferenceLeague();
+    }
+
+    if (competition === "EL") {
       return await getApiFootballMatches(
         competition,
         dateFrom,
