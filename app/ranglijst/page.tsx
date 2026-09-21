@@ -623,8 +623,8 @@ export default function Ranglijst() {
                   }
                   className={`rounded-xl border px-4 py-2.5 text-sm font-bold transition-all ${
                     active
-                      ? "border-green-400 bg-green-500 text-green-950 shadow-lg shadow-green-950/30"
-                      : "border-white/10 bg-white/5 text-green-100/70 hover:border-green-400/30 hover:bg-white/10 hover:text-white"
+                      ? "border-green-300/80 bg-gradient-to-br from-green-400 to-green-500 text-green-950 shadow-lg shadow-green-950/30"
+                      : "border-white/10 bg-white/[0.07] text-green-50/80 hover:border-green-400/35 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   <span className="mr-2">
@@ -641,7 +641,7 @@ export default function Ranglijst() {
         </div>
 
         {isCompetition && (
-          <div className="mx-auto mb-7 max-w-4xl">
+          <div className="mx-auto mb-7 max-w-5xl">
             <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.18em] text-green-300">
               {t.chooseRound}
             </p>
@@ -679,8 +679,8 @@ export default function Ranglijst() {
           </div>
         )}
 
-        <div className="mx-auto mb-4 max-w-4xl">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/5 px-5 py-4">
+        <div className="mx-auto mb-4 max-w-5xl">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-green-300/10 bg-white/[0.07] px-6 py-4 shadow-lg shadow-black/10">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-green-300">
                 {t.current}
@@ -711,12 +711,12 @@ export default function Ranglijst() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl backdrop-blur">
+        <div className="mx-auto max-w-5xl overflow-hidden rounded-2xl border border-green-300/10 bg-white/[0.055] shadow-2xl shadow-black/20 backdrop-blur">
           <div
             className={`grid px-5 py-4 text-sm font-bold uppercase tracking-wide ${
               selectedCompetition === "ALL"
-                ? "grid-cols-[60px_1fr_120px] bg-green-600/90 sm:grid-cols-[80px_1fr_140px]"
-                : "grid-cols-[55px_1fr_90px_90px_110px] bg-green-600/90"
+                ? "grid-cols-[60px_1fr_120px] bg-gradient-to-r from-green-600 to-green-500 sm:grid-cols-[80px_1fr_140px]"
+                : "grid-cols-[55px_1fr_90px_90px_110px] bg-gradient-to-r from-green-600 to-green-500"
             }`}
           >
             <span>#</span>
@@ -857,7 +857,7 @@ export default function Ranglijst() {
                 )}
 
                 <div className="text-right">
-                  <span className="font-black text-green-300">
+                  <span className="text-lg font-black tabular-nums text-green-300">
                     {player.total_points}
                   </span>
 
@@ -869,8 +869,8 @@ export default function Ranglijst() {
             ))}
         </div>
 
-        <div className="mx-auto mt-8 max-w-4xl rounded-2xl border border-white/10 bg-white/5 p-6 text-center">
-          <p className="text-sm leading-6 text-green-100/60">
+        <div className="mx-auto mt-6 max-w-5xl rounded-xl border border-white/10 bg-white/[0.045] px-5 py-3.5 text-center">
+          <p className="text-xs leading-5 text-green-100/55 sm:text-sm">
             {selectedCompetition === "ALL"
               ? t.allTip
               : selectedMatchday === null
