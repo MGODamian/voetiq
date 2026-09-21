@@ -737,14 +737,15 @@ export default function MyPredictionsPage() {
 
         .day-heading h2 {
           margin: 0;
-          color: #dff7e9;
+          color: #e9fff2;
           font-size: 14px;
           font-weight: 950;
+          letter-spacing: 0.01em;
           text-transform: capitalize;
         }
 
         .day-heading span {
-          color: #718b7d;
+          color: #8aa395;
           font-size: 10px;
           font-weight: 850;
         }
@@ -761,17 +762,24 @@ export default function MyPredictionsPage() {
               rgba(6, 39, 26, 0.97),
               rgba(0, 23, 14, 0.98)
             );
-          border: 1px solid rgba(80, 190, 130, 0.18);
+          border: 1px solid rgba(80, 190, 130, 0.2);
           border-radius: 18px;
           padding: 20px;
+          box-shadow:
+            0 16px 42px rgba(0, 0, 0, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.02);
           transition:
             transform 0.15s ease,
-            border 0.15s ease;
+            border 0.15s ease,
+            box-shadow 0.15s ease;
         }
 
         .prediction-card:hover {
           transform: translateY(-1px);
           border-color: rgba(65, 229, 139, 0.34);
+          box-shadow:
+            0 18px 46px rgba(0, 0, 0, 0.22),
+            inset 0 1px 0 rgba(255, 255, 255, 0.025);
         }
 
         .exact-card {
@@ -798,20 +806,23 @@ export default function MyPredictionsPage() {
         }
 
         .competition {
-          color: #75dfa4;
+          color: #68e59d;
           font-size: 11px;
-          font-weight: 900;
+          font-weight: 950;
         }
 
         .date {
-          color: #718b7d;
+          color: #8aa395;
           font-size: 11px;
-          font-weight: 700;
+          font-weight: 750;
         }
 
         .prediction-card h2 {
           margin: 17px 0;
-          font-size: 20px;
+          font-size: 21px;
+          line-height: 1.05;
+          letter-spacing: -0.01em;
+          letter-spacing: -0.01em;
         }
 
         .status {
@@ -820,6 +831,7 @@ export default function MyPredictionsPage() {
           padding: 6px 9px;
           font-size: 10px;
           font-weight: 950;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
         }
 
         .upcoming-status {
@@ -844,9 +856,11 @@ export default function MyPredictionsPage() {
           display: flex;
           align-items: center;
           gap: 16px;
-          background: rgba(0, 10, 6, 0.35);
+          background: linear-gradient(135deg, rgba(0, 13, 8, 0.58), rgba(3, 29, 19, 0.5));
+          border: 1px solid rgba(255, 255, 255, 0.035);
           border-radius: 12px;
           padding: 13px 15px;
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.015);
         }
 
         .score-block {
@@ -856,9 +870,9 @@ export default function MyPredictionsPage() {
         }
 
         .score-block span {
-          color: #799486;
+          color: #8ca598;
           font-size: 10px;
-          font-weight: 850;
+          font-weight: 900;
         }
 
         .score-block strong {
@@ -878,7 +892,8 @@ export default function MyPredictionsPage() {
         }
 
         .points-earned {
-          color: #41e58b;
+          color: #57ed98;
+          text-shadow: 0 0 18px rgba(65, 229, 139, 0.14);
         }
 
         .state-card,
@@ -1012,9 +1027,12 @@ function StatCard({
               rgba(6, 39, 26, 0.98),
               rgba(0, 23, 14, 0.98)
             );
-          border: 1px solid rgba(80, 190, 130, 0.18);
+          border: 1px solid rgba(80, 190, 130, 0.2);
           border-radius: 15px;
           padding: 16px;
+          box-shadow:
+            0 12px 32px rgba(0, 0, 0, 0.16),
+            inset 0 1px 0 rgba(255, 255, 255, 0.02);
           display: flex;
           flex-direction: column;
           gap: 4px;
@@ -1026,9 +1044,10 @@ function StatCard({
         }
 
         strong {
-          font-size: 24px;
+          font-size: 25px;
           line-height: 1;
           color: white;
+          letter-spacing: -0.02em;
         }
 
         small {
@@ -1079,9 +1098,10 @@ function FilterButton({
         }
 
         .filter.active {
-          background: #08783e;
+          background: linear-gradient(135deg, #159447 0%, #08783e 100%);
           color: white;
-          border-color: #159858;
+          border-color: #20a653;
+          box-shadow: 0 6px 18px rgba(8, 120, 62, 0.18);
         }
       `}</style>
     </button>
