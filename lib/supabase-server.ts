@@ -1,14 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-export function createServerSupabaseClient() {
+export function createAdminSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
-    throw new Error("Supabase environment variables ontbreken.");
+  if (!supabaseUrl || !supabaseSecretKey) {
+    throw new Error("Supabase server environment variables ontbreken.");
   }
 
-  return createClient(supabaseUrl, supabaseKey, {
+  return createClient(supabaseUrl, supabaseSecretKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
