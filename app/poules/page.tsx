@@ -431,13 +431,13 @@ export default function PoulesPage() {
           >
             <section
               style={{
-                background: "linear-gradient(145deg, #0c3524 0%, #08271a 100%)",
+                background: "linear-gradient(145deg, rgba(18,58,39,0.96) 0%, rgba(7,31,21,0.98) 100%)",
                 color: "white",
-                border: "1px solid rgba(65,229,139,0.10)",
+                border: "1px solid rgba(65,229,139,0.16)",
                 borderRadius: "20px",
-                padding: "26px",
+                padding: "24px",
                 boxShadow:
-                  "0 8px 30px rgba(0,0,0,0.06)",
+                  "0 18px 46px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.025)",
               }}
             >
               <div
@@ -490,8 +490,11 @@ export default function PoulesPage() {
                   boxSizing: "border-box",
                   padding: "13px",
                   borderRadius: "10px",
-                  border: "1px solid #d7ddd9",
+                  border: "1px solid rgba(65,229,139,0.22)",
                   marginBottom: "18px",
+                  background: "#0a281b",
+                  color: "white",
+                  outline: "none",
                   fontSize: "15px",
                 }}
               />
@@ -518,8 +521,9 @@ export default function PoulesPage() {
                   borderRadius: "10px",
                   border: "1px solid rgba(65,229,139,0.22)",
                   marginBottom: "20px",
-                  background: "#0b2b1d",
+                  background: "#0a281b",
                   color: "white",
+                  outline: "none",
                   fontSize: "15px",
                   fontWeight: 700,
                 }}
@@ -542,9 +546,10 @@ export default function PoulesPage() {
                   border: 0,
                   borderRadius: "10px",
                   padding: "14px",
-                  background: "#08783e",
+                  background: "linear-gradient(135deg, #159447 0%, #08783e 100%)",
                   color: "white",
                   fontWeight: 800,
+                  boxShadow: "0 8px 22px rgba(8,120,62,0.18)",
                   fontSize: "15px",
                   cursor: "pointer",
                 }}
@@ -557,12 +562,13 @@ export default function PoulesPage() {
 
             <section
               style={{
-                background: "linear-gradient(145deg, #0d3a27 0%, #0a2d1f 100%)",
+                background: "linear-gradient(145deg, rgba(18,58,39,0.96) 0%, rgba(7,31,21,0.98) 100%)",
                 color: "white",
+                border: "1px solid rgba(65,229,139,0.16)",
                 borderRadius: "20px",
-                padding: "26px",
+                padding: "24px",
                 boxShadow:
-                  "0 8px 30px rgba(0,0,0,0.08)",
+                  "0 18px 46px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.025)",
               }}
             >
               <div
@@ -616,8 +622,9 @@ export default function PoulesPage() {
                   borderRadius: "10px",
                   border: "1px solid rgba(65,229,139,0.22)",
                   marginBottom: "20px",
-                  background: "#0b2b1d",
+                  background: "#0a281b",
                   color: "white",
+                  outline: "none",
                   fontSize: "17px",
                   fontWeight: 800,
                   letterSpacing: "1px",
@@ -632,9 +639,10 @@ export default function PoulesPage() {
                   border: 0,
                   borderRadius: "10px",
                   padding: "14px",
-                  background: "#07883f",
+                  background: "linear-gradient(135deg, #20a653 0%, #07883f 100%)",
                   color: "white",
                   fontWeight: 800,
+                  boxShadow: "0 8px 22px rgba(7,136,63,0.18)",
                   fontSize: "15px",
                   cursor: "pointer",
                 }}
@@ -660,11 +668,12 @@ export default function PoulesPage() {
             ) : pools.length === 0 ? (
               <div
                 style={{
-                  background: "white",
+                  background: "linear-gradient(145deg, #0b3020 0%, #071f15 100%)",
                   padding: "32px",
+                  border: "1px solid rgba(65,229,139,0.12)",
                   borderRadius: "18px",
                   textAlign: "center",
-                  color: "#68756d",
+                  color: "#a9bbb0",
                 }}
               >
                 {t("noPools")}
@@ -692,50 +701,91 @@ export default function PoulesPage() {
                         )
                       }
                       style={{
+                        width: "100%",
                         textAlign: "left",
-                        background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
+                        background: "linear-gradient(135deg, rgba(16,55,37,0.98) 0%, rgba(7,31,21,0.98) 100%)",
                         color: "white",
-                        border: "1px solid rgba(65,229,139,0.10)",
-                        borderRadius: "16px",
-                        padding: "20px",
+                        border: "1px solid rgba(65,229,139,0.14)",
+                        borderRadius: "18px",
+                        padding: "20px 22px",
                         cursor: "pointer",
+                        boxShadow: "0 14px 38px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.02)",
                       }}
                     >
                       <div
                         style={{
-                          fontSize: "25px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: "20px",
+                          flexWrap: "wrap",
                         }}
                       >
-                        {comp.flag}
-                      </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "15px",
+                            minWidth: 0,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "42px",
+                              height: "42px",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
+                              borderRadius: "13px",
+                              background: "rgba(255,255,255,0.045)",
+                              border: "1px solid rgba(255,255,255,0.055)",
+                              fontSize: "22px",
+                            }}
+                          >
+                            {comp.flag}
+                          </div>
 
-                      <h3
-                        style={{
-                          margin: "9px 0 5px",
-                          fontSize: "19px",
-                          color: "white",
-                        }}
-                      >
-                        {pool.name}
-                      </h3>
+                          <div style={{ minWidth: 0 }}>
+                            <h3
+                              style={{
+                                margin: "0 0 4px",
+                                fontSize: "18px",
+                                color: "white",
+                              }}
+                            >
+                              {pool.name}
+                            </h3>
 
-                      <div
-                        style={{
-                          color: "#b7c9bf",
-                          fontSize: "14px",
-                        }}
-                      >
-                        {comp.name}
-                      </div>
+                            <div
+                              style={{
+                                color: "#9fb5a8",
+                                fontSize: "14px",
+                              }}
+                            >
+                              {comp.name}
+                            </div>
+                          </div>
+                        </div>
 
-                      <div
-                        style={{
-                          marginTop: "16px",
-                          color: "#41e58b",
-                          fontWeight: 800,
-                        }}
-                      >
-                        {t("viewPool")} →
+                        <div
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            minHeight: "40px",
+                            padding: "0 15px",
+                            borderRadius: "11px",
+                            background: "rgba(65,229,139,0.09)",
+                            border: "1px solid rgba(65,229,139,0.16)",
+                            color: "#55e996",
+                            fontSize: "14px",
+                            fontWeight: 800,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {t("viewPool")} →
+                        </div>
                       </div>
                     </button>
                   );
