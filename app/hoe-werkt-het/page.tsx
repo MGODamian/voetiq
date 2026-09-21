@@ -753,23 +753,36 @@ export default function HoeWerktHetPage() {
         .step {
           position: relative;
           padding: 30px;
-          border: 1px solid #1d352c;
-          background: #0b1c16;
+          border: 1px solid rgba(76, 155, 116, 0.24);
+          background:
+            linear-gradient(145deg, rgba(16, 42, 32, 0.98), rgba(7, 22, 16, 0.98));
           border-radius: 20px;
+          box-shadow:
+            0 18px 45px rgba(0, 0, 0, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.025);
         }
 
         .number {
           position: absolute;
           right: 24px;
           top: 20px;
-          color: #29473b;
-          font-size: 46px;
+          color: rgba(91, 194, 139, 0.24);
+          font-size: 48px;
           font-weight: 900;
+          line-height: 1;
         }
 
         .icon {
-          font-size: 32px;
+          width: 46px;
+          height: 46px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 27px;
           margin-bottom: 22px;
+          border-radius: 13px;
+          background: rgba(88, 229, 154, 0.07);
+          border: 1px solid rgba(88, 229, 154, 0.10);
         }
 
         .step h2 {
@@ -818,9 +831,13 @@ export default function HoeWerktHetPage() {
           gap: 16px;
           align-items: flex-start;
           padding: 22px;
-          border: 1px solid #1d352c;
-          background: #0b1c16;
+          border: 1px solid rgba(72, 143, 108, 0.22);
+          background:
+            linear-gradient(135deg, rgba(13, 35, 27, 0.96), rgba(8, 25, 19, 0.96));
           border-radius: 18px;
+          box-shadow:
+            0 12px 30px rgba(0, 0, 0, 0.12),
+            inset 0 1px 0 rgba(255, 255, 255, 0.02);
         }
 
         .journeyCard.wide {
@@ -839,7 +856,7 @@ export default function HoeWerktHetPage() {
 
         .journeyCard p {
           margin: 0;
-          color: #84978f;
+          color: #93a69e;
           line-height: 1.55;
           font-size: 13px;
         }
