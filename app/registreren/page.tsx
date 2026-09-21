@@ -34,6 +34,11 @@ type Translation = {
   emailExists: string;
   accountFailed: string;
   genericError: string;
+  country: string;
+  countryPlaceholder: string;
+  timezone: string;
+  timezonePlaceholder: string;
+  searchCountry: string;
   checkEmail: string;
   confirmationSent: string;
   confirmationInstruction: string;
@@ -74,6 +79,7 @@ const ui: Record<LanguageCode, Translation> = {
       "Er bestaat al een account met dit e-mailadres.",
     accountFailed: "Account kon niet worden aangemaakt.",
     genericError: "Er ging iets mis. Probeer het opnieuw.",
+    country: "Land", countryPlaceholder: "Kies je land", timezone: "Tijdzone", timezonePlaceholder: "Kies je tijdzone", searchCountry: "Zoek een land...",
     checkEmail: "Controleer je e-mail",
     confirmationSent: "We hebben een bevestigingslink gestuurd naar:",
     confirmationInstruction:
@@ -114,6 +120,7 @@ const ui: Record<LanguageCode, Translation> = {
       "An account with this email address already exists.",
     accountFailed: "The account could not be created.",
     genericError: "Something went wrong. Please try again.",
+    country: "Country", countryPlaceholder: "Choose your country", timezone: "Time zone", timezonePlaceholder: "Choose your time zone", searchCountry: "Search country...",
     checkEmail: "Check your email",
     confirmationSent: "We sent a confirmation link to:",
     confirmationInstruction:
@@ -156,6 +163,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Das Konto konnte nicht erstellt werden.",
     genericError:
       "Etwas ist schiefgelaufen. Versuche es erneut.",
+    country: "Land", countryPlaceholder: "Land auswählen", timezone: "Zeitzone", timezonePlaceholder: "Zeitzone auswählen", searchCountry: "Land suchen...",
     checkEmail: "Überprüfe deine E-Mails",
     confirmationSent:
       "Wir haben einen Bestätigungslink gesendet an:",
@@ -200,6 +208,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "No se ha podido crear la cuenta.",
     genericError:
       "Algo ha salido mal. Inténtalo de nuevo.",
+    country: "País", countryPlaceholder: "Elige tu país", timezone: "Zona horaria", timezonePlaceholder: "Elige tu zona horaria", searchCountry: "Buscar país...",
     checkEmail: "Comprueba tu correo electrónico",
     confirmationSent:
       "Hemos enviado un enlace de confirmación a:",
@@ -244,6 +253,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Le compte n'a pas pu être créé.",
     genericError:
       "Une erreur s'est produite. Veuillez réessayer.",
+    country: "Pays", countryPlaceholder: "Choisissez votre pays", timezone: "Fuseau horaire", timezonePlaceholder: "Choisissez votre fuseau horaire", searchCountry: "Rechercher un pays...",
     checkEmail: "Consultez votre e-mail",
     confirmationSent:
       "Nous avons envoyé un lien de confirmation à :",
@@ -288,6 +298,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Impossibile creare l'account.",
     genericError:
       "Qualcosa è andato storto. Riprova.",
+    country: "Paese", countryPlaceholder: "Scegli il tuo paese", timezone: "Fuso orario", timezonePlaceholder: "Scegli il tuo fuso orario", searchCountry: "Cerca paese...",
     checkEmail: "Controlla la tua email",
     confirmationSent:
       "Abbiamo inviato un link di conferma a:",
@@ -332,6 +343,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Não foi possível criar a conta.",
     genericError:
       "Algo correu mal. Tenta novamente.",
+    country: "País", countryPlaceholder: "Escolhe o teu país", timezone: "Fuso horário", timezonePlaceholder: "Escolhe o teu fuso horário", searchCountry: "Pesquisar país...",
     checkEmail: "Verifica o teu email",
     confirmationSent:
       "Enviámos um link de confirmação para:",
@@ -344,6 +356,220 @@ const ui: Record<LanguageCode, Translation> = {
 function isLanguageCode(value: string): value is LanguageCode {
   return ["nl", "en", "de", "es", "fr", "it", "pt"].includes(value);
 }
+
+const COUNTRIES = [
+  { code: "AF", flag: "\ud83c\udde6\ud83c\uddeb", name: "Afghanistan", timezone: "Asia/Kabul" },
+  { code: "AL", flag: "\ud83c\udde6\ud83c\uddf1", name: "Albani\u00eb", timezone: "Europe/Tirane" },
+  { code: "DZ", flag: "\ud83c\udde9\ud83c\uddff", name: "Algerije", timezone: "Africa/Algiers" },
+  { code: "AD", flag: "\ud83c\udde6\ud83c\udde9", name: "Andorra", timezone: "Europe/Andorra" },
+  { code: "AO", flag: "\ud83c\udde6\ud83c\uddf4", name: "Angola", timezone: "Africa/Luanda" },
+  { code: "AG", flag: "\ud83c\udde6\ud83c\uddec", name: "Antigua en Barbuda", timezone: "America/Antigua" },
+  { code: "AR", flag: "\ud83c\udde6\ud83c\uddf7", name: "Argentini\u00eb", timezone: "America/Argentina/Buenos_Aires" },
+  { code: "AM", flag: "\ud83c\udde6\ud83c\uddf2", name: "Armeni\u00eb", timezone: "Asia/Yerevan" },
+  { code: "AU", flag: "\ud83c\udde6\ud83c\uddfa", name: "Australi\u00eb", timezone: "Australia/Sydney" },
+  { code: "AT", flag: "\ud83c\udde6\ud83c\uddf9", name: "Oostenrijk", timezone: "Europe/Vienna" },
+  { code: "AZ", flag: "\ud83c\udde6\ud83c\uddff", name: "Azerbeidzjan", timezone: "Asia/Baku" },
+  { code: "BS", flag: "\ud83c\udde7\ud83c\uddf8", name: "Bahama's", timezone: "America/Nassau" },
+  { code: "BH", flag: "\ud83c\udde7\ud83c\udded", name: "Bahrein", timezone: "Asia/Bahrain" },
+  { code: "BD", flag: "\ud83c\udde7\ud83c\udde9", name: "Bangladesh", timezone: "Asia/Dhaka" },
+  { code: "BB", flag: "\ud83c\udde7\ud83c\udde7", name: "Barbados", timezone: "America/Barbados" },
+  { code: "BY", flag: "\ud83c\udde7\ud83c\uddfe", name: "Belarus", timezone: "Europe/Minsk" },
+  { code: "BE", flag: "\ud83c\udde7\ud83c\uddea", name: "Belgi\u00eb", timezone: "Europe/Brussels" },
+  { code: "BZ", flag: "\ud83c\udde7\ud83c\uddff", name: "Belize", timezone: "America/Belize" },
+  { code: "BJ", flag: "\ud83c\udde7\ud83c\uddef", name: "Benin", timezone: "Africa/Porto-Novo" },
+  { code: "BT", flag: "\ud83c\udde7\ud83c\uddf9", name: "Bhutan", timezone: "Asia/Thimphu" },
+  { code: "BO", flag: "\ud83c\udde7\ud83c\uddf4", name: "Bolivia", timezone: "America/La_Paz" },
+  { code: "BA", flag: "\ud83c\udde7\ud83c\udde6", name: "Bosni\u00eb en Herzegovina", timezone: "Europe/Sarajevo" },
+  { code: "BW", flag: "\ud83c\udde7\ud83c\uddfc", name: "Botswana", timezone: "Africa/Gaborone" },
+  { code: "BR", flag: "\ud83c\udde7\ud83c\uddf7", name: "Brazili\u00eb", timezone: "America/Sao_Paulo" },
+  { code: "BN", flag: "\ud83c\udde7\ud83c\uddf3", name: "Brunei", timezone: "Asia/Brunei" },
+  { code: "BG", flag: "\ud83c\udde7\ud83c\uddec", name: "Bulgarije", timezone: "Europe/Sofia" },
+  { code: "BF", flag: "\ud83c\udde7\ud83c\uddeb", name: "Burkina Faso", timezone: "Africa/Ouagadougou" },
+  { code: "BI", flag: "\ud83c\udde7\ud83c\uddee", name: "Burundi", timezone: "Africa/Bujumbura" },
+  { code: "CV", flag: "\ud83c\udde8\ud83c\uddfb", name: "Kaapverdi\u00eb", timezone: "Atlantic/Cape_Verde" },
+  { code: "KH", flag: "\ud83c\uddf0\ud83c\udded", name: "Cambodja", timezone: "Asia/Phnom_Penh" },
+  { code: "CM", flag: "\ud83c\udde8\ud83c\uddf2", name: "Kameroen", timezone: "Africa/Douala" },
+  { code: "CA", flag: "\ud83c\udde8\ud83c\udde6", name: "Canada", timezone: "America/Toronto" },
+  { code: "CF", flag: "\ud83c\udde8\ud83c\uddeb", name: "Centraal-Afrikaanse Republiek", timezone: "Africa/Bangui" },
+  { code: "TD", flag: "\ud83c\uddf9\ud83c\udde9", name: "Tsjaad", timezone: "Africa/Ndjamena" },
+  { code: "CL", flag: "\ud83c\udde8\ud83c\uddf1", name: "Chili", timezone: "America/Santiago" },
+  { code: "CN", flag: "\ud83c\udde8\ud83c\uddf3", name: "China", timezone: "Asia/Shanghai" },
+  { code: "CO", flag: "\ud83c\udde8\ud83c\uddf4", name: "Colombia", timezone: "America/Bogota" },
+  { code: "KM", flag: "\ud83c\uddf0\ud83c\uddf2", name: "Comoren", timezone: "Indian/Comoro" },
+  { code: "CG", flag: "\ud83c\udde8\ud83c\uddec", name: "Congo-Brazzaville", timezone: "Africa/Brazzaville" },
+  { code: "CD", flag: "\ud83c\udde8\ud83c\udde9", name: "Congo-Kinshasa", timezone: "Africa/Kinshasa" },
+  { code: "CR", flag: "\ud83c\udde8\ud83c\uddf7", name: "Costa Rica", timezone: "America/Costa_Rica" },
+  { code: "CI", flag: "\ud83c\udde8\ud83c\uddee", name: "Ivoorkust", timezone: "Africa/Abidjan" },
+  { code: "HR", flag: "\ud83c\udded\ud83c\uddf7", name: "Kroati\u00eb", timezone: "Europe/Zagreb" },
+  { code: "CU", flag: "\ud83c\udde8\ud83c\uddfa", name: "Cuba", timezone: "America/Havana" },
+  { code: "CY", flag: "\ud83c\udde8\ud83c\uddfe", name: "Cyprus", timezone: "Asia/Nicosia" },
+  { code: "CZ", flag: "\ud83c\udde8\ud83c\uddff", name: "Tsjechi\u00eb", timezone: "Europe/Prague" },
+  { code: "DK", flag: "\ud83c\udde9\ud83c\uddf0", name: "Denemarken", timezone: "Europe/Copenhagen" },
+  { code: "DJ", flag: "\ud83c\udde9\ud83c\uddef", name: "Djibouti", timezone: "Africa/Djibouti" },
+  { code: "DM", flag: "\ud83c\udde9\ud83c\uddf2", name: "Dominica", timezone: "America/Dominica" },
+  { code: "DO", flag: "\ud83c\udde9\ud83c\uddf4", name: "Dominicaanse Republiek", timezone: "America/Santo_Domingo" },
+  { code: "EC", flag: "\ud83c\uddea\ud83c\udde8", name: "Ecuador", timezone: "America/Guayaquil" },
+  { code: "EG", flag: "\ud83c\uddea\ud83c\uddec", name: "Egypte", timezone: "Africa/Cairo" },
+  { code: "SV", flag: "\ud83c\uddf8\ud83c\uddfb", name: "El Salvador", timezone: "America/El_Salvador" },
+  { code: "GQ", flag: "\ud83c\uddec\ud83c\uddf6", name: "Equatoriaal-Guinea", timezone: "Africa/Malabo" },
+  { code: "ER", flag: "\ud83c\uddea\ud83c\uddf7", name: "Eritrea", timezone: "Africa/Asmara" },
+  { code: "EE", flag: "\ud83c\uddea\ud83c\uddea", name: "Estland", timezone: "Europe/Tallinn" },
+  { code: "SZ", flag: "\ud83c\uddf8\ud83c\uddff", name: "Eswatini", timezone: "Africa/Mbabane" },
+  { code: "ET", flag: "\ud83c\uddea\ud83c\uddf9", name: "Ethiopi\u00eb", timezone: "Africa/Addis_Ababa" },
+  { code: "FJ", flag: "\ud83c\uddeb\ud83c\uddef", name: "Fiji", timezone: "Pacific/Fiji" },
+  { code: "FI", flag: "\ud83c\uddeb\ud83c\uddee", name: "Finland", timezone: "Europe/Helsinki" },
+  { code: "FR", flag: "\ud83c\uddeb\ud83c\uddf7", name: "Frankrijk", timezone: "Europe/Paris" },
+  { code: "GA", flag: "\ud83c\uddec\ud83c\udde6", name: "Gabon", timezone: "Africa/Libreville" },
+  { code: "GM", flag: "\ud83c\uddec\ud83c\uddf2", name: "Gambia", timezone: "Africa/Banjul" },
+  { code: "GE", flag: "\ud83c\uddec\ud83c\uddea", name: "Georgi\u00eb", timezone: "Asia/Tbilisi" },
+  { code: "DE", flag: "\ud83c\udde9\ud83c\uddea", name: "Duitsland", timezone: "Europe/Berlin" },
+  { code: "GH", flag: "\ud83c\uddec\ud83c\udded", name: "Ghana", timezone: "Africa/Accra" },
+  { code: "GR", flag: "\ud83c\uddec\ud83c\uddf7", name: "Griekenland", timezone: "Europe/Athens" },
+  { code: "GD", flag: "\ud83c\uddec\ud83c\udde9", name: "Grenada", timezone: "America/Grenada" },
+  { code: "GT", flag: "\ud83c\uddec\ud83c\uddf9", name: "Guatemala", timezone: "America/Guatemala" },
+  { code: "GN", flag: "\ud83c\uddec\ud83c\uddf3", name: "Guinee", timezone: "Africa/Conakry" },
+  { code: "GW", flag: "\ud83c\uddec\ud83c\uddfc", name: "Guinee-Bissau", timezone: "Africa/Bissau" },
+  { code: "GY", flag: "\ud83c\uddec\ud83c\uddfe", name: "Guyana", timezone: "America/Guyana" },
+  { code: "HT", flag: "\ud83c\udded\ud83c\uddf9", name: "Ha\u00efti", timezone: "America/Port-au-Prince" },
+  { code: "HN", flag: "\ud83c\udded\ud83c\uddf3", name: "Honduras", timezone: "America/Tegucigalpa" },
+  { code: "HU", flag: "\ud83c\udded\ud83c\uddfa", name: "Hongarije", timezone: "Europe/Budapest" },
+  { code: "IS", flag: "\ud83c\uddee\ud83c\uddf8", name: "IJsland", timezone: "Atlantic/Reykjavik" },
+  { code: "IN", flag: "\ud83c\uddee\ud83c\uddf3", name: "India", timezone: "Asia/Kolkata" },
+  { code: "ID", flag: "\ud83c\uddee\ud83c\udde9", name: "Indonesi\u00eb", timezone: "Asia/Jakarta" },
+  { code: "IR", flag: "\ud83c\uddee\ud83c\uddf7", name: "Iran", timezone: "Asia/Tehran" },
+  { code: "IQ", flag: "\ud83c\uddee\ud83c\uddf6", name: "Irak", timezone: "Asia/Baghdad" },
+  { code: "IE", flag: "\ud83c\uddee\ud83c\uddea", name: "Ierland", timezone: "Europe/Dublin" },
+  { code: "IL", flag: "\ud83c\uddee\ud83c\uddf1", name: "Isra\u00ebl", timezone: "Asia/Jerusalem" },
+  { code: "IT", flag: "\ud83c\uddee\ud83c\uddf9", name: "Itali\u00eb", timezone: "Europe/Rome" },
+  { code: "JM", flag: "\ud83c\uddef\ud83c\uddf2", name: "Jamaica", timezone: "America/Jamaica" },
+  { code: "JP", flag: "\ud83c\uddef\ud83c\uddf5", name: "Japan", timezone: "Asia/Tokyo" },
+  { code: "JO", flag: "\ud83c\uddef\ud83c\uddf4", name: "Jordani\u00eb", timezone: "Asia/Amman" },
+  { code: "KZ", flag: "\ud83c\uddf0\ud83c\uddff", name: "Kazachstan", timezone: "Asia/Almaty" },
+  { code: "KE", flag: "\ud83c\uddf0\ud83c\uddea", name: "Kenia", timezone: "Africa/Nairobi" },
+  { code: "KI", flag: "\ud83c\uddf0\ud83c\uddee", name: "Kiribati", timezone: "Pacific/Tarawa" },
+  { code: "KP", flag: "\ud83c\uddf0\ud83c\uddf5", name: "Noord-Korea", timezone: "Asia/Pyongyang" },
+  { code: "KR", flag: "\ud83c\uddf0\ud83c\uddf7", name: "Zuid-Korea", timezone: "Asia/Seoul" },
+  { code: "KW", flag: "\ud83c\uddf0\ud83c\uddfc", name: "Koeweit", timezone: "Asia/Kuwait" },
+  { code: "KG", flag: "\ud83c\uddf0\ud83c\uddec", name: "Kirgizi\u00eb", timezone: "Asia/Bishkek" },
+  { code: "LA", flag: "\ud83c\uddf1\ud83c\udde6", name: "Laos", timezone: "Asia/Vientiane" },
+  { code: "LV", flag: "\ud83c\uddf1\ud83c\uddfb", name: "Letland", timezone: "Europe/Riga" },
+  { code: "LB", flag: "\ud83c\uddf1\ud83c\udde7", name: "Libanon", timezone: "Asia/Beirut" },
+  { code: "LS", flag: "\ud83c\uddf1\ud83c\uddf8", name: "Lesotho", timezone: "Africa/Maseru" },
+  { code: "LR", flag: "\ud83c\uddf1\ud83c\uddf7", name: "Liberia", timezone: "Africa/Monrovia" },
+  { code: "LY", flag: "\ud83c\uddf1\ud83c\uddfe", name: "Libi\u00eb", timezone: "Africa/Tripoli" },
+  { code: "LI", flag: "\ud83c\uddf1\ud83c\uddee", name: "Liechtenstein", timezone: "Europe/Vaduz" },
+  { code: "LT", flag: "\ud83c\uddf1\ud83c\uddf9", name: "Litouwen", timezone: "Europe/Vilnius" },
+  { code: "LU", flag: "\ud83c\uddf1\ud83c\uddfa", name: "Luxemburg", timezone: "Europe/Luxembourg" },
+  { code: "MG", flag: "\ud83c\uddf2\ud83c\uddec", name: "Madagaskar", timezone: "Indian/Antananarivo" },
+  { code: "MW", flag: "\ud83c\uddf2\ud83c\uddfc", name: "Malawi", timezone: "Africa/Blantyre" },
+  { code: "MY", flag: "\ud83c\uddf2\ud83c\uddfe", name: "Maleisi\u00eb", timezone: "Asia/Kuala_Lumpur" },
+  { code: "MV", flag: "\ud83c\uddf2\ud83c\uddfb", name: "Maldiven", timezone: "Indian/Maldives" },
+  { code: "ML", flag: "\ud83c\uddf2\ud83c\uddf1", name: "Mali", timezone: "Africa/Bamako" },
+  { code: "MT", flag: "\ud83c\uddf2\ud83c\uddf9", name: "Malta", timezone: "Europe/Malta" },
+  { code: "MH", flag: "\ud83c\uddf2\ud83c\udded", name: "Marshalleilanden", timezone: "Pacific/Majuro" },
+  { code: "MR", flag: "\ud83c\uddf2\ud83c\uddf7", name: "Mauritani\u00eb", timezone: "Africa/Nouakchott" },
+  { code: "MU", flag: "\ud83c\uddf2\ud83c\uddfa", name: "Mauritius", timezone: "Indian/Mauritius" },
+  { code: "MX", flag: "\ud83c\uddf2\ud83c\uddfd", name: "Mexico", timezone: "America/Mexico_City" },
+  { code: "FM", flag: "\ud83c\uddeb\ud83c\uddf2", name: "Micronesi\u00eb", timezone: "Pacific/Pohnpei" },
+  { code: "MD", flag: "\ud83c\uddf2\ud83c\udde9", name: "Moldavi\u00eb", timezone: "Europe/Chisinau" },
+  { code: "MC", flag: "\ud83c\uddf2\ud83c\udde8", name: "Monaco", timezone: "Europe/Monaco" },
+  { code: "MN", flag: "\ud83c\uddf2\ud83c\uddf3", name: "Mongoli\u00eb", timezone: "Asia/Ulaanbaatar" },
+  { code: "ME", flag: "\ud83c\uddf2\ud83c\uddea", name: "Montenegro", timezone: "Europe/Podgorica" },
+  { code: "MA", flag: "\ud83c\uddf2\ud83c\udde6", name: "Marokko", timezone: "Africa/Casablanca" },
+  { code: "MZ", flag: "\ud83c\uddf2\ud83c\uddff", name: "Mozambique", timezone: "Africa/Maputo" },
+  { code: "MM", flag: "\ud83c\uddf2\ud83c\uddf2", name: "Myanmar", timezone: "Asia/Yangon" },
+  { code: "NA", flag: "\ud83c\uddf3\ud83c\udde6", name: "Namibi\u00eb", timezone: "Africa/Windhoek" },
+  { code: "NR", flag: "\ud83c\uddf3\ud83c\uddf7", name: "Nauru", timezone: "Pacific/Nauru" },
+  { code: "NP", flag: "\ud83c\uddf3\ud83c\uddf5", name: "Nepal", timezone: "Asia/Kathmandu" },
+  { code: "NL", flag: "\ud83c\uddf3\ud83c\uddf1", name: "Nederland", timezone: "Europe/Amsterdam" },
+  { code: "NZ", flag: "\ud83c\uddf3\ud83c\uddff", name: "Nieuw-Zeeland", timezone: "Pacific/Auckland" },
+  { code: "NI", flag: "\ud83c\uddf3\ud83c\uddee", name: "Nicaragua", timezone: "America/Managua" },
+  { code: "NE", flag: "\ud83c\uddf3\ud83c\uddea", name: "Niger", timezone: "Africa/Niamey" },
+  { code: "NG", flag: "\ud83c\uddf3\ud83c\uddec", name: "Nigeria", timezone: "Africa/Lagos" },
+  { code: "MK", flag: "\ud83c\uddf2\ud83c\uddf0", name: "Noord-Macedoni\u00eb", timezone: "Europe/Skopje" },
+  { code: "NO", flag: "\ud83c\uddf3\ud83c\uddf4", name: "Noorwegen", timezone: "Europe/Oslo" },
+  { code: "OM", flag: "\ud83c\uddf4\ud83c\uddf2", name: "Oman", timezone: "Asia/Muscat" },
+  { code: "PK", flag: "\ud83c\uddf5\ud83c\uddf0", name: "Pakistan", timezone: "Asia/Karachi" },
+  { code: "PW", flag: "\ud83c\uddf5\ud83c\uddfc", name: "Palau", timezone: "Pacific/Palau" },
+  { code: "PS", flag: "\ud83c\uddf5\ud83c\uddf8", name: "Palestina", timezone: "Asia/Gaza" },
+  { code: "PA", flag: "\ud83c\uddf5\ud83c\udde6", name: "Panama", timezone: "America/Panama" },
+  { code: "PG", flag: "\ud83c\uddf5\ud83c\uddec", name: "Papoea-Nieuw-Guinea", timezone: "Pacific/Port_Moresby" },
+  { code: "PY", flag: "\ud83c\uddf5\ud83c\uddfe", name: "Paraguay", timezone: "America/Asuncion" },
+  { code: "PE", flag: "\ud83c\uddf5\ud83c\uddea", name: "Peru", timezone: "America/Lima" },
+  { code: "PH", flag: "\ud83c\uddf5\ud83c\udded", name: "Filipijnen", timezone: "Asia/Manila" },
+  { code: "PL", flag: "\ud83c\uddf5\ud83c\uddf1", name: "Polen", timezone: "Europe/Warsaw" },
+  { code: "PT", flag: "\ud83c\uddf5\ud83c\uddf9", name: "Portugal", timezone: "Europe/Lisbon" },
+  { code: "QA", flag: "\ud83c\uddf6\ud83c\udde6", name: "Qatar", timezone: "Asia/Qatar" },
+  { code: "RO", flag: "\ud83c\uddf7\ud83c\uddf4", name: "Roemeni\u00eb", timezone: "Europe/Bucharest" },
+  { code: "RU", flag: "\ud83c\uddf7\ud83c\uddfa", name: "Rusland", timezone: "Europe/Moscow" },
+  { code: "RW", flag: "\ud83c\uddf7\ud83c\uddfc", name: "Rwanda", timezone: "Africa/Kigali" },
+  { code: "KN", flag: "\ud83c\uddf0\ud83c\uddf3", name: "Saint Kitts en Nevis", timezone: "America/St_Kitts" },
+  { code: "LC", flag: "\ud83c\uddf1\ud83c\udde8", name: "Saint Lucia", timezone: "America/St_Lucia" },
+  { code: "VC", flag: "\ud83c\uddfb\ud83c\udde8", name: "Saint Vincent en de Grenadines", timezone: "America/St_Vincent" },
+  { code: "WS", flag: "\ud83c\uddfc\ud83c\uddf8", name: "Samoa", timezone: "Pacific/Apia" },
+  { code: "SM", flag: "\ud83c\uddf8\ud83c\uddf2", name: "San Marino", timezone: "Europe/San_Marino" },
+  { code: "ST", flag: "\ud83c\uddf8\ud83c\uddf9", name: "Sao Tom\u00e9 en Principe", timezone: "Africa/Sao_Tome" },
+  { code: "SA", flag: "\ud83c\uddf8\ud83c\udde6", name: "Saoedi-Arabi\u00eb", timezone: "Asia/Riyadh" },
+  { code: "SN", flag: "\ud83c\uddf8\ud83c\uddf3", name: "Senegal", timezone: "Africa/Dakar" },
+  { code: "RS", flag: "\ud83c\uddf7\ud83c\uddf8", name: "Servi\u00eb", timezone: "Europe/Belgrade" },
+  { code: "SC", flag: "\ud83c\uddf8\ud83c\udde8", name: "Seychellen", timezone: "Indian/Mahe" },
+  { code: "SL", flag: "\ud83c\uddf8\ud83c\uddf1", name: "Sierra Leone", timezone: "Africa/Freetown" },
+  { code: "SG", flag: "\ud83c\uddf8\ud83c\uddec", name: "Singapore", timezone: "Asia/Singapore" },
+  { code: "SK", flag: "\ud83c\uddf8\ud83c\uddf0", name: "Slowakije", timezone: "Europe/Bratislava" },
+  { code: "SI", flag: "\ud83c\uddf8\ud83c\uddee", name: "Sloveni\u00eb", timezone: "Europe/Ljubljana" },
+  { code: "SB", flag: "\ud83c\uddf8\ud83c\udde7", name: "Salomonseilanden", timezone: "Pacific/Guadalcanal" },
+  { code: "SO", flag: "\ud83c\uddf8\ud83c\uddf4", name: "Somali\u00eb", timezone: "Africa/Mogadishu" },
+  { code: "ZA", flag: "\ud83c\uddff\ud83c\udde6", name: "Zuid-Afrika", timezone: "Africa/Johannesburg" },
+  { code: "SS", flag: "\ud83c\uddf8\ud83c\uddf8", name: "Zuid-Soedan", timezone: "Africa/Juba" },
+  { code: "ES", flag: "\ud83c\uddea\ud83c\uddf8", name: "Spanje", timezone: "Europe/Madrid" },
+  { code: "LK", flag: "\ud83c\uddf1\ud83c\uddf0", name: "Sri Lanka", timezone: "Asia/Colombo" },
+  { code: "SD", flag: "\ud83c\uddf8\ud83c\udde9", name: "Soedan", timezone: "Africa/Khartoum" },
+  { code: "SR", flag: "\ud83c\uddf8\ud83c\uddf7", name: "Suriname", timezone: "America/Paramaribo" },
+  { code: "SE", flag: "\ud83c\uddf8\ud83c\uddea", name: "Zweden", timezone: "Europe/Stockholm" },
+  { code: "CH", flag: "\ud83c\udde8\ud83c\udded", name: "Zwitserland", timezone: "Europe/Zurich" },
+  { code: "SY", flag: "\ud83c\uddf8\ud83c\uddfe", name: "Syri\u00eb", timezone: "Asia/Damascus" },
+  { code: "TJ", flag: "\ud83c\uddf9\ud83c\uddef", name: "Tadzjikistan", timezone: "Asia/Dushanbe" },
+  { code: "TZ", flag: "\ud83c\uddf9\ud83c\uddff", name: "Tanzania", timezone: "Africa/Dar_es_Salaam" },
+  { code: "TH", flag: "\ud83c\uddf9\ud83c\udded", name: "Thailand", timezone: "Asia/Bangkok" },
+  { code: "TL", flag: "\ud83c\uddf9\ud83c\uddf1", name: "Oost-Timor", timezone: "Asia/Dili" },
+  { code: "TG", flag: "\ud83c\uddf9\ud83c\uddec", name: "Togo", timezone: "Africa/Lome" },
+  { code: "TO", flag: "\ud83c\uddf9\ud83c\uddf4", name: "Tonga", timezone: "Pacific/Tongatapu" },
+  { code: "TT", flag: "\ud83c\uddf9\ud83c\uddf9", name: "Trinidad en Tobago", timezone: "America/Port_of_Spain" },
+  { code: "TN", flag: "\ud83c\uddf9\ud83c\uddf3", name: "Tunesi\u00eb", timezone: "Africa/Tunis" },
+  { code: "TR", flag: "\ud83c\uddf9\ud83c\uddf7", name: "Turkije", timezone: "Europe/Istanbul" },
+  { code: "TM", flag: "\ud83c\uddf9\ud83c\uddf2", name: "Turkmenistan", timezone: "Asia/Ashgabat" },
+  { code: "TV", flag: "\ud83c\uddf9\ud83c\uddfb", name: "Tuvalu", timezone: "Pacific/Funafuti" },
+  { code: "UG", flag: "\ud83c\uddfa\ud83c\uddec", name: "Oeganda", timezone: "Africa/Kampala" },
+  { code: "UA", flag: "\ud83c\uddfa\ud83c\udde6", name: "Oekra\u00efne", timezone: "Europe/Kyiv" },
+  { code: "AE", flag: "\ud83c\udde6\ud83c\uddea", name: "Verenigde Arabische Emiraten", timezone: "Asia/Dubai" },
+  { code: "GB", flag: "\ud83c\uddec\ud83c\udde7", name: "Verenigd Koninkrijk", timezone: "Europe/London" },
+  { code: "US", flag: "\ud83c\uddfa\ud83c\uddf8", name: "Verenigde Staten", timezone: "America/New_York" },
+  { code: "UY", flag: "\ud83c\uddfa\ud83c\uddfe", name: "Uruguay", timezone: "America/Montevideo" },
+  { code: "UZ", flag: "\ud83c\uddfa\ud83c\uddff", name: "Oezbekistan", timezone: "Asia/Tashkent" },
+  { code: "VU", flag: "\ud83c\uddfb\ud83c\uddfa", name: "Vanuatu", timezone: "Pacific/Efate" },
+  { code: "VA", flag: "\ud83c\uddfb\ud83c\udde6", name: "Vaticaanstad", timezone: "Europe/Vatican" },
+  { code: "VE", flag: "\ud83c\uddfb\ud83c\uddea", name: "Venezuela", timezone: "America/Caracas" },
+  { code: "VN", flag: "\ud83c\uddfb\ud83c\uddf3", name: "Vietnam", timezone: "Asia/Ho_Chi_Minh" },
+  { code: "YE", flag: "\ud83c\uddfe\ud83c\uddea", name: "Jemen", timezone: "Asia/Aden" },
+  { code: "ZM", flag: "\ud83c\uddff\ud83c\uddf2", name: "Zambia", timezone: "Africa/Lusaka" },
+  { code: "ZW", flag: "\ud83c\uddff\ud83c\uddfc", name: "Zimbabwe", timezone: "Africa/Harare" }
+];
+
+const MULTI_TIMEZONE_OPTIONS: Record<string, { value: string; label: string }[]> = {
+  "US": [{ value: "America/New_York", label: "New York / Eastern" }, { value: "America/Chicago", label: "Chicago / Central" }, { value: "America/Denver", label: "Denver / Mountain" }, { value: "America/Los_Angeles", label: "Los Angeles / Pacific" }, { value: "America/Anchorage", label: "Alaska" }, { value: "Pacific/Honolulu", label: "Hawa\u00ef" }],
+  "CA": [{ value: "America/Toronto", label: "Toronto / Eastern" }, { value: "America/Winnipeg", label: "Winnipeg / Central" }, { value: "America/Edmonton", label: "Edmonton / Mountain" }, { value: "America/Vancouver", label: "Vancouver / Pacific" }, { value: "America/Halifax", label: "Halifax / Atlantic" }, { value: "America/St_Johns", label: "St. John's / Newfoundland" }],
+  "AU": [{ value: "Australia/Sydney", label: "Sydney" }, { value: "Australia/Melbourne", label: "Melbourne" }, { value: "Australia/Brisbane", label: "Brisbane" }, { value: "Australia/Adelaide", label: "Adelaide" }, { value: "Australia/Perth", label: "Perth" }, { value: "Australia/Darwin", label: "Darwin" }],
+  "RU": [{ value: "Europe/Moscow", label: "Moskou" }, { value: "Europe/Samara", label: "Samara" }, { value: "Asia/Yekaterinburg", label: "Jekaterinenburg" }, { value: "Asia/Omsk", label: "Omsk" }, { value: "Asia/Novosibirsk", label: "Novosibirsk" }, { value: "Asia/Krasnoyarsk", label: "Krasnojarsk" }, { value: "Asia/Irkutsk", label: "Irkoetsk" }, { value: "Asia/Yakutsk", label: "Jakoetsk" }, { value: "Asia/Vladivostok", label: "Vladivostok" }, { value: "Asia/Magadan", label: "Magadan" }, { value: "Asia/Kamchatka", label: "Kamtsjatka" }],
+  "BR": [{ value: "America/Sao_Paulo", label: "S\u00e3o Paulo / Bras\u00edlia" }, { value: "America/Manaus", label: "Manaus" }, { value: "America/Cuiaba", label: "Cuiab\u00e1" }, { value: "America/Rio_Branco", label: "Rio Branco" }],
+  "MX": [{ value: "America/Mexico_City", label: "Mexico-Stad" }, { value: "America/Monterrey", label: "Monterrey" }, { value: "America/Mazatlan", label: "Mazatl\u00e1n" }, { value: "America/Tijuana", label: "Tijuana" }],
+  "ID": [{ value: "Asia/Jakarta", label: "Jakarta / West" }, { value: "Asia/Makassar", label: "Makassar / Central" }, { value: "Asia/Jayapura", label: "Jayapura / East" }],
+  "CL": [{ value: "America/Santiago", label: "Santiago" }, { value: "Pacific/Easter", label: "Paaseiland" }],
+  "EC": [{ value: "America/Guayaquil", label: "Ecuador vasteland" }, { value: "Pacific/Galapagos", label: "Gal\u00e1pagos" }],
+  "CD": [{ value: "Africa/Kinshasa", label: "Kinshasa" }, { value: "Africa/Lubumbashi", label: "Lubumbashi" }],
+  "PG": [{ value: "Pacific/Port_Moresby", label: "Port Moresby" }, { value: "Pacific/Bougainville", label: "Bougainville" }],
+  "KZ": [{ value: "Asia/Almaty", label: "Almaty" }, { value: "Asia/Aqtau", label: "Aqtau" }, { value: "Asia/Aqtobe", label: "Aqt\u00f6be" }, { value: "Asia/Atyrau", label: "Atyrau" }, { value: "Asia/Oral", label: "Oral" }, { value: "Asia/Qostanay", label: "Qostanay" }],
+  "FM": [{ value: "Pacific/Pohnpei", label: "Pohnpei" }, { value: "Pacific/Chuuk", label: "Chuuk" }, { value: "Pacific/Kosrae", label: "Kosrae" }]
+};
 
 export default function RegistrerenPage() {
   const [firstName, setFirstName] = useState("");
@@ -358,8 +584,18 @@ export default function RegistrerenPage() {
   const [registered, setRegistered] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [language, setLanguage] = useState<LanguageCode>("nl");
+  const [country, setCountry] = useState("");
+  const [timezone, setTimezone] = useState("");
+  const [countrySearch, setCountrySearch] = useState("");
 
   const t = ui[language];
+
+  const filteredCountries = COUNTRIES.filter((item) => {
+    const query = countrySearch.trim().toLowerCase();
+    return !query || item.name.toLowerCase().includes(query) || item.code.toLowerCase().includes(query);
+  });
+
+  const timezoneOptions = country ? MULTI_TIMEZONE_OPTIONS[country] ?? [] : [];
 
   function getSafeRedirect() {
     if (typeof window === "undefined") {
@@ -437,6 +673,11 @@ export default function RegistrerenPage() {
       return;
     }
 
+    if (!country || !timezone) {
+      setErrorMessage(t.fillAll);
+      return;
+    }
+
     if (!acceptedTerms) {
       setErrorMessage(t.acceptTerms);
       return;
@@ -468,6 +709,8 @@ export default function RegistrerenPage() {
             first_name: cleanFirstName,
             last_name: cleanLastName,
             username: cleanUsername,
+            country,
+            timezone,
           },
         },
       });
@@ -808,6 +1051,66 @@ export default function RegistrerenPage() {
                 </button>
               </div>
             </div>
+
+            <div style={{ marginTop: "14px" }}>
+              <label style={labelStyle}>{t.country}</label>
+
+              <input
+                type="text"
+                value={countrySearch}
+                onChange={(e) => setCountrySearch(e.target.value)}
+                placeholder={t.searchCountry}
+                style={inputStyle}
+              />
+
+              <select
+                value={country}
+                onChange={(e) => {
+                  const nextCountry = e.target.value;
+                  setCountry(nextCountry);
+
+                  const options = MULTI_TIMEZONE_OPTIONS[nextCountry];
+                  const defaultCountry = COUNTRIES.find((item) => item.code === nextCountry);
+
+                  setTimezone(options?.[0]?.value ?? defaultCountry?.timezone ?? "");
+                }}
+                style={{ ...inputStyle, marginTop: "8px" }}
+              >
+                <option value="">{t.countryPlaceholder}</option>
+                {filteredCountries.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.flag} {item.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {country && (
+              <div style={{ marginTop: "14px" }}>
+                <label style={labelStyle}>{t.timezone}</label>
+
+                {timezoneOptions.length > 0 ? (
+                  <select
+                    value={timezone}
+                    onChange={(e) => setTimezone(e.target.value)}
+                    style={inputStyle}
+                  >
+                    {timezoneOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type="text"
+                    value={timezone}
+                    readOnly
+                    style={{ ...inputStyle, opacity: 0.8 }}
+                  />
+                )}
+              </div>
+            )}
 
             <label
               style={{
