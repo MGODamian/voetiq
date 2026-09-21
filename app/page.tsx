@@ -482,6 +482,68 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CONTACT */}
+      <section
+        style={{
+          padding: "0 20px 70px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1100px",
+            margin: "0 auto",
+            padding: "30px",
+            borderRadius: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "22px",
+            background:
+              "linear-gradient(145deg, rgba(8,35,23,0.96), rgba(3,18,11,0.96))",
+            border: "1px solid rgba(75,255,153,0.10)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "flex-start", gap: "16px", flex: "1 1 500px" }}>
+            <div style={{ fontSize: "30px" }}>💬</div>
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "22px",
+                  fontWeight: 950,
+                }}
+              >
+                {tr("Heb je een vraag of idee?")}
+              </h2>
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  color: "#83998c",
+                  fontSize: "13px",
+                  lineHeight: 1.6,
+                  maxWidth: "650px",
+                }}
+              >
+                {tr("Heb je hulp nodig, een goede tip of juist een top voor VoetIQ? We horen graag van je.")}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => router.push("/contact")}
+            style={{
+              ...secondaryButtonStyle,
+              borderColor: "rgba(66,233,133,0.22)",
+              color: "#42e985",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {tr("Neem contact op →")}
+          </button>
+        </div>
+      </section>
+
       {/* CTA */}
       <section
         style={{
@@ -990,6 +1052,37 @@ Object.assign(homeTranslations.es, {'Voorspel. Beleef. Win punten.': 'Pronostica
 Object.assign(homeTranslations.fr, {'Voorspel. Beleef. Win punten.': 'Pronostiquez. Vibrez. Gagnez des points.', 'Voorspel echte voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.': 'Pronostiquez de vrais matchs de football, cumulez des points et affrontez vos amis et d’autres fans.', 'Echte wedstrijden': 'Vrais matchs', 'Wereldwijde ranglijst': 'Classement mondial', 'Speel met vrienden': 'Jouez avec vos amis', 'Ontdek de competities': 'Découvrez les compétitions', 'Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.': 'Consultez le système de points et découvrez comment vos pronostics sont récompensés.', 'Bekijk wie de meeste punten heeft en klim zelf naar de top.': 'Découvrez qui a le plus de points et grimpez vous-même jusqu’au sommet.'});
 Object.assign(homeTranslations.it, {'Voorspel. Beleef. Win punten.': 'Pronostica. Vivi. Guadagna punti.', 'Voorspel echte voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.': 'Pronostica vere partite di calcio, accumula punti e sfida amici e altri appassionati.', 'Echte wedstrijden': 'Partite reali', 'Wereldwijde ranglijst': 'Classifica mondiale', 'Speel met vrienden': 'Gioca con gli amici', 'Ontdek de competities': 'Scopri le competizioni', 'Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.': 'Scopri il sistema di punteggio e come vengono premiati i tuoi pronostici.', 'Bekijk wie de meeste punten heeft en klim zelf naar de top.': 'Scopri chi ha più punti e scala anche tu la classifica.'});
 Object.assign(homeTranslations.pt, {'Voorspel. Beleef. Win punten.': 'Prevê. Vive. Ganha pontos.', 'Voorspel echte voetbalwedstrijden, verzamel punten en strijd met vrienden en andere voetbalfans.': 'Prevê jogos de futebol reais, acumula pontos e compete com amigos e outros adeptos.', 'Echte wedstrijden': 'Jogos reais', 'Wereldwijde ranglijst': 'Classificação mundial', 'Speel met vrienden': 'Joga com amigos', 'Ontdek de competities': 'Descobre as competições', 'Bekijk de puntentelling en ontdek hoe jouw voorspellingen worden beloond.': 'Consulta o sistema de pontos e descobre como as tuas previsões são recompensadas.', 'Bekijk wie de meeste punten heeft en klim zelf naar de top.': 'Vê quem tem mais pontos e sobe também até ao topo.'});
+
+Object.assign(homeTranslations.en, {
+  "Heb je een vraag of idee?": "Have a question or idea?",
+  "Heb je hulp nodig, een goede tip of juist een top voor VoetIQ? We horen graag van je.": "Need help, have a useful suggestion or want to tell us what you like about VoetIQ? We'd love to hear from you.",
+  "Neem contact op →": "Contact us →"
+});
+Object.assign(homeTranslations.de, {
+  "Heb je een vraag of idee?": "Hast du eine Frage oder Idee?",
+  "Heb je hulp nodig, een goede tip of juist een top voor VoetIQ? We horen graag van je.": "Brauchst du Hilfe, hast du einen guten Tipp oder möchtest du uns sagen, was dir an VoetIQ gefällt? Wir freuen uns von dir zu hören.",
+  "Neem contact op →": "Kontakt aufnehmen →"
+});
+Object.assign(homeTranslations.es, {
+  "Heb je een vraag of idee?": "¿Tienes una pregunta o una idea?",
+  "Heb je hulp nodig, een goede tip of juist een top voor VoetIQ? We horen graag van je.": "¿Necesitas ayuda, tienes una buena sugerencia o quieres contarnos qué te gusta de VoetIQ? Nos encantará saber de ti.",
+  "Neem contact op →": "Contacta con nosotros →"
+});
+Object.assign(homeTranslations.fr, {
+  "Heb je een vraag of idee?": "Une question ou une idée ?",
+  "Heb je hulp nodig, een goede tip of juist een top voor VoetIQ? We horen graag van je.": "Besoin d'aide, une bonne suggestion ou envie de nous dire ce que vous appréciez sur VoetIQ ? Nous serons ravis de vous lire.",
+  "Neem contact op →": "Nous contacter →"
+});
+Object.assign(homeTranslations.it, {
+  "Heb je een vraag of idee?": "Hai una domanda o un'idea?",
+  "Heb je hulp nodig, een goede tip of juist een top voor VoetIQ? We horen graag van je.": "Hai bisogno di aiuto, hai un buon suggerimento o vuoi dirci cosa ti piace di VoetIQ? Ci fa piacere sentirti.",
+  "Neem contact op →": "Contattaci →"
+});
+Object.assign(homeTranslations.pt, {
+  "Heb je een vraag of idee?": "Tens uma pergunta ou uma ideia?",
+  "Heb je hulp nodig, een goede tip of juist een top voor VoetIQ? We horen graag van je.": "Precisas de ajuda, tens uma boa sugestão ou queres dizer-nos aquilo de que gostas no VoetIQ? Gostamos de ouvir a tua opinião.",
+  "Neem contact op →": "Contacta-nos →"
+});
 
 function translateHome(language: string, text: string) {
   if (language === "nl") return text;
