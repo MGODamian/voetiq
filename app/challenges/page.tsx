@@ -26,13 +26,13 @@ type Challenge = {
 };
 
 const ui: Record<LanguageCode, any> = {
-  nl:{eyebrow:"Challenges",title:"Dagelijkse & wekelijkse challenges",intro:"Voltooi uitdagingen met je VoetIQ-voorspellingen.",daily:"Vandaag",weekly:"Deze week",progress:"Voortgang",reward:"beloningspunten",complete:"Voltooid",loading:"Challenges laden...",empty:"Geen actieve challenges.",error:"Challenges konden niet worden geladen.",daily_predict_3:"Doe 3 voorspellingen",daily_correct_2:"Voorspel 2 juiste uitslagen",weekly_predict_10:"Doe 10 voorspellingen",weekly_score_50:"Verdien 50 punten"},
-  en:{eyebrow:"Challenges",title:"Daily & weekly challenges",intro:"Complete challenges with your VoetIQ predictions.",daily:"Today",weekly:"This week",progress:"Progress",reward:"reward points",complete:"Completed",loading:"Loading challenges...",empty:"No active challenges.",error:"Challenges could not be loaded.",daily_predict_3:"Make 3 predictions",daily_correct_2:"Predict 2 correct results",weekly_predict_10:"Make 10 predictions",weekly_score_50:"Earn 50 points"},
-  de:{eyebrow:"Challenges",title:"Tägliche & wöchentliche Challenges",intro:"Schließe Herausforderungen mit deinen VoetIQ-Tipps ab.",daily:"Heute",weekly:"Diese Woche",progress:"Fortschritt",reward:"Belohnungspunkte",complete:"Abgeschlossen",loading:"Challenges werden geladen...",empty:"Keine aktiven Challenges.",error:"Challenges konnten nicht geladen werden.",daily_predict_3:"Gib 3 Tipps ab",daily_correct_2:"Tippe 2 richtige Ausgänge",weekly_predict_10:"Gib 10 Tipps ab",weekly_score_50:"Verdiene 50 Punkte"},
-  es:{eyebrow:"Desafíos",title:"Desafíos diarios y semanales",intro:"Completa desafíos con tus predicciones de VoetIQ.",daily:"Hoy",weekly:"Esta semana",progress:"Progreso",reward:"puntos de recompensa",complete:"Completado",loading:"Cargando desafíos...",empty:"No hay desafíos activos.",error:"No se pudieron cargar los desafíos.",daily_predict_3:"Haz 3 predicciones",daily_correct_2:"Predice 2 resultados correctos",weekly_predict_10:"Haz 10 predicciones",weekly_score_50:"Consigue 50 puntos"},
-  fr:{eyebrow:"Défis",title:"Défis quotidiens et hebdomadaires",intro:"Relève des défis avec tes pronostics VoetIQ.",daily:"Aujourd’hui",weekly:"Cette semaine",progress:"Progression",reward:"points de récompense",complete:"Terminé",loading:"Chargement des défis...",empty:"Aucun défi actif.",error:"Impossible de charger les défis.",daily_predict_3:"Fais 3 pronostics",daily_correct_2:"Pronostique 2 bons résultats",weekly_predict_10:"Fais 10 pronostics",weekly_score_50:"Gagne 50 points"},
-  it:{eyebrow:"Sfide",title:"Sfide giornaliere e settimanali",intro:"Completa le sfide con i tuoi pronostici VoetIQ.",daily:"Oggi",weekly:"Questa settimana",progress:"Progresso",reward:"punti premio",complete:"Completata",loading:"Caricamento sfide...",empty:"Nessuna sfida attiva.",error:"Impossibile caricare le sfide.",daily_predict_3:"Fai 3 pronostici",daily_correct_2:"Pronostica 2 esiti corretti",weekly_predict_10:"Fai 10 pronostici",weekly_score_50:"Guadagna 50 punti"},
-  pt:{eyebrow:"Desafios",title:"Desafios diários e semanais",intro:"Completa desafios com as tuas previsões VoetIQ.",daily:"Hoje",weekly:"Esta semana",progress:"Progresso",reward:"pontos de recompensa",complete:"Concluído",loading:"A carregar desafios...",empty:"Não há desafios ativos.",error:"Não foi possível carregar os desafios.",daily_predict_3:"Faz 3 previsões",daily_correct_2:"Prevê 2 resultados corretos",weekly_predict_10:"Faz 10 previsões",weekly_score_50:"Ganha 50 pontos"}
+  nl:{eyebrow:"Challenges",title:"Dagelijkse & wekelijkse challenges",intro:"Voltooi uitdagingen met je VoetIQ-voorspellingen.",daily:"Vandaag",weekly:"Deze week",progress:"Voortgang",reward:"beloningspunten",complete:"Voltooid",loading:"Challenges laden...",empty:"Geen actieve challenges.",error:"Challenges konden niet worden geladen.",daily_predict_2:"Doe 2 voorspellingen",daily_predict_3:"Doe 3 voorspellingen",daily_predict_5:"Doe 5 voorspellingen",daily_correct_1:"Voorspel 1 juiste uitslag",daily_correct_2:"Voorspel 2 juiste uitslagen",daily_score_10:"Verdien 10 punten",daily_score_20:"Verdien 20 punten",daily_score_30:"Verdien 30 punten",weekly_predict_5:"Doe 5 voorspellingen",weekly_predict_10:"Doe 10 voorspellingen",weekly_predict_15:"Doe 15 voorspellingen",weekly_predict_20:"Doe 20 voorspellingen",weekly_correct_3:"Voorspel 3 juiste uitslagen",weekly_correct_5:"Voorspel 5 juiste uitslagen",weekly_score_50:"Verdien 50 punten",weekly_score_100:"Verdien 100 punten"},
+  en:{eyebrow:"Challenges",title:"Daily & weekly challenges",intro:"Complete challenges with your VoetIQ predictions.",daily:"Today",weekly:"This week",progress:"Progress",reward:"reward points",complete:"Completed",loading:"Loading challenges...",empty:"No active challenges.",error:"Challenges could not be loaded.",daily_predict_2:"Make 2 predictions",daily_predict_3:"Make 3 predictions",daily_predict_5:"Make 5 predictions",daily_correct_1:"Predict 1 correct result",daily_correct_2:"Predict 2 correct results",daily_score_10:"Earn 10 points",daily_score_20:"Earn 20 points",daily_score_30:"Earn 30 points",weekly_predict_5:"Make 5 predictions",weekly_predict_10:"Make 10 predictions",weekly_predict_15:"Make 15 predictions",weekly_predict_20:"Make 20 predictions",weekly_correct_3:"Predict 3 correct results",weekly_correct_5:"Predict 5 correct results",weekly_score_50:"Earn 50 points",weekly_score_100:"Earn 100 points"},
+  de:{eyebrow:"Challenges",title:"Tägliche & wöchentliche Challenges",intro:"Schließe Herausforderungen mit deinen VoetIQ-Tipps ab.",daily:"Heute",weekly:"Diese Woche",progress:"Fortschritt",reward:"Belohnungspunkte",complete:"Abgeschlossen",loading:"Challenges werden geladen...",empty:"Keine aktiven Challenges.",error:"Challenges konnten nicht geladen werden.",daily_predict_2:"Gib 2 Tipps ab",daily_predict_3:"Gib 3 Tipps ab",daily_predict_5:"Gib 5 Tipps ab",daily_correct_1:"Tippe 1 richtigen Ausgang",daily_correct_2:"Tippe 2 richtige Ausgänge",daily_score_10:"Verdiene 10 Punkte",daily_score_20:"Verdiene 20 Punkte",daily_score_30:"Verdiene 30 Punkte",weekly_predict_5:"Gib 5 Tipps ab",weekly_predict_10:"Gib 10 Tipps ab",weekly_predict_15:"Gib 15 Tipps ab",weekly_predict_20:"Gib 20 Tipps ab",weekly_correct_3:"Tippe 3 richtige Ausgänge",weekly_correct_5:"Tippe 5 richtige Ausgänge",weekly_score_50:"Verdiene 50 Punkte",weekly_score_100:"Verdiene 100 Punkte"},
+  es:{eyebrow:"Desafíos",title:"Desafíos diarios y semanales",intro:"Completa desafíos con tus predicciones de VoetIQ.",daily:"Hoy",weekly:"Esta semana",progress:"Progreso",reward:"puntos de recompensa",complete:"Completado",loading:"Cargando desafíos...",empty:"No hay desafíos activos.",error:"No se pudieron cargar los desafíos.",daily_predict_2:"Haz 2 predicciones",daily_predict_3:"Haz 3 predicciones",daily_predict_5:"Haz 5 predicciones",daily_correct_1:"Predice 1 resultado correcto",daily_correct_2:"Predice 2 resultados correctos",daily_score_10:"Consigue 10 puntos",daily_score_20:"Consigue 20 puntos",daily_score_30:"Consigue 30 puntos",weekly_predict_5:"Haz 5 predicciones",weekly_predict_10:"Haz 10 predicciones",weekly_predict_15:"Haz 15 predicciones",weekly_predict_20:"Haz 20 predicciones",weekly_correct_3:"Predice 3 resultados correctos",weekly_correct_5:"Predice 5 resultados correctos",weekly_score_50:"Consigue 50 puntos",weekly_score_100:"Consigue 100 puntos"},
+  fr:{eyebrow:"Défis",title:"Défis quotidiens et hebdomadaires",intro:"Relève des défis avec tes pronostics VoetIQ.",daily:"Aujourd’hui",weekly:"Cette semaine",progress:"Progression",reward:"points de récompense",complete:"Terminé",loading:"Chargement des défis...",empty:"Aucun défi actif.",error:"Impossible de charger les défis.",daily_predict_2:"Fais 2 pronostics",daily_predict_3:"Fais 3 pronostics",daily_predict_5:"Fais 5 pronostics",daily_correct_1:"Pronostique 1 bon résultat",daily_correct_2:"Pronostique 2 bons résultats",daily_score_10:"Gagne 10 points",daily_score_20:"Gagne 20 points",daily_score_30:"Gagne 30 points",weekly_predict_5:"Fais 5 pronostics",weekly_predict_10:"Fais 10 pronostics",weekly_predict_15:"Fais 15 pronostics",weekly_predict_20:"Fais 20 pronostics",weekly_correct_3:"Pronostique 3 bons résultats",weekly_correct_5:"Pronostique 5 bons résultats",weekly_score_50:"Gagne 50 points",weekly_score_100:"Gagne 100 points"},
+  it:{eyebrow:"Sfide",title:"Sfide giornaliere e settimanali",intro:"Completa le sfide con i tuoi pronostici VoetIQ.",daily:"Oggi",weekly:"Questa settimana",progress:"Progresso",reward:"punti premio",complete:"Completata",loading:"Caricamento sfide...",empty:"Nessuna sfida attiva.",error:"Impossibile caricare le sfide.",daily_predict_2:"Fai 2 pronostici",daily_predict_3:"Fai 3 pronostici",daily_predict_5:"Fai 5 pronostici",daily_correct_1:"Pronostica 1 esito corretto",daily_correct_2:"Pronostica 2 esiti corretti",daily_score_10:"Guadagna 10 punti",daily_score_20:"Guadagna 20 punti",daily_score_30:"Guadagna 30 punti",weekly_predict_5:"Fai 5 pronostici",weekly_predict_10:"Fai 10 pronostici",weekly_predict_15:"Fai 15 pronostici",weekly_predict_20:"Fai 20 pronostici",weekly_correct_3:"Pronostica 3 esiti corretti",weekly_correct_5:"Pronostica 5 esiti corretti",weekly_score_50:"Guadagna 50 punti",weekly_score_100:"Guadagna 100 punti"},
+  pt:{eyebrow:"Desafios",title:"Desafios diários e semanais",intro:"Completa desafios com as tuas previsões VoetIQ.",daily:"Hoje",weekly:"Esta semana",progress:"Progresso",reward:"pontos de recompensa",complete:"Concluído",loading:"A carregar desafios...",empty:"Não há desafios ativos.",error:"Não foi possível carregar os desafios.",daily_predict_2:"Faz 2 previsões",daily_predict_3:"Faz 3 previsões",daily_predict_5:"Faz 5 previsões",daily_correct_1:"Prevê 1 resultado correto",daily_correct_2:"Prevê 2 resultados corretos",daily_score_10:"Ganha 10 pontos",daily_score_20:"Ganha 20 pontos",daily_score_30:"Ganha 30 pontos",weekly_predict_5:"Faz 5 previsões",weekly_predict_10:"Faz 10 previsões",weekly_predict_15:"Faz 15 previsões",weekly_predict_20:"Faz 20 previsões",weekly_correct_3:"Prevê 3 resultados corretos",weekly_correct_5:"Prevê 5 resultados corretos",weekly_score_50:"Ganha 50 pontos",weekly_score_100:"Ganha 100 pontos"}
 };
 
 function correctResult(p: Prediction) {
@@ -54,6 +54,36 @@ function localWeekStart() {
   const diff = day === 0 ? 6 : day - 1;
   d.setDate(d.getDate() - diff);
   return d;
+}
+
+function localDateKey() {
+  const d = localDayStart();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function localWeekKey() {
+  const d = localWeekStart();
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+function hashString(value: string) {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function selectForPeriod(items: Challenge[], periodKey: string, amount = 2) {
+  return [...items]
+    .map((item) => ({
+      item,
+      score: hashString(`${periodKey}:${item.challenge_key}`),
+    }))
+    .sort((a, b) => a.score - b.score || a.item.id - b.item.id)
+    .slice(0, amount)
+    .map(({ item }) => item);
 }
 
 export default function ChallengesPage() {
@@ -102,28 +132,52 @@ export default function ChallengesPage() {
     const week=localWeekStart().getTime();
     const daily=predictions.filter(p=>new Date(p.created_at).getTime()>=today);
     const weekly=predictions.filter(p=>new Date(p.created_at).getTime()>=week);
+    const dailyCorrect = daily.filter(correctResult).length;
+    const weeklyCorrect = weekly.filter(correctResult).length;
+    const dailyPoints = daily.reduce((n,p)=>n+Number(p.points||0),0);
+    const weeklyPoints = weekly.reduce((n,p)=>n+Number(p.points||0),0);
+
     return {
+      daily_predict_2: daily.length,
       daily_predict_3: daily.length,
-      daily_correct_2: daily.filter(correctResult).length,
+      daily_predict_5: daily.length,
+      daily_correct_1: dailyCorrect,
+      daily_correct_2: dailyCorrect,
+      daily_score_10: dailyPoints,
+      daily_score_20: dailyPoints,
+      daily_score_30: dailyPoints,
+      weekly_predict_5: weekly.length,
       weekly_predict_10: weekly.length,
-      weekly_score_50: weekly.reduce((n,p)=>n+Number(p.points||0),0)
+      weekly_predict_15: weekly.length,
+      weekly_predict_20: weekly.length,
+      weekly_correct_3: weeklyCorrect,
+      weekly_correct_5: weeklyCorrect,
+      weekly_score_50: weeklyPoints,
+      weekly_score_100: weeklyPoints
     } as Record<string,number>;
   },[predictions]);
 
   const t=ui[language];
 
   const orderedChallenges = useMemo(() => {
-    return [...challenges].sort((a,b) => {
-      if (a.challenge_type !== b.challenge_type) {
-        return a.challenge_type === "daily" ? -1 : 1;
-      }
+    const dailyPool = challenges.filter((challenge) => challenge.challenge_type === "daily");
+    const weeklyPool = challenges.filter((challenge) => challenge.challenge_type === "weekly");
 
-      const aDone = (progress[a.challenge_key] || 0) >= a.target;
-      const bDone = (progress[b.challenge_key] || 0) >= b.target;
-      if (aDone !== bDone) return aDone ? -1 : 1;
+    const selectedDaily = selectForPeriod(dailyPool, `daily:${localDateKey()}`, 2);
+    const selectedWeekly = selectForPeriod(weeklyPool, `weekly:${localWeekKey()}`, 2);
 
-      return a.id - b.id;
-    });
+    const sortCompletedFirst = (items: Challenge[]) =>
+      [...items].sort((a,b) => {
+        const aDone = (progress[a.challenge_key] || 0) >= a.target;
+        const bDone = (progress[b.challenge_key] || 0) >= b.target;
+        if (aDone !== bDone) return aDone ? -1 : 1;
+        return a.id - b.id;
+      });
+
+    return [
+      ...sortCompletedFirst(selectedDaily),
+      ...sortCompletedFirst(selectedWeekly),
+    ];
   }, [challenges, progress]);
 
   return (
