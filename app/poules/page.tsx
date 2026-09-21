@@ -340,7 +340,7 @@ export default function PoulesPage() {
         style={{
           minHeight: "100vh",
           background: "radial-gradient(circle at 50% 0%, rgba(15, 122, 70, 0.20) 0%, transparent 32%), linear-gradient(180deg, #00170e 0%, #00110a 48%, #000d08 100%)",
-          padding: "40px 20px 80px",
+          padding: "36px 20px 80px",
         }}
       >
         <div
@@ -351,7 +351,7 @@ export default function PoulesPage() {
         >
           <div
             style={{
-              marginBottom: "32px",
+              marginBottom: "28px",
             }}
           >
             <div
@@ -426,12 +426,12 @@ export default function PoulesPage() {
               gridTemplateColumns:
                 "repeat(auto-fit, minmax(300px, 1fr))",
               gap: "20px",
-              marginBottom: "48px",
+              marginBottom: "38px",
             }}
           >
             <section
               style={{
-                background: "linear-gradient(145deg, #0b3523 0%, #082719 100%)",
+                background: "linear-gradient(145deg, #0c3524 0%, #08271a 100%)",
                 color: "white",
                 border: "1px solid rgba(65,229,139,0.10)",
                 borderRadius: "20px",
@@ -516,9 +516,9 @@ export default function PoulesPage() {
                   width: "100%",
                   padding: "13px",
                   borderRadius: "10px",
-                  border: "1px solid #315f48",
+                  border: "1px solid rgba(65,229,139,0.22)",
                   marginBottom: "20px",
-                  background: "#164c33",
+                  background: "#0b2b1d",
                   color: "white",
                   fontSize: "15px",
                   fontWeight: 700,
@@ -557,7 +557,7 @@ export default function PoulesPage() {
 
             <section
               style={{
-                background: "#0d3d27",
+                background: "linear-gradient(145deg, #0d3a27 0%, #0a2d1f 100%)",
                 color: "white",
                 borderRadius: "20px",
                 padding: "26px",
@@ -614,9 +614,9 @@ export default function PoulesPage() {
                   boxSizing: "border-box",
                   padding: "14px",
                   borderRadius: "10px",
-                  border: "1px solid #315f48",
+                  border: "1px solid rgba(65,229,139,0.22)",
                   marginBottom: "20px",
-                  background: "#164c33",
+                  background: "#0b2b1d",
                   color: "white",
                   fontSize: "17px",
                   fontWeight: 800,
