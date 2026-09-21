@@ -38,6 +38,8 @@ type Translation = {
   countryPlaceholder: string;
   timezone: string;
   timezonePlaceholder: string;
+  region: string;
+  regionPlaceholder: string;
   searchCountry: string;
   checkEmail: string;
   confirmationSent: string;
@@ -79,7 +81,7 @@ const ui: Record<LanguageCode, Translation> = {
       "Er bestaat al een account met dit e-mailadres.",
     accountFailed: "Account kon niet worden aangemaakt.",
     genericError: "Er ging iets mis. Probeer het opnieuw.",
-    country: "Land", countryPlaceholder: "Kies je land", timezone: "Tijdzone", timezonePlaceholder: "Kies je tijdzone", searchCountry: "Zoek een land...",
+    country: "Land", countryPlaceholder: "Kies je land", timezone: "Tijdzone", timezonePlaceholder: "Kies je tijdzone", region: "Regio", regionPlaceholder: "Kies je regio", searchCountry: "Zoek een land...",
     checkEmail: "Controleer je e-mail",
     confirmationSent: "We hebben een bevestigingslink gestuurd naar:",
     confirmationInstruction:
@@ -120,7 +122,7 @@ const ui: Record<LanguageCode, Translation> = {
       "An account with this email address already exists.",
     accountFailed: "The account could not be created.",
     genericError: "Something went wrong. Please try again.",
-    country: "Country", countryPlaceholder: "Choose your country", timezone: "Time zone", timezonePlaceholder: "Choose your time zone", searchCountry: "Search country...",
+    country: "Country", countryPlaceholder: "Choose your country", timezone: "Time zone", timezonePlaceholder: "Choose your time zone", region: "Region", regionPlaceholder: "Choose your region", searchCountry: "Search country...",
     checkEmail: "Check your email",
     confirmationSent: "We sent a confirmation link to:",
     confirmationInstruction:
@@ -163,7 +165,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Das Konto konnte nicht erstellt werden.",
     genericError:
       "Etwas ist schiefgelaufen. Versuche es erneut.",
-    country: "Land", countryPlaceholder: "Land auswählen", timezone: "Zeitzone", timezonePlaceholder: "Zeitzone auswählen", searchCountry: "Land suchen...",
+    country: "Land", countryPlaceholder: "Land auswählen", timezone: "Zeitzone", timezonePlaceholder: "Zeitzone auswählen", region: "Region", regionPlaceholder: "Region auswählen", searchCountry: "Land suchen...",
     checkEmail: "Überprüfe deine E-Mails",
     confirmationSent:
       "Wir haben einen Bestätigungslink gesendet an:",
@@ -208,7 +210,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "No se ha podido crear la cuenta.",
     genericError:
       "Algo ha salido mal. Inténtalo de nuevo.",
-    country: "País", countryPlaceholder: "Elige tu país", timezone: "Zona horaria", timezonePlaceholder: "Elige tu zona horaria", searchCountry: "Buscar país...",
+    country: "País", countryPlaceholder: "Elige tu país", timezone: "Zona horaria", timezonePlaceholder: "Elige tu zona horaria", region: "Región", regionPlaceholder: "Elige tu región", searchCountry: "Buscar país...",
     checkEmail: "Comprueba tu correo electrónico",
     confirmationSent:
       "Hemos enviado un enlace de confirmación a:",
@@ -253,7 +255,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Le compte n'a pas pu être créé.",
     genericError:
       "Une erreur s'est produite. Veuillez réessayer.",
-    country: "Pays", countryPlaceholder: "Choisissez votre pays", timezone: "Fuseau horaire", timezonePlaceholder: "Choisissez votre fuseau horaire", searchCountry: "Rechercher un pays...",
+    country: "Pays", countryPlaceholder: "Choisissez votre pays", timezone: "Fuseau horaire", timezonePlaceholder: "Choisissez votre fuseau horaire", region: "Région", regionPlaceholder: "Choisissez votre région", searchCountry: "Rechercher un pays...",
     checkEmail: "Consultez votre e-mail",
     confirmationSent:
       "Nous avons envoyé un lien de confirmation à :",
@@ -298,7 +300,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Impossibile creare l'account.",
     genericError:
       "Qualcosa è andato storto. Riprova.",
-    country: "Paese", countryPlaceholder: "Scegli il tuo paese", timezone: "Fuso orario", timezonePlaceholder: "Scegli il tuo fuso orario", searchCountry: "Cerca paese...",
+    country: "Paese", countryPlaceholder: "Scegli il tuo paese", timezone: "Fuso orario", timezonePlaceholder: "Scegli il tuo fuso orario", region: "Regione", regionPlaceholder: "Scegli la tua regione", searchCountry: "Cerca paese...",
     checkEmail: "Controlla la tua email",
     confirmationSent:
       "Abbiamo inviato un link di conferma a:",
@@ -343,7 +345,7 @@ const ui: Record<LanguageCode, Translation> = {
     accountFailed: "Não foi possível criar a conta.",
     genericError:
       "Algo correu mal. Tenta novamente.",
-    country: "País", countryPlaceholder: "Escolhe o teu país", timezone: "Fuso horário", timezonePlaceholder: "Escolhe o teu fuso horário", searchCountry: "Pesquisar país...",
+    country: "País", countryPlaceholder: "Escolhe o teu país", timezone: "Fuso horário", timezonePlaceholder: "Escolhe o teu fuso horário", region: "Região", regionPlaceholder: "Escolhe a tua região", searchCountry: "Pesquisar país...",
     checkEmail: "Verifica o teu email",
     confirmationSent:
       "Enviámos um link de confirmação para:",
@@ -556,20 +558,114 @@ const COUNTRIES = [
 ];
 
 const MULTI_TIMEZONE_OPTIONS: Record<string, { value: string; label: string }[]> = {
-  "US": [{ value: "America/New_York", label: "New York / Eastern" }, { value: "America/Chicago", label: "Chicago / Central" }, { value: "America/Denver", label: "Denver / Mountain" }, { value: "America/Los_Angeles", label: "Los Angeles / Pacific" }, { value: "America/Anchorage", label: "Alaska" }, { value: "Pacific/Honolulu", label: "Hawa\u00ef" }],
-  "CA": [{ value: "America/Toronto", label: "Toronto / Eastern" }, { value: "America/Winnipeg", label: "Winnipeg / Central" }, { value: "America/Edmonton", label: "Edmonton / Mountain" }, { value: "America/Vancouver", label: "Vancouver / Pacific" }, { value: "America/Halifax", label: "Halifax / Atlantic" }, { value: "America/St_Johns", label: "St. John's / Newfoundland" }],
-  "AU": [{ value: "Australia/Sydney", label: "Sydney" }, { value: "Australia/Melbourne", label: "Melbourne" }, { value: "Australia/Brisbane", label: "Brisbane" }, { value: "Australia/Adelaide", label: "Adelaide" }, { value: "Australia/Perth", label: "Perth" }, { value: "Australia/Darwin", label: "Darwin" }],
-  "RU": [{ value: "Europe/Moscow", label: "Moskou" }, { value: "Europe/Samara", label: "Samara" }, { value: "Asia/Yekaterinburg", label: "Jekaterinenburg" }, { value: "Asia/Omsk", label: "Omsk" }, { value: "Asia/Novosibirsk", label: "Novosibirsk" }, { value: "Asia/Krasnoyarsk", label: "Krasnojarsk" }, { value: "Asia/Irkutsk", label: "Irkoetsk" }, { value: "Asia/Yakutsk", label: "Jakoetsk" }, { value: "Asia/Vladivostok", label: "Vladivostok" }, { value: "Asia/Magadan", label: "Magadan" }, { value: "Asia/Kamchatka", label: "Kamtsjatka" }],
-  "BR": [{ value: "America/Sao_Paulo", label: "S\u00e3o Paulo / Bras\u00edlia" }, { value: "America/Manaus", label: "Manaus" }, { value: "America/Cuiaba", label: "Cuiab\u00e1" }, { value: "America/Rio_Branco", label: "Rio Branco" }],
-  "MX": [{ value: "America/Mexico_City", label: "Mexico-Stad" }, { value: "America/Monterrey", label: "Monterrey" }, { value: "America/Mazatlan", label: "Mazatl\u00e1n" }, { value: "America/Tijuana", label: "Tijuana" }],
-  "ID": [{ value: "Asia/Jakarta", label: "Jakarta / West" }, { value: "Asia/Makassar", label: "Makassar / Central" }, { value: "Asia/Jayapura", label: "Jayapura / East" }],
-  "CL": [{ value: "America/Santiago", label: "Santiago" }, { value: "Pacific/Easter", label: "Paaseiland" }],
-  "EC": [{ value: "America/Guayaquil", label: "Ecuador vasteland" }, { value: "Pacific/Galapagos", label: "Gal\u00e1pagos" }],
-  "CD": [{ value: "Africa/Kinshasa", label: "Kinshasa" }, { value: "Africa/Lubumbashi", label: "Lubumbashi" }],
-  "PG": [{ value: "Pacific/Port_Moresby", label: "Port Moresby" }, { value: "Pacific/Bougainville", label: "Bougainville" }],
-  "KZ": [{ value: "Asia/Almaty", label: "Almaty" }, { value: "Asia/Aqtau", label: "Aqtau" }, { value: "Asia/Aqtobe", label: "Aqt\u00f6be" }, { value: "Asia/Atyrau", label: "Atyrau" }, { value: "Asia/Oral", label: "Oral" }, { value: "Asia/Qostanay", label: "Qostanay" }],
-  "FM": [{ value: "Pacific/Pohnpei", label: "Pohnpei" }, { value: "Pacific/Chuuk", label: "Chuuk" }, { value: "Pacific/Kosrae", label: "Kosrae" }]
+  US: [
+    { value: "America/New_York", label: "New York / Eastern" },
+    { value: "America/Chicago", label: "Chicago / Central" },
+    { value: "America/Denver", label: "Denver / Mountain" },
+    { value: "America/Phoenix", label: "Arizona" },
+    { value: "America/Los_Angeles", label: "Los Angeles / Pacific" },
+    { value: "America/Anchorage", label: "Alaska" },
+    { value: "Pacific/Honolulu", label: "Hawaï" },
+  ],
+  CA: [
+    { value: "America/St_Johns", label: "Newfoundland / St. John's" },
+    { value: "America/Halifax", label: "Atlantic / Halifax" },
+    { value: "America/Toronto", label: "Eastern / Toronto" },
+    { value: "America/Winnipeg", label: "Central / Winnipeg" },
+    { value: "America/Edmonton", label: "Mountain / Edmonton" },
+    { value: "America/Vancouver", label: "Pacific / Vancouver" },
+  ],
+  AU: [
+    { value: "Australia/Sydney", label: "New South Wales / Sydney" },
+    { value: "Australia/Melbourne", label: "Victoria / Melbourne" },
+    { value: "Australia/Brisbane", label: "Queensland / Brisbane" },
+    { value: "Australia/Adelaide", label: "South Australia / Adelaide" },
+    { value: "Australia/Darwin", label: "Northern Territory / Darwin" },
+    { value: "Australia/Perth", label: "Western Australia / Perth" },
+    { value: "Australia/Hobart", label: "Tasmania / Hobart" },
+  ],
+  RU: [
+    { value: "Europe/Kaliningrad", label: "Kaliningrad" },
+    { value: "Europe/Moscow", label: "Moskou" },
+    { value: "Europe/Samara", label: "Samara" },
+    { value: "Asia/Yekaterinburg", label: "Jekaterinenburg" },
+    { value: "Asia/Omsk", label: "Omsk" },
+    { value: "Asia/Novosibirsk", label: "Novosibirsk" },
+    { value: "Asia/Krasnoyarsk", label: "Krasnojarsk" },
+    { value: "Asia/Irkutsk", label: "Irkoetsk" },
+    { value: "Asia/Yakutsk", label: "Jakoetsk" },
+    { value: "Asia/Vladivostok", label: "Vladivostok" },
+    { value: "Asia/Magadan", label: "Magadan" },
+    { value: "Asia/Kamchatka", label: "Kamtsjatka" },
+  ],
+  BR: [
+    { value: "America/Noronha", label: "Fernando de Noronha" },
+    { value: "America/Sao_Paulo", label: "Brasília / São Paulo / Rio de Janeiro" },
+    { value: "America/Manaus", label: "Amazonas / Manaus" },
+    { value: "America/Cuiaba", label: "Mato Grosso / Cuiabá" },
+    { value: "America/Rio_Branco", label: "Acre / Rio Branco" },
+  ],
+  MX: [
+    { value: "America/Mexico_City", label: "Centraal-Mexico / Mexico-Stad" },
+    { value: "America/Cancun", label: "Quintana Roo / Cancún" },
+    { value: "America/Chihuahua", label: "Chihuahua" },
+    { value: "America/Hermosillo", label: "Sonora / Hermosillo" },
+    { value: "America/Mazatlan", label: "Sinaloa / Mazatlán" },
+    { value: "America/Tijuana", label: "Baja California / Tijuana" },
+  ],
+  ID: [
+    { value: "Asia/Jakarta", label: "West-Indonesië / Jakarta" },
+    { value: "Asia/Makassar", label: "Centraal-Indonesië / Makassar" },
+    { value: "Asia/Jayapura", label: "Oost-Indonesië / Jayapura" },
+  ],
+  CL: [
+    { value: "America/Santiago", label: "Vasteland / Santiago" },
+    { value: "Pacific/Easter", label: "Paaseiland" },
+  ],
+  EC: [
+    { value: "America/Guayaquil", label: "Vasteland / Guayaquil" },
+    { value: "Pacific/Galapagos", label: "Galápagoseilanden" },
+  ],
+  CD: [
+    { value: "Africa/Kinshasa", label: "West / Kinshasa" },
+    { value: "Africa/Lubumbashi", label: "Oost / Lubumbashi" },
+  ],
+  PG: [
+    { value: "Pacific/Port_Moresby", label: "Papoea-Nieuw-Guinea / Port Moresby" },
+    { value: "Pacific/Bougainville", label: "Bougainville" },
+  ],
+  FM: [
+    { value: "Pacific/Chuuk", label: "Chuuk" },
+    { value: "Pacific/Pohnpei", label: "Pohnpei" },
+    { value: "Pacific/Kosrae", label: "Kosrae" },
+  ],
+  KI: [
+    { value: "Pacific/Tarawa", label: "Gilberteilanden / Tarawa" },
+    { value: "Pacific/Kanton", label: "Phoenixeilanden / Kanton" },
+    { value: "Pacific/Kiritimati", label: "Line-eilanden / Kiritimati" },
+  ],
+  MN: [
+    { value: "Asia/Ulaanbaatar", label: "Ulaanbaatar / Centraal & Oost" },
+    { value: "Asia/Hovd", label: "West-Mongolië / Hovd" },
+  ],
+  NZ: [
+    { value: "Pacific/Auckland", label: "Nieuw-Zeeland / Auckland" },
+    { value: "Pacific/Chatham", label: "Chathameilanden" },
+  ],
+  PT: [
+    { value: "Europe/Lisbon", label: "Vasteland / Madeira" },
+    { value: "Atlantic/Azores", label: "Azoren" },
+  ],
+  ES: [
+    { value: "Europe/Madrid", label: "Vasteland / Balearen" },
+    { value: "Atlantic/Canary", label: "Canarische Eilanden" },
+  ],
+  UA: [
+    { value: "Europe/Kyiv", label: "Meeste regio's / Kyiv" },
+    { value: "Europe/Simferopol", label: "Krim / Simferopol" },
+  ],
 };
+
 
 export default function RegistrerenPage() {
   const [firstName, setFirstName] = useState("");
@@ -1115,7 +1211,10 @@ export default function RegistrerenPage() {
                               setCountry(item.code);
 
                               const options = MULTI_TIMEZONE_OPTIONS[item.code];
-                              setTimezone(options?.[0]?.value ?? item.timezone ?? "");
+
+                              // Bij meerdere tijdzones kiest de gebruiker bewust
+                              // zijn/haar regio. Bij één tijdzone vullen we hem automatisch in.
+                              setTimezone(options?.length ? "" : item.timezone ?? "");
 
                               setCountrySearch("");
                               setCountryOpen(false);
@@ -1146,30 +1245,28 @@ export default function RegistrerenPage() {
               </div>
             </div>
 
-            {country && (
+            {country && timezoneOptions.length > 0 && (
               <div style={{ marginTop: "14px" }}>
-                <label style={labelStyle}>{t.timezone}</label>
+                <label style={labelStyle}>{t.region}</label>
 
-                {timezoneOptions.length > 0 ? (
-                  <select
-                    value={timezone}
-                    onChange={(e) => setTimezone(e.target.value)}
-                    style={inputStyle}
-                  >
-                    {timezoneOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type="text"
-                    value={timezone}
-                    readOnly
-                    style={{ ...inputStyle, opacity: 0.8 }}
-                  />
-                )}
+                <select
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                  style={{
+                    ...inputStyle,
+                    color: timezone ? "#ffffff" : "#8fa79a",
+                  }}
+                >
+                  <option value="" disabled>
+                    {t.regionPlaceholder}
+                  </option>
+
+                  {timezoneOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
 
