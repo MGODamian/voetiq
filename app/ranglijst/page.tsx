@@ -336,6 +336,8 @@ const competitions: Competition[] = [
   { code: "FL1", name: "Ligue 1", icon: "🇫🇷", matchdays: 34 },
   { code: "PPL", name: "Primeira Liga", icon: "🇵🇹", matchdays: 34 },
   { code: "CL", name: "Champions League", icon: "🏆", matchdays: 8 },
+  { code: "EL", name: "Europa League", icon: "🏆", matchdays: 8 },
+  { code: "ECL", name: "Conference League", icon: "🏆", matchdays: 6 },
 ];
 
 export default function Ranglijst() {
