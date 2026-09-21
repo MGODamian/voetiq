@@ -16,6 +16,7 @@ function getMatchday(round?: string): number | undefined {
   if (!round) return undefined;
   const numbers = round.match(/\d+/g);
   if (!numbers?.length) return undefined;
+
   const value = Number(numbers[numbers.length - 1]);
   return Number.isFinite(value) ? value : undefined;
 }
@@ -23,7 +24,9 @@ function getMatchday(round?: string): number | undefined {
 function mapApiFootballStatus(shortStatus?: string) {
   switch (shortStatus) {
     case "NS":
-    case "TBD": return "SCHEDULED";
+    case "TBD":
+      return "SCHEDULED";
+
     case "1H":
     case "HT":
     case "2H":
@@ -32,13 +35,22 @@ function mapApiFootballStatus(shortStatus?: string) {
     case "P":
     case "SUSP":
     case "INT":
-    case "LIVE": return "IN_PLAY";
+    case "LIVE":
+      return "IN_PLAY";
+
     case "FT":
     case "AET":
-    case "PEN": return "FINISHED";
-    case "PST": return "POSTPONED";
-    case "CANC": return "CANCELLED";
-    default: return shortStatus || "SCHEDULED";
+    case "PEN":
+      return "FINISHED";
+
+    case "PST":
+      return "POSTPONED";
+
+    case "CANC":
+      return "CANCELLED";
+
+    default:
+      return shortStatus || "SCHEDULED";
   }
 }
 
@@ -67,15 +79,23 @@ async function getApiFootballMatches(
     "&timezone=UTC";
 
   const response = await fetch(url, {
-    headers: { "x-apisports-key": apiKey },
-    next: { revalidate: 3600 },
+    headers: {
+      "x-apisports-key": apiKey,
+    },
+    next: {
+      revalidate: 3600,
+    },
   });
 
   const data = await response.json();
 
   if (!response.ok) {
     return NextResponse.json(
-      { error: "API-Football fout", competition, details: data },
+      {
+        error: "API-Football fout",
+        competition,
+        details: data,
+      },
       { status: response.status }
     );
   }
@@ -87,7 +107,11 @@ async function getApiFootballMatches(
 
     if (hasErrors) {
       return NextResponse.json(
-        { error: "API-Football fout", competition, details: data.errors },
+        {
+          error: "API-Football fout",
+          competition,
+          details: data.errors,
+        },
         { status: 502 }
       );
     }
@@ -98,21 +122,25 @@ async function getApiFootballMatches(
     utcDate: item.fixture.date,
     status: mapApiFootballStatus(item.fixture.status?.short),
     matchday: getMatchday(item.league?.round),
+
     homeTeam: {
       id: item.teams?.home?.id,
       name: item.teams?.home?.name || "Thuisteam",
       crest: item.teams?.home?.logo,
     },
+
     awayTeam: {
       id: item.teams?.away?.id,
       name: item.teams?.away?.name || "Uitteam",
       crest: item.teams?.away?.logo,
     },
+
     competition: {
       id: item.league?.id,
       name: item.league?.name || "UEFA Europa League",
       code: competition,
     },
+
     score: {
       winner:
         item.teams?.home?.winner === true
@@ -122,11 +150,14 @@ async function getApiFootballMatches(
             : item.fixture.status?.short === "FT"
               ? "DRAW"
               : null,
+
       duration: "REGULAR",
+
       fullTime: {
         home: item.goals?.home ?? null,
         away: item.goals?.away ?? null,
       },
+
       halfTime: {
         home: item.score?.halftime?.home ?? null,
         away: item.score?.halftime?.away ?? null,
@@ -135,14 +166,20 @@ async function getApiFootballMatches(
   }));
 
   return NextResponse.json({
-    competition: { code: competition, name: "UEFA Europa League" },
+    competition: {
+      code: competition,
+      name: "UEFA Europa League",
+    },
     matches,
   });
 }
 
 function zafronixNumericId(id: unknown, index: number) {
   const text = String(id ?? "");
-  const number = Number(text.match(/(\d+)$/)?.[1] ?? index + 1);
+  const number = Number(
+    text.match(/(\d+)$/)?.[1] ?? index + 1
+  );
+
   return 848000000 + number;
 }
 
@@ -155,6 +192,7 @@ function zafronixStatus(item: any) {
   ) {
     return "FINISHED";
   }
+
   return "SCHEDULED";
 }
 
@@ -168,19 +206,27 @@ function zafronixWinner(item: any) {
     return null;
   }
 
-  if (item.homeScore > item.awayScore) return "HOME_TEAM";
-  if (item.awayScore > item.homeScore) return "AWAY_TEAM";
+  if (item.homeScore > item.awayScore) {
+    return "HOME_TEAM";
+  }
+
+  if (item.awayScore > item.homeScore) {
+    return "AWAY_TEAM";
+  }
+
   return "DRAW";
 }
 
 /**
  * Officiële UEFA-aftraptijden voor de Conference League 2026/27.
  *
- * UEFA vermeldt 21:00 CET als standaardtijd en alleen de afwijkende
- * tijden hoeven hier te worden vastgelegd. De Zafronix-feed levert
- * namelijk alleen de datum en teams, niet de kickoff-tijd.
+ * UEFA vermeldt 21:00 als standaardtijd.
+ * Alleen afwijkende tijden worden hieronder vastgelegd.
  *
- * Key = YYYY-MM-DD|thuisteam zoals aangeleverd door Zafronix.
+ * Zafronix levert alleen de datum en teams,
+ * niet de kickoff-tijd.
+ *
+ * Key = YYYY-MM-DD|thuisteam
  */
 const UEFA_CONFERENCE_SPECIAL_KICKOFFS: Record<string, string> = {
   // Speeldag 1 — 15 oktober 2026
@@ -247,24 +293,85 @@ function getUefaConferenceKickoff(
   date: string,
   homeTeam: string
 ): string {
-  return UEFA_CONFERENCE_SPECIAL_KICKOFFS[
-    `${date}|${homeTeam}`
-  ] || "21:00";
+  return (
+    UEFA_CONFERENCE_SPECIAL_KICKOFFS[
+      `${date}|${homeTeam}`
+    ] || "21:00"
+  );
+}
+
+/**
+ * Bepaalt automatisch de Nederlandse UTC-offset.
+ *
+ * Nederland gebruikt:
+ * - UTC+2 tijdens zomertijd
+ * - UTC+1 tijdens wintertijd
+ *
+ * Hierdoor worden bijvoorbeeld:
+ * 15 oktober 2026 18:45 → 16:45 UTC
+ * 15 oktober 2026 21:00 → 19:00 UTC
+ *
+ * En vanaf november:
+ * 5 november 2026 18:45 → 17:45 UTC
+ */
+function getAmsterdamUtcOffset(date: string): number {
+  const reference = new Date(`${date}T12:00:00Z`);
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Amsterdam",
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(reference);
+
+  const localHour = Number(
+    parts.find((part) => part.type === "hour")?.value ?? "12"
+  );
+
+  let offset = localHour - 12;
+
+  if (offset < 0) {
+    offset += 24;
+  }
+
+  return offset;
 }
 
 function getUefaConferenceUtcDate(
   date: string,
   homeTeam: string
 ): string {
-  const kickoff = getUefaConferenceKickoff(date, homeTeam);
-  // Alle UEFA-tijden hierboven zijn CET (UTC+1).
-  const [hours, minutes] = kickoff.split(":").map(Number);
+  const kickoff = getUefaConferenceKickoff(
+    date,
+    homeTeam
+  );
 
-  const utcHours = hours - 1;
+  const [hours, minutes] = kickoff
+    .split(":")
+    .map(Number);
 
-  return `${date}T${String(utcHours).padStart(2, "0")}:${String(
-    minutes
-  ).padStart(2, "0")}:00Z`;
+  const offset = getAmsterdamUtcOffset(date);
+
+  let utcHours = hours - offset;
+  let utcDate = date;
+
+  if (utcHours < 0) {
+    utcHours += 24;
+
+    const previousDay = new Date(`${date}T12:00:00Z`);
+
+    previousDay.setUTCDate(
+      previousDay.getUTCDate() - 1
+    );
+
+    utcDate = previousDay
+      .toISOString()
+      .split("T")[0];
+  }
+
+  return `${utcDate}T${String(utcHours).padStart(
+    2,
+    "0"
+  )}:${String(minutes).padStart(2, "0")}:00Z`;
 }
 
 async function getZafronixConferenceLeagueMatches(
@@ -275,7 +382,10 @@ async function getZafronixConferenceLeagueMatches(
 
   if (!apiKey) {
     return NextResponse.json(
-      { error: "ZAFRONIX_API_KEY ontbreekt in Vercel." },
+      {
+        error:
+          "ZAFRONIX_API_KEY ontbreekt in Vercel.",
+      },
       { status: 500 }
     );
   }
@@ -287,19 +397,23 @@ async function getZafronixConferenceLeagueMatches(
         "X-API-Key": apiKey,
         Accept: "application/json",
       },
-      next: { revalidate: 3600 },
+      next: {
+        revalidate: 3600,
+      },
     }
   );
 
   const rawText = await response.text();
 
   let payload: any;
+
   try {
     payload = JSON.parse(rawText);
   } catch {
     return NextResponse.json(
       {
-        error: "Zafronix gaf geen geldige JSON terug.",
+        error:
+          "Zafronix gaf geen geldige JSON terug.",
         details: rawText,
       },
       { status: 502 }
@@ -324,71 +438,110 @@ async function getZafronixConferenceLeagueMatches(
       ? payload
       : [];
 
-  const filteredSourceMatches = sourceMatches.filter((item: any) => {
-    if (!item?.date) return false;
-    return item.date >= dateFrom && item.date <= dateTo;
-  });
+  const filteredSourceMatches = sourceMatches.filter(
+    (item: any) => {
+      if (!item?.date) {
+        return false;
+      }
 
-  const matches = filteredSourceMatches.map((item: any, index: number) => ({
-    id: zafronixNumericId(item.id, index),
+      return (
+        item.date >= dateFrom &&
+        item.date <= dateTo
+      );
+    }
+  );
 
-    // Zafronix levert geen kickoff-tijd. Gebruik daarom de officieel
-    // door UEFA gepubliceerde Conference League-tijd.
-    utcDate: getUefaConferenceUtcDate(
-      item.date,
-      item.homeTeam || "Thuisteam"
-    ),
+  const matches = filteredSourceMatches.map(
+    (item: any, index: number) => ({
+      id: zafronixNumericId(
+        item.id,
+        index
+      ),
 
-    status: zafronixStatus(item),
-    matchday:
-      typeof item.matchday === "number"
-        ? item.matchday
-        : Number(item.matchday) || undefined,
-    stage: item.stage || "league_phase",
+      // Zafronix levert geen kickoff-tijd.
+      // Gebruik daarom de officieel ingestelde
+      // Conference League-tijden.
+      utcDate: getUefaConferenceUtcDate(
+        item.date,
+        item.homeTeam || "Thuisteam"
+      ),
 
-    homeTeam: {
-      id: null,
-      name: item.homeTeam || "Thuisteam",
-      shortName: item.homeTeam || "Thuisteam",
-      tla: null,
-      crest: null,
-    },
+      status: zafronixStatus(item),
 
-    awayTeam: {
-      id: null,
-      name: item.awayTeam || "Uitteam",
-      shortName: item.awayTeam || "Uitteam",
-      tla: null,
-      crest: null,
-    },
+      matchday:
+        typeof item.matchday === "number"
+          ? item.matchday
+          : Number(item.matchday) ||
+            undefined,
 
-    competition: {
-      id: 848,
-      name: "UEFA Conference League",
-      code: "ECL",
-    },
+      stage:
+        item.stage ||
+        "league_phase",
 
-    score: {
-      winner: zafronixWinner(item),
-      duration: "REGULAR",
-      fullTime: {
-        home: item.homeScore ?? null,
-        away: item.awayScore ?? null,
+      homeTeam: {
+        id: null,
+        name:
+          item.homeTeam ||
+          "Thuisteam",
+        shortName:
+          item.homeTeam ||
+          "Thuisteam",
+        tla: null,
+        crest: null,
       },
-      halfTime: {
-        home: null,
-        away: null,
+
+      awayTeam: {
+        id: null,
+        name:
+          item.awayTeam ||
+          "Uitteam",
+        shortName:
+          item.awayTeam ||
+          "Uitteam",
+        tla: null,
+        crest: null,
       },
-    },
-  }));
+
+      competition: {
+        id: 848,
+        name:
+          "UEFA Conference League",
+        code: "ECL",
+      },
+
+      score: {
+        winner:
+          zafronixWinner(item),
+
+        duration: "REGULAR",
+
+        fullTime: {
+          home:
+            item.homeScore ??
+            null,
+          away:
+            item.awayScore ??
+            null,
+        },
+
+        halfTime: {
+          home: null,
+          away: null,
+        },
+      },
+    })
+  );
 
   return NextResponse.json({
     competition: {
       id: 848,
       code: "ECL",
-      name: "UEFA Conference League",
+      name:
+        "UEFA Conference League",
     },
+
     count: matches.length,
+
     matches,
   });
 }
@@ -398,11 +551,15 @@ async function getFootballDataMatches(
   dateFrom: string,
   dateTo: string
 ) {
-  const token = process.env.FOOTBALL_DATA_API_TOKEN;
+  const token =
+    process.env.FOOTBALL_DATA_API_TOKEN;
 
   if (!token) {
     return NextResponse.json(
-      { error: "FOOTBALL_DATA_API_TOKEN ontbreekt." },
+      {
+        error:
+          "FOOTBALL_DATA_API_TOKEN ontbreekt.",
+      },
       { status: 500 }
     );
   }
@@ -410,17 +567,21 @@ async function getFootballDataMatches(
   const response = await fetch(
     `https://api.football-data.org/v4/competitions/${competition}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`,
     {
-      headers: { "X-Auth-Token": token },
+      headers: {
+        "X-Auth-Token": token,
+      },
       cache: "no-store",
     }
   );
 
   if (!response.ok) {
-    const errorText = await response.text();
+    const errorText =
+      await response.text();
 
     return NextResponse.json(
       {
-        error: "Football-data API fout",
+        error:
+          "Football-data API fout",
         competition,
         details: errorText,
       },
@@ -428,53 +589,99 @@ async function getFootballDataMatches(
     );
   }
 
-  const data = await response.json();
+  const data =
+    await response.json();
+
   return NextResponse.json(data);
 }
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const competition = searchParams.get("competition") || "DED";
+export async function GET(
+  request: Request
+) {
+  const { searchParams } =
+    new URL(request.url);
+
+  const competition =
+    searchParams.get(
+      "competition"
+    ) || "DED";
 
   const supportedCompetitions = [
     ...FOOTBALL_DATA_COMPETITIONS,
-    ...Object.keys(API_FOOTBALL_COMPETITIONS),
+    ...Object.keys(
+      API_FOOTBALL_COMPETITIONS
+    ),
     "ECL",
   ];
 
-  if (!supportedCompetitions.includes(competition)) {
+  if (
+    !supportedCompetitions.includes(
+      competition
+    )
+  ) {
     return NextResponse.json(
-      { error: "Deze competitie wordt niet ondersteund." },
+      {
+        error:
+          "Deze competitie wordt niet ondersteund.",
+      },
       { status: 400 }
     );
   }
 
   const today = new Date();
 
-  const previousMonth = new Date(today);
-  previousMonth.setDate(previousMonth.getDate() - 30);
+  const previousMonth =
+    new Date(today);
 
-  const nextMonth = new Date(today);
-  nextMonth.setDate(nextMonth.getDate() + 30);
+  previousMonth.setDate(
+    previousMonth.getDate() - 30
+  );
 
-  const dateFrom = formatDate(previousMonth);
-  const dateTo = formatDate(nextMonth);
+  const nextMonth =
+    new Date(today);
+
+  nextMonth.setDate(
+    nextMonth.getDate() + 30
+  );
+
+  const dateFrom =
+    formatDate(previousMonth);
+
+  const dateTo =
+    formatDate(nextMonth);
 
   try {
     if (competition === "ECL") {
-      return await getZafronixConferenceLeagueMatches(dateFrom, dateTo);
+      return await getZafronixConferenceLeagueMatches(
+        dateFrom,
+        dateTo
+      );
     }
 
     if (competition === "EL") {
-      return await getApiFootballMatches(competition, dateFrom, dateTo);
+      return await getApiFootballMatches(
+        competition,
+        dateFrom,
+        dateTo
+      );
     }
 
-    return await getFootballDataMatches(competition, dateFrom, dateTo);
+    return await getFootballDataMatches(
+      competition,
+      dateFrom,
+      dateTo
+    );
   } catch (error) {
-    console.error("Matches API error:", error);
+    console.error(
+      "Matches API error:",
+      error
+    );
 
     return NextResponse.json(
-      { error: "Er ging iets mis bij het ophalen van de wedstrijden." },
+      {
+        error:
+          "Er ging iets mis bij het ophalen van de wedstrijden.",
+      },
       { status: 500 }
     );
   }
