@@ -119,6 +119,9 @@ async function getApiFootballMatches(
 
   const matches = (data.response || []).map((item: any) => ({
     id: item.fixture.id,
+    // API-Football geeft de aftrap als ISO-datum/tijd terug.
+    // We bewaren deze als UTC; de frontend zet hem om naar
+    // de tijdzone van de gebruiker.
     utcDate: item.fixture.date,
     status: mapApiFootballStatus(item.fixture.status?.short),
     matchday: getMatchday(item.league?.round),
@@ -169,7 +172,9 @@ async function getApiFootballMatches(
     competition: {
       code: competition,
       name: "UEFA Europa League",
+      id: leagueId,
     },
+    count: matches.length,
     matches,
   });
 }
@@ -637,18 +642,20 @@ export async function GET(
     previousMonth.getDate() - 30
   );
 
-  const nextMonth =
+  // Kijk ruim vooruit zodat ook komende Europese speelrondes
+  // buiten de eerste 30 dagen worden opgehaald.
+  const nextMatches =
     new Date(today);
 
-  nextMonth.setDate(
-    nextMonth.getDate() + 30
+  nextMatches.setDate(
+    nextMatches.getDate() + 120
   );
 
   const dateFrom =
     formatDate(previousMonth);
 
   const dateTo =
-    formatDate(nextMonth);
+    formatDate(nextMatches);
 
   try {
     if (competition === "ECL") {
