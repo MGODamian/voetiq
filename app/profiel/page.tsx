@@ -1102,7 +1102,7 @@ export default function ProfielPage() {
           profile && (
             <>
               <section
-                className="overflow-hidden rounded-3xl border shadow-2xl transition-all duration-300"
+                className="overflow-hidden rounded-3xl border shadow-[0_28px_80px_rgba(0,0,0,0.34)] transition-all duration-300"
                 style={{
                   background: activeHeaderTheme.background,
                   borderColor: activeHeaderTheme.borderColor,
@@ -1111,12 +1111,14 @@ export default function ProfielPage() {
                 <div className="p-6 sm:p-8">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-5">
-                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-green-500/15 text-4xl ring-1 ring-green-400/20">
+                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl text-4xl shadow-[0_12px_30px_rgba(0,0,0,0.20)]"
+                        style={{ background: activeHeaderTheme.avatarBackground, boxShadow: `inset 0 0 0 1px ${activeHeaderTheme.avatarRing}, 0 12px 30px rgba(0,0,0,0.20)` }}>
                         ⚽
                       </div>
 
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-green-300">
+                        <p className="text-xs font-bold uppercase tracking-[0.2em]"
+                          style={{ color: activeHeaderTheme.accent }}>
                           {t.myProfile}
                         </p>
 
@@ -1124,7 +1126,8 @@ export default function ProfielPage() {
                           {profile.username}
                         </h1>
 
-                        <p className="mt-1 text-sm text-green-100/60">
+                        <p className="mt-1 text-sm"
+                          style={{ color: activeHeaderTheme.accentSoft }}>
                           {profile.first_name}{" "}
                           {profile.last_name}
                         </p>
@@ -1132,8 +1135,10 @@ export default function ProfielPage() {
                     </div>
 
                     {rankPosition !== null && (
-                      <div className="rounded-2xl border border-green-400/20 bg-green-400/10 px-5 py-4 text-center sm:min-w-[180px]">
-                        <p className="text-xs font-bold uppercase tracking-wide text-green-300">
+                      <div className="rounded-2xl border px-5 py-4 text-center shadow-[0_12px_30px_rgba(0,0,0,0.16)] sm:min-w-[180px]"
+                        style={{ background: activeHeaderTheme.rankBackground, borderColor: activeHeaderTheme.rankBorder }}>
+                        <p className="text-xs font-bold uppercase tracking-wide"
+                          style={{ color: activeHeaderTheme.accent }}>
                           {t.leaderboardRank}
                         </p>
 
@@ -1141,7 +1146,8 @@ export default function ProfielPage() {
                           #{rankPosition}
                         </p>
 
-                        <p className="text-xs text-green-100/50">
+                        <p className="text-xs"
+                          style={{ color: activeHeaderTheme.accentSoft }}>
                           {t.ofPlayers(totalPlayers)}
                         </p>
                       </div>
@@ -1149,7 +1155,7 @@ export default function ProfielPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 border-t border-white/10 sm:grid-cols-4">
+                <div className="grid grid-cols-2 border-t border-white/10 bg-black/[0.10] sm:grid-cols-4">
                   <ProfileHeaderStat
                     label={t.points}
                     value={totalPoints.toString()}
@@ -1172,7 +1178,7 @@ export default function ProfielPage() {
                 </div>
               </section>
 
-              <section className="mt-8 rounded-3xl border border-green-400/15 bg-gradient-to-br from-green-900/70 via-green-950/80 to-gray-950 p-6 sm:p-7">
+              <section className="mt-8 rounded-3xl border border-green-400/20 bg-gradient-to-br from-green-900/75 via-green-950/85 to-gray-950 p-6 shadow-[0_18px_50px_rgba(0,0,0,0.22)] sm:p-7">
                 <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">{rui.careerRank}</p>
@@ -1205,9 +1211,9 @@ export default function ProfielPage() {
                       {nextFootballRank ? `${nextFootballRank.min} ${rui.points}` : rui.highest}
                     </span>
                   </div>
-                  <div className="h-3 overflow-hidden rounded-full bg-white/10">
+                  <div className="h-3 overflow-hidden rounded-full border border-white/[0.06] bg-black/30 shadow-inner">
                     <div
-                      className="h-full rounded-full bg-green-400 transition-all duration-500"
+                      className="h-full rounded-full bg-gradient-to-r from-green-500 via-green-400 to-emerald-300 shadow-[0_0_16px_rgba(74,222,128,0.28)] transition-all duration-500"
                       style={{ width: `${rankProgress}%` }}
                     />
                   </div>
@@ -1217,7 +1223,7 @@ export default function ProfielPage() {
                 </div>
               </section>
 
-              <section className="mt-8 rounded-3xl border border-green-400/10 bg-white/[0.035] p-6 sm:p-7">
+              <section className="mt-8 rounded-3xl border border-green-400/10 bg-gradient-to-br from-white/[0.045] to-black/[0.08] p-6 shadow-[0_16px_44px_rgba(0,0,0,0.18)] sm:p-7">
                 <div className="mb-5">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-green-400">
                     {aui.eyebrow}
@@ -1239,9 +1245,9 @@ export default function ProfielPage() {
                     {activityItems.map((item) => (
                       <div
                         key={item.id}
-                        className="flex items-start gap-4 rounded-2xl border border-white/10 bg-black/10 px-4 py-4 sm:items-center"
+                        className="flex items-start gap-4 rounded-2xl border border-white/[0.09] bg-black/[0.16] px-4 py-4 transition hover:border-green-400/20 hover:bg-white/[0.035] sm:items-center"
                       >
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-500/10 text-xl ring-1 ring-green-400/10">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green-500/[0.12] text-xl ring-1 ring-green-400/15 shadow-[0_8px_20px_rgba(0,0,0,0.16)]">
                           {item.icon}
                         </div>
                         <div className="min-w-0 flex-1">
