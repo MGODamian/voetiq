@@ -1102,12 +1102,12 @@ export default function Wedstrijden() {
                         ? `1px solid ${activeTheme.border}`
                         : "1px solid transparent",
                       background:
-                        active
-                          ? "#e9faf1"
-                          : "transparent",
-                      color: active
-                        ? "#08763e"
-                        : "#52605a",
+                         active
+                           ? activeTheme.surfaceSoft
+                           : "transparent",
+                       color: active
+                         ? activeTheme.accent
+                         : "rgba(255,255,255,0.68)",
                       fontSize:
                         "13px",
                       fontWeight:
