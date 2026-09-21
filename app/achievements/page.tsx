@@ -183,11 +183,11 @@ export default function AchievementsPage() {
       <Navbar />
       <main style={pageStyle}>
         <div style={{ maxWidth: "1120px", margin: "0 auto" }}>
-          <section style={{ ...cardStyle, padding: "30px", marginBottom: "18px" }}>
+          <section style={{ ...cardStyle, padding: "24px 26px", marginBottom: "16px", boxShadow: "0 12px 34px rgba(0,0,0,0.16)" }}>
             <div style={{ color: "#83e7ae", fontSize: "12px", fontWeight: 900, letterSpacing: "1px", marginBottom: "7px" }}>
               {ui.career}
             </div>
-            <h1 style={{ margin: 0, fontSize: "34px" }}>🏅 {ui.title}</h1>
+            <h1 style={{ margin: 0, fontSize: "32px", letterSpacing: "-0.5px" }}>🏅 {ui.title}</h1>
             <p style={{ color: "#a9bbb0", margin: "9px 0 0", fontSize: "14px" }}>
               {username ? `${username}, ${ui.introNamed}` : ui.intro}
             </p>
@@ -199,7 +199,7 @@ export default function AchievementsPage() {
             <section style={cardStyle}><strong style={{ color: "#ffb4b4" }}>{error}</strong></section>
           ) : (
             <>
-              <section style={{ ...cardStyle, marginBottom: "18px" }}>
+              <section style={{ ...cardStyle, marginBottom: "16px", background: "linear-gradient(135deg, #073522 0%, #031d14 100%)", boxShadow: "0 12px 34px rgba(0,0,0,0.18)" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "20px", alignItems: "center", flexWrap: "wrap" }}>
                   <div>
                     <div style={{ fontSize: "29px", fontWeight: 950, color: "#41e58b" }}>
@@ -210,7 +210,10 @@ export default function AchievementsPage() {
                     </div>
                   </div>
                   <div style={{ flex: "1 1 300px", maxWidth: "600px" }}>
-                    <ProgressBar value={unlockedCount} target={achievements.length} done={unlockedCount === achievements.length} />
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "7px", color: "#83e7ae", fontSize: "12px", fontWeight: 900 }}>
+                       {Math.round((unlockedCount / achievements.length) * 100)}%
+                     </div>
+                     <ProgressBar value={unlockedCount} target={achievements.length} done={unlockedCount === achievements.length} />
                   </div>
                 </div>
               </section>
@@ -224,17 +227,23 @@ export default function AchievementsPage() {
                       style={{
                         ...cardStyle,
                         padding: "19px",
-                        opacity: done ? 1 : 0.72,
+                        opacity: done ? 1 : 0.82,
+                        background: done
+                          ? "linear-gradient(145deg, #08331f 0%, #031b12 100%)"
+                          : "linear-gradient(145deg, #052218 0%, #02150f 100%)",
                         border: done
-                          ? "1px solid rgba(65,229,139,0.30)"
-                          : "1px solid rgba(255,255,255,0.08)",
+                          ? "1px solid rgba(65,229,139,0.34)"
+                          : "1px solid rgba(255,255,255,0.075)",
+                        boxShadow: done
+                          ? "0 10px 28px rgba(11,143,77,0.13), inset 0 1px 0 rgba(255,255,255,0.025)"
+                          : "0 7px 20px rgba(0,0,0,0.12)",
                       }}
                     >
                       <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", alignItems: "flex-start" }}>
                         <div style={{ display: "flex", gap: "11px" }}>
                           <span style={{ fontSize: "25px" }}>{achievement.icon}</span>
                           <div>
-                            <strong style={{ fontSize: "15px", color: done ? "#83e7ae" : "white" }}>
+                            <strong style={{ fontSize: "15px", color: done ? "#8ff0b7" : "#edf5f0" }}>
                               {achievement.title}
                             </strong>
                             <div style={{ color: "#a9bbb0", fontSize: "12px", marginTop: "5px", lineHeight: 1.45 }}>
@@ -248,7 +257,7 @@ export default function AchievementsPage() {
                       <div style={{ marginTop: "16px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", color: "#a9bbb0", fontSize: "11px", marginBottom: "7px" }}>
                           <span>{ui.progress}</span>
-                          <strong style={{ color: done ? "#41e58b" : "#c8d5ce" }}>
+                          <strong style={{ color: done ? "#5df0a0" : "#d3ddd7" }}>
                             {Math.min(achievement.progress, achievement.target)} / {achievement.target}
                           </strong>
                         </div>
@@ -269,14 +278,15 @@ export default function AchievementsPage() {
 function ProgressBar({ value, target, done }: { value: number; target: number; done: boolean }) {
   const percentage = target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0;
   return (
-    <div style={{ height: "8px", borderRadius: "999px", overflow: "hidden", background: "rgba(255,255,255,0.08)" }}>
+    <div style={{ height: "8px", borderRadius: "999px", overflow: "hidden", background: done ? "rgba(65,229,139,0.12)" : "rgba(255,255,255,0.11)" }}>
       <div
         style={{
           width: `${percentage}%`,
           height: "100%",
           borderRadius: "999px",
-          background: done ? "#41e58b" : "#1e8f58",
+          background: done ? "linear-gradient(90deg, #41e58b 0%, #72f0a9 100%)" : "linear-gradient(90deg, #197a4a 0%, #2aa864 100%)",
           transition: "width .25s ease",
+          boxShadow: done ? "0 0 12px rgba(65,229,139,0.20)" : "none",
         }}
       />
     </div>
