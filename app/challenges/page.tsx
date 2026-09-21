@@ -201,28 +201,50 @@ export default function ChallengesPage() {
               const done=value>=ch.target;
               const title=t[ch.challenge_key] || ch.challenge_key;
               return (
-                <article key={ch.id} className="rounded-3xl border border-green-400/15 bg-gradient-to-br from-green-900/60 via-green-950/70 to-gray-950 p-6 shadow-xl">
-                  <div className="flex items-start justify-between gap-4">
+                <article
+                  key={ch.id}
+                  className={`relative overflow-hidden rounded-3xl border p-6 transition-all duration-300 ${
+                    done
+                      ? "border-green-300/30 bg-gradient-to-br from-green-800/55 via-green-950/80 to-[#050b09] shadow-[0_18px_50px_rgba(34,197,94,0.12)]"
+                      : "border-green-400/15 bg-gradient-to-br from-[#123522]/90 via-[#0a1d14]/95 to-[#050b09] shadow-[0_18px_45px_rgba(0,0,0,0.28)]"
+                  }`}
+                >
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-green-300/30 to-transparent" />
+
+                  <div className="relative flex items-start justify-between gap-4">
                     <div>
-                      <span className="inline-flex rounded-lg bg-green-500/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-green-300 ring-1 ring-green-400/10">
+                      <span className="inline-flex items-center rounded-lg border border-green-300/15 bg-green-400/[0.09] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.08em] text-green-300 shadow-sm">
                         {ch.challenge_type==="daily" ? `☀️ ${t.daily}` : `📅 ${t.weekly}`}
                       </span>
-                      <h2 className="mt-4 text-xl font-black">{title}</h2>
+                      <h2 className="mt-4 text-xl font-black tracking-[-0.01em] text-white">{title}</h2>
                     </div>
-                    <div className="text-3xl">{done ? "✅" : ch.challenge_type==="daily" ? "🎯" : "🔥"}</div>
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/[0.06] bg-white/[0.035] text-2xl shadow-inner">
+                      {done ? "✅" : ch.challenge_type==="daily" ? "🎯" : "🔥"}
+                    </div>
                   </div>
 
-                  <div className="mt-6 flex items-end justify-between">
-                    <span className="text-xs font-bold text-green-100/45">{t.progress}</span>
-                    <span className="text-lg font-black text-green-300">{shown}/{ch.target}</span>
+                  <div className="relative mt-7 flex items-end justify-between gap-4">
+                    <span className="text-xs font-extrabold text-green-100/55">{t.progress}</span>
+                    <span className={`text-xl font-black tabular-nums ${done ? "text-green-200" : "text-green-300"}`}>
+                      {shown}<span className="text-green-100/45">/</span>{ch.target}
+                    </span>
                   </div>
-                  <div className="mt-2 h-3 overflow-hidden rounded-full bg-white/10">
-                    <div className="h-full rounded-full bg-green-400 transition-all duration-500" style={{width:`${percentage}%`}}/>
+                  <div className="relative mt-2.5 h-3 overflow-hidden rounded-full border border-white/[0.04] bg-white/[0.09] shadow-inner">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-green-500 via-green-400 to-emerald-300 shadow-[0_0_14px_rgba(74,222,128,0.35)] transition-all duration-500"
+                      style={{width:`${percentage}%`}}
+                    />
                   </div>
 
-                  <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/5 pt-4">
-                    <span className="text-sm text-green-100/45">🎁 +{ch.reward_points} {t.reward}</span>
-                    {done && <span className="rounded-lg bg-green-500/10 px-3 py-1.5 text-xs font-black text-green-300 ring-1 ring-green-400/15">{t.complete}</span>}
+                  <div className="relative mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.07] pt-4">
+                    <span className="text-sm font-semibold text-green-100/60">
+                      🎁 <span className="font-black text-green-300">+{ch.reward_points}</span> {t.reward}
+                    </span>
+                    {done && (
+                      <span className="rounded-lg border border-green-300/20 bg-green-400/10 px-3 py-1.5 text-xs font-black text-green-200 shadow-sm">
+                        {t.complete}
+                      </span>
+                    )}
                   </div>
                 </article>
               );
