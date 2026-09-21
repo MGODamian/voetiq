@@ -6,6 +6,10 @@ const FOOTBALL_DATA_COMPETITIONS = [
 
 const ZAFRONIX_COMPETITIONS = ["EL", "ECL"] as const;
 
+function formatDate(date: Date) {
+  return date.toISOString().split("T")[0];
+}
+
 function zafronixNumericId(
   competition: "EL" | "ECL",
   id: unknown,
