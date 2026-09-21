@@ -24,15 +24,8 @@ function calculatePoints(
   actualHome: number,
   actualAway: number
 ) {
-  const predictedOutcome = getOutcome(
-    predictedHome,
-    predictedAway
-  );
-
-  const actualOutcome = getOutcome(
-    actualHome,
-    actualAway
-  );
+  const predictedOutcome = getOutcome(predictedHome, predictedAway);
+  const actualOutcome = getOutcome(actualHome, actualAway);
 
   if (predictedOutcome !== actualOutcome) {
     return 0;
@@ -54,8 +47,7 @@ function calculatePoints(
 export async function GET(request: Request) {
   // Beveiliging voor cron-job.org / Vercel Cron
   const cronSecret = process.env.CRON_SECRET;
-  const authorization =
-    request.headers.get("authorization");
+  const authorization = request.headers.get("authorization");
 
   if (
     !cronSecret ||
@@ -105,8 +97,7 @@ export async function GET(request: Request) {
   try {
     const now = new Date();
 
-    // Alleen voorspellingen ophalen die nog
-    // geen einduitslag hebben.
+    // Alleen voorspellingen ophalen die nog geen einduitslag hebben.
     const {
       data: pendingPredictions,
       error: predictionsError,
@@ -134,39 +125,49 @@ export async function GET(request: Request) {
       (pendingPredictions || []) as Prediction[];
 
     /*
-     * Alleen voorspellingen meenemen waarvan:
+     * Normale voorspellingen:
+     * - kickoff_at bestaat
+     * - datum is geldig
+     * - wedstrijd is al begonnen
      *
-     * 1. kickoff_at bestaat
-     * 2. kickoff_at een geldige datum is
-     * 3. de wedstrijd al begonnen is
+     * Herstelgevallen:
+     * - kickoff_at ontbreekt of is ongeldig
+     * - match_id bestaat wel
      *
-     * Toekomstige wedstrijden worden dus NIET
-     * bij football-data opgevraagd.
+     * Die herstelgevallen controleren we óók bij football-data.
+     * Zo blijft een oude/onjuiste voorspelling niet voor altijd hangen.
      */
     const predictionsToCheck =
       allPredictions.filter((prediction) => {
         if (!prediction.kickoff_at) {
-          return false;
+          return true;
         }
 
-        const kickoff = new Date(
-          prediction.kickoff_at
-        );
+        const kickoff = new Date(prediction.kickoff_at);
 
         if (Number.isNaN(kickoff.getTime())) {
-          return false;
+          return true;
         }
 
         return kickoff.getTime() <= now.getTime();
       });
 
-    const futurePredictions =
+    const skippedFuturePredictions =
       allPredictions.length -
       predictionsToCheck.length;
 
-    // Eén wedstrijd kan voorspellingen van
-    // honderden gebruikers hebben.
-    // We controleren ieder uniek match_id maar één keer.
+    const predictionsMissingKickoff =
+      allPredictions.filter((prediction) => {
+        if (!prediction.kickoff_at) {
+          return true;
+        }
+
+        const kickoff = new Date(prediction.kickoff_at);
+        return Number.isNaN(kickoff.getTime());
+      }).length;
+
+    // Eén wedstrijd kan voorspellingen van honderden gebruikers hebben.
+    // Daarom controleren we ieder uniek match_id maar één keer.
     const uniqueMatchIds = [
       ...new Set(
         predictionsToCheck.map(
@@ -198,8 +199,7 @@ export async function GET(request: Request) {
             `https://api.football-data.org/v4/matches/${matchId}`,
             {
               headers: {
-                "X-Auth-Token":
-                  footballToken,
+                "X-Auth-Token": footballToken,
               },
               cache: "no-store",
             }
@@ -230,7 +230,59 @@ export async function GET(request: Request) {
         const match =
           await footballResponse.json();
 
-        // Wedstrijd is begonnen maar nog niet afgelopen.
+        // Als football-data de juiste aftraptijd teruggeeft,
+        // herstellen we ontbrekende/ongeldige kickoff_at-waarden.
+        const apiKickoff =
+          typeof match.utcDate === "string"
+            ? match.utcDate
+            : null;
+
+        if (apiKickoff) {
+          const predictionsForKickoffRepair =
+            predictionsToCheck.filter(
+              (prediction) => {
+                if (
+                  prediction.match_id !== matchId
+                ) {
+                  return false;
+                }
+
+                if (!prediction.kickoff_at) {
+                  return true;
+                }
+
+                const kickoff = new Date(
+                  prediction.kickoff_at
+                );
+
+                return Number.isNaN(
+                  kickoff.getTime()
+                );
+              }
+            );
+
+          for (
+            const prediction
+            of predictionsForKickoffRepair
+          ) {
+            const { error: kickoffUpdateError } =
+              await supabase
+                .from("predictions")
+                .update({
+                  kickoff_at: apiKickoff,
+                })
+                .eq("id", prediction.id);
+
+            if (kickoffUpdateError) {
+              console.error(
+                `Kickoff van voorspelling ${prediction.id} kon niet worden hersteld:`,
+                kickoffUpdateError
+              );
+            }
+          }
+        }
+
+        // Wedstrijd is nog niet afgelopen.
         if (match.status !== "FINISHED") {
           unfinishedMatches++;
 
@@ -264,7 +316,7 @@ export async function GET(request: Request) {
 
         finishedMatches++;
 
-        // Alle voorspellingen voor deze wedstrijd.
+        // Alle openstaande voorspellingen voor deze wedstrijd.
         const matchPredictions =
           predictionsToCheck.filter(
             (prediction) =>
@@ -290,6 +342,9 @@ export async function GET(request: Request) {
                 actual_away_score:
                   actualAwayScore,
                 points,
+                ...(apiKickoff
+                  ? { kickoff_at: apiKickoff }
+                  : {}),
               })
               .eq("id", prediction.id);
 
@@ -332,22 +387,20 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
 
-      // Alle voorspellingen zonder einduitslag
+      // Alle voorspellingen zonder einduitslag.
       openPredictions:
         allPredictions.length,
 
-      // Voorspellingen die we nu bewust overslaan
-      // omdat de wedstrijd nog niet begonnen is
+      // Alleen echte toekomstige wedstrijden worden overgeslagen.
       skippedPredictions:
-        futurePredictions,
+        skippedFuturePredictions,
 
-      // Voorspellingen waarvan de wedstrijd
-      // al begonnen is
+      // Handig om oude/onvolledige records terug te vinden.
+      predictionsMissingKickoff,
+
       predictionsToCheck:
         predictionsToCheck.length,
 
-      // Aantal unieke wedstrijden waarvoor
-      // daadwerkelijk football-data is aangeroepen
       uniqueMatches:
         uniqueMatchIds.length,
 
