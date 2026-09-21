@@ -351,6 +351,8 @@ const competitions: Competition[] = [
   { code: "SA", name: "Serie A", flag: "🇮🇹" },
   { code: "FL1", name: "Ligue 1", flag: "🇫🇷" },
   { code: "PPL", name: "Primeira Liga", flag: "🇵🇹" },
+  { code: "EL", name: "Europa League", flag: "🟠" },
+  { code: "ECL", name: "Conference League", flag: "🟢" },
   { code: "CL", name: "Champions League", flag: "🏆" },
 ];
 
@@ -436,6 +438,26 @@ const competitionThemes: Record<
     surface: "#082218",
     surfaceSoft: "#0b3020",
     border: "rgba(118,236,173,0.14)",
+  },
+  EL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(255,117,24,0.42) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(255,181,71,0.20) 0%, transparent 30%), linear-gradient(135deg, #160904 0%, #5a2108 55%, #a8490c 100%)",
+    card: "linear-gradient(135deg, #341207 0%, #9a400b 100%)",
+    accent: "#ffad63",
+    glow: "rgba(235,105,20,0.27)",
+    page: "#100703",
+    surface: "#241008",
+    surfaceSoft: "#32160a",
+    border: "rgba(255,173,99,0.15)",
+  },
+  ECL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(55,215,112,0.38) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(123,255,167,0.16) 0%, transparent 30%), linear-gradient(135deg, #031008 0%, #0a4827 55%, #11713b 100%)",
+    card: "linear-gradient(135deg, #062a17 0%, #0e6937 100%)",
+    accent: "#7cf0a9",
+    glow: "rgba(32,180,91,0.25)",
+    page: "#030d07",
+    surface: "#071d11",
+    surfaceSoft: "#0a2a18",
+    border: "rgba(124,240,169,0.14)",
   },
   CL: {
     hero: "radial-gradient(circle at 82% 18%, rgba(93,110,255,0.42) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(42,58,180,0.30) 0%, transparent 30%), linear-gradient(135deg, #030514 0%, #0b1240 55%, #171e68 100%)",
