@@ -965,7 +965,7 @@ export default function Wedstrijden() {
               display: "inline-flex",
               alignItems: "center",
               gap: "7px",
-              marginBottom: "16px",
+              marginBottom: "13px",
               padding: "8px 12px",
               borderRadius: "10px",
               border: "1px solid rgba(255,255,255,0.18)",
@@ -1047,7 +1047,7 @@ export default function Wedstrijden() {
           maxWidth: "1180px",
           margin: "0 auto",
           padding:
-            "28px 20px 70px",
+            "24px 20px 70px",
         }}
       >
         <div
@@ -1584,7 +1584,7 @@ export default function Wedstrijden() {
                             borderBottom:
                               `1px solid ${activeTheme.border}`,
                             color:
-                              "rgba(255,255,255,0.58)",
+                              "rgba(255,255,255,0.72)",
                             fontSize:
                               "12px",
                             fontWeight:
