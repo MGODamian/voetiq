@@ -71,6 +71,7 @@ type TranslationKey =
   | "premiumGateTitle"
   | "premiumGateDescription"
   | "back"
+  | "timeTbd"
   | "matchCenter";
 
 const localeByLanguage: Record<LanguageCode, string> = {
@@ -118,6 +119,7 @@ const translations: Record<
     premiumGateTitle: "Champions League is onderdeel van VoetIQ Premium",
     premiumGateDescription: "Word Premium om Champions League-wedstrijden te bekijken en te voorspellen.",
     back: "Terug",
+    timeTbd: "Tijd volgt",
     matchCenter: "VOETIQ MATCH CENTER",
   },
   en: {
@@ -150,6 +152,7 @@ const translations: Record<
     premiumGateTitle: "Champions League is part of VoetIQ Premium",
     premiumGateDescription: "Go Premium to view and predict Champions League matches.",
     back: "Back",
+    timeTbd: "Time TBA",
     matchCenter: "VOETIQ MATCH CENTER",
   },
   de: {
@@ -182,6 +185,7 @@ const translations: Record<
     premiumGateTitle: "Die Champions League ist Teil von VoetIQ Premium",
     premiumGateDescription: "Hol dir Premium, um Champions-League-Spiele zu sehen und zu tippen.",
     back: "Zurück",
+    timeTbd: "Uhrzeit folgt",
     matchCenter: "VOETIQ MATCH CENTER",
   },
   es: {
@@ -214,6 +218,7 @@ const translations: Record<
     premiumGateTitle: "La Champions League forma parte de VoetIQ Premium",
     premiumGateDescription: "Hazte Premium para ver y pronosticar los partidos de la Champions League.",
     back: "Volver",
+    timeTbd: "Hora por confirmar",
     matchCenter: "CENTRO DE PARTIDOS VOETIQ",
   },
   fr: {
@@ -248,6 +253,7 @@ const translations: Record<
     premiumGateTitle: "La Ligue des champions fait partie de VoetIQ Premium",
     premiumGateDescription: "Passez à Premium pour voir et pronostiquer les matchs de Ligue des champions.",
     back: "Retour",
+    timeTbd: "Horaire à confirmer",
     matchCenter: "CENTRE DES MATCHS VOETIQ",
   },
   it: {
@@ -281,6 +287,7 @@ const translations: Record<
     premiumGateTitle: "La Champions League fa parte di VoetIQ Premium",
     premiumGateDescription: "Passa a Premium per vedere e pronosticare le partite di Champions League.",
     back: "Indietro",
+    timeTbd: "Orario da definire",
     matchCenter: "CENTRO PARTITE VOETIQ",
   },
   pt: {
@@ -313,6 +320,7 @@ const translations: Record<
     premiumGateTitle: "A Champions League faz parte do VoetIQ Premium",
     premiumGateDescription: "Adere ao Premium para veres e preveres os jogos da Champions League.",
     back: "Voltar",
+    timeTbd: "Hora a confirmar",
     matchCenter: "CENTRO DE JOGOS VOETIQ",
   },
 };
@@ -1656,15 +1664,17 @@ export default function Wedstrijden() {
                             )}
 
                             <span>
-                              {date.toLocaleTimeString(
-                                locale,
-                                {
-                                  hour:
-                                    "2-digit",
-                                  minute:
-                                    "2-digit",
-                                }
-                              )}
+                              {(selectedCompetition === "EL" ||
+                                selectedCompetition === "ECL") &&
+                              date.toLocaleTimeString(locale, {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }) === "14:00"
+                                ? t("timeTbd")
+                                : date.toLocaleTimeString(locale, {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
                             </span>
                           </div>
                         </div>
