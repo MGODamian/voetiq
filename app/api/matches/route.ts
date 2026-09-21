@@ -1,14 +1,7 @@
 import { NextResponse } from "next/server";
 
 const FOOTBALL_DATA_COMPETITIONS = [
-  "PL",
-  "DED",
-  "PD",
-  "BL1",
-  "SA",
-  "FL1",
-  "PPL",
-  "CL",
+  "PL", "DED", "PD", "BL1", "SA", "FL1", "PPL", "CL",
 ];
 
 const API_FOOTBALL_COMPETITIONS: Record<string, number> = {
@@ -21,10 +14,8 @@ function formatDate(date: Date) {
 
 function getMatchday(round?: string): number | undefined {
   if (!round) return undefined;
-
   const numbers = round.match(/\d+/g);
   if (!numbers?.length) return undefined;
-
   const value = Number(numbers[numbers.length - 1]);
   return Number.isFinite(value) ? value : undefined;
 }
@@ -32,8 +23,7 @@ function getMatchday(round?: string): number | undefined {
 function mapApiFootballStatus(shortStatus?: string) {
   switch (shortStatus) {
     case "NS":
-    case "TBD":
-      return "SCHEDULED";
+    case "TBD": return "SCHEDULED";
     case "1H":
     case "HT":
     case "2H":
@@ -42,18 +32,13 @@ function mapApiFootballStatus(shortStatus?: string) {
     case "P":
     case "SUSP":
     case "INT":
-    case "LIVE":
-      return "IN_PLAY";
+    case "LIVE": return "IN_PLAY";
     case "FT":
     case "AET":
-    case "PEN":
-      return "FINISHED";
-    case "PST":
-      return "POSTPONED";
-    case "CANC":
-      return "CANCELLED";
-    default:
-      return shortStatus || "SCHEDULED";
+    case "PEN": return "FINISHED";
+    case "PST": return "POSTPONED";
+    case "CANC": return "CANCELLED";
+    default: return shortStatus || "SCHEDULED";
   }
 }
 
@@ -82,23 +67,15 @@ async function getApiFootballMatches(
     "&timezone=UTC";
 
   const response = await fetch(url, {
-    headers: {
-      "x-apisports-key": apiKey,
-    },
-    next: {
-      revalidate: 3600,
-    },
+    headers: { "x-apisports-key": apiKey },
+    next: { revalidate: 3600 },
   });
 
   const data = await response.json();
 
   if (!response.ok) {
     return NextResponse.json(
-      {
-        error: "API-Football fout",
-        competition,
-        details: data,
-      },
+      { error: "API-Football fout", competition, details: data },
       { status: response.status }
     );
   }
@@ -110,11 +87,7 @@ async function getApiFootballMatches(
 
     if (hasErrors) {
       return NextResponse.json(
-        {
-          error: "API-Football fout",
-          competition,
-          details: data.errors,
-        },
+        { error: "API-Football fout", competition, details: data.errors },
         { status: 502 }
       );
     }
@@ -125,25 +98,21 @@ async function getApiFootballMatches(
     utcDate: item.fixture.date,
     status: mapApiFootballStatus(item.fixture.status?.short),
     matchday: getMatchday(item.league?.round),
-
     homeTeam: {
       id: item.teams?.home?.id,
       name: item.teams?.home?.name || "Thuisteam",
       crest: item.teams?.home?.logo,
     },
-
     awayTeam: {
       id: item.teams?.away?.id,
       name: item.teams?.away?.name || "Uitteam",
       crest: item.teams?.away?.logo,
     },
-
     competition: {
       id: item.league?.id,
       name: item.league?.name || "UEFA Europa League",
       code: competition,
     },
-
     score: {
       winner:
         item.teams?.home?.winner === true
@@ -166,21 +135,42 @@ async function getApiFootballMatches(
   }));
 
   return NextResponse.json({
-    competition: {
-      code: competition,
-      name: "UEFA Europa League",
-    },
+    competition: { code: competition, name: "UEFA Europa League" },
     matches,
   });
 }
 
-/**
- * Tijdelijke test voor Zafronix Conference League 2026/27.
- * We geven de Zafronix-response bewust vrijwel ongewijzigd terug.
- * Zo kunnen we eerst exact zien welke JSON-vorm hun actuele ECL-data heeft,
- * zonder de bestaande VoetIQ-competities aan te raken.
- */
-async function testZafronixConferenceLeague() {
+function zafronixNumericId(id: unknown, index: number) {
+  const text = String(id ?? "");
+  const number = Number(text.match(/(\d+)$/)?.[1] ?? index + 1);
+  // Separate namespace from the other providers while keeping match_id numeric.
+  return 848000000 + number;
+}
+
+function zafronixStatus(item: any) {
+  if (item.homeScore !== null && item.homeScore !== undefined &&
+      item.awayScore !== null && item.awayScore !== undefined) {
+    return "FINISHED";
+  }
+
+  return "SCHEDULED";
+}
+
+function zafronixWinner(item: any) {
+  if (item.homeScore === null || item.homeScore === undefined ||
+      item.awayScore === null || item.awayScore === undefined) {
+    return null;
+  }
+
+  if (item.homeScore > item.awayScore) return "HOME_TEAM";
+  if (item.awayScore > item.homeScore) return "AWAY_TEAM";
+  return "DRAW";
+}
+
+async function getZafronixConferenceLeagueMatches(
+  dateFrom: string,
+  dateTo: string
+) {
   const apiKey = process.env.ZAFRONIX_API_KEY;
 
   if (!apiKey) {
@@ -190,27 +180,30 @@ async function testZafronixConferenceLeague() {
     );
   }
 
-  const url =
-    "https://api.zafronix.com/uefa/conferenceleague/v1/matches?season=2026";
-
-  const response = await fetch(url, {
-    headers: {
-      "X-API-Key": apiKey,
-      Accept: "application/json",
-    },
-    next: {
-      revalidate: 3600,
-    },
-  });
+  const response = await fetch(
+    "https://api.zafronix.com/uefa/conferenceleague/v1/matches?season=2026",
+    {
+      headers: {
+        "X-API-Key": apiKey,
+        Accept: "application/json",
+      },
+      next: { revalidate: 3600 },
+    }
+  );
 
   const rawText = await response.text();
 
-  let data: unknown;
-
+  let payload: any;
   try {
-    data = JSON.parse(rawText);
+    payload = JSON.parse(rawText);
   } catch {
-    data = rawText;
+    return NextResponse.json(
+      {
+        error: "Zafronix gaf geen geldige JSON terug.",
+        details: rawText,
+      },
+      { status: 502 }
+    );
   }
 
   if (!response.ok) {
@@ -219,18 +212,77 @@ async function testZafronixConferenceLeague() {
         error: "Zafronix fout",
         competition: "ECL",
         status: response.status,
-        details: data,
+        details: payload,
       },
       { status: response.status }
     );
   }
 
+  const sourceMatches = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload)
+      ? payload
+      : [];
+
+  const matches = sourceMatches
+    .filter((item: any) => {
+      if (!item?.date) return false;
+      return item.date >= dateFrom && item.date <= dateTo;
+    })
+    .map((item: any, index: number) => ({
+      id: zafronixNumericId(item.id, index),
+      utcDate: `${item.date}T12:00:00Z`,
+      status: zafronixStatus(item),
+      matchday:
+        typeof item.matchday === "number"
+          ? item.matchday
+          : Number(item.matchday) || undefined,
+      stage: item.stage || "league_phase",
+
+      homeTeam: {
+        id: null,
+        name: item.homeTeam || "Thuisteam",
+        shortName: item.homeTeam || "Thuisteam",
+        tla: null,
+        crest: null,
+      },
+
+      awayTeam: {
+        id: null,
+        name: item.awayTeam || "Uitteam",
+        shortName: item.awayTeam || "Uitteam",
+        tla: null,
+        crest: null,
+      },
+
+      competition: {
+        id: 848,
+        name: "UEFA Conference League",
+        code: "ECL",
+      },
+
+      score: {
+        winner: zafronixWinner(item),
+        duration: "REGULAR",
+        fullTime: {
+          home: item.homeScore ?? null,
+          away: item.awayScore ?? null,
+        },
+        halfTime: {
+          home: null,
+          away: null,
+        },
+      },
+    }));
+
   return NextResponse.json({
-    test: true,
-    provider: "Zafronix",
-    competition: "ECL",
-    season: 2026,
-    data,
+    competition: {
+      id: 848,
+      code: "ECL",
+      name: "UEFA Conference League",
+    },
+    count: matches.length,
+    matches,
   });
 }
 
@@ -251,9 +303,7 @@ async function getFootballDataMatches(
   const response = await fetch(
     `https://api.football-data.org/v4/competitions/${competition}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`,
     {
-      headers: {
-        "X-Auth-Token": token,
-      },
+      headers: { "X-Auth-Token": token },
       cache: "no-store",
     }
   );
@@ -305,29 +355,19 @@ export async function GET(request: Request) {
 
   try {
     if (competition === "ECL") {
-      return await testZafronixConferenceLeague();
+      return await getZafronixConferenceLeagueMatches(dateFrom, dateTo);
     }
 
     if (competition === "EL") {
-      return await getApiFootballMatches(
-        competition,
-        dateFrom,
-        dateTo
-      );
+      return await getApiFootballMatches(competition, dateFrom, dateTo);
     }
 
-    return await getFootballDataMatches(
-      competition,
-      dateFrom,
-      dateTo
-    );
+    return await getFootballDataMatches(competition, dateFrom, dateTo);
   } catch (error) {
     console.error("Matches API error:", error);
 
     return NextResponse.json(
-      {
-        error: "Er ging iets mis bij het ophalen van de wedstrijden.",
-      },
+      { error: "Er ging iets mis bij het ophalen van de wedstrijden." },
       { status: 500 }
     );
   }
