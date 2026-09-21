@@ -159,6 +159,7 @@ type NavbarTranslation = {
   openMenu: string;
   progress: string;
   more: string;
+  admin: string;
 };
 
 const languages: {
@@ -196,6 +197,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     openMenu: "Menu openen",
     progress: "Voortgang",
     more: "Meer",
+    admin: "Beheer",
   },
   en: {
     home: "Home",
@@ -216,6 +218,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     openMenu: "Open menu",
     progress: "Progress",
     more: "More",
+    admin: "Admin",
   },
   de: {
     home: "Startseite",
@@ -236,6 +239,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     openMenu: "Menü öffnen",
     progress: "Fortschritt",
     more: "Mehr",
+    admin: "Verwaltung",
   },
   es: {
     home: "Inicio",
@@ -256,6 +260,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     openMenu: "Abrir menú",
     progress: "Progreso",
     more: "Más",
+    admin: "Administración",
   },
   fr: {
     home: "Accueil",
@@ -276,6 +281,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     openMenu: "Ouvrir le menu",
     progress: "Progression",
     more: "Plus",
+    admin: "Administration",
   },
   it: {
     home: "Home",
@@ -296,6 +302,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     openMenu: "Apri menu",
     progress: "Progressi",
     more: "Altro",
+    admin: "Amministrazione",
   },
   pt: {
     home: "Início",
@@ -316,6 +323,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     openMenu: "Abrir menu",
     progress: "Progresso",
     more: "Mais",
+    admin: "Administração",
   },
 };
 
@@ -327,6 +335,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const [loggedIn, setLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [languageOpen, setLanguageOpen] = useState(false);
   const [language, setLanguage] = useState<LanguageCode>("nl");
@@ -368,6 +377,7 @@ export default function Navbar() {
       setMobileOpen(false);
 
       if (session?.user) {
+        void checkAdminAccess();
         setNotificationUserId(session.user.id);
         void checkPromotion(session.user.id);
         void loadNotifications(session.user.id);
@@ -375,6 +385,7 @@ export default function Navbar() {
       } else {
         setPromotionRankIndex(null);
         setPromotionUserId("");
+        setIsAdmin(false);
         setNotificationUserId("");
         setNotifications([]);
         setReadNotificationIds([]);
@@ -432,6 +443,7 @@ export default function Navbar() {
     setLoggedIn(!!user);
 
     if (user) {
+      void checkAdminAccess();
       setNotificationUserId(user.id);
       await Promise.all([
         checkPromotion(user.id),
@@ -445,6 +457,18 @@ export default function Navbar() {
     if (!notificationUserId) return;
     void loadNotifications(notificationUserId);
   }, [language, notificationUserId]);
+
+  async function checkAdminAccess() {
+    try {
+      const response = await fetch("/api/admin/users", {
+        method: "GET",
+        cache: "no-store",
+      });
+      setIsAdmin(response.ok);
+    } catch {
+      setIsAdmin(false);
+    }
+  }
 
   async function loadNotifications(userId: string) {
     const { data, error } = await supabase
@@ -822,7 +846,8 @@ export default function Navbar() {
                   className={
                     isActive("/dashboard") ||
                     isActive("/mijn-voorspellingen") ||
-                    isActive("/premium")
+                    isActive("/premium") ||
+                    (isAdmin && isActive("/admin"))
                       ? "nav-dropdown-button active"
                       : "nav-dropdown-button"
                   }
@@ -849,6 +874,12 @@ export default function Navbar() {
                       <span>👑</span>
                       <div><strong>{t.premium}</strong></div>
                     </Link>
+                    {isAdmin && (
+                      <Link href="/admin" onClick={() => setMoreOpen(false)}>
+                        <span>🛠️</span>
+                        <div><strong>{t.admin}</strong></div>
+                      </Link>
+                    )}
                     <button
                       type="button"
                       className="dropdown-logout"
@@ -1025,6 +1056,11 @@ export default function Navbar() {
                 <Link href="/premium" onClick={() => setMobileOpen(false)}>
                   👑 {t.premium}
                 </Link>
+                {isAdmin && (
+                  <Link href="/admin" onClick={() => setMobileOpen(false)}>
+                    🛠️ {t.admin}
+                  </Link>
+                )}
               </>
             )}
 
