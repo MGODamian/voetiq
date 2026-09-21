@@ -950,12 +950,12 @@ export default function Wedstrijden() {
           boxShadow: `inset 0 -50px 80px ${activeTheme.glow}`,
           color: "white",
           padding:
-            "48px 20px 44px",
+            "38px 20px 36px",
         }}
       >
         <div
           style={{
-            maxWidth: "1050px",
+            maxWidth: "1180px",
             margin: "0 auto",
           }}
         >
@@ -1031,15 +1031,27 @@ export default function Wedstrijden() {
         </div>
       </section>
 
+      <style jsx global>{`
+        .voetiq-competition-scroll { scrollbar-width: thin; scrollbar-color: ${activeTheme.accent} ${activeTheme.surface}; }
+        .voetiq-competition-scroll::-webkit-scrollbar { height: 7px; }
+        .voetiq-competition-scroll::-webkit-scrollbar-track { background: ${activeTheme.surface}; border-radius: 999px; }
+        .voetiq-competition-scroll::-webkit-scrollbar-thumb { background: ${activeTheme.accent}; border-radius: 999px; }
+        @media (max-width: 760px) {
+          .voetiq-competition-scroll { scrollbar-width: none; }
+          .voetiq-competition-scroll::-webkit-scrollbar { display: none; }
+        }
+      `}</style>
+
       <section
         style={{
-          maxWidth: "1050px",
+          maxWidth: "1180px",
           margin: "0 auto",
           padding:
             "28px 20px 70px",
         }}
       >
         <div
+          className="voetiq-competition-scroll"
           style={{
             background: activeTheme.surface,
             border: `1px solid ${activeTheme.border}`,
@@ -1087,7 +1099,7 @@ export default function Wedstrijden() {
                       borderRadius:
                         "10px",
                       border: active
-                        ? "1px solid rgba(11,143,77,0.18)"
+                        ? `1px solid ${activeTheme.border}`
                         : "1px solid transparent",
                       background:
                         active
@@ -1394,7 +1406,8 @@ export default function Wedstrijden() {
               <div
                 style={{
                   background:
-                    "white",
+                    activeTheme.surface,
+                  border: `1px solid ${activeTheme.border}`,
                   borderRadius:
                     "15px",
                   padding: "10px",
@@ -1439,7 +1452,7 @@ export default function Wedstrijden() {
                   <div
                     style={{
                       color:
-                        "#89958e",
+                        "rgba(255,255,255,0.52)",
                       fontSize:
                         "10px",
                       fontWeight:
@@ -1457,6 +1470,7 @@ export default function Wedstrijden() {
                     style={{
                       fontSize:
                         "20px",
+                      color: "white",
                     }}
                   >
                     {
@@ -1631,7 +1645,7 @@ export default function Wedstrijden() {
                         <div
                           style={{
                             padding:
-                              "23px 22px 21px",
+                              "20px 22px 18px",
                           }}
                         >
                           <div
@@ -1639,7 +1653,7 @@ export default function Wedstrijden() {
                               display:
                                 "grid",
                               gridTemplateColumns:
-                                "minmax(0,1fr) 150px minmax(0,1fr)",
+                                "minmax(0,1fr) 170px minmax(0,1fr)",
                               alignItems:
                                 "center",
                               gap: "18px",
@@ -1855,9 +1869,9 @@ export default function Wedstrijden() {
               padding:
                 "14px 17px",
               background:
-                "#e9faf1",
+                activeTheme.surface,
               border:
-                "1px solid rgba(11,143,77,0.15)",
+                `1px solid ${activeTheme.border}`,
               borderRadius:
                 "12px",
               color: activeTheme.accent,
