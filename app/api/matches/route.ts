@@ -143,28 +143,47 @@ async function getApiFootballMatches(
 function zafronixNumericId(id: unknown, index: number) {
   const text = String(id ?? "");
   const number = Number(text.match(/(\d+)$/)?.[1] ?? index + 1);
-  // Separate namespace from the other providers while keeping match_id numeric.
   return 848000000 + number;
 }
 
 function zafronixStatus(item: any) {
-  if (item.homeScore !== null && item.homeScore !== undefined &&
-      item.awayScore !== null && item.awayScore !== undefined) {
+  if (
+    item.homeScore !== null &&
+    item.homeScore !== undefined &&
+    item.awayScore !== null &&
+    item.awayScore !== undefined
+  ) {
     return "FINISHED";
   }
-
   return "SCHEDULED";
 }
 
 function zafronixWinner(item: any) {
-  if (item.homeScore === null || item.homeScore === undefined ||
-      item.awayScore === null || item.awayScore === undefined) {
+  if (
+    item.homeScore === null ||
+    item.homeScore === undefined ||
+    item.awayScore === null ||
+    item.awayScore === undefined
+  ) {
     return null;
   }
 
   if (item.homeScore > item.awayScore) return "HOME_TEAM";
   if (item.awayScore > item.homeScore) return "AWAY_TEAM";
   return "DRAW";
+}
+
+function pickKickoff(item: any) {
+  return (
+    item.kickoff ??
+    item.kickoffUtc ??
+    item.kickoffUTC ??
+    item.kickoffTime ??
+    item.time ??
+    item.startTime ??
+    item.start_time ??
+    null
+  );
 }
 
 async function getZafronixConferenceLeagueMatches(
@@ -224,56 +243,64 @@ async function getZafronixConferenceLeagueMatches(
       ? payload
       : [];
 
-  const matches = sourceMatches
-    .filter((item: any) => {
-      if (!item?.date) return false;
-      return item.date >= dateFrom && item.date <= dateTo;
-    })
-    .map((item: any, index: number) => ({
-      id: zafronixNumericId(item.id, index),
-      utcDate: `${item.date}T12:00:00Z`,
-      status: zafronixStatus(item),
-      matchday:
-        typeof item.matchday === "number"
-          ? item.matchday
-          : Number(item.matchday) || undefined,
-      stage: item.stage || "league_phase",
+  const filteredSourceMatches = sourceMatches.filter((item: any) => {
+    if (!item?.date) return false;
+    return item.date >= dateFrom && item.date <= dateTo;
+  });
 
-      homeTeam: {
-        id: null,
-        name: item.homeTeam || "Thuisteam",
-        shortName: item.homeTeam || "Thuisteam",
-        tla: null,
-        crest: null,
-      },
+  const matches = filteredSourceMatches.map((item: any, index: number) => ({
+    id: zafronixNumericId(item.id, index),
 
-      awayTeam: {
-        id: null,
-        name: item.awayTeam || "Uitteam",
-        shortName: item.awayTeam || "Uitteam",
-        tla: null,
-        crest: null,
-      },
+    // Voorlopig blijft de veilige placeholder bestaan totdat we exact weten
+    // hoe Zafronix de echte kickoff terugstuurt.
+    utcDate: `${item.date}T12:00:00Z`,
 
-      competition: {
-        id: 848,
-        name: "UEFA Conference League",
-        code: "ECL",
-      },
+    status: zafronixStatus(item),
+    matchday:
+      typeof item.matchday === "number"
+        ? item.matchday
+        : Number(item.matchday) || undefined,
+    stage: item.stage || "league_phase",
 
-      score: {
-        winner: zafronixWinner(item),
-        duration: "REGULAR",
-        fullTime: {
-          home: item.homeScore ?? null,
-          away: item.awayScore ?? null,
-        },
-        halfTime: {
-          home: null,
-          away: null,
-        },
+    homeTeam: {
+      id: null,
+      name: item.homeTeam || "Thuisteam",
+      shortName: item.homeTeam || "Thuisteam",
+      tla: null,
+      crest: null,
+    },
+
+    awayTeam: {
+      id: null,
+      name: item.awayTeam || "Uitteam",
+      shortName: item.awayTeam || "Uitteam",
+      tla: null,
+      crest: null,
+    },
+
+    competition: {
+      id: 848,
+      name: "UEFA Conference League",
+      code: "ECL",
+    },
+
+    score: {
+      winner: zafronixWinner(item),
+      duration: "REGULAR",
+      fullTime: {
+        home: item.homeScore ?? null,
+        away: item.awayScore ?? null,
       },
-    }));
+      halfTime: {
+        home: null,
+        away: null,
+      },
+    },
+  }));
+
+  // Tijdelijke debug-info: geen API-key of andere geheime gegevens.
+  // Hiermee zien we exact welke velden Zafronix voor de eerste ECL-match levert.
+  const firstMatch = filteredSourceMatches[0] ?? null;
 
   return NextResponse.json({
     competition: {
@@ -282,6 +309,25 @@ async function getZafronixConferenceLeagueMatches(
       name: "UEFA Conference League",
     },
     count: matches.length,
+    kickoffDebug: firstMatch
+      ? {
+          availableFields: Object.keys(firstMatch),
+          detectedKickoff: pickKickoff(firstMatch),
+          sample: {
+            id: firstMatch.id ?? null,
+            date: firstMatch.date ?? null,
+            homeTeam: firstMatch.homeTeam ?? null,
+            awayTeam: firstMatch.awayTeam ?? null,
+            kickoff: firstMatch.kickoff ?? null,
+            kickoffUtc: firstMatch.kickoffUtc ?? null,
+            kickoffUTC: firstMatch.kickoffUTC ?? null,
+            kickoffTime: firstMatch.kickoffTime ?? null,
+            time: firstMatch.time ?? null,
+            startTime: firstMatch.startTime ?? null,
+            start_time: firstMatch.start_time ?? null,
+          },
+        }
+      : null,
     matches,
   });
 }
