@@ -426,9 +426,11 @@ export default function PremiumPage() {
         .plan-card,
         .features-card,
         .fair-card {
-          border: 1px solid rgba(46, 230, 129, 0.15);
-          background: linear-gradient(145deg, #071e13, #05170f);
-          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
+          border: 1px solid rgba(46, 230, 129, 0.18);
+          background: linear-gradient(145deg, #0a2619 0%, #04150e 100%);
+          box-shadow:
+            0 26px 72px rgba(0, 0, 0, 0.28),
+            inset 0 1px 0 rgba(255, 255, 255, 0.025);
         }
 
         .plan-card,
@@ -439,9 +441,11 @@ export default function PremiumPage() {
 
         .active-plan {
           border-color: rgba(46, 230, 129, 0.5);
+          background: linear-gradient(145deg, #0b2c1d 0%, #04150e 100%);
           box-shadow:
-            0 24px 70px rgba(0, 0, 0, 0.24),
-            0 0 40px rgba(46, 230, 129, 0.08);
+            0 28px 76px rgba(0, 0, 0, 0.3),
+            0 0 44px rgba(46, 230, 129, 0.09),
+            inset 0 1px 0 rgba(255, 255, 255, 0.03);
         }
 
         .plan-top {
@@ -468,8 +472,11 @@ export default function PremiumPage() {
         }
 
         .price strong {
-          font-size: 47px;
-          letter-spacing: -2px;
+          font-size: 52px;
+          line-height: 0.98;
+          letter-spacing: -2.4px;
+          color: #f7fff9;
+          text-shadow: 0 0 28px rgba(46, 230, 129, 0.08);
         }
 
         .price span,
@@ -487,9 +494,10 @@ export default function PremiumPage() {
           width: 100%;
           border: 0;
           border-radius: 11px;
-          background: #2ee681;
+          background: linear-gradient(135deg, #65efa0 0%, #2ee681 100%);
           color: #052c1b;
           padding: 14px;
+          box-shadow: 0 10px 26px rgba(46, 230, 129, 0.16);
           font-size: 14px;
           font-weight: 950;
           cursor: pointer;
@@ -501,7 +509,7 @@ export default function PremiumPage() {
         }
 
         .active-button {
-          background: #45ec8e;
+          background: linear-gradient(135deg, #75f0a8 0%, #45ec8e 100%);
           cursor: default;
         }
 
@@ -520,6 +528,7 @@ export default function PremiumPage() {
         .features-card h2 {
           margin: 0 0 21px;
           font-size: 21px;
+          letter-spacing: -0.25px;
         }
 
         .features {
@@ -532,9 +541,10 @@ export default function PremiumPage() {
           grid-template-columns: 28px 1fr;
           gap: 9px;
           align-items: center;
-          padding: 11px;
+          padding: 11px 12px;
+          border: 1px solid rgba(255, 255, 255, 0.025);
           border-radius: 11px;
-          background: rgba(255, 255, 255, 0.025);
+          background: linear-gradient(90deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.018));
         }
 
         .feature span {
@@ -543,8 +553,9 @@ export default function PremiumPage() {
           display: grid;
           place-items: center;
           border-radius: 50%;
-          background: rgba(46, 230, 129, 0.12);
-          color: #55ed98;
+          background: rgba(46, 230, 129, 0.13);
+          border: 1px solid rgba(46, 230, 129, 0.1);
+          color: #65f0a1;
           font-weight: 950;
         }
 
@@ -560,17 +571,30 @@ export default function PremiumPage() {
           margin: 18px auto 0;
           border-radius: 16px;
           padding: 18px 22px;
+          background: linear-gradient(135deg, #08251a 0%, #04170f 100%);
+          box-shadow:
+            0 16px 44px rgba(0, 0, 0, 0.2),
+            inset 0 1px 0 rgba(255, 255, 255, 0.02);
           display: flex;
           align-items: center;
           gap: 14px;
         }
 
         .fair-card > div:first-child {
-          font-size: 27px;
+          width: 42px;
+          height: 42px;
+          flex: 0 0 42px;
+          display: grid;
+          place-items: center;
+          border-radius: 13px;
+          border: 1px solid rgba(46, 230, 129, 0.1);
+          background: rgba(46, 230, 129, 0.06);
+          font-size: 23px;
         }
 
         .fair-card strong {
-          color: #5bef9b;
+          color: #65f0a1;
+          font-size: 14px;
         }
 
         .fair-card p {
