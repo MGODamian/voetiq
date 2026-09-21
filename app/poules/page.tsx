@@ -128,6 +128,8 @@ const competitions = [
   { code: "FL1", name: "Ligue 1", flag: "🇫🇷" },
   { code: "PPL", name: "Primeira Liga", flag: "🇵🇹" },
   { code: "CL", name: "Champions League", flag: "🏆" },
+  { code: "EL", name: "Europa League", flag: "🏆" },
+  { code: "ECL", name: "Conference League", flag: "🏆" },
 ];
 
 export default function PoulesPage() {
