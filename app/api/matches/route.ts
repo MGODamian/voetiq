@@ -173,17 +173,98 @@ function zafronixWinner(item: any) {
   return "DRAW";
 }
 
-function pickKickoff(item: any) {
-  return (
-    item.kickoff ??
-    item.kickoffUtc ??
-    item.kickoffUTC ??
-    item.kickoffTime ??
-    item.time ??
-    item.startTime ??
-    item.start_time ??
-    null
-  );
+/**
+ * Officiële UEFA-aftraptijden voor de Conference League 2026/27.
+ *
+ * UEFA vermeldt 21:00 CET als standaardtijd en alleen de afwijkende
+ * tijden hoeven hier te worden vastgelegd. De Zafronix-feed levert
+ * namelijk alleen de datum en teams, niet de kickoff-tijd.
+ *
+ * Key = YYYY-MM-DD|thuisteam zoals aangeleverd door Zafronix.
+ */
+const UEFA_CONFERENCE_SPECIAL_KICKOFFS: Record<string, string> = {
+  // Speeldag 1 — 15 oktober 2026
+  "2026-10-15|Lugano": "18:45",
+  "2026-10-15|Hajduk Split": "18:45",
+  "2026-10-15|Gent": "18:45",
+  "2026-10-15|Egnatia": "18:45",
+  "2026-10-15|KuPS": "18:45",
+  "2026-10-15|Mjällby AIF": "18:45",
+  "2026-10-15|Panathinaikos": "18:45",
+  "2026-10-15|CSKA Sofia": "18:45",
+  "2026-10-15|Riga": "18:45",
+  "2026-10-15|Universitatea Craiova": "18:45",
+
+  // Speeldag 2 — 22 oktober 2026
+  "2026-10-22|Kairat": "16:30",
+  "2026-10-22|Iberia 1999": "18:45",
+  "2026-10-22|Nordsjælland": "18:45",
+  "2026-10-22|Red Star Belgrade": "18:45",
+  "2026-10-22|Jablonec": "18:45",
+  "2026-10-22|Kauno Žalgiris": "18:45",
+  "2026-10-22|Getafe": "18:45",
+  "2026-10-22|Inter Escaldes": "18:45",
+  "2026-10-22|Pafos": "18:45",
+  "2026-10-22|Trabzonspor": "18:45",
+
+  // Speeldag 3 — 5 november 2026
+  "2026-11-05|AGF": "18:45",
+  "2026-11-05|Atalanta": "18:45",
+  "2026-11-05|Midtjylland": "18:45",
+  "2026-11-05|Thun": "18:45",
+  "2026-11-05|Red Star Belgrade": "18:45",
+  "2026-11-05|KuPS": "18:45",
+  "2026-11-05|Lincoln Red Imps": "18:45",
+  "2026-11-05|Mjällby AIF": "18:45",
+  "2026-11-05|Trabzonspor": "18:45",
+
+  // Speeldag 4 — 26 november 2026
+  "2026-11-26|Kairat": "16:30",
+  "2026-11-26|Ajax": "18:45",
+  "2026-11-26|Brighton & Hove Albion": "18:45",
+  "2026-11-26|Iberia 1999": "18:45",
+  "2026-11-26|Jablonec": "18:45",
+  "2026-11-26|Kauno Žalgiris": "18:45",
+  "2026-11-26|Heart of Midlothian": "18:45",
+  "2026-11-26|Egnatia": "18:45",
+  "2026-11-26|Pafos": "18:45",
+  "2026-11-26|Brann": "18:45",
+
+  // Speeldag 5 — 10 december 2026
+  "2026-12-10|Kairat": "16:30",
+  "2026-12-10|Copenhagen": "18:45",
+  "2026-12-10|Iberia 1999": "18:45",
+  "2026-12-10|Getafe": "18:45",
+  "2026-12-10|KuPS": "18:45",
+  "2026-12-10|Lincoln Red Imps": "18:45",
+  "2026-12-10|Riga": "18:45",
+  "2026-12-10|SC Freiburg": "18:45",
+  "2026-12-10|Brann": "18:45",
+  "2026-12-10|Trabzonspor": "18:45",
+};
+
+function getUefaConferenceKickoff(
+  date: string,
+  homeTeam: string
+): string {
+  return UEFA_CONFERENCE_SPECIAL_KICKOFFS[
+    `${date}|${homeTeam}`
+  ] || "21:00";
+}
+
+function getUefaConferenceUtcDate(
+  date: string,
+  homeTeam: string
+): string {
+  const kickoff = getUefaConferenceKickoff(date, homeTeam);
+  // Alle UEFA-tijden hierboven zijn CET (UTC+1).
+  const [hours, minutes] = kickoff.split(":").map(Number);
+
+  const utcHours = hours - 1;
+
+  return `${date}T${String(utcHours).padStart(2, "0")}:${String(
+    minutes
+  ).padStart(2, "0")}:00Z`;
 }
 
 async function getZafronixConferenceLeagueMatches(
@@ -251,9 +332,12 @@ async function getZafronixConferenceLeagueMatches(
   const matches = filteredSourceMatches.map((item: any, index: number) => ({
     id: zafronixNumericId(item.id, index),
 
-    // Voorlopig blijft de veilige placeholder bestaan totdat we exact weten
-    // hoe Zafronix de echte kickoff terugstuurt.
-    utcDate: `${item.date}T12:00:00Z`,
+    // Zafronix levert geen kickoff-tijd. Gebruik daarom de officieel
+    // door UEFA gepubliceerde Conference League-tijd.
+    utcDate: getUefaConferenceUtcDate(
+      item.date,
+      item.homeTeam || "Thuisteam"
+    ),
 
     status: zafronixStatus(item),
     matchday:
@@ -298,10 +382,6 @@ async function getZafronixConferenceLeagueMatches(
     },
   }));
 
-  // Tijdelijke debug-info: geen API-key of andere geheime gegevens.
-  // Hiermee zien we exact welke velden Zafronix voor de eerste ECL-match levert.
-  const firstMatch = filteredSourceMatches[0] ?? null;
-
   return NextResponse.json({
     competition: {
       id: 848,
@@ -309,25 +389,6 @@ async function getZafronixConferenceLeagueMatches(
       name: "UEFA Conference League",
     },
     count: matches.length,
-    kickoffDebug: firstMatch
-      ? {
-          availableFields: Object.keys(firstMatch),
-          detectedKickoff: pickKickoff(firstMatch),
-          sample: {
-            id: firstMatch.id ?? null,
-            date: firstMatch.date ?? null,
-            homeTeam: firstMatch.homeTeam ?? null,
-            awayTeam: firstMatch.awayTeam ?? null,
-            kickoff: firstMatch.kickoff ?? null,
-            kickoffUtc: firstMatch.kickoffUtc ?? null,
-            kickoffUTC: firstMatch.kickoffUTC ?? null,
-            kickoffTime: firstMatch.kickoffTime ?? null,
-            time: firstMatch.time ?? null,
-            startTime: firstMatch.startTime ?? null,
-            start_time: firstMatch.start_time ?? null,
-          },
-        }
-      : null,
     matches,
   });
 }
