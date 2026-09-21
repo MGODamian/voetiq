@@ -681,6 +681,10 @@ export default function Navbar() {
     });
   }
 
+  const visibleNotifications = notifications.filter(
+    (item) => !readNotificationIds.includes(item.id)
+  );
+
   async function checkPromotion(userId: string) {
     const [{ data: profile }, { data: predictionRows }] = await Promise.all([
       supabase
@@ -921,9 +925,9 @@ export default function Navbar() {
                     aria-expanded={notificationsOpen}
                   >
                     <span>🔔</span>
-                    {notifications.filter((item) => !readNotificationIds.includes(item.id)).length > 0 && (
+                    {visibleNotifications.length > 0 && (
                       <span className="notification-count">
-                        {Math.min(9, notifications.filter((item) => !readNotificationIds.includes(item.id)).length)}
+                        {Math.min(9, visibleNotifications.length)}
                       </span>
                     )}
                   </button>
@@ -932,17 +936,17 @@ export default function Navbar() {
                     <div className="notification-dropdown">
                       <div className="notification-header">
                         <strong>{notificationCopy[language].title}</strong>
-                        {notifications.length > 0 && (
+                        {visibleNotifications.length > 0 && (
                           <button type="button" onClick={markAllNotificationsRead}>
                             {notificationCopy[language].markRead}
                           </button>
                         )}
                       </div>
-                      {notifications.length === 0 ? (
+                      {visibleNotifications.length === 0 ? (
                         <div className="notification-empty">{notificationCopy[language].empty}</div>
                       ) : (
                         <div className="notification-list">
-                          {notifications.map((item) => (
+                          {visibleNotifications.map((item) => (
                             <Link
                               key={item.id}
                               href={item.href}
@@ -1040,8 +1044,8 @@ export default function Navbar() {
                 }}
               >
                 🔔 {notificationCopy[language].title}
-                {notifications.filter((item) => !readNotificationIds.includes(item.id)).length > 0
-                  ? ` (${notifications.filter((item) => !readNotificationIds.includes(item.id)).length})`
+                {visibleNotifications.length > 0
+                  ? ` (${visibleNotifications.length})`
                   : ""}
               </button>
             )}
@@ -1110,7 +1114,7 @@ export default function Navbar() {
           <div className="notification-header">
             <strong>{notificationCopy[language].title}</strong>
             <div className="mobile-notification-actions">
-              {notifications.length > 0 && (
+              {visibleNotifications.length > 0 && (
                 <button type="button" onClick={markAllNotificationsRead}>
                   {notificationCopy[language].markRead}
                 </button>
@@ -1118,11 +1122,11 @@ export default function Navbar() {
               <button type="button" onClick={() => setNotificationsOpen(false)}>✕</button>
             </div>
           </div>
-          {notifications.length === 0 ? (
+          {visibleNotifications.length === 0 ? (
             <div className="notification-empty">{notificationCopy[language].empty}</div>
           ) : (
             <div className="notification-list">
-              {notifications.map((item) => (
+              {visibleNotifications.map((item) => (
                 <Link
                   key={`mobile-${item.id}`}
                   href={item.href}
