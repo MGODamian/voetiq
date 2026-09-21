@@ -21,6 +21,8 @@ export async function GET(request: Request) {
     "SA",
     "FL1",
     "PPL",
+    "EL",
+    "ECL",
     "CL",
   ];
 
@@ -31,12 +33,17 @@ export async function GET(request: Request) {
     );
   }
 
+  // VoetIQ gebruikt intern ECL voor de Conference League.
+  // football-data.org gebruikt hiervoor UCL.
+  const footballDataCompetition =
+    competition === "ECL" ? "UCL" : competition;
+
   const today = new Date();
 
-  const previousMonth = new Date();
+  const previousMonth = new Date(today);
   previousMonth.setDate(today.getDate() - 30);
 
-  const nextMonth = new Date();
+  const nextMonth = new Date(today);
   nextMonth.setDate(today.getDate() + 30);
 
   const dateFrom = previousMonth.toISOString().split("T")[0];
@@ -44,7 +51,7 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(
-      `https://api.football-data.org/v4/competitions/${competition}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`,
+      `https://api.football-data.org/v4/competitions/${footballDataCompetition}/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`,
       {
         headers: {
           "X-Auth-Token": token,
@@ -56,9 +63,17 @@ export async function GET(request: Request) {
     if (!response.ok) {
       const errorText = await response.text();
 
+      console.error(
+        `Football-data fout voor ${competition} (${footballDataCompetition}):`,
+        response.status,
+        errorText
+      );
+
       return NextResponse.json(
         {
           error: "Football-data API fout",
+          competition,
+          footballDataCompetition,
           details: errorText,
         },
         { status: response.status }
@@ -69,7 +84,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json(data);
   } catch (error) {
-    console.error(error);
+    console.error(
+      `Fout bij ophalen van ${competition}:`,
+      error
+    );
 
     return NextResponse.json(
       {
