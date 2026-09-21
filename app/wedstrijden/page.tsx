@@ -479,6 +479,53 @@ const competitionThemes: Record<
   },
 };
 
+
+const ECL_KICKOFFS_2026_10_15_UTC: Record<string, string> = {
+  "Lugano|Red Star Belgrade": "2026-10-15T16:45:00Z",
+  "Hajduk Split|Ajax": "2026-10-15T16:45:00Z",
+  "Gent|AGF": "2026-10-15T16:45:00Z",
+  "Egnatia|Midtjylland": "2026-10-15T16:45:00Z",
+  "KuPS|Trabzonspor": "2026-10-15T16:45:00Z",
+  "Mjällby AIF|Inter Club d'Escaldes": "2026-10-15T16:45:00Z",
+  "Panathinaikos|Borac Banja Luka": "2026-10-15T16:45:00Z",
+  "CSKA Sofia|Monaco": "2026-10-15T16:45:00Z",
+  "Riga|Kairat": "2026-10-15T16:45:00Z",
+  "Universitatea Craiova|Getafe": "2026-10-15T16:45:00Z",
+  "Atalanta|Pafos": "2026-10-15T19:00:00Z",
+  "Brighton & Hove Albion|Kauno Žalgiris": "2026-10-15T19:00:00Z",
+  "Copenhagen|Braga": "2026-10-15T19:00:00Z",
+  "Twente|Thun": "2026-10-15T19:00:00Z",
+  "Heart of Midlothian|Nordsjælland": "2026-10-15T19:00:00Z",
+  "Sint-Truiden|Iberia 1999": "2026-10-15T19:00:00Z",
+  "SC Freiburg|Jablonec": "2026-10-15T19:00:00Z",
+  "Brann|Lincoln Red Imps": "2026-10-15T19:00:00Z",
+};
+
+function getEffectiveMatchDate(match: Match, competitionCode: string): Date {
+  if (competitionCode === "ECL") {
+    const kickoffKey = `${match.homeTeam.name}|${match.awayTeam.name}`;
+    const scheduledKickoff = ECL_KICKOFFS_2026_10_15_UTC[kickoffKey];
+
+    if (scheduledKickoff) {
+      return new Date(scheduledKickoff);
+    }
+  }
+
+  return new Date(match.utcDate);
+}
+
+function getUserTimezone(): string {
+  if (typeof Intl !== "undefined") {
+    const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (browserTimezone) {
+      return browserTimezone;
+    }
+  }
+
+  return "Europe/Amsterdam";
+}
+
 export default function Wedstrijden() {
   const router = useRouter();
 
@@ -504,6 +551,7 @@ export default function Wedstrijden() {
   const [language, setLanguage] = useState<LanguageCode>("nl");
   const [isPremium, setIsPremium] = useState(false);
   const [premiumLoading, setPremiumLoading] = useState(true);
+  const [timezone, setTimezone] = useState("Europe/Amsterdam");
 
   const [selectedMatchday, setSelectedMatchday] =
     useState<number | null>(null);
@@ -515,6 +563,30 @@ export default function Wedstrijden() {
 
     setLanguage(initialLanguage);
     document.documentElement.lang = initialLanguage;
+
+    const fallbackTimezone = getUserTimezone();
+    setTimezone(fallbackTimezone);
+
+    async function loadRegisteredTimezone() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        const registeredTimezone = user?.user_metadata?.timezone;
+
+        if (
+          typeof registeredTimezone === "string" &&
+          registeredTimezone.trim() !== ""
+        ) {
+          setTimezone(registeredTimezone);
+        }
+      } catch (error) {
+        console.error("Kon geregistreerde tijdzone niet laden:", error);
+      }
+    }
+
+    loadRegisteredTimezone();
 
     function handleLanguageChange(event: Event) {
       const customEvent = event as CustomEvent<{ language?: string }>;
@@ -1561,10 +1633,10 @@ export default function Wedstrijden() {
                         away: "",
                       };
 
-                    const date =
-                      new Date(
-                        match.utcDate
-                      );
+                    const date = getEffectiveMatchDate(
+                      match,
+                      selectedCompetition
+                    );
 
                     const isSaved =
                       savedMatchIds.has(
@@ -1630,11 +1702,10 @@ export default function Wedstrijden() {
                             {date.toLocaleDateString(
                               locale,
                               {
-                                weekday:
-                                  "short",
+                                timeZone: timezone,
+                                weekday: "short",
                                 day: "numeric",
-                                month:
-                                  "short",
+                                month: "short",
                               }
                             )}
                           </span>
@@ -1664,17 +1735,12 @@ export default function Wedstrijden() {
                             )}
 
                             <span>
-                              {(selectedCompetition === "EL" ||
-                                selectedCompetition === "ECL") &&
-                              date.toLocaleTimeString(locale, {
+                              {date.toLocaleTimeString(locale, {
+                                timeZone: timezone,
                                 hour: "2-digit",
                                 minute: "2-digit",
-                              }) === "14:00"
-                                ? t("timeTbd")
-                                : date.toLocaleTimeString(locale, {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  })}
+                                hour12: false,
+                              })}
                             </span>
                           </div>
                         </div>
