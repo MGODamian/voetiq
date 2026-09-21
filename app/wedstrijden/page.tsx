@@ -1089,72 +1089,77 @@ export default function Wedstrijden() {
           <div
             style={{
               display: "flex",
+              flexDirection: "column",
               gap: "6px",
-              minWidth:
-                "max-content",
+              minWidth: "max-content",
             }}
           >
-            {competitions.map(
-              (competition) => {
-                const active =
-                  selectedCompetition ===
-                  competition.code;
+            {[
+              competitions.filter((competition) =>
+                ["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL"].includes(
+                  competition.code
+                )
+              ),
+              competitions.filter((competition) =>
+                ["EL", "ECL", "CL"].includes(competition.code)
+              ),
+            ].map((competitionRow, rowIndex) => (
+              <div
+                key={rowIndex}
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  minWidth: "max-content",
+                }}
+              >
+                {competitionRow.map((competition) => {
+                  const active =
+                    selectedCompetition === competition.code;
 
-                return (
-                  <button
-                    key={
-                      competition.code
-                    }
-                    onClick={() =>
-                      changeCompetition(
-                        competition.code
-                      )
-                    }
-                    style={{
-                      display:
-                        "flex",
-                      alignItems:
-                        "center",
-                      gap: "7px",
-                      padding:
-                        "10px 13px",
-                      borderRadius:
-                        "10px",
-                      border: active
-                        ? `1px solid ${activeTheme.border}`
-                        : "1px solid transparent",
-                      background:
-                         active
-                           ? activeTheme.surfaceSoft
-                           : "transparent",
-                       color: active
-                         ? activeTheme.accent
-                         : "rgba(255,255,255,0.68)",
-                      fontSize:
-                        "13px",
-                      fontWeight:
-                        active
-                          ? 800
-                          : 600,
-                      cursor:
-                        "pointer",
-                      whiteSpace:
-                        "nowrap",
-                    }}
-                  >
-                    <span>
-                      {
-                        competition.flag
-                      }
-                    </span>
-
-                    {
-                      competition.name
-                    }
-                  </button>
-                );
-              }
-            )}
+                  return (
+                    <button
+                      key={competition.code}
+                      onClick={() => changeCompetition(competition.code)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "7px",
+                        padding: "10px 13px",
+                        borderRadius: "10px",
+                        border: active
+                          ? `1px solid ${activeTheme.border}`
+                          : "1px solid transparent",
+                        background: active
+                          ? activeTheme.surfaceSoft
+                          : "transparent",
+                        color: active
+                          ? activeTheme.accent
+                          : "rgba(255,255,255,0.68)",
+                        fontSize: "13px",
+                        fontWeight: active ? 800 : 600,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <span>{competition.flag}</span>
+                      {competition.name}
+                      {competition.code === "CL" &&
+                        !premiumLoading &&
+                        !isPremium && (
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              opacity: 0.9,
+                            }}
+                          >
+                            🔒
+                          </span>
+                        )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
 
