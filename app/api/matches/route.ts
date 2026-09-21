@@ -384,6 +384,102 @@ async function getZafronixConferenceLeagueMatches(
   });
 }
 
+
+/**
+ * UEFA Europa League 2026/27.
+ * UEFA publiceert alle tijden als CET: standaard 21:00,
+ * behalve de expliciet vermelde 18:45-wedstrijden.
+ */
+const UEFA_EUROPA_SPECIAL_KICKOFFS: Record<string, string> = {
+  // Speeldag 1
+  "2026-09-16|Ararat-Armenia": "18:45",
+  "2026-09-16|Omonia": "18:45",
+  "2026-09-17|OFI Crete": "18:45",
+  "2026-09-17|Levski Sofia": "18:45",
+
+  // Speeldag 2
+  "2026-10-15|Sparta Praha": "18:45",
+  "2026-10-15|AZ Alkmaar": "18:45",
+  "2026-10-15|Salzburg": "18:45",
+  "2026-10-15|Lech Poznań": "18:45",
+  "2026-10-15|Celje": "18:45",
+  "2026-10-15|Lyon": "18:45",
+  "2026-10-15|Union SG": "18:45",
+  "2026-10-15|Torreense": "18:45",
+
+  // Speeldag 3
+  "2026-10-22|Ararat-Armenia": "18:45",
+  "2026-10-22|Ferencváros": "18:45",
+  "2026-10-22|GNK Dinamo": "18:45",
+  "2026-10-22|Juventus": "18:45",
+  "2026-10-22|Lech Poznań": "18:45",
+  "2026-10-22|OFI Crete": "18:45",
+  "2026-10-22|Union SG": "18:45",
+  "2026-10-22|Sturm Graz": "18:45",
+
+  // Speeldag 4
+  "2026-11-05|Milan": "18:45",
+  "2026-11-05|Sparta Praha": "18:45",
+  "2026-11-05|Crystal Palace": "18:45",
+  "2026-11-05|Lillestrøm": "18:45",
+  "2026-11-05|N.E.C. Nijmegen": "18:45",
+  "2026-11-05|N.E.C.": "18:45",
+  "2026-11-05|Levski Sofia": "18:45",
+  "2026-11-05|Real Sociedad": "18:45",
+  "2026-11-05|Anderlecht": "18:45",
+  "2026-11-05|Rennes": "18:45",
+
+  // Speeldag 5
+  "2026-11-26|Viktoria Plzeň": "18:45",
+  "2026-11-26|Beşiktaş": "18:45",
+  "2026-11-26|Celta": "18:45",
+  "2026-11-26|Olympiacos": "18:45",
+  "2026-11-26|Salzburg": "18:45",
+
+  // Speeldag 6
+  "2026-12-10|Anderlecht": "18:45",
+  "2026-12-10|Ararat-Armenia": "18:45",
+  "2026-12-10|AZ Alkmaar": "18:45",
+  "2026-12-10|Celta": "18:45",
+  "2026-12-10|Jagiellonia": "18:45",
+  "2026-12-10|Omonia": "18:45",
+  "2026-12-10|Rennes": "18:45",
+
+  // Speeldag 7
+  "2027-01-21|Beşiktaş": "18:45",
+  "2027-01-21|Ararat-Armenia": "18:45",
+  "2027-01-21|Ferencváros": "18:45",
+  "2027-01-21|Jagiellonia": "18:45",
+  "2027-01-21|Lillestrøm": "18:45",
+  "2027-01-21|N.E.C. Nijmegen": "18:45",
+  "2027-01-21|N.E.C.": "18:45",
+  "2027-01-21|Olympiacos": "18:45",
+  "2027-01-21|Real Sociedad": "18:45",
+  "2027-01-21|Sturm Graz": "18:45",
+};
+
+function getUefaEuropaKickoff(date: string, homeTeam: string): string {
+  return UEFA_EUROPA_SPECIAL_KICKOFFS[`${date}|${homeTeam}`] || "21:00";
+}
+
+function getUefaEuropaUtcDate(date: string, homeTeam: string): string {
+  const kickoff = getUefaEuropaKickoff(date, homeTeam);
+  const [hours, minutes] = kickoff.split(":").map(Number);
+  const offset = getAmsterdamUtcOffset(date);
+
+  let utcHours = hours - offset;
+  let utcDate = date;
+
+  if (utcHours < 0) {
+    utcHours += 24;
+    const previousDay = new Date(`${date}T12:00:00Z`);
+    previousDay.setUTCDate(previousDay.getUTCDate() - 1);
+    utcDate = previousDay.toISOString().split("T")[0];
+  }
+
+  return `${utcDate}T${String(utcHours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:00Z`;
+}
+
 async function getZafronixEuropaLeagueMatches(
   dateFrom: string,
   dateTo: string
@@ -447,17 +543,15 @@ async function getZafronixEuropaLeagueMatches(
     const suppliedDateTime =
       item.utcDate || item.kickoffUtc || item.kickoff || item.startTime || null;
 
-    let utcDate: string;
-
-    if (typeof suppliedDateTime === "string" && suppliedDateTime.includes("T")) {
-      utcDate = suppliedDateTime;
-    } else {
-      // Zafronix geeft bij sommige toekomstige fixtures alleen de speeldatum.
-      // Gebruik dan de UEFA-standaardtijd van 21:00 Nederlandse lokale tijd.
-      const offset = getAmsterdamUtcOffset(item.date);
-      const utcHour = 21 - offset;
-      utcDate = `${item.date}T${String(utcHour).padStart(2, "0")}:00:00Z`;
-    }
+    // Gebruik een echte volledige kickoff van Zafronix als die beschikbaar is.
+    // Anders gebruiken we de door UEFA gepubliceerde Europa League-tijd.
+    const utcDate =
+      typeof suppliedDateTime === "string" && suppliedDateTime.includes("T")
+        ? suppliedDateTime
+        : getUefaEuropaUtcDate(
+            item.date,
+            item.homeTeam || "Thuisteam"
+          );
 
     return {
       id: zafronixNumericId("EL", item.id, index),
