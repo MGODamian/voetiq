@@ -28,6 +28,12 @@ const copy: Record<
     dailyTitle: string;
     dailyText: string;
     dailyButton: string;
+    backHome: string;
+    pillGames: string;
+    pillFast: string;
+    pillBest: string;
+    choose: string;
+    sectionIntro: string;
     games: Game[];
   }
 > = {
@@ -44,6 +50,12 @@ const copy: Record<
     dailyText:
       "De VoetIQ Daily blijft losstaan van de minigames. Iedere dag wacht daar een nieuwe voetbalchallenge op je.",
     dailyButton: "Naar de Daily",
+    backHome: "Terug naar Home",
+    pillGames: "Minigames",
+    pillFast: "Snel & uitdagend",
+    pillBest: "Versla je beste score",
+    choose: "Kies je uitdaging",
+    sectionIntro: "Begin met Wie is de speler? Binnenkort komen er steeds meer voetbalgames bij.",
     games: [
       {
         id: "player",
@@ -107,6 +119,12 @@ const copy: Record<
     dailyText:
       "VoetIQ Daily remains separate from the mini-games. A new football challenge awaits you there every day.",
     dailyButton: "Go to Daily",
+    backHome: "Back to Home",
+    pillGames: "Mini-games",
+    pillFast: "Fast & challenging",
+    pillBest: "Beat your best score",
+    choose: "Choose your challenge",
+    sectionIntro: "Start with Who is the player? More football games will be added over time.",
     games: [
       {
         id: "player",
@@ -170,6 +188,12 @@ const copy: Record<
     dailyText:
       "Die VoetIQ Daily bleibt von den Minigames getrennt. Jeden Tag wartet dort eine neue Fußball-Challenge.",
     dailyButton: "Zur Daily",
+    backHome: "Zurück zur Startseite",
+    pillGames: "Minispiele",
+    pillFast: "Schnell & herausfordernd",
+    pillBest: "Schlage deinen Highscore",
+    choose: "Wähle deine Herausforderung",
+    sectionIntro: "Starte mit Wer ist der Spieler? Nach und nach kommen weitere Fußballspiele dazu.",
     games: [],
   },
 
@@ -186,6 +210,12 @@ const copy: Record<
     dailyText:
       "VoetIQ Daily permanece separado de los minijuegos y ofrece un nuevo reto cada día.",
     dailyButton: "Ir al Daily",
+    backHome: "Volver al inicio",
+    pillGames: "Minijuegos",
+    pillFast: "Rápido y desafiante",
+    pillBest: "Supera tu mejor puntuación",
+    choose: "Elige tu desafío",
+    sectionIntro: "Empieza con ¿Quién es el jugador? Poco a poco añadiremos más juegos de fútbol.",
     games: [],
   },
 
@@ -202,6 +232,12 @@ const copy: Record<
     dailyText:
       "Le VoetIQ Daily reste séparé des mini-jeux avec un nouveau défi chaque jour.",
     dailyButton: "Voir le Daily",
+    backHome: "Retour à l’accueil",
+    pillGames: "Mini-jeux",
+    pillFast: "Rapide et stimulant",
+    pillBest: "Bats ton meilleur score",
+    choose: "Choisis ton défi",
+    sectionIntro: "Commence par Qui est le joueur ? De nouveaux jeux de football seront ajoutés progressivement.",
     games: [],
   },
 
@@ -218,6 +254,12 @@ const copy: Record<
     dailyText:
       "VoetIQ Daily rimane separata dai minigiochi con una nuova sfida ogni giorno.",
     dailyButton: "Vai alla Daily",
+    backHome: "Torna alla Home",
+    pillGames: "Minigiochi",
+    pillFast: "Veloce e impegnativo",
+    pillBest: "Batti il tuo record",
+    choose: "Scegli la tua sfida",
+    sectionIntro: "Inizia con Chi è il giocatore? Aggiungeremo sempre più giochi di calcio.",
     games: [],
   },
 
@@ -234,8 +276,53 @@ const copy: Record<
     dailyText:
       "A VoetIQ Daily continua separada dos minijogos com um novo desafio todos os dias.",
     dailyButton: "Ir para a Daily",
+    backHome: "Voltar ao início",
+    pillGames: "Minijogos",
+    pillFast: "Rápido e desafiante",
+    pillBest: "Supera a tua melhor pontuação",
+    choose: "Escolhe o teu desafio",
+    sectionIntro: "Começa com Quem é o jogador? Serão adicionados cada vez mais jogos de futebol.",
     games: [],
   },
+};
+
+
+const translatedGames: Record<Exclude<LanguageCode,"nl"|"en">, Game[]> = {
+  de: [
+    {id:"player",icon:"👤",title:"Wer ist der Spieler?",description:"Finde heraus, welchen Fußballer wir suchen. Du bekommst immer mehr Hinweise — errate ihn so früh wie möglich.",href:"/games/wie-is-de-speler",status:"available",badge:"ERSTES SPIEL"},
+    {id:"stadium",icon:"🏟️",title:"Errate das Stadion",description:"Von weltberühmten Fußballtempeln bis zu kniffligen Stadien. Weißt du, welches Stadion du siehst?",href:"/games/raad-het-stadion",status:"available"},
+    {id:"quiz",icon:"🧠",title:"Fußballquiz",description:"Zehn Fragen. Ein Ergebnis. Zeig, wie viel du wirklich über Fußball weißt.",href:"/games/voetbalquiz",status:"available"},
+    {id:"link",icon:"🔗",title:"Player Link",description:"Verbinde zwei Fußballer über Vereine und Mitspieler. Findest du den kürzesten Weg?",href:"/games/player-link",status:"available"},
+    {id:"country",icon:"🌍",title:"Errate das Fußballland",description:"Vereine, Spieler und Wettbewerbe geben dir Hinweise. Findest du das richtige Land?",href:"/games/raad-het-land",status:"available"}
+  ],
+  es: [
+    {id:"player",icon:"👤",title:"¿Quién es el jugador?",description:"Descubre qué futbolista buscamos. Recibirás cada vez más pistas: adivínalo lo antes posible.",href:"/games/wie-is-de-speler",status:"available",badge:"PRIMER JUEGO"},
+    {id:"stadium",icon:"🏟️",title:"Adivina el estadio",description:"Desde templos del fútbol mundialmente famosos hasta estadios difíciles. ¿Sabes qué estadio estás viendo?",href:"/games/raad-het-stadion",status:"available"},
+    {id:"quiz",icon:"🧠",title:"Quiz de fútbol",description:"Diez preguntas. Una puntuación. Demuestra cuánto sabes realmente de fútbol.",href:"/games/voetbalquiz",status:"available"},
+    {id:"link",icon:"🔗",title:"Player Link",description:"Conecta a dos futbolistas mediante clubes y compañeros de equipo. ¿Encuentras la ruta más corta?",href:"/games/player-link",status:"available"},
+    {id:"country",icon:"🌍",title:"Adivina el país",description:"Clubes, jugadores y competiciones te dan pistas. ¿Puedes encontrar el país correcto?",href:"/games/raad-het-land",status:"available"}
+  ],
+  fr: [
+    {id:"player",icon:"👤",title:"Qui est le joueur ?",description:"Découvre quel footballeur nous recherchons. Tu obtiens de plus en plus d’indices — trouve-le le plus tôt possible.",href:"/games/wie-is-de-speler",status:"available",badge:"PREMIER JEU"},
+    {id:"stadium",icon:"🏟️",title:"Devine le stade",description:"Des temples du football mondialement connus aux stades plus difficiles. Sais-tu quel stade tu vois ?",href:"/games/raad-het-stadion",status:"available"},
+    {id:"quiz",icon:"🧠",title:"Quiz football",description:"Dix questions. Un score. Montre ce que tu sais vraiment sur le football.",href:"/games/voetbalquiz",status:"available"},
+    {id:"link",icon:"🔗",title:"Player Link",description:"Relie deux footballeurs grâce aux clubs et coéquipiers. Trouveras-tu le chemin le plus court ?",href:"/games/player-link",status:"available"},
+    {id:"country",icon:"🌍",title:"Devine le pays",description:"Les clubs, joueurs et compétitions te donnent des indices. Trouveras-tu le bon pays ?",href:"/games/raad-het-land",status:"available"}
+  ],
+  it: [
+    {id:"player",icon:"👤",title:"Chi è il giocatore?",description:"Scopri quale calciatore stiamo cercando. Riceverai sempre più indizi: indovinalo il prima possibile.",href:"/games/wie-is-de-speler",status:"available",badge:"PRIMO GIOCO"},
+    {id:"stadium",icon:"🏟️",title:"Indovina lo stadio",description:"Dai templi del calcio famosi in tutto il mondo agli stadi più difficili. Sai quale stadio stai guardando?",href:"/games/raad-het-stadion",status:"available"},
+    {id:"quiz",icon:"🧠",title:"Quiz di calcio",description:"Dieci domande. Un punteggio. Dimostra quanto conosci davvero il calcio.",href:"/games/voetbalquiz",status:"available"},
+    {id:"link",icon:"🔗",title:"Player Link",description:"Collega due calciatori tramite club e compagni di squadra. Trovi il percorso più breve?",href:"/games/player-link",status:"available"},
+    {id:"country",icon:"🌍",title:"Indovina il paese",description:"Club, giocatori e competizioni ti danno indizi. Riesci a trovare il paese giusto?",href:"/games/raad-het-land",status:"available"}
+  ],
+  pt: [
+    {id:"player",icon:"👤",title:"Quem é o jogador?",description:"Descobre qual é o futebolista que procuramos. Recebes cada vez mais pistas — tenta adivinhar o mais cedo possível.",href:"/games/wie-is-de-speler",status:"available",badge:"PRIMEIRO JOGO"},
+    {id:"stadium",icon:"🏟️",title:"Adivinha o estádio",description:"Dos templos do futebol mundialmente famosos aos estádios mais difíceis. Sabes que estádio estás a ver?",href:"/games/raad-het-stadion",status:"available"},
+    {id:"quiz",icon:"🧠",title:"Quiz de futebol",description:"Dez perguntas. Uma pontuação. Mostra quanto sabes realmente de futebol.",href:"/games/voetbalquiz",status:"available"},
+    {id:"link",icon:"🔗",title:"Player Link",description:"Liga dois futebolistas através de clubes e colegas de equipa. Encontras o caminho mais curto?",href:"/games/player-link",status:"available"},
+    {id:"country",icon:"🌍",title:"Adivinha o país",description:"Clubes, jogadores e competições dão-te pistas. Consegues encontrar o país certo?",href:"/games/raad-het-land",status:"available"}
+  ]
 };
 
 function isLanguageCode(value: string | null): value is LanguageCode {
@@ -274,7 +361,7 @@ export default function GamesPage() {
   const fallbackGames = copy.nl.games;
   const t = copy[language];
 
-  const games = t.games.length > 0 ? t.games : fallbackGames;
+  const games = t.games.length > 0 ? t.games : (language === "nl" || language === "en" ? fallbackGames : translatedGames[language]);
 
   return (
     <main className="games-page">
@@ -283,33 +370,27 @@ export default function GamesPage() {
         <div className="hero-glow hero-glow-two" />
 
         <div className="games-container hero-content">
-          <Link href="/" className="home-back-link">
-            ← Terug naar Home
-          </Link>
-
           <div className="hero-kicker">
             <span className="kicker-dot" />
             {t.eyebrow}
           </div>
 
-          <h1>
-            Hoe goed is jouw <span>voetbalkennis?</span>
-          </h1>
+          <h1>{t.title}</h1>
 
           <p>{t.subtitle}</p>
 
           <div className="hero-pills">
             <div>
               <span>🎮</span>
-              Minigames
+              {t.pillGames}
             </div>
             <div>
               <span>⚡</span>
-              Snel &amp; uitdagend
+              {t.pillFast}
             </div>
             <div>
               <span>🏆</span>
-              Versla je beste score
+              {t.pillBest}
             </div>
           </div>
         </div>
@@ -320,13 +401,10 @@ export default function GamesPage() {
           <div className="section-heading">
             <div>
               <span className="section-label">🎮 GAMES</span>
-              <h2>Kies je uitdaging</h2>
+              <h2>{t.choose}</h2>
             </div>
 
-            <p>
-              Begin met Wie is de speler? Binnenkort komen er steeds meer
-              voetbalgames bij.
-            </p>
+            <p>{t.sectionIntro}</p>
           </div>
 
           <div className="games-grid">
@@ -461,31 +539,6 @@ export default function GamesPage() {
           flex-direction: column;
           align-items: center;
           text-align: center;
-        }
-
-        .home-back-link {
-          align-self: flex-start;
-          margin-bottom: 24px;
-          padding: 9px 13px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 9px;
-          background: rgba(255, 255, 255, 0.03);
-          color: #91a79b;
-          text-decoration: none;
-          font-size: 12px;
-          font-weight: 850;
-          transition:
-            color 0.18s ease,
-            border-color 0.18s ease,
-            background 0.18s ease,
-            transform 0.18s ease;
-        }
-
-        .home-back-link:hover {
-          color: #65eea1;
-          border-color: rgba(46, 230, 129, 0.24);
-          background: rgba(46, 230, 129, 0.055);
-          transform: translateX(-2px);
         }
 
         .hero-glow {
