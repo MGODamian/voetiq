@@ -540,21 +540,10 @@ function getUserTimezone(): string {
 export default function Wedstrijden() {
   const router = useRouter();
 
-  const [selectedCompetition, setSelectedCompetition] = useState(() => {
-    if (typeof window === "undefined") {
-      return "DED";
-    }
-
-    const params = new URLSearchParams(window.location.search);
-    const competitionFromUrl =
-      params.get("competition")?.toUpperCase() || "DED";
-
-    return competitions.some(
-      (competition) => competition.code === competitionFromUrl
-    )
-      ? competitionFromUrl
-      : "DED";
-  });
+  const [selectedCompetition, setSelectedCompetition] =
+    useState("DED");
+  const [competitionUrlReady, setCompetitionUrlReady] =
+    useState(false);
 
   const [matches, setMatches] = useState<Match[]>([]);
 
@@ -669,8 +658,27 @@ export default function Wedstrijden() {
   }, []);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const competitionFromUrl =
+      params.get("competition")?.toUpperCase() || "DED";
+
+    const isValidCompetition = competitions.some(
+      (competition) => competition.code === competitionFromUrl
+    );
+
+    setSelectedCompetition(
+      isValidCompetition ? competitionFromUrl : "DED"
+    );
+    setCompetitionUrlReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!competitionUrlReady) {
+      return;
+    }
+
     loadCompetition(selectedCompetition);
-  }, [selectedCompetition]);
+  }, [selectedCompetition, competitionUrlReady]);
 
   async function loadCompetition(
     competitionCode: string
