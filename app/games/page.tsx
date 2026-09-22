@@ -283,6 +283,10 @@ export default function GamesPage() {
         <div className="hero-glow hero-glow-two" />
 
         <div className="games-container hero-content">
+          <Link href="/" className="home-back-link">
+            ← Terug naar Home
+          </Link>
+
           <div className="hero-kicker">
             <span className="kicker-dot" />
             {t.eyebrow}
@@ -457,6 +461,31 @@ export default function GamesPage() {
           flex-direction: column;
           align-items: center;
           text-align: center;
+        }
+
+        .home-back-link {
+          align-self: flex-start;
+          margin-bottom: 24px;
+          padding: 9px 13px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 9px;
+          background: rgba(255, 255, 255, 0.03);
+          color: #91a79b;
+          text-decoration: none;
+          font-size: 12px;
+          font-weight: 850;
+          transition:
+            color 0.18s ease,
+            border-color 0.18s ease,
+            background 0.18s ease,
+            transform 0.18s ease;
+        }
+
+        .home-back-link:hover {
+          color: #65eea1;
+          border-color: rgba(46, 230, 129, 0.24);
+          background: rgba(46, 230, 129, 0.055);
+          transform: translateX(-2px);
         }
 
         .hero-glow {
