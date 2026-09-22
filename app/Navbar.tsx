@@ -144,6 +144,7 @@ type NavbarTranslation = {
   home: string;
   dashboard: string;
   matches: string;
+  games: string;
   predictions: string;
   pools: string;
   leaderboard: string;
@@ -182,6 +183,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     home: "Home",
     dashboard: "Dashboard",
     matches: "Wedstrijden",
+    games: "Games",
     predictions: "Mijn voorspellingen",
     pools: "Poules",
     leaderboard: "Ranglijst",
@@ -203,6 +205,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     home: "Home",
     dashboard: "Dashboard",
     matches: "Matches",
+    games: "Games",
     predictions: "My predictions",
     pools: "Pools",
     leaderboard: "Leaderboard",
@@ -224,6 +227,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     home: "Startseite",
     dashboard: "Dashboard",
     matches: "Spiele",
+    games: "Games",
     predictions: "Meine Tipps",
     pools: "Tipprunden",
     leaderboard: "Rangliste",
@@ -245,6 +249,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     home: "Inicio",
     dashboard: "Panel",
     matches: "Partidos",
+    games: "Juegos",
     predictions: "Mis pronósticos",
     pools: "Grupos",
     leaderboard: "Clasificación",
@@ -266,6 +271,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     home: "Accueil",
     dashboard: "Tableau de bord",
     matches: "Matchs",
+    games: "Jeux",
     predictions: "Mes pronostics",
     pools: "Ligues",
     leaderboard: "Classement",
@@ -287,6 +293,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     home: "Home",
     dashboard: "Dashboard",
     matches: "Partite",
+    games: "Giochi",
     predictions: "I miei pronostici",
     pools: "Gruppi",
     leaderboard: "Classifica",
@@ -308,6 +315,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     home: "Início",
     dashboard: "Dashboard",
     matches: "Jogos",
+    games: "Jogos",
     predictions: "Os meus prognósticos",
     pools: "Grupos",
     leaderboard: "Classificação",
@@ -798,6 +806,12 @@ export default function Navbar() {
               active={isActive("/wedstrijden")}
             />
 
+            <NavLink
+              href="/games"
+              label={t.games}
+              active={isActive("/games")}
+            />
+
             <NavLink href="/poules" label={t.pools} active={isActive("/poules")} />
 
             <NavLink
@@ -1026,6 +1040,13 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
             >
               {t.matches}
+            </Link>
+
+            <Link
+              href="/games"
+              onClick={() => setMobileOpen(false)}
+            >
+              🎮 {t.games}
             </Link>
 
             {loggedIn && (
