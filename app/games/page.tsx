@@ -56,15 +56,6 @@ const copy: Record<
         badge: "EERSTE GAME",
       },
       {
-        id: "logo",
-        icon: "🛡️",
-        title: "Raad het clublogo",
-        description:
-          "Hoeveel voetbalclubs herken jij alleen aan hun logo? Test je clubkennis.",
-        href: "/game/raad-het-logo",
-        status: "soon",
-      },
-      {
         id: "stadium",
         icon: "🏟️",
         title: "Raad het stadion",
@@ -126,15 +117,6 @@ const copy: Record<
         href: "/games/wie-is-de-speler",
         status: "available",
         badge: "FIRST GAME",
-      },
-      {
-        id: "logo",
-        icon: "🛡️",
-        title: "Guess the club logo",
-        description:
-          "How many football clubs can you recognize from their logo?",
-        href: "/game/raad-het-logo",
-        status: "soon",
       },
       {
         id: "stadium",
