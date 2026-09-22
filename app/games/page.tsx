@@ -79,8 +79,8 @@ const copy: Record<
         title: "Player Link",
         description:
           "Verbind twee voetballers via clubs en teamgenoten. Vind jij de kortste route?",
-        href: "/game/player-link",
-        status: "soon",
+        href: "/games/player-link",
+        status: "available",
       },
       {
         id: "country",
@@ -142,8 +142,8 @@ const copy: Record<
         title: "Player Link",
         description:
           "Connect two footballers through clubs and teammates. Find the shortest route.",
-        href: "/game/player-link",
-        status: "soon",
+        href: "/games/player-link",
+        status: "available",
       },
       {
         id: "country",
