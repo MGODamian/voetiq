@@ -13,24 +13,12 @@ const FOOTBALL_DATA_COMPETITIONS = [
 
 const ZAFRONIX_COMPETITIONS = ["EL", "ECL"] as const;
 
-const ZAFRONIX_CONFIG: Record<
-  (typeof ZAFRONIX_COMPETITIONS)[number],
-  { baseUrl: string; name: string }
-> = {
-  EL: {
-    baseUrl: "https://api.zafronix.com/uefa/europaleague/v1",
-    name: "UEFA Europa League",
-  },
-  ECL: {
-    baseUrl: "https://api.zafronix.com/uefa/conferenceleague/v1",
-    name: "UEFA Conference League",
-  },
-};
+type ZafronixCompetition = (typeof ZAFRONIX_COMPETITIONS)[number];
 
-type NormalizedStandingRow = {
+type StandingRow = {
   position: number;
   team: {
-    id: string | number | null;
+    id: number | null;
     name: string;
     shortName: string;
     tla: string | null;
@@ -46,208 +34,305 @@ type NormalizedStandingRow = {
   goalDifference: number;
 };
 
-function numberValue(...values: unknown[]) {
-  for (const value of values) {
-    if (typeof value === "number" && Number.isFinite(value)) {
-      return value;
-    }
+type MutableStanding = Omit<StandingRow, "position">;
 
-    if (
-      typeof value === "string" &&
-      value.trim() !== "" &&
-      Number.isFinite(Number(value))
-    ) {
-      return Number(value);
+const ZAFRONIX_CONFIG: Record<
+  ZafronixCompetition,
+  { url: string; name: string; id: number }
+> = {
+  EL: {
+    url: "https://api.zafronix.com/uefa/europaleague/v1/matches?season=2026",
+    name: "UEFA Europa League",
+    id: 3,
+  },
+  ECL: {
+    url: "https://api.zafronix.com/uefa/conferenceleague/v1/matches?season=2026",
+    name: "UEFA Conference League",
+    id: 848,
+  },
+};
+
+function normalizeStage(value: unknown): string {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+function isLeaguePhaseMatch(item: any): boolean {
+  const stage = normalizeStage(item?.stageNormalized ?? item?.stage);
+
+  // De moderne EL/ECL league phase. We nemen bewust geen kwalificatie-
+  // of knock-outwedstrijden mee in de ranglijst.
+  return (
+    stage === "league_phase" ||
+    stage === "league" ||
+    stage === "league_stage"
+  );
+}
+
+function hasFinishedScore(item: any): boolean {
+  const home = item?.homeScore;
+  const away = item?.awayScore;
+
+  return (
+    home !== null &&
+    home !== undefined &&
+    away !== null &&
+    away !== undefined &&
+    Number.isFinite(Number(home)) &&
+    Number.isFinite(Number(away))
+  );
+}
+
+function teamName(value: unknown): string {
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
+
+  if (value && typeof value === "object") {
+    const objectValue = value as Record<string, unknown>;
+
+    for (const key of ["name", "shortName", "clubName"]) {
+      const candidate = objectValue[key];
+
+      if (typeof candidate === "string" && candidate.trim()) {
+        return candidate.trim();
+      }
     }
   }
 
-  return 0;
+  return "";
 }
 
-function stringValue(...values: unknown[]) {
-  for (const value of values) {
-    if (typeof value === "string" && value.trim() !== "") {
-      return value;
-    }
+function getOrCreateStanding(
+  map: Map<string, MutableStanding>,
+  name: string
+): MutableStanding {
+  const existing = map.get(name);
+
+  if (existing) {
+    return existing;
   }
 
-  return null;
-}
-
-function normalizeZafronixRow(
-  row: any,
-  index: number
-): NormalizedStandingRow {
-  const teamObject =
-    row?.team && typeof row.team === "object"
-      ? row.team
-      : row?.club && typeof row.club === "object"
-        ? row.club
-        : {};
-
-  const teamName =
-    stringValue(
-      teamObject?.name,
-      teamObject?.shortName,
-      row?.teamName,
-      row?.clubName,
-      typeof row?.team === "string" ? row.team : null,
-      typeof row?.club === "string" ? row.club : null,
-      row?.name
-    ) ?? "Onbekend";
-
-  const shortName =
-    stringValue(
-      teamObject?.shortName,
-      teamObject?.name,
-      row?.shortName,
-      row?.teamName,
-      row?.clubName,
-      teamName
-    ) ?? teamName;
-
-  const crest =
-    stringValue(
-      teamObject?.crest,
-      teamObject?.logo,
-      teamObject?.badge,
-      teamObject?.image,
-      row?.crest,
-      row?.logo,
-      row?.badge,
-      row?.image
-    ) ?? null;
-
-  const tla =
-    stringValue(
-      teamObject?.tla,
-      teamObject?.code,
-      teamObject?.abbr,
-      row?.tla,
-      row?.code,
-      row?.abbr
-    ) ?? null;
-
-  const playedGames = numberValue(
-    row?.playedGames,
-    row?.played,
-    row?.matchesPlayed,
-    row?.gamesPlayed,
-    row?.mp
-  );
-
-  const won = numberValue(row?.won, row?.wins, row?.win, row?.w);
-  const draw = numberValue(
-    row?.draw,
-    row?.drawn,
-    row?.draws,
-    row?.d
-  );
-  const lost = numberValue(
-    row?.lost,
-    row?.losses,
-    row?.loss,
-    row?.l
-  );
-
-  const goalsFor = numberValue(
-    row?.goalsFor,
-    row?.goals_for,
-    row?.gf
-  );
-
-  const goalsAgainst = numberValue(
-    row?.goalsAgainst,
-    row?.goals_against,
-    row?.ga
-  );
-
-  const goalDifference = numberValue(
-    row?.goalDifference,
-    row?.goal_difference,
-    row?.gd,
-    goalsFor - goalsAgainst
-  );
-
-  return {
-    position: numberValue(
-      row?.position,
-      row?.rank,
-      row?.place,
-      index + 1
-    ),
+  const row: MutableStanding = {
     team: {
-      id:
-        teamObject?.id ??
-        row?.teamId ??
-        row?.clubId ??
-        row?.id ??
-        null,
-      name: teamName,
-      shortName,
-      tla,
-      crest,
+      id: null,
+      name,
+      shortName: name,
+      tla: null,
+      crest: null,
     },
-    playedGames,
-    won,
-    draw,
-    lost,
-    points: numberValue(row?.points, row?.pts),
-    goalsFor,
-    goalsAgainst,
-    goalDifference,
+    playedGames: 0,
+    won: 0,
+    draw: 0,
+    lost: 0,
+    points: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    goalDifference: 0,
   };
+
+  map.set(name, row);
+  return row;
 }
 
-function findZafronixTable(data: any): any[] {
-  const candidates = [
-    data?.table,
-    data?.standings,
-    data?.rows,
-    data?.leagueTable,
-    data?.league_table,
-    data?.data?.table,
-    data?.data?.standings,
-    data?.data?.rows,
-    data?.data?.leagueTable,
-    data?.data?.league_table,
-  ];
+function applyResult(
+  home: MutableStanding,
+  away: MutableStanding,
+  homeScore: number,
+  awayScore: number
+) {
+  home.playedGames += 1;
+  away.playedGames += 1;
 
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) {
-      return candidate;
-    }
+  home.goalsFor += homeScore;
+  home.goalsAgainst += awayScore;
+
+  away.goalsFor += awayScore;
+  away.goalsAgainst += homeScore;
+
+  if (homeScore > awayScore) {
+    home.won += 1;
+    away.lost += 1;
+    home.points += 3;
+  } else if (homeScore < awayScore) {
+    away.won += 1;
+    home.lost += 1;
+    away.points += 3;
+  } else {
+    home.draw += 1;
+    away.draw += 1;
+    home.points += 1;
+    away.points += 1;
   }
 
-  if (data?.standings && typeof data.standings === "object") {
-    const nestedCandidates = [
-      data.standings?.table,
-      data.standings?.rows,
-      data.standings?.standings,
-    ];
+  home.goalDifference = home.goalsFor - home.goalsAgainst;
+  away.goalDifference = away.goalsFor - away.goalsAgainst;
+}
 
-    for (const candidate of nestedCandidates) {
-      if (Array.isArray(candidate)) {
-        return candidate;
-      }
-    }
+function sortStandings(a: MutableStanding, b: MutableStanding) {
+  // Dit is voldoende om de live tabel op te bouwen.
+  // UEFA heeft bij volledig gelijke waarden aanvullende tiebreakers;
+  // die kunnen later worden toegevoegd als twee clubs exact gelijk staan.
+  if (b.points !== a.points) return b.points - a.points;
+  if (b.goalDifference !== a.goalDifference) {
+    return b.goalDifference - a.goalDifference;
+  }
+  if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+
+  return a.team.name.localeCompare(b.team.name, "nl");
+}
+
+async function getZafronixStandings(competition: ZafronixCompetition) {
+  const apiKey = process.env.ZAFRONIX_API_KEY;
+
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "ZAFRONIX_API_KEY ontbreekt in Vercel." },
+      { status: 500 }
+    );
   }
 
-  if (data?.data?.standings && typeof data.data.standings === "object") {
-    const nestedCandidates = [
-      data.data.standings?.table,
-      data.data.standings?.rows,
-      data.data.standings?.standings,
-    ];
+  const config = ZAFRONIX_CONFIG[competition];
 
-    for (const candidate of nestedCandidates) {
-      if (Array.isArray(candidate)) {
-        return candidate;
-      }
-    }
+  const response = await fetch(config.url, {
+    headers: {
+      "X-API-Key": apiKey,
+      Accept: "application/json",
+    },
+    next: {
+      // Zelfde rustige cache-aanpak als bij de bestaande Zafronix-matchroute.
+      revalidate: 7200,
+    },
+  });
+
+  const rawText = await response.text();
+
+  let payload: any;
+
+  try {
+    payload = JSON.parse(rawText);
+  } catch {
+    return NextResponse.json(
+      {
+        error: "Zafronix gaf geen geldige JSON terug.",
+        competition,
+        details: rawText,
+      },
+      { status: 502 }
+    );
   }
 
-  return [];
+  if (!response.ok) {
+    return NextResponse.json(
+      {
+        error: "Zafronix API fout",
+        competition,
+        status: response.status,
+        details: payload,
+      },
+      { status: response.status }
+    );
+  }
+
+  const sourceMatches = Array.isArray(payload?.data)
+    ? payload.data
+    : Array.isArray(payload)
+      ? payload
+      : [];
+
+  if (sourceMatches.length === 0) {
+    return NextResponse.json(
+      {
+        error: "Zafronix gaf geen wedstrijden terug.",
+        competition,
+      },
+      { status: 502 }
+    );
+  }
+
+  const leaguePhaseMatches = sourceMatches.filter(isLeaguePhaseMatch);
+
+  /*
+   * Voeg alle clubs uit de league phase alvast toe.
+   * Daardoor staat de volledige league table er ook voordat alle clubs
+   * hun eerste wedstrijd hebben gespeeld.
+   */
+  const standingsMap = new Map<string, MutableStanding>();
+
+  for (const item of leaguePhaseMatches) {
+    const homeName = teamName(item?.homeTeam);
+    const awayName = teamName(item?.awayTeam);
+
+    if (homeName) getOrCreateStanding(standingsMap, homeName);
+    if (awayName) getOrCreateStanding(standingsMap, awayName);
+  }
+
+  let finishedMatches = 0;
+
+  for (const item of leaguePhaseMatches) {
+    if (!hasFinishedScore(item)) {
+      continue;
+    }
+
+    const homeName = teamName(item?.homeTeam);
+    const awayName = teamName(item?.awayTeam);
+
+    if (!homeName || !awayName) {
+      continue;
+    }
+
+    const homeScore = Number(item.homeScore);
+    const awayScore = Number(item.awayScore);
+
+    const home = getOrCreateStanding(standingsMap, homeName);
+    const away = getOrCreateStanding(standingsMap, awayName);
+
+    applyResult(home, away, homeScore, awayScore);
+    finishedMatches += 1;
+  }
+
+  const table: StandingRow[] = Array.from(standingsMap.values())
+    .sort(sortStandings)
+    .map((row, index) => ({
+      position: index + 1,
+      ...row,
+    }));
+
+  if (table.length === 0) {
+    return NextResponse.json(
+      {
+        error:
+          "Er konden geen league-phase clubs uit de Zafronix-wedstrijden worden opgebouwd.",
+        competition,
+        availableStages: Array.from(
+          new Set(
+            sourceMatches
+              .map((item: any) => item?.stageNormalized ?? item?.stage)
+              .filter(Boolean)
+          )
+        ),
+      },
+      { status: 502 }
+    );
+  }
+
+  return NextResponse.json({
+    competition: {
+      id: config.id,
+      name: config.name,
+      code: competition,
+      emblem: null,
+    },
+    season: 2026,
+    stage: "LEAGUE_PHASE",
+    type: "TOTAL",
+    count: table.length,
+    calculatedFromMatches: true,
+    finishedMatches,
+    table,
+  });
 }
 
 async function getFootballDataStandings(competition: string) {
@@ -340,103 +425,9 @@ async function getFootballDataStandings(competition: string) {
   });
 }
 
-async function getZafronixStandings(
-  competition: (typeof ZAFRONIX_COMPETITIONS)[number]
-) {
-  const apiKey = process.env.ZAFRONIX_API_KEY;
-
-  if (!apiKey) {
-    return NextResponse.json(
-      { error: "ZAFRONIX_API_KEY ontbreekt." },
-      { status: 500 }
-    );
-  }
-
-  const config = ZAFRONIX_CONFIG[competition];
-
-  const response = await fetch(
-    `${config.baseUrl}/standings?season=2026`,
-    {
-      headers: {
-        "X-API-Key": apiKey,
-      },
-      next: {
-        revalidate: 300,
-      },
-    }
-  );
-
-  const rawText = await response.text();
-
-  let data: any;
-
-  try {
-    data = JSON.parse(rawText);
-  } catch {
-    return NextResponse.json(
-      {
-        error: "Zafronix gaf geen geldige JSON terug.",
-        competition,
-        details: rawText,
-      },
-      { status: 502 }
-    );
-  }
-
-  if (!response.ok) {
-    return NextResponse.json(
-      {
-        error: "Zafronix API fout",
-        competition,
-        details: data,
-      },
-      { status: response.status }
-    );
-  }
-
-  const rawTable = findZafronixTable(data);
-  const table = rawTable.map(normalizeZafronixRow);
-
-  if (table.length === 0) {
-    return NextResponse.json(
-      {
-        error: "Zafronix gaf geen herkenbare stand terug.",
-        competition,
-        details: data,
-      },
-      { status: 502 }
-    );
-  }
-
-  table.sort((a, b) => a.position - b.position);
-
-  return NextResponse.json({
-    competition: {
-      id: data?.competition?.id ?? null,
-      name:
-        data?.competition?.name ??
-        data?.competitionName ??
-        config.name,
-      code: competition,
-      emblem:
-        data?.competition?.emblem ??
-        data?.competition?.logo ??
-        null,
-    },
-    season: data?.season ?? 2026,
-    stage:
-      data?.stage ??
-      data?.phase ??
-      data?.competition?.stage ??
-      "LEAGUE_PHASE",
-    type: "TOTAL",
-    count: table.length,
-    table,
-  });
-}
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+
   const competition = (
     searchParams.get("competition") || "DED"
   ).toUpperCase();
@@ -448,7 +439,7 @@ export async function GET(request: Request) {
 
     if (ZAFRONIX_COMPETITIONS.includes(competition as any)) {
       return await getZafronixStandings(
-        competition as (typeof ZAFRONIX_COMPETITIONS)[number]
+        competition as ZafronixCompetition
       );
     }
 
