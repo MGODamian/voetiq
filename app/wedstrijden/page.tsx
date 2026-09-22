@@ -1898,133 +1898,192 @@ export default function Wedstrijden() {
                         >
                           <div
                             style={{
-                              display:
-                                "grid",
-                              gridTemplateColumns:
-                                "minmax(0,1fr) 170px minmax(0,1fr)",
-                              alignItems:
-                                "center",
-                              gap: "18px",
+                              display: "grid",
+                              gridTemplateColumns: "minmax(0,1fr) 26px minmax(0,1fr)",
+                              alignItems: "end",
+                              gap: "14px",
+                              maxWidth: "560px",
+                              margin: "0 auto",
                             }}
                           >
-                            <Team
-                              name={
-                                match
-                                  .homeTeam
-                                  .name
-                              }
-                              crest={
-                                match
-                                  .homeTeam
-                                  .crest
-                              }
-                              side="home"
-                              theme={activeTheme}
-                            />
-
                             <div
                               style={{
-                                display:
-                                  "flex",
-                                justifyContent:
-                                  "center",
-                                alignItems:
-                                  "center",
-                                gap: "8px",
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                minWidth: 0,
                               }}
                             >
+                              <div
+                                style={{
+                                  width: "58px",
+                                  height: "58px",
+                                  borderRadius: "14px",
+                                  background: activeTheme.surface,
+                                  border: `1px solid ${activeTheme.border}`,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  padding: "8px",
+                                  boxSizing: "border-box",
+                                  marginBottom: "9px",
+                                }}
+                              >
+                                {match.homeTeam.crest ? (
+                                  <img
+                                    src={match.homeTeam.crest}
+                                    alt={`${match.homeTeam.name} logo`}
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "contain",
+                                    }}
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: "23px" }}>⚽</span>
+                                )}
+                              </div>
+
+                              <strong
+                                style={{
+                                  color: "white",
+                                  fontSize: "14px",
+                                  lineHeight: 1.25,
+                                  textAlign: "center",
+                                  minHeight: "35px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  marginBottom: "10px",
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {match.homeTeam.name}
+                              </strong>
+
                               <input
+                                aria-label={`Score ${match.homeTeam.name}`}
+                                inputMode="numeric"
                                 type="number"
                                 min="0"
                                 max="20"
-                                disabled={
-                                  predictionLocked
-                                }
-                                value={
-                                  prediction.home
-                                }
-                                onChange={(
-                                  e
-                                ) =>
+                                disabled={predictionLocked}
+                                value={prediction.home}
+                                onChange={(e) =>
                                   updatePrediction(
                                     match.id,
                                     "home",
-                                    e
-                                      .target
-                                      .value
+                                    e.target.value
                                   )
                                 }
                                 style={{
                                   ...scoreInputStyle,
+                                  width: "82px",
+                                  height: "54px",
                                   background: activeTheme.surface,
                                   border: `1px solid ${activeTheme.border}`,
                                   color: "white",
-                                  opacity:
-                                    predictionLocked
-                                      ? 0.6
-                                      : 1,
-                                }}
-                              />
-
-                              <span
-                                style={{
-                                  fontWeight:
-                                    900,
-                                  color:
-                                    "#9ca7a1",
-                                }}
-                              >
-                                -
-                              </span>
-
-                              <input
-                                type="number"
-                                min="0"
-                                max="20"
-                                disabled={
-                                  predictionLocked
-                                }
-                                value={
-                                  prediction.away
-                                }
-                                onChange={(
-                                  e
-                                ) =>
-                                  updatePrediction(
-                                    match.id,
-                                    "away",
-                                    e
-                                      .target
-                                      .value
-                                  )
-                                }
-                                style={{
-                                  ...scoreInputStyle,
-                                  background: activeTheme.surface,
-                                  border: `1px solid ${activeTheme.border}`,
-                                  color: "white",
-                                  opacity:
-                                    predictionLocked
-                                      ? 0.6
-                                      : 1,
+                                  opacity: predictionLocked ? 0.6 : 1,
                                 }}
                               />
                             </div>
 
-                            <Team
-                              name={
-                                match
-                                  .awayTeam
-                                  .name
-                              }
-                              crest={
-                                match
-                                  .awayTeam
-                                  .crest
-                              }
-                              side="away"
-                              theme={activeTheme}
-                            />
+                            <div
+                              aria-hidden="true"
+                              style={{
+                                height: "54px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "rgba(255,255,255,0.55)",
+                                fontSize: "20px",
+                                fontWeight: 900,
+                              }}
+                            >
+                              -
+                            </div>
+
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                minWidth: 0,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "58px",
+                                  height: "58px",
+                                  borderRadius: "14px",
+                                  background: activeTheme.surface,
+                                  border: `1px solid ${activeTheme.border}`,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  padding: "8px",
+                                  boxSizing: "border-box",
+                                  marginBottom: "9px",
+                                }}
+                              >
+                                {match.awayTeam.crest ? (
+                                  <img
+                                    src={match.awayTeam.crest}
+                                    alt={`${match.awayTeam.name} logo`}
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "contain",
+                                    }}
+                                  />
+                                ) : (
+                                  <span style={{ fontSize: "23px" }}>⚽</span>
+                                )}
+                              </div>
+
+                              <strong
+                                style={{
+                                  color: "white",
+                                  fontSize: "14px",
+                                  lineHeight: 1.25,
+                                  textAlign: "center",
+                                  minHeight: "35px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  marginBottom: "10px",
+                                  wordBreak: "break-word",
+                                }}
+                              >
+                                {match.awayTeam.name}
+                              </strong>
+
+                              <input
+                                aria-label={`Score ${match.awayTeam.name}`}
+                                inputMode="numeric"
+                                type="number"
+                                min="0"
+                                max="20"
+                                disabled={predictionLocked}
+                                value={prediction.away}
+                                onChange={(e) =>
+                                  updatePrediction(
+                                    match.id,
+                                    "away",
+                                    e.target.value
+                                  )
+                                }
+                                style={{
+                                  ...scoreInputStyle,
+                                  width: "82px",
+                                  height: "54px",
+                                  background: activeTheme.surface,
+                                  border: `1px solid ${activeTheme.border}`,
+                                  color: "white",
+                                  opacity: predictionLocked ? 0.6 : 1,
+                                }}
+                              />
+                            </div>
                           </div>
 
                           <button
