@@ -288,6 +288,10 @@ export default function WhoIsThePlayerPage() {
         <div className="background-glow glow-two" />
 
         <section className="result-screen">
+          <Link href="/games" className="result-back-link">
+            ← Terug naar Games
+          </Link>
+
           <div className="result-icon">🏆</div>
           <div className="result-kicker">RONDE VOLTOOID</div>
 
@@ -1070,6 +1074,21 @@ function GameStyles() {
             transparent 35%
           ),
           linear-gradient(145deg, #082319, #04170f);
+      }
+
+      .result-back-link {
+        position: absolute;
+        top: 18px;
+        left: 20px;
+        color: #82988c;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 850;
+        transition: color 0.18s ease;
+      }
+
+      .result-back-link:hover {
+        color: #55ec97;
       }
 
       .result-icon {
