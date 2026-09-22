@@ -51,7 +51,7 @@ const copy: Record<
         title: "Wie is de speler?",
         description:
           "Ontdek welke voetballer we zoeken. Je krijgt steeds meer hints — raad hem zo vroeg mogelijk.",
-        href: "/game/wie-is-de-speler",
+        href: "/games/wie-is-de-speler",
         status: "available",
         badge: "EERSTE GAME",
       },
@@ -123,7 +123,7 @@ const copy: Record<
         title: "Who is the player?",
         description:
           "Discover which footballer we're looking for. More hints appear as you play.",
-        href: "/game/wie-is-de-speler",
+        href: "/games/wie-is-de-speler",
         status: "available",
         badge: "FIRST GAME",
       },
