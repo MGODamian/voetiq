@@ -145,6 +145,7 @@ type NavbarTranslation = {
   dashboard: string;
   matches: string;
   games: string;
+  tournaments: string;
   predictions: string;
   pools: string;
   leaderboard: string;
@@ -184,6 +185,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     dashboard: "Dashboard",
     matches: "Wedstrijden",
     games: "Games",
+    tournaments: "Toernooien",
     predictions: "Mijn voorspellingen",
     pools: "Poules",
     leaderboard: "Ranglijst",
@@ -206,6 +208,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     dashboard: "Dashboard",
     matches: "Matches",
     games: "Games",
+    tournaments: "Tournaments",
     predictions: "My predictions",
     pools: "Pools",
     leaderboard: "Leaderboard",
@@ -228,6 +231,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     dashboard: "Dashboard",
     matches: "Spiele",
     games: "Games",
+    tournaments: "Toernooien",
     predictions: "Meine Tipps",
     pools: "Tipprunden",
     leaderboard: "Rangliste",
@@ -250,6 +254,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     dashboard: "Panel",
     matches: "Partidos",
     games: "Juegos",
+    tournaments: "Torneos",
     predictions: "Mis pronósticos",
     pools: "Grupos",
     leaderboard: "Clasificación",
@@ -272,6 +277,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     dashboard: "Tableau de bord",
     matches: "Matchs",
     games: "Jeux",
+    tournaments: "Tournois",
     predictions: "Mes pronostics",
     pools: "Ligues",
     leaderboard: "Classement",
@@ -294,6 +300,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     dashboard: "Dashboard",
     matches: "Partite",
     games: "Giochi",
+    tournaments: "Tornei",
     predictions: "I miei pronostici",
     pools: "Gruppi",
     leaderboard: "Classifica",
@@ -316,6 +323,7 @@ const translations: Record<LanguageCode, NavbarTranslation> = {
     dashboard: "Dashboard",
     matches: "Jogos",
     games: "Jogos",
+    tournaments: "Torneios",
     predictions: "Os meus prognósticos",
     pools: "Grupos",
     leaderboard: "Classificação",
@@ -812,6 +820,12 @@ export default function Navbar() {
               active={isActive("/games")}
             />
 
+            <NavLink
+              href="/toernooien"
+              label={`🏆 ${t.tournaments}`}
+              active={isActive("/toernooien")}
+            />
+
             <NavLink href="/poules" label={t.pools} active={isActive("/poules")} />
 
             <NavLink
@@ -1047,6 +1061,13 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
             >
               🎮 {t.games}
+            </Link>
+
+            <Link
+              href="/toernooien"
+              onClick={() => setMobileOpen(false)}
+            >
+              🏆 {t.tournaments}
             </Link>
 
             {loggedIn && (
