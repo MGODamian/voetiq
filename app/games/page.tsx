@@ -61,8 +61,8 @@ const copy: Record<
         title: "Raad het stadion",
         description:
           "Van wereldberoemde voetbaltempels tot lastige stadions. Weet jij welk stadion je ziet?",
-        href: "/game/raad-het-stadion",
-        status: "soon",
+        href: "/games/raad-het-stadion",
+        status: "available",
       },
       {
         id: "quiz",
@@ -88,8 +88,8 @@ const copy: Record<
         title: "Raad het voetballand",
         description:
           "Clubs, spelers en competities geven je hints. Kun jij het juiste land vinden?",
-        href: "/game/raad-het-land",
-        status: "soon",
+        href: "/games/raad-het-land",
+        status: "available",
       },
     ],
   },
@@ -124,8 +124,8 @@ const copy: Record<
         title: "Guess the stadium",
         description:
           "From famous football temples to difficult grounds. Can you identify them?",
-        href: "/game/raad-het-stadion",
-        status: "soon",
+        href: "/games/raad-het-stadion",
+        status: "available",
       },
       {
         id: "quiz",
@@ -151,8 +151,8 @@ const copy: Record<
         title: "Guess the football country",
         description:
           "Clubs, players and competitions give you clues. Find the right country.",
-        href: "/game/raad-het-land",
-        status: "soon",
+        href: "/games/raad-het-land",
+        status: "available",
       },
     ],
   },
