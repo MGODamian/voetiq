@@ -19,6 +19,79 @@ type Group = {
   matches: Match[];
 };
 
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+const translations = {
+  nl:{back:"Toernooien",brand:"{t.brand}",titleBefore:"Voorspel de",hero:"{t.hero}",phase:"{t.phase}",loading:"Je opgeslagen voorspellingen worden geladen...",account:"Je voorspellingen worden gekoppeld aan je VoetIQ-account en blijven na een refresh bewaard.",league:"LEAGUE",group:"Groep",previous:"Vorige",round:"SPEELRONDE",of:"van",next:"Volgende",save:"Opslaan",saving:"Opslaan...",saved:"✓ Opgeslagen",current:"ACTUELE STAND",standing:"Stand Groep",country:"Land",played:"Gespeeld",won:"Gewonnen",drawn:"Gelijk",lost:"Verloren",gf:"Doelpunten voor",ga:"Doelpunten tegen",gd:"Doelsaldo",points:"Punten",winner:"Groepswinnaar",second:"Tweede plaats",note:"De stand wordt later automatisch bijgewerkt met echte uitslagen.",system:"PUNTENSYSTEEM",accurate:"Voorspel zo nauwkeurig mogelijk",systemText:"Het definitieve puntensysteem en automatisch verwerken van uitslagen koppelen we samen met de database.",complete:t.complete,valid:t.valid,login:t.login,loadError:t.loadError,saveError:t.saveError,saveSuccess:t.saveSuccess,goRound:"Ga naar speelronde"},
+  en:{back:"Tournaments",brand:"VOETIQ TOURNAMENTS",titleBefore:"Predict the",hero:"Choose a league and group and enter your prediction for every match.",phase:"League phase: 24 September – 17 November 2026",loading:"Your saved predictions are loading...",account:"Your predictions are linked to your VoetIQ account and remain saved after a refresh.",league:"LEAGUE",group:"Group",previous:"Previous",round:"MATCHDAY",of:"of",next:"Next",save:"Save",saving:"Saving...",saved:"✓ Saved",current:"CURRENT STANDINGS",standing:"Group standings",country:"Country",played:"Played",won:"Won",drawn:"Drawn",lost:"Lost",gf:"Goals for",ga:"Goals against",gd:"Goal difference",points:"Points",winner:"Group winner",second:"Second place",note:"The standings will later be updated automatically with real results.",system:"POINTS SYSTEM",accurate:"Predict as accurately as possible",systemText:"The final points system and automatic result processing will be connected to the database.",complete:"Enter a complete score first.",valid:"Enter a valid score from 0 to 20.",login:"You must be logged in to save a prediction.",loadError:"Your saved predictions could not be loaded.",saveError:"Something went wrong while saving your prediction.",saveSuccess:"Your prediction has been saved.",goRound:"Go to matchday"},
+  de:{back:"Turniere",brand:"VOETIQ TURNIERE",titleBefore:"Tippe die",hero:"Wähle eine Liga und Gruppe und gib deinen Tipp für jedes Spiel ab.",phase:"Ligaphase: 24. September – 17. November 2026",loading:"Deine gespeicherten Tipps werden geladen...",account:"Deine Tipps sind mit deinem VoetIQ-Konto verknüpft und bleiben nach dem Aktualisieren gespeichert.",league:"LIGA",group:"Gruppe",previous:"Zurück",round:"SPIELTAG",of:"von",next:"Weiter",save:"Speichern",saving:"Speichern...",saved:"✓ Gespeichert",current:"AKTUELLE TABELLE",standing:"Tabelle Gruppe",country:"Land",played:"Gespielt",won:"Gewonnen",drawn:"Unentschieden",lost:"Verloren",gf:"Tore",ga:"Gegentore",gd:"Tordifferenz",points:"Punkte",winner:"Gruppensieger",second:"Zweiter Platz",note:"Die Tabelle wird später automatisch mit echten Ergebnissen aktualisiert.",system:"PUNKTESYSTEM",accurate:"Tippe so genau wie möglich",systemText:"Das endgültige Punktesystem und die automatische Ergebnisverarbeitung werden mit der Datenbank verbunden.",complete:"Gib zuerst ein vollständiges Ergebnis ein.",valid:"Gib ein gültiges Ergebnis von 0 bis 20 ein.",login:"Du musst angemeldet sein, um einen Tipp zu speichern.",loadError:"Deine gespeicherten Tipps konnten nicht geladen werden.",saveError:"Beim Speichern deines Tipps ist etwas schiefgelaufen.",saveSuccess:"Dein Tipp wurde gespeichert.",goRound:"Gehe zu Spieltag"},
+  es:{back:"Torneos",brand:"TORNEOS VOETIQ",titleBefore:"Predice la",hero:"Elige una liga y un grupo e introduce tu pronóstico para cada partido.",phase:"Fase de liga: 24 de septiembre – 17 de noviembre de 2026",loading:"Se están cargando tus pronósticos guardados...",account:"Tus pronósticos están vinculados a tu cuenta de VoetIQ y se conservan al actualizar.",league:"LIGA",group:"Grupo",previous:"Anterior",round:"JORNADA",of:"de",next:"Siguiente",save:"Guardar",saving:"Guardando...",saved:"✓ Guardado",current:"CLASIFICACIÓN ACTUAL",standing:"Clasificación Grupo",country:"País",played:"Jugados",won:"Ganados",drawn:"Empatados",lost:"Perdidos",gf:"Goles a favor",ga:"Goles en contra",gd:"Diferencia de goles",points:"Puntos",winner:"Ganador del grupo",second:"Segundo puesto",note:"La clasificación se actualizará más adelante automáticamente con resultados reales.",system:"SISTEMA DE PUNTOS",accurate:"Pronostica con la mayor precisión posible",systemText:"El sistema de puntos definitivo y el procesamiento automático de resultados se conectarán a la base de datos.",complete:"Introduce primero un resultado completo.",valid:"Introduce un resultado válido de 0 a 20.",login:"Debes iniciar sesión para guardar un pronóstico.",loadError:"No se pudieron cargar tus pronósticos guardados.",saveError:"Se produjo un error al guardar tu pronóstico.",saveSuccess:"Tu pronóstico se ha guardado.",goRound:"Ir a la jornada"},
+  fr:{back:"Tournois",brand:"TOURNOIS VOETIQ",titleBefore:"Pronostique la",hero:"Choisis une ligue et un groupe et saisis ton pronostic pour chaque match.",phase:"Phase de ligue : 24 septembre – 17 novembre 2026",loading:"Tes pronostics enregistrés sont en cours de chargement...",account:"Tes pronostics sont liés à ton compte VoetIQ et restent enregistrés après actualisation.",league:"LIGUE",group:"Groupe",previous:"Précédent",round:"JOURNÉE",of:"sur",next:"Suivant",save:"Enregistrer",saving:"Enregistrement...",saved:"✓ Enregistré",current:"CLASSEMENT ACTUEL",standing:"Classement Groupe",country:"Pays",played:"Joués",won:"Victoires",drawn:"Nuls",lost:"Défaites",gf:"Buts pour",ga:"Buts contre",gd:"Différence",points:"Points",winner:"Vainqueur du groupe",second:"Deuxième place",note:"Le classement sera ensuite mis à jour automatiquement avec les résultats réels.",system:"SYSTÈME DE POINTS",accurate:"Pronostique le plus précisément possible",systemText:"Le système de points définitif et le traitement automatique des résultats seront reliés à la base de données.",complete:"Saisis d’abord un score complet.",valid:"Saisis un score valide de 0 à 20.",login:"Tu dois être connecté pour enregistrer un pronostic.",loadError:"Tes pronostics enregistrés n’ont pas pu être chargés.",saveError:"Une erreur s’est produite lors de l’enregistrement de ton pronostic.",saveSuccess:"Ton pronostic a été enregistré.",goRound:"Aller à la journée"},
+  it:{back:"Tornei",brand:"TORNEI VOETIQ",titleBefore:"Pronostica la",hero:"Scegli una lega e un gruppo e inserisci il tuo pronostico per ogni partita.",phase:"Fase campionato: 24 settembre – 17 novembre 2026",loading:"I tuoi pronostici salvati sono in caricamento...",account:"I tuoi pronostici sono collegati al tuo account VoetIQ e restano salvati dopo l’aggiornamento.",league:"LEGA",group:"Gruppo",previous:"Precedente",round:"GIORNATA",of:"di",next:"Successiva",save:"Salva",saving:"Salvataggio...",saved:"✓ Salvato",current:"CLASSIFICA ATTUALE",standing:"Classifica Gruppo",country:"Paese",played:"Giocate",won:"Vinte",drawn:"Pareggi",lost:"Perse",gf:"Gol fatti",ga:"Gol subiti",gd:"Differenza reti",points:"Punti",winner:"Vincitore del gruppo",second:"Secondo posto",note:"La classifica verrà aggiornata automaticamente con i risultati reali.",system:"SISTEMA PUNTI",accurate:"Pronostica nel modo più preciso possibile",systemText:"Il sistema di punti definitivo e l’elaborazione automatica dei risultati saranno collegati al database.",complete:"Inserisci prima un risultato completo.",valid:"Inserisci un risultato valido da 0 a 20.",login:"Devi accedere per salvare un pronostico.",loadError:"Impossibile caricare i pronostici salvati.",saveError:"Si è verificato un errore durante il salvataggio del pronostico.",saveSuccess:"Il tuo pronostico è stato salvato.",goRound:"Vai alla giornata"},
+  pt:{back:"Torneios",brand:"TORNEIOS VOETIQ",titleBefore:"Prevê a",hero:"Escolhe uma liga e um grupo e indica o teu prognóstico para cada jogo.",phase:"Fase de liga: 24 de setembro – 17 de novembro de 2026",loading:"Os teus prognósticos guardados estão a carregar...",account:"Os teus prognósticos estão ligados à tua conta VoetIQ e permanecem guardados após atualizar.",league:"LIGA",group:"Grupo",previous:"Anterior",round:"JORNADA",of:"de",next:"Seguinte",save:"Guardar",saving:"A guardar...",saved:"✓ Guardado",current:"CLASSIFICAÇÃO ATUAL",standing:"Classificação Grupo",country:"País",played:"Jogos",won:"Vitórias",drawn:"Empates",lost:"Derrotas",gf:"Golos marcados",ga:"Golos sofridos",gd:"Diferença de golos",points:"Pontos",winner:"Vencedor do grupo",second:"Segundo lugar",note:"A classificação será atualizada automaticamente mais tarde com resultados reais.",system:"SISTEMA DE PONTOS",accurate:"Prevê com a maior precisão possível",systemText:"O sistema de pontos definitivo e o processamento automático dos resultados serão ligados à base de dados.",complete:"Indica primeiro um resultado completo.",valid:"Indica um resultado válido de 0 a 20.",login:"Tens de iniciar sessão para guardar um prognóstico.",loadError:"Não foi possível carregar os teus prognósticos guardados.",saveError:"Ocorreu um erro ao guardar o teu prognóstico.",saveSuccess:"O teu prognóstico foi guardado.",goRound:"Ir para a jornada"}
+} satisfies Record<LanguageCode, Record<string,string>>;
+
+function isLanguageCode(v:string|null): v is LanguageCode {
+  return ["nl","en","de","es","fr","it","pt"].includes(v ?? "");
+}
+
+const countryNames: Record<string, Record<LanguageCode,string>> = {
+"Frankrijk":{nl:"Frankrijk",en:"France",de:"Frankreich",es:"Francia",fr:"France",it:"Francia",pt:"França"},
+"Italië":{nl:"Italië",en:"Italy",de:"Italien",es:"Italia",fr:"Italie",it:"Italia",pt:"Itália"},
+"België":{nl:"België",en:"Belgium",de:"Belgien",es:"Bélgica",fr:"Belgique",it:"Belgio",pt:"Bélgica"},
+"Turkije":{nl:"Turkije",en:"Türkiye",de:"Türkei",es:"Turquía",fr:"Turquie",it:"Turchia",pt:"Turquia"},
+"Duitsland":{nl:"Duitsland",en:"Germany",de:"Deutschland",es:"Alemania",fr:"Allemagne",it:"Germania",pt:"Alemanha"},
+"Nederland":{nl:"Nederland",en:"Netherlands",de:"Niederlande",es:"Países Bajos",fr:"Pays-Bas",it:"Paesi Bassi",pt:"Países Baixos"},
+"Servië":{nl:"Servië",en:"Serbia",de:"Serbien",es:"Serbia",fr:"Serbie",it:"Serbia",pt:"Sérvia"},
+"Griekenland":{nl:"Griekenland",en:"Greece",de:"Griechenland",es:"Grecia",fr:"Grèce",it:"Grecia",pt:"Grécia"},
+"Spanje":{nl:"Spanje",en:"Spain",de:"Spanien",es:"España",fr:"Espagne",it:"Spagna",pt:"Espanha"},
+"Kroatië":{nl:"Kroatië",en:"Croatia",de:"Kroatien",es:"Croacia",fr:"Croatie",it:"Croazia",pt:"Croácia"},
+"Engeland":{nl:"Engeland",en:"England",de:"England",es:"Inglaterra",fr:"Angleterre",it:"Inghilterra",pt:"Inglaterra"},
+"Tsjechië":{nl:"Tsjechië",en:"Czechia",de:"Tschechien",es:"Chequia",fr:"Tchéquie",it:"Cechia",pt:"Chéquia"},
+"Portugal":{nl:"Portugal",en:"Portugal",de:"Portugal",es:"Portugal",fr:"Portugal",it:"Portogallo",pt:"Portugal"},
+"Denemarken":{nl:"Denemarken",en:"Denmark",de:"Dänemark",es:"Dinamarca",fr:"Danemark",it:"Danimarca",pt:"Dinamarca"},
+"Noorwegen":{nl:"Noorwegen",en:"Norway",de:"Norwegen",es:"Noruega",fr:"Norvège",it:"Norvegia",pt:"Noruega"},
+"Wales":{nl:"Wales",en:"Wales",de:"Wales",es:"Gales",fr:"Pays de Galles",it:"Galles",pt:"País de Gales"},
+"Schotland":{nl:"Schotland",en:"Scotland",de:"Schottland",es:"Escocia",fr:"Écosse",it:"Scozia",pt:"Escócia"},
+"Zwitserland":{nl:"Zwitserland",en:"Switzerland",de:"Schweiz",es:"Suiza",fr:"Suisse",it:"Svizzera",pt:"Suíça"},
+"Slovenië":{nl:"Slovenië",en:"Slovenia",de:"Slowenien",es:"Eslovenia",fr:"Slovénie",it:"Slovenia",pt:"Eslovénia"},
+"Noord-Macedonië":{nl:"Noord-Macedonië",en:"North Macedonia",de:"Nordmazedonien",es:"Macedonia del Norte",fr:"Macédoine du Nord",it:"Macedonia del Nord",pt:"Macedónia do Norte"},
+"Hongarije":{nl:"Hongarije",en:"Hungary",de:"Ungarn",es:"Hungría",fr:"Hongrie",it:"Ungheria",pt:"Hungria"},
+"Oekraïne":{nl:"Oekraïne",en:"Ukraine",de:"Ukraine",es:"Ucrania",fr:"Ukraine",it:"Ucraina",pt:"Ucrânia"},
+"Georgië":{nl:"Georgië",en:"Georgia",de:"Georgien",es:"Georgia",fr:"Géorgie",it:"Georgia",pt:"Geórgia"},
+"Noord-Ierland":{nl:"Noord-Ierland",en:"Northern Ireland",de:"Nordirland",es:"Irlanda del Norte",fr:"Irlande du Nord",it:"Irlanda del Nord",pt:"Irlanda do Norte"},
+"Israël":{nl:"Israël",en:"Israel",de:"Israel",es:"Israel",fr:"Israël",it:"Israele",pt:"Israel"},
+"Oostenrijk":{nl:"Oostenrijk",en:"Austria",de:"Österreich",es:"Austria",fr:"Autriche",it:"Austria",pt:"Áustria"},
+"Ierland":{nl:"Ierland",en:"Ireland",de:"Irland",es:"Irlanda",fr:"Irlande",it:"Irlanda",pt:"Irlanda"},
+"Kosovo":{nl:"Kosovo",en:"Kosovo",de:"Kosovo",es:"Kosovo",fr:"Kosovo",it:"Kosovo",pt:"Kosovo"},
+"Polen":{nl:"Polen",en:"Poland",de:"Polen",es:"Polonia",fr:"Pologne",it:"Polonia",pt:"Polónia"},
+"Bosnië en Herzegovina":{nl:"Bosnië en Herzegovina",en:"Bosnia and Herzegovina",de:"Bosnien und Herzegowina",es:"Bosnia y Herzegovina",fr:"Bosnie-Herzégovine",it:"Bosnia ed Erzegovina",pt:"Bósnia e Herzegovina"},
+"Roemenië":{nl:"Roemenië",en:"Romania",de:"Rumänien",es:"Rumanía",fr:"Roumanie",it:"Romania",pt:"Roménia"},
+"Zweden":{nl:"Zweden",en:"Sweden",de:"Schweden",es:"Suecia",fr:"Suède",it:"Svezia",pt:"Suécia"},
+"Albanië":{nl:"Albanië",en:"Albania",de:"Albanien",es:"Albania",fr:"Albanie",it:"Albania",pt:"Albânia"},
+"Finland":{nl:"Finland",en:"Finland",de:"Finnland",es:"Finlandia",fr:"Finlande",it:"Finlandia",pt:"Finlândia"},
+"Belarus":{nl:"Belarus",en:"Belarus",de:"Belarus",es:"Bielorrusia",fr:"Biélorussie",it:"Bielorussia",pt:"Bielorrússia"},
+"San Marino":{nl:"San Marino",en:"San Marino",de:"San Marino",es:"San Marino",fr:"Saint-Marin",it:"San Marino",pt:"São Marinho"},
+"Montenegro":{nl:"Montenegro",en:"Montenegro",de:"Montenegro",es:"Montenegro",fr:"Monténégro",it:"Montenegro",pt:"Montenegro"},
+"Armenië":{nl:"Armenië",en:"Armenia",de:"Armenien",es:"Armenia",fr:"Arménie",it:"Armenia",pt:"Arménia"},
+"Cyprus":{nl:"Cyprus",en:"Cyprus",de:"Zypern",es:"Chipre",fr:"Chypre",it:"Cipro",pt:"Chipre"},
+"Letland":{nl:"Letland",en:"Latvia",de:"Lettland",es:"Letonia",fr:"Lettonie",it:"Lettonia",pt:"Letónia"},
+"Kazachstan":{nl:"Kazachstan",en:"Kazakhstan",de:"Kasachstan",es:"Kazajistán",fr:"Kazakhstan",it:"Kazakistan",pt:"Cazaquistão"},
+"Slowakije":{nl:"Slowakije",en:"Slovakia",de:"Slowakei",es:"Eslovaquia",fr:"Slovaquie",it:"Slovacchia",pt:"Eslováquia"},
+"Faeröer":{nl:"Faeröer",en:"Faroe Islands",de:"Färöer",es:"Islas Feroe",fr:"Îles Féroé",it:"Isole Faroe",pt:"Ilhas Faroé"},
+"Moldavië":{nl:"Moldavië",en:"Moldova",de:"Moldau",es:"Moldavia",fr:"Moldavie",it:"Moldavia",pt:"Moldávia"},
+"IJsland":{nl:"IJsland",en:"Iceland",de:"Island",es:"Islandia",fr:"Islande",it:"Islanda",pt:"Islândia"},
+"Bulgarije":{nl:"Bulgarije",en:"Bulgaria",de:"Bulgarien",es:"Bulgaria",fr:"Bulgarie",it:"Bulgaria",pt:"Bulgária"},
+"Estland":{nl:"Estland",en:"Estonia",de:"Estland",es:"Estonia",fr:"Estonie",it:"Estonia",pt:"Estónia"},
+"Luxemburg":{nl:"Luxemburg",en:"Luxembourg",de:"Luxemburg",es:"Luxemburgo",fr:"Luxembourg",it:"Lussemburgo",pt:"Luxemburgo"},
+"Gibraltar":{nl:"Gibraltar",en:"Gibraltar",de:"Gibraltar",es:"Gibraltar",fr:"Gibraltar",it:"Gibilterra",pt:"Gibraltar"},
+"Malta":{nl:"Malta",en:"Malta",de:"Malta",es:"Malta",fr:"Malte",it:"Malta",pt:"Malta"},
+"Andorra":{nl:"Andorra",en:"Andorra",de:"Andorra",es:"Andorra",fr:"Andorre",it:"Andorra",pt:"Andorra"},
+"Litouwen":{nl:"Litouwen",en:"Lithuania",de:"Litauen",es:"Lituania",fr:"Lituanie",it:"Lituania",pt:"Lituânia"},
+"Azerbeidzjan":{nl:"Azerbeidzjan",en:"Azerbaijan",de:"Aserbaidschan",es:"Azerbaiyán",fr:"Azerbaïdjan",it:"Azerbaigian",pt:"Azerbaijão"},
+"Liechtenstein":{nl:"Liechtenstein",en:"Liechtenstein",de:"Liechtenstein",es:"Liechtenstein",fr:"Liechtenstein",it:"Liechtenstein",pt:"Liechtenstein"}
+};
+
 const flags: Record<string, string> = {
   "Frankrijk": "🇫🇷", "Italië": "🇮🇹", "België": "🇧🇪", "Turkije": "🇹🇷",
   "Duitsland": "🇩🇪", "Nederland": "🇳🇱", "Servië": "🇷🇸", "Griekenland": "🇬🇷",
@@ -162,7 +235,12 @@ const raw: Record<string, Array<[string,string,string,string?]>> = {
  ],
 };
 
-const monthMap: Record<string,string> = {sep:"SEP",okt:"OKT",nov:"NOV"};
+const monthLabels: Record<LanguageCode, Record<string,string>> = {
+  nl:{sep:"SEP",okt:"OKT",nov:"NOV"}, en:{sep:"SEP",okt:"OCT",nov:"NOV"},
+  de:{sep:"SEP",okt:"OKT",nov:"NOV"}, es:{sep:"SEP",okt:"OCT",nov:"NOV"},
+  fr:{sep:"SEPT",okt:"OCT",nov:"NOV"}, it:{sep:"SET",okt:"OTT",nov:"NOV"},
+  pt:{sep:"SET",okt:"OUT",nov:"NOV"}
+};
 
 const groups: Group[] = groupInfo.map((g) => ({
   ...g,
@@ -204,6 +282,10 @@ function createEmptyStandings(teams: string[]): StandingRow[] {
 }
 
 export default function NationsLeaguePage() {
+  const [language, setLanguage] = useState<LanguageCode>("nl");
+  const t = translations[language];
+  const country = (name:string) => countryNames[name]?.[language] ?? name;
+
   const [league, setLeague] = useState<"A"|"B"|"C"|"D">("A");
   const [selected, setSelected] = useState("A2");
   const [predictions, setPredictions] = useState<Record<string,Prediction>>({});
@@ -243,6 +325,26 @@ export default function NationsLeaguePage() {
   }, [group.id]);
 
   useEffect(() => {
+    const syncLanguage = () => {
+      const stored = window.localStorage.getItem("voetiq-language");
+      setLanguage(isLanguageCode(stored) ? stored : "nl");
+    };
+    const handleLanguageChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{language?:string}>;
+      const next = customEvent.detail?.language ?? null;
+      if (isLanguageCode(next)) setLanguage(next);
+      else syncLanguage();
+    };
+    syncLanguage();
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+    window.addEventListener("storage", syncLanguage);
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+      window.removeEventListener("storage", syncLanguage);
+    };
+  }, []);
+
+  useEffect(() => {
     async function loadSavedPredictions() {
       setLoadingSaved(true);
 
@@ -263,7 +365,7 @@ export default function NationsLeaguePage() {
 
       if (error) {
         console.error("Kon toernooivoorspellingen niet laden:", error);
-        setMessage("Je opgeslagen voorspellingen konden niet worden geladen.");
+        setMessage(t.loadError);
         setLoadingSaved(false);
         return;
       }
@@ -315,7 +417,7 @@ export default function NationsLeaguePage() {
     const p = predictions[match.id];
 
     if (!p || p.home === "" || p.away === "") {
-      setMessage("Vul eerst een volledige uitslag in.");
+      setMessage(t.complete);
       return;
     }
 
@@ -330,7 +432,7 @@ export default function NationsLeaguePage() {
       homeScore > 20 ||
       awayScore > 20
     ) {
-      setMessage("Vul een geldige uitslag in van 0 t/m 20.");
+      setMessage(t.valid);
       return;
     }
 
@@ -339,7 +441,7 @@ export default function NationsLeaguePage() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setMessage("Je moet ingelogd zijn om een voorspelling op te slaan.");
+      setMessage(t.login);
       return;
     }
 
@@ -367,13 +469,13 @@ export default function NationsLeaguePage() {
 
     if (error) {
       console.error("Kon voorspelling niet opslaan:", error);
-      setMessage("Er ging iets mis bij het opslaan van je voorspelling.");
+      setMessage(t.saveError);
       setSaving(null);
       return;
     }
 
     setSaved(s => ({ ...s, [match.id]: true }));
-    setMessage("Je voorspelling is opgeslagen.");
+    setMessage(t.saveSuccess);
     setSaving(null);
   };
 
@@ -382,7 +484,7 @@ export default function NationsLeaguePage() {
       <div className="glow g1"/><div className="glow g2"/>
       <div className="shell">
         <div className="top">
-          <Link href="/toernooien" className="back">← Toernooien</Link>
+          <Link href="/toernooien" className="back">← {t.back}</Link>
           <span className="brand"><i/> VOETIQ TOERNOOIEN</span>
         </div>
 
@@ -390,7 +492,7 @@ export default function NationsLeaguePage() {
           <div className="cup">🏆</div>
           <div>
             <span className="eyebrow">UEFA NATIONS LEAGUE • 2026/27</span>
-            <h1>Voorspel de <span>Nations League.</span></h1>
+            <h1>{t.titleBefore} <span>Nations League.</span></h1>
             <p>Kies een league en poule en vul jouw voorspelling voor iedere wedstrijd in.</p>
           </div>
         </section>
@@ -401,8 +503,8 @@ export default function NationsLeaguePage() {
             <strong>League phase: 24 september – 17 november 2026</strong>
             <p>
               {loadingSaved
-                ? "Je opgeslagen voorspellingen worden geladen..."
-                : "Je voorspellingen worden gekoppeld aan je VoetIQ-account en blijven na een refresh bewaard."}
+                ? t.loading
+                : t.account}
             </p>
           </div>
         </div>
@@ -412,7 +514,7 @@ export default function NationsLeaguePage() {
         <div className="league-tabs">
           {(["A","B","C","D"] as const).map(l => (
             <button key={l} onClick={() => chooseLeague(l)} className={league===l?"active":""}>
-              <span>LEAGUE</span><strong>{l}</strong>
+              <span>{t.league}</span><strong>{l}</strong>
             </button>
           ))}
         </div>
@@ -421,18 +523,18 @@ export default function NationsLeaguePage() {
           <div className="group-tabs">
             {leagueGroups.map(g => (
               <button key={g.id} onClick={() => chooseGroup(g.id)} className={group.id===g.id?"active":""}>
-                Groep {g.id}
+                {t.group} {g.id}
               </button>
             ))}
           </div>
 
           <div className="group-head">
             <div>
-              <span className="small-label">LEAGUE {group.league}</span>
-              <h2>Groep {group.id}</h2>
+              <span className="small-label">{t.league} {group.league}</span>
+              <h2>{t.group} {group.id}</h2>
             </div>
             <div className="team-pills">
-              {group.teams.map(t => <span key={t}>{flags[t]} {t}</span>)}
+              {group.teams.map(team => <span key={team}>{flags[team]} {country(team)}</span>)}
             </div>
           </div>
 
@@ -443,12 +545,12 @@ export default function NationsLeaguePage() {
                 onClick={() => setSelectedRound((current) => Math.max(0, current - 1))}
                 disabled={selectedRound === 0}
               >
-                ← Vorige
+                ← {t.previous}
               </button>
 
               <div className="round-title">
-                <span>SPEELRONDE</span>
-                <strong>{activeRound.number} van {rounds.length}</strong>
+                <span>{t.round}</span>
+                <strong>{activeRound.number} {t.of} {rounds.length}</strong>
                 <small>{activeRound.date}</small>
               </div>
 
@@ -461,7 +563,7 @@ export default function NationsLeaguePage() {
                 }
                 disabled={selectedRound === rounds.length - 1}
               >
-                Volgende →
+                {t.next} →
               </button>
             </div>
           )}
@@ -473,7 +575,7 @@ export default function NationsLeaguePage() {
                 key={`${group.id}-round-${round.number}`}
                 className={selectedRound === index ? "active" : ""}
                 onClick={() => setSelectedRound(index)}
-                aria-label={`Ga naar speelronde ${round.number}`}
+                aria-label={`${t.goRound} ${round.number}`}
               >
                 {round.number}
               </button>
@@ -489,22 +591,22 @@ export default function NationsLeaguePage() {
                 <article className="match" key={m.id}>
                   <div className="match-number">#{index+1}</div>
                   <div className="date">
-                    <strong>{day}</strong><span>{monthMap[mon] ?? mon.toUpperCase()}</span><small>{m.time}</small>
+                    <strong>{day}</strong><span>{monthLabels[language][mon] ?? mon.toUpperCase()}</span><small>{m.time}</small>
                   </div>
 
                   <div className="prediction">
                     <div className="team home">
-                      <span>{flags[m.home]}</span><strong>{m.home}</strong>
+                      <span>{flags[m.home]}</span><strong>{country(m.home)}</strong>
                     </div>
 
                     <div className="score">
-                      <input aria-label={`${m.home} score`} inputMode="numeric" value={p.home} onChange={e=>setScore(m.id,"home",e.target.value)} placeholder="-" />
+                      <input aria-label={`${country(m.home)} score`} inputMode="numeric" value={p.home} onChange={e=>setScore(m.id,"home",e.target.value)} placeholder="-" />
                       <b>:</b>
-                      <input aria-label={`${m.away} score`} inputMode="numeric" value={p.away} onChange={e=>setScore(m.id,"away",e.target.value)} placeholder="-" />
+                      <input aria-label={`${country(m.away)} score`} inputMode="numeric" value={p.away} onChange={e=>setScore(m.id,"away",e.target.value)} placeholder="-" />
                     </div>
 
                     <div className="team away">
-                      <strong>{m.away}</strong><span>{flags[m.away]}</span>
+                      <strong>{country(m.away)}</strong><span>{flags[m.away]}</span>
                     </div>
                   </div>
 
@@ -514,10 +616,10 @@ export default function NationsLeaguePage() {
                     disabled={saving === m.id}
                   >
                     {saving === m.id
-                      ? "Opslaan..."
+                      ? t.saving
                       : ok
-                        ? "✓ Opgeslagen"
-                        : "Opslaan"}
+                        ? t.saved
+                        : t.save}
                   </button>
                 </article>
               );
@@ -527,10 +629,10 @@ export default function NationsLeaguePage() {
           <section className="standings-card">
             <div className="standings-heading">
               <div>
-                <span className="small-label">ACTUELE STAND</span>
-                <h3>Stand Groep {group.id}</h3>
+                <span className="small-label">{t.current}</span>
+                <h3>{t.standing} {group.id}</h3>
               </div>
-              <span className="standings-league">League {group.league}</span>
+              <span className="standings-league">{t.league} {group.league}</span>
             </div>
 
             <div className="standings-scroll">
@@ -538,15 +640,15 @@ export default function NationsLeaguePage() {
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Land</th>
-                    <th title="Gespeeld">GS</th>
-                    <th title="Gewonnen">W</th>
-                    <th title="Gelijk">G</th>
-                    <th title="Verloren">V</th>
-                    <th title="Doelpunten voor">DV</th>
-                    <th title="Doelpunten tegen">DT</th>
-                    <th title="Doelsaldo">DS</th>
-                    <th title="Punten">P</th>
+                    <th>{t.country}</th>
+                    <th title={t.played}>GS</th>
+                    <th title={t.won}>W</th>
+                    <th title={t.drawn}>G</th>
+                    <th title={t.lost}>V</th>
+                    <th title={t.gf}>DV</th>
+                    <th title={t.ga}>DT</th>
+                    <th title={t.gd}>DS</th>
+                    <th title={t.points}>P</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -559,7 +661,7 @@ export default function NationsLeaguePage() {
                       </td>
                       <td className="standing-team">
                         <span>{flags[row.team]}</span>
-                        <strong>{row.team}</strong>
+                        <strong>{country(row.team)}</strong>
                       </td>
                       <td>{row.played}</td>
                       <td>{row.won}</td>
@@ -576,16 +678,16 @@ export default function NationsLeaguePage() {
             </div>
 
             <div className="standings-legend">
-              <span><i className="legend-dot first"/> Groepswinnaar</span>
-              <span><i className="legend-dot second"/> Tweede plaats</span>
-              <span className="standings-note">De stand wordt later automatisch bijgewerkt met echte uitslagen.</span>
+              <span><i className="legend-dot first"/> {t.winner}</span>
+              <span><i className="legend-dot second"/> {t.second}</span>
+              <span className="standings-note">{t.note}</span>
             </div>
           </section>
         </section>
 
         <div className="points-info">
           <div className="pi-icon">🎯</div>
-          <div><span>PUNTENSYSTEEM</span><h3>Voorspel zo nauwkeurig mogelijk</h3><p>Het definitieve puntensysteem en automatisch verwerken van uitslagen koppelen we samen met de database.</p></div>
+          <div><span>{t.system}</span><h3>{t.accurate}</h3><p>{t.systemText}</p></div>
         </div>
       </div>
 
