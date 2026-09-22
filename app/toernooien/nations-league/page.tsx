@@ -177,6 +177,32 @@ const groups: Group[] = groupInfo.map((g) => ({
 
 type Prediction = {home:string; away:string};
 
+type StandingRow = {
+  team: string;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  points: number;
+};
+
+function createEmptyStandings(teams: string[]): StandingRow[] {
+  return teams.map((team) => ({
+    team,
+    played: 0,
+    won: 0,
+    drawn: 0,
+    lost: 0,
+    goalsFor: 0,
+    goalsAgainst: 0,
+    goalDifference: 0,
+    points: 0,
+  }));
+}
+
 export default function NationsLeaguePage() {
   const [league, setLeague] = useState<"A"|"B"|"C"|"D">("A");
   const [selected, setSelected] = useState("A2");
@@ -204,6 +230,13 @@ export default function NationsLeaguePage() {
   }, [group]);
 
   const activeRound = rounds[selectedRound] ?? rounds[0];
+
+  const standings = useMemo(() => {
+    // De Nations League is op dit moment nog niet begonnen.
+    // Daarom starten alle landen op 0. Deze structuur kan later direct
+    // worden gevoed met echte uitslagen zonder de tabel opnieuw te bouwen.
+    return createEmptyStandings(group.teams);
+  }, [group]);
 
   useEffect(() => {
     setSelectedRound(0);
@@ -490,6 +523,64 @@ export default function NationsLeaguePage() {
               );
             })}
           </div>
+
+          <section className="standings-card">
+            <div className="standings-heading">
+              <div>
+                <span className="small-label">ACTUELE STAND</span>
+                <h3>Stand Groep {group.id}</h3>
+              </div>
+              <span className="standings-league">League {group.league}</span>
+            </div>
+
+            <div className="standings-scroll">
+              <table className="standings-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Land</th>
+                    <th title="Gespeeld">GS</th>
+                    <th title="Gewonnen">W</th>
+                    <th title="Gelijk">G</th>
+                    <th title="Verloren">V</th>
+                    <th title="Doelpunten voor">DV</th>
+                    <th title="Doelpunten tegen">DT</th>
+                    <th title="Doelsaldo">DS</th>
+                    <th title="Punten">P</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {standings.map((row, index) => (
+                    <tr key={row.team}>
+                      <td className="position">
+                        <span className={index === 0 ? "position-mark first" : index === 1 ? "position-mark second" : "position-mark"}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td className="standing-team">
+                        <span>{flags[row.team]}</span>
+                        <strong>{row.team}</strong>
+                      </td>
+                      <td>{row.played}</td>
+                      <td>{row.won}</td>
+                      <td>{row.drawn}</td>
+                      <td>{row.lost}</td>
+                      <td>{row.goalsFor}</td>
+                      <td>{row.goalsAgainst}</td>
+                      <td>{row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}</td>
+                      <td className="standing-points">{row.points}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="standings-legend">
+              <span><i className="legend-dot first"/> Groepswinnaar</span>
+              <span><i className="legend-dot second"/> Tweede plaats</span>
+              <span className="standings-note">De stand wordt later automatisch bijgewerkt met echte uitslagen.</span>
+            </div>
+          </section>
         </section>
 
         <div className="points-info">
@@ -515,9 +606,10 @@ export default function NationsLeaguePage() {
         .matches{display:grid;gap:8px;padding-top:14px}.match{min-height:75px;padding:10px 11px;display:grid;grid-template-columns:28px 63px 1fr 100px;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.05);border-radius:10px;background:rgba(255,255,255,.018)}.match-number{color:#526a5d;font-size:8px;font-weight:900}.date{display:flex;flex-direction:column;text-align:center}.date strong{font-size:15px}.date span{color:#4fe994;font-size:7px;font-weight:950;letter-spacing:1px}.date small{margin-top:2px;color:#657d70;font-size:7px}
         .prediction{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:13px}.team{display:flex;align-items:center;gap:7px;min-width:0}.team.home{justify-content:flex-end;text-align:right}.team.away{justify-content:flex-start}.team span{font-size:19px}.team strong{font-size:10px;line-height:1.2}.score{display:flex;align-items:center;gap:5px}.score input{width:38px;height:38px;border:1px solid rgba(46,230,129,.16);border-radius:8px;outline:none;background:#061d13;color:#fff;text-align:center;font-size:15px;font-weight:950}.score input:focus{border-color:#2ee681;box-shadow:0 0 0 2px rgba(46,230,129,.06)}.score b{color:#526a5d}
         .save{padding:9px 10px;border:1px solid rgba(46,230,129,.15);border-radius:8px;background:rgba(46,230,129,.06);color:#55eb99;cursor:pointer;font-size:8px;font-weight:950}.save.saved{background:#2ee681;color:#032014}.save:disabled{opacity:.55;cursor:default}
+        .standings-card{margin-top:24px;padding:18px;border:1px solid rgba(46,230,129,.10);border-radius:13px;background:rgba(3,20,13,.48)}.standings-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:13px}.standings-heading .small-label{margin-bottom:4px}.standings-heading h3{margin:0;font-size:17px}.standings-league{padding:6px 8px;border:1px solid rgba(46,230,129,.12);border-radius:7px;background:rgba(46,230,129,.04);color:#66ec9f;font-size:8px;font-weight:900;text-transform:uppercase}.standings-scroll{overflow-x:auto;border:1px solid rgba(255,255,255,.045);border-radius:10px}.standings-table{width:100%;min-width:650px;border-collapse:collapse}.standings-table th{padding:9px 10px;background:rgba(255,255,255,.025);border-bottom:1px solid rgba(255,255,255,.055);color:#60796c;font-size:7px;font-weight:950;letter-spacing:.7px;text-align:center}.standings-table th:nth-child(2){text-align:left}.standings-table td{padding:10px;border-bottom:1px solid rgba(255,255,255,.04);color:#93a99d;font-size:9px;font-weight:800;text-align:center}.standings-table tbody tr:last-child td{border-bottom:0}.position{width:40px}.position-mark{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;border-left:2px solid transparent;border-radius:5px;background:rgba(255,255,255,.025);color:#8ba095}.position-mark.first{border-left-color:#2ee681;background:rgba(46,230,129,.07);color:#67eea2}.position-mark.second{border-left-color:#4aa8ff;background:rgba(74,168,255,.06);color:#7dbdff}.standing-team{display:flex;align-items:center;gap:8px;text-align:left!important;white-space:nowrap}.standing-team span{font-size:17px}.standing-team strong{color:#dbe7e1;font-size:9px}.standing-points{color:#fff!important;font-size:11px!important;font-weight:950!important}.standings-legend{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:10px;color:#6f877a;font-size:7px;font-weight:800}.standings-legend>span{display:flex;align-items:center;gap:5px}.legend-dot{width:7px;height:7px;border-radius:2px;background:#2ee681}.legend-dot.second{background:#4aa8ff}.standings-note{margin-left:auto!important;color:#526b5e!important}
         .points-info{margin-top:18px;padding:19px 22px;display:flex;gap:16px;align-items:center;border:1px dashed rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.015)}.pi-icon{font-size:27px}.points-info span{color:#4be991;font-size:8px;font-weight:950;letter-spacing:1.2px}.points-info h3{margin:3px 0;font-size:14px}.points-info p{margin:0;color:#6e8679;font-size:9px}
         @media(max-width:760px){.brand{display:none}.hero{align-items:flex-start;flex-direction:column}.league-tabs{grid-template-columns:repeat(2,1fr)}.group-head{align-items:flex-start;flex-direction:column}.team-pills{justify-content:flex-start}.match{grid-template-columns:45px 1fr 78px}.match-number{display:none}.prediction{grid-column:2/3}.save{grid-column:3/4}.date{grid-column:1/2;grid-row:1}.team strong{font-size:9px}}
-        @media(max-width:520px){.round-navigation{grid-template-columns:1fr 1fr}.round-title{grid-column:1/-1;grid-row:1}.round-navigation>button{grid-row:2}.round-navigation>button:last-child{justify-self:end}.nl-page{padding-top:23px}.shell{width:min(100% - 24px,1100px)}.group-area{padding:15px}.match{grid-template-columns:45px 1fr;padding:12px 8px}.prediction{grid-column:1/-1;grid-row:2}.date{grid-row:1}.save{grid-column:2/3;grid-row:1}.team{flex-direction:column;gap:2px}.team.home{flex-direction:column-reverse;text-align:center}.team.away{text-align:center}.score input{width:36px;height:36px}.team-pills span{font-size:7px}}
+        @media(max-width:520px){.standings-card{padding:13px}.standings-heading{align-items:flex-start}.standings-note{width:100%;margin-left:0!important}.round-navigation{grid-template-columns:1fr 1fr}.round-title{grid-column:1/-1;grid-row:1}.round-navigation>button{grid-row:2}.round-navigation>button:last-child{justify-self:end}.nl-page{padding-top:23px}.shell{width:min(100% - 24px,1100px)}.group-area{padding:15px}.match{grid-template-columns:45px 1fr;padding:12px 8px}.prediction{grid-column:1/-1;grid-row:2}.date{grid-row:1}.save{grid-column:2/3;grid-row:1}.team{flex-direction:column;gap:2px}.team.home{flex-direction:column-reverse;text-align:center}.team.away{text-align:center}.score input{width:36px;height:36px}.team-pills span{font-size:7px}}
       `}</style>
     </main>
   );
