@@ -540,8 +540,21 @@ function getUserTimezone(): string {
 export default function Wedstrijden() {
   const router = useRouter();
 
-  const [selectedCompetition, setSelectedCompetition] =
-    useState("DED");
+  const [selectedCompetition, setSelectedCompetition] = useState(() => {
+    if (typeof window === "undefined") {
+      return "DED";
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const competitionFromUrl =
+      params.get("competition")?.toUpperCase() || "DED";
+
+    return competitions.some(
+      (competition) => competition.code === competitionFromUrl
+    )
+      ? competitionFromUrl
+      : "DED";
+  });
 
   const [matches, setMatches] = useState<Match[]>([]);
 
@@ -610,22 +623,6 @@ export default function Wedstrijden() {
     }
 
     window.addEventListener("voetiq-language-change", handleLanguageChange);
-
-    const params = new URLSearchParams(
-      window.location.search
-    );
-
-    const competitionFromUrl =
-      params.get("competition")?.toUpperCase() || "DED";
-
-    const isValidCompetition = competitions.some(
-      (competition) =>
-        competition.code === competitionFromUrl
-    );
-
-    if (isValidCompetition) {
-      setSelectedCompetition(competitionFromUrl);
-    }
 
     return () => {
       window.removeEventListener("voetiq-language-change", handleLanguageChange);
