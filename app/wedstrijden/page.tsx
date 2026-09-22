@@ -1,452 +1,2150 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
 type Match = {
-  id: string;
-  date: string;
-  time: string;
+  id: number;
+  utcDate: string;
+  status: string;
+  matchday?: number;
+  homeTeam: {
+    name: string;
+    crest?: string;
+  };
+  awayTeam: {
+    name: string;
+    crest?: string;
+  };
+  competition: {
+    name: string;
+  };
+};
+
+type Prediction = {
   home: string;
   away: string;
 };
 
-type Group = {
-  id: string;
-  league: "A" | "B" | "C" | "D";
-  teams: string[];
-  matches: Match[];
+type Competition = {
+  code: string;
+  name: string;
+  flag: string;
 };
 
-const flags: Record<string, string> = {
-  "Frankrijk": "🇫🇷", "Italië": "🇮🇹", "België": "🇧🇪", "Turkije": "🇹🇷",
-  "Duitsland": "🇩🇪", "Nederland": "🇳🇱", "Servië": "🇷🇸", "Griekenland": "🇬🇷",
-  "Spanje": "🇪🇸", "Kroatië": "🇭🇷", "Engeland": "🏴", "Tsjechië": "🇨🇿",
-  "Portugal": "🇵🇹", "Denemarken": "🇩🇰", "Noorwegen": "🇳🇴", "Wales": "🏴",
-  "Schotland": "🏴", "Zwitserland": "🇨🇭", "Slovenië": "🇸🇮", "Noord-Macedonië": "🇲🇰",
-  "Hongarije": "🇭🇺", "Oekraïne": "🇺🇦", "Georgië": "🇬🇪", "Noord-Ierland": "🇬🇧",
-  "Israël": "🇮🇱", "Oostenrijk": "🇦🇹", "Ierland": "🇮🇪", "Kosovo": "🇽🇰",
-  "Polen": "🇵🇱", "Bosnië en Herzegovina": "🇧🇦", "Roemenië": "🇷🇴", "Zweden": "🇸🇪",
-  "Albanië": "🇦🇱", "Finland": "🇫🇮", "Belarus": "🇧🇾", "San Marino": "🇸🇲",
-  "Montenegro": "🇲🇪", "Armenië": "🇦🇲", "Cyprus": "🇨🇾", "Letland": "🇱🇻",
-  "Kazachstan": "🇰🇿", "Slowakije": "🇸🇰", "Faeröer": "🇫🇴", "Moldavië": "🇲🇩",
-  "IJsland": "🇮🇸", "Bulgarije": "🇧🇬", "Estland": "🇪🇪", "Luxemburg": "🇱🇺",
-  "Gibraltar": "🇬🇮", "Malta": "🇲🇹", "Andorra": "🇦🇩",
-  "Litouwen": "🇱🇹", "Azerbeidzjan": "🇦🇿", "Liechtenstein": "🇱🇮",
+type StoredPrediction = {
+  match_id: number;
+  home_score: number;
+  away_score: number;
 };
 
-const groupInfo: Array<{id:string; league:"A"|"B"|"C"|"D"; teams:string[]}> = [
-  {id:"A1",league:"A",teams:["Frankrijk","Italië","België","Turkije"]},
-  {id:"A2",league:"A",teams:["Duitsland","Nederland","Servië","Griekenland"]},
-  {id:"A3",league:"A",teams:["Spanje","Kroatië","Engeland","Tsjechië"]},
-  {id:"A4",league:"A",teams:["Portugal","Denemarken","Noorwegen","Wales"]},
-  {id:"B1",league:"B",teams:["Schotland","Zwitserland","Slovenië","Noord-Macedonië"]},
-  {id:"B2",league:"B",teams:["Hongarije","Oekraïne","Georgië","Noord-Ierland"]},
-  {id:"B3",league:"B",teams:["Israël","Oostenrijk","Ierland","Kosovo"]},
-  {id:"B4",league:"B",teams:["Polen","Bosnië en Herzegovina","Roemenië","Zweden"]},
-  {id:"C1",league:"C",teams:["Albanië","Finland","Belarus","San Marino"]},
-  {id:"C2",league:"C",teams:["Montenegro","Armenië","Cyprus","Letland"]},
-  {id:"C3",league:"C",teams:["Kazachstan","Slowakije","Faeröer","Moldavië"]},
-  {id:"C4",league:"C",teams:["IJsland","Bulgarije","Estland","Luxemburg"]},
-  {id:"D1",league:"D",teams:["Gibraltar","Malta","Andorra"]},
-  {id:"D2",league:"D",teams:["Litouwen","Azerbeidzjan","Liechtenstein"]},
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+type TranslationKey =
+  | "matches"
+  | "subtitle"
+  | "competition"
+  | "filled"
+  | "loading"
+  | "noUpcoming"
+  | "noUpcomingDescription"
+  | "previous"
+  | "matchday"
+  | "next"
+  | "predicted"
+  | "predictionClosed"
+  | "saving"
+  | "changePrediction"
+  | "savePrediction"
+  | "matchesLoadFailed"
+  | "completeScore"
+  | "validScore"
+  | "loginRequired"
+  | "predictionSaveFailed"
+  | "predictionSaved"
+  | "predictionSaveError"
+  | "premiumRequired"
+  | "unlockPremium"
+  | "premiumOnly"
+  | "premiumGateTitle"
+  | "premiumGateDescription"
+  | "back"
+  | "timeTbd"
+  | "matchCenter";
+
+const localeByLanguage: Record<LanguageCode, string> = {
+  nl: "nl-NL",
+  en: "en-GB",
+  de: "de-DE",
+  es: "es-ES",
+  fr: "fr-FR",
+  it: "it-IT",
+  pt: "pt-PT",
+};
+
+const translations: Record<
+  LanguageCode,
+  Record<TranslationKey, string>
+> = {
+  nl: {
+    matches: "Wedstrijden",
+    subtitle: "Voorspel de uitslagen en verdien punten.",
+    competition: "Competitie",
+    filled: "Ingevuld",
+    loading: "Wedstrijden laden...",
+    noUpcoming: "Geen komende wedstrijden",
+    noUpcomingDescription:
+      "Er zijn momenteel geen aankomende wedstrijden beschikbaar voor deze competitie.",
+    previous: "Vorige",
+    matchday: "Speelronde",
+    next: "Volgende",
+    predicted: "Voorspeld",
+    predictionClosed: "Voorspelling gesloten",
+    saving: "Opslaan...",
+    changePrediction: "Voorspelling wijzigen",
+    savePrediction: "Voorspelling opslaan",
+    matchesLoadFailed: "De wedstrijden konden niet worden opgehaald.",
+    completeScore: "Vul eerst een volledige uitslag in.",
+    validScore: "Vul een geldige uitslag in van 0 t/m 20.",
+    loginRequired: "Je moet ingelogd zijn om een voorspelling op te slaan.",
+    predictionSaveFailed: "Je voorspelling kon niet worden opgeslagen.",
+    predictionSaved: "Je voorspelling is opgeslagen.",
+    predictionSaveError:
+      "Er ging iets mis bij het opslaan van je voorspelling.",
+    premiumRequired: "Voor Champions League-voorspellingen heb je VoetIQ Premium nodig.",
+    unlockPremium: "Ontgrendel met VoetIQ Premium",
+    premiumOnly: "Alleen met Premium",
+    premiumGateTitle: "Champions League is onderdeel van VoetIQ Premium",
+    premiumGateDescription: "Word Premium om Champions League-wedstrijden te bekijken en te voorspellen.",
+    back: "Terug",
+    timeTbd: "Tijd volgt",
+    matchCenter: "VOETIQ MATCH CENTER",
+  },
+  en: {
+    matches: "Matches",
+    subtitle: "Predict the scores and earn points.",
+    competition: "Competition",
+    filled: "Completed",
+    loading: "Loading matches...",
+    noUpcoming: "No upcoming matches",
+    noUpcomingDescription:
+      "There are currently no upcoming matches available for this competition.",
+    previous: "Previous",
+    matchday: "Matchday",
+    next: "Next",
+    predicted: "Predicted",
+    predictionClosed: "Prediction closed",
+    saving: "Saving...",
+    changePrediction: "Change prediction",
+    savePrediction: "Save prediction",
+    matchesLoadFailed: "The matches could not be loaded.",
+    completeScore: "Enter a complete score first.",
+    validScore: "Enter a valid score from 0 to 20.",
+    loginRequired: "You must be logged in to save a prediction.",
+    predictionSaveFailed: "Your prediction could not be saved.",
+    predictionSaved: "Your prediction has been saved.",
+    predictionSaveError: "Something went wrong while saving your prediction.",
+    premiumRequired: "You need VoetIQ Premium to predict Champions League matches.",
+    unlockPremium: "Unlock with VoetIQ Premium",
+    premiumOnly: "Premium only",
+    premiumGateTitle: "Champions League is part of VoetIQ Premium",
+    premiumGateDescription: "Go Premium to view and predict Champions League matches.",
+    back: "Back",
+    timeTbd: "Time TBA",
+    matchCenter: "VOETIQ MATCH CENTER",
+  },
+  de: {
+    matches: "Spiele",
+    subtitle: "Tippe die Ergebnisse und sammle Punkte.",
+    competition: "Wettbewerb",
+    filled: "Ausgefüllt",
+    loading: "Spiele werden geladen...",
+    noUpcoming: "Keine kommenden Spiele",
+    noUpcomingDescription:
+      "Für diesen Wettbewerb sind derzeit keine kommenden Spiele verfügbar.",
+    previous: "Zurück",
+    matchday: "Spieltag",
+    next: "Weiter",
+    predicted: "Getippt",
+    predictionClosed: "Tippabgabe geschlossen",
+    saving: "Speichern...",
+    changePrediction: "Tipp ändern",
+    savePrediction: "Tipp speichern",
+    matchesLoadFailed: "Die Spiele konnten nicht geladen werden.",
+    completeScore: "Gib zuerst ein vollständiges Ergebnis ein.",
+    validScore: "Gib ein gültiges Ergebnis von 0 bis 20 ein.",
+    loginRequired: "Du musst angemeldet sein, um einen Tipp zu speichern.",
+    predictionSaveFailed: "Dein Tipp konnte nicht gespeichert werden.",
+    predictionSaved: "Dein Tipp wurde gespeichert.",
+    predictionSaveError: "Beim Speichern deines Tipps ist etwas schiefgelaufen.",
+    premiumRequired: "Für Champions-League-Tipps benötigst du VoetIQ Premium.",
+    unlockPremium: "Mit VoetIQ Premium freischalten",
+    premiumOnly: "Nur mit Premium",
+    premiumGateTitle: "Die Champions League ist Teil von VoetIQ Premium",
+    premiumGateDescription: "Hol dir Premium, um Champions-League-Spiele zu sehen und zu tippen.",
+    back: "Zurück",
+    timeTbd: "Uhrzeit folgt",
+    matchCenter: "VOETIQ MATCH CENTER",
+  },
+  es: {
+    matches: "Partidos",
+    subtitle: "Pronostica los resultados y gana puntos.",
+    competition: "Competición",
+    filled: "Completados",
+    loading: "Cargando partidos...",
+    noUpcoming: "No hay próximos partidos",
+    noUpcomingDescription:
+      "Actualmente no hay próximos partidos disponibles para esta competición.",
+    previous: "Anterior",
+    matchday: "Jornada",
+    next: "Siguiente",
+    predicted: "Pronosticado",
+    predictionClosed: "Pronóstico cerrado",
+    saving: "Guardando...",
+    changePrediction: "Cambiar pronóstico",
+    savePrediction: "Guardar pronóstico",
+    matchesLoadFailed: "No se han podido cargar los partidos.",
+    completeScore: "Introduce primero un resultado completo.",
+    validScore: "Introduce un resultado válido entre 0 y 20.",
+    loginRequired: "Debes iniciar sesión para guardar un pronóstico.",
+    predictionSaveFailed: "No se ha podido guardar tu pronóstico.",
+    predictionSaved: "Tu pronóstico se ha guardado.",
+    predictionSaveError: "Se ha producido un error al guardar tu pronóstico.",
+    premiumRequired: "Necesitas VoetIQ Premium para pronosticar la Champions League.",
+    unlockPremium: "Desbloquear con VoetIQ Premium",
+    premiumOnly: "Solo con Premium",
+    premiumGateTitle: "La Champions League forma parte de VoetIQ Premium",
+    premiumGateDescription: "Hazte Premium para ver y pronosticar los partidos de la Champions League.",
+    back: "Volver",
+    timeTbd: "Hora por confirmar",
+    matchCenter: "CENTRO DE PARTIDOS VOETIQ",
+  },
+  fr: {
+    matches: "Matchs",
+    subtitle: "Pronostiquez les scores et gagnez des points.",
+    competition: "Compétition",
+    filled: "Complétés",
+    loading: "Chargement des matchs...",
+    noUpcoming: "Aucun match à venir",
+    noUpcomingDescription:
+      "Aucun match à venir n’est actuellement disponible pour cette compétition.",
+    previous: "Précédent",
+    matchday: "Journée",
+    next: "Suivant",
+    predicted: "Pronostiqué",
+    predictionClosed: "Pronostic fermé",
+    saving: "Enregistrement...",
+    changePrediction: "Modifier le pronostic",
+    savePrediction: "Enregistrer le pronostic",
+    matchesLoadFailed: "Les matchs n’ont pas pu être chargés.",
+    completeScore: "Saisissez d’abord un score complet.",
+    validScore: "Saisissez un score valide compris entre 0 et 20.",
+    loginRequired:
+      "Vous devez être connecté pour enregistrer un pronostic.",
+    predictionSaveFailed: "Votre pronostic n’a pas pu être enregistré.",
+    predictionSaved: "Votre pronostic a été enregistré.",
+    predictionSaveError:
+      "Une erreur s’est produite lors de l’enregistrement de votre pronostic.",
+    premiumRequired: "VoetIQ Premium est nécessaire pour pronostiquer la Champions League.",
+    unlockPremium: "Débloquer avec VoetIQ Premium",
+    premiumOnly: "Premium uniquement",
+    premiumGateTitle: "La Ligue des champions fait partie de VoetIQ Premium",
+    premiumGateDescription: "Passez à Premium pour voir et pronostiquer les matchs de Ligue des champions.",
+    back: "Retour",
+    timeTbd: "Horaire à confirmer",
+    matchCenter: "CENTRE DES MATCHS VOETIQ",
+  },
+  it: {
+    matches: "Partite",
+    subtitle: "Pronostica i risultati e guadagna punti.",
+    competition: "Competizione",
+    filled: "Completati",
+    loading: "Caricamento delle partite...",
+    noUpcoming: "Nessuna partita in programma",
+    noUpcomingDescription:
+      "Al momento non ci sono prossime partite disponibili per questa competizione.",
+    previous: "Precedente",
+    matchday: "Giornata",
+    next: "Successiva",
+    predicted: "Pronosticato",
+    predictionClosed: "Pronostico chiuso",
+    saving: "Salvataggio...",
+    changePrediction: "Modifica pronostico",
+    savePrediction: "Salva pronostico",
+    matchesLoadFailed: "Non è stato possibile caricare le partite.",
+    completeScore: "Inserisci prima un risultato completo.",
+    validScore: "Inserisci un risultato valido da 0 a 20.",
+    loginRequired: "Devi accedere per salvare un pronostico.",
+    predictionSaveFailed: "Non è stato possibile salvare il tuo pronostico.",
+    predictionSaved: "Il tuo pronostico è stato salvato.",
+    predictionSaveError:
+      "Si è verificato un errore durante il salvataggio del pronostico.",
+    premiumRequired: "Serve VoetIQ Premium per pronosticare la Champions League.",
+    unlockPremium: "Sblocca con VoetIQ Premium",
+    premiumOnly: "Solo Premium",
+    premiumGateTitle: "La Champions League fa parte di VoetIQ Premium",
+    premiumGateDescription: "Passa a Premium per vedere e pronosticare le partite di Champions League.",
+    back: "Indietro",
+    timeTbd: "Orario da definire",
+    matchCenter: "CENTRO PARTITE VOETIQ",
+  },
+  pt: {
+    matches: "Jogos",
+    subtitle: "Prevê os resultados e ganha pontos.",
+    competition: "Competição",
+    filled: "Preenchidos",
+    loading: "A carregar jogos...",
+    noUpcoming: "Sem próximos jogos",
+    noUpcomingDescription:
+      "De momento, não existem próximos jogos disponíveis para esta competição.",
+    previous: "Anterior",
+    matchday: "Jornada",
+    next: "Seguinte",
+    predicted: "Previsto",
+    predictionClosed: "Previsão encerrada",
+    saving: "A guardar...",
+    changePrediction: "Alterar previsão",
+    savePrediction: "Guardar previsão",
+    matchesLoadFailed: "Não foi possível carregar os jogos.",
+    completeScore: "Introduz primeiro um resultado completo.",
+    validScore: "Introduz um resultado válido entre 0 e 20.",
+    loginRequired: "Tens de iniciar sessão para guardar uma previsão.",
+    predictionSaveFailed: "Não foi possível guardar a tua previsão.",
+    predictionSaved: "A tua previsão foi guardada.",
+    predictionSaveError: "Ocorreu um erro ao guardar a tua previsão.",
+    premiumRequired: "Precisas do VoetIQ Premium para prever jogos da Champions League.",
+    unlockPremium: "Desbloquear com VoetIQ Premium",
+    premiumOnly: "Apenas Premium",
+    premiumGateTitle: "A Champions League faz parte do VoetIQ Premium",
+    premiumGateDescription: "Adere ao Premium para veres e preveres os jogos da Champions League.",
+    back: "Voltar",
+    timeTbd: "Hora a confirmar",
+    matchCenter: "CENTRO DE JOGOS VOETIQ",
+  },
+};
+
+function isLanguageCode(value: string): value is LanguageCode {
+  return ["nl", "en", "de", "es", "fr", "it", "pt"].includes(value);
+}
+
+
+function translateServerMessage(
+  message: unknown,
+  language: LanguageCode
+): string {
+  if (typeof message !== "string" || message.trim() === "") {
+    return "";
+  }
+
+  const knownMessages: Record<string, TranslationKey> = {
+    "Je voorspelling is opgeslagen.": "predictionSaved",
+    "Je voorspelling kon niet worden opgeslagen.": "predictionSaveFailed",
+    "Je moet ingelogd zijn om een voorspelling op te slaan.": "loginRequired",
+    "Vul eerst een volledige uitslag in.": "completeScore",
+    "Vul een geldige uitslag in van 0 t/m 20.": "validScore",
+  };
+
+  const key = knownMessages[message];
+
+  return key ? translations[language][key] : message;
+}
+
+const competitions: Competition[] = [
+  { code: "PL", name: "Premier League", flag: "🏴" },
+  { code: "DED", name: "Eredivisie", flag: "🇳🇱" },
+  { code: "PD", name: "La Liga", flag: "🇪🇸" },
+  { code: "BL1", name: "Bundesliga", flag: "🇩🇪" },
+  { code: "SA", name: "Serie A", flag: "🇮🇹" },
+  { code: "FL1", name: "Ligue 1", flag: "🇫🇷" },
+  { code: "PPL", name: "Primeira Liga", flag: "🇵🇹" },
+  { code: "EL", name: "Europa League", flag: "🟠" },
+  { code: "ECL", name: "Conference League", flag: "🟢" },
+  { code: "CL", name: "Champions League", flag: "🏆" },
+  { code: "KNVB", name: "KNVB Beker Special", flag: "✨" },
 ];
 
-const raw: Record<string, Array<[string,string,string,string?]>> = {
- A1:[
-  ["25 sep","Italië","België"],["25 sep","Turkije","Frankrijk"],
-  ["28 sep","België","Frankrijk"],["28 sep","Turkije","Italië"],
-  ["2 okt","Frankrijk","Italië"],["2 okt","België","Turkije"],
-  ["5 okt","Frankrijk","België"],["5 okt","Italië","Turkije"],
-  ["12 nov","Italië","Frankrijk"],["12 nov","Turkije","België","18:00"],
-  ["15 nov","België","Italië"],["15 nov","Frankrijk","Turkije"],
- ],
- A2:[
-  ["24 sep","Nederland","Duitsland"],["24 sep","Servië","Griekenland"],
-  ["27 sep","Servië","Nederland","18:00"],["27 sep","Duitsland","Griekenland"],
-  ["1 okt","Griekenland","Nederland"],["1 okt","Duitsland","Servië"],
-  ["4 okt","Nederland","Servië"],["4 okt","Griekenland","Duitsland"],
-  ["13 nov","Nederland","Griekenland"],["13 nov","Servië","Duitsland"],
-  ["16 nov","Duitsland","Nederland"],["16 nov","Griekenland","Servië"],
- ],
- A3:[
-  ["26 sep","Tsjechië","Kroatië"],["26 sep","Engeland","Spanje"],
-  ["29 sep","Tsjechië","Engeland"],["29 sep","Spanje","Kroatië"],
-  ["3 okt","Kroatië","Engeland","18:00"],["3 okt","Spanje","Tsjechië"],
-  ["6 okt","Kroatië","Spanje"],["6 okt","Engeland","Tsjechië"],
-  ["12 nov","Engeland","Kroatië"],["12 nov","Tsjechië","Spanje"],
-  ["15 nov","Kroatië","Tsjechië"],["15 nov","Spanje","Engeland"],
- ],
- A4:[
-  ["24 sep","Noorwegen","Denemarken"],["24 sep","Portugal","Wales"],
-  ["27 sep","Denemarken","Wales","18:00"],["27 sep","Noorwegen","Portugal"],
-  ["1 okt","Denemarken","Portugal"],["1 okt","Wales","Noorwegen"],
-  ["4 okt","Wales","Denemarken"],["4 okt","Portugal","Noorwegen"],
-  ["14 nov","Portugal","Denemarken"],["14 nov","Noorwegen","Wales","18:00"],
-  ["17 nov","Denemarken","Noorwegen"],["17 nov","Wales","Portugal"],
- ],
- B1:[
-  ["26 sep","Slovenië","Schotland","15:00"],["26 sep","Noord-Macedonië","Zwitserland"],
-  ["29 sep","Schotland","Zwitserland"],["29 sep","Slovenië","Noord-Macedonië"],
-  ["3 okt","Noord-Macedonië","Schotland"],["3 okt","Zwitserland","Slovenië"],
-  ["6 okt","Schotland","Slovenië"],["6 okt","Zwitserland","Noord-Macedonië"],
-  ["13 nov","Schotland","Noord-Macedonië"],["13 nov","Slovenië","Zwitserland"],
-  ["16 nov","Zwitserland","Schotland"],["16 nov","Noord-Macedonië","Slovenië"],
- ],
- B2:[
-  ["25 sep","Georgië","Noord-Ierland","18:00"],["25 sep","Hongarije","Oekraïne"],
-  ["28 sep","Georgië","Oekraïne","18:00"],["28 sep","Noord-Ierland","Hongarije"],
-  ["2 okt","Hongarije","Georgië"],["2 okt","Oekraïne","Noord-Ierland"],
-  ["5 okt","Noord-Ierland","Georgië"],["5 okt","Oekraïne","Hongarije"],
-  ["14 nov","Georgië","Hongarije","18:00"],["14 nov","Noord-Ierland","Oekraïne"],
-  ["17 nov","Oekraïne","Georgië"],["17 nov","Hongarije","Noord-Ierland"],
- ],
- B3:[
-  ["24 sep","Oostenrijk","Israël"],["24 sep","Kosovo","Ierland"],
-  ["27 sep","Oostenrijk","Kosovo","18:00"],["27 sep","Israël","Ierland"],
-  ["1 okt","Ierland","Oostenrijk"],["1 okt","Israël","Kosovo"],
-  ["4 okt","Kosovo","Oostenrijk","18:00"],["4 okt","Ierland","Israël"],
-  ["14 nov","Oostenrijk","Ierland"],["14 nov","Kosovo","Israël","15:00"],
-  ["17 nov","Israël","Oostenrijk"],["17 nov","Ierland","Kosovo"],
- ],
- B4:[
-  ["25 sep","Polen","Bosnië en Herzegovina"],["25 sep","Zweden","Roemenië"],
-  ["28 sep","Roemenië","Bosnië en Herzegovina"],["28 sep","Zweden","Polen"],
-  ["2 okt","Bosnië en Herzegovina","Zweden"],["2 okt","Polen","Roemenië"],
-  ["5 okt","Bosnië en Herzegovina","Polen"],["5 okt","Roemenië","Zweden"],
-  ["14 nov","Zweden","Bosnië en Herzegovina"],["14 nov","Roemenië","Polen"],
-  ["17 nov","Bosnië en Herzegovina","Roemenië"],["17 nov","Polen","Zweden"],
- ],
- C1:[
-  ["26 sep","Albanië","Belarus"],["26 sep","San Marino","Finland","18:00"],
-  ["29 sep","Finland","Belarus","18:00"],["29 sep","San Marino","Albanië"],
-  ["3 okt","Finland","Albanië","15:00"],["3 okt","Belarus","San Marino","18:00"],
-  ["6 okt","Albanië","San Marino"],["6 okt","Belarus","Finland"],
-  ["12 nov","Albanië","Finland"],["12 nov","San Marino","Belarus"],
-  ["15 nov","Belarus","Albanië","18:00"],["15 nov","Finland","San Marino","18:00"],
- ],
- C2:[
-  ["25 sep","Armenië","Letland","18:00"],["25 sep","Montenegro","Cyprus"],
-  ["28 sep","Armenië","Montenegro","18:00"],["28 sep","Letland","Cyprus","18:00"],
-  ["2 okt","Cyprus","Armenië","18:00"],["2 okt","Letland","Montenegro","18:00"],
-  ["5 okt","Montenegro","Armenië"],["5 okt","Cyprus","Letland","18:00"],
-  ["12 nov","Armenië","Cyprus","18:00"],["12 nov","Montenegro","Letland"],
-  ["15 nov","Letland","Armenië","15:00"],["15 nov","Cyprus","Montenegro","15:00"],
- ],
- C3:[
-  ["26 sep","Faeröer","Kazachstan","18:00"],["26 sep","Slowakije","Moldavië"],
-  ["29 sep","Moldavië","Faeröer","18:00"],["29 sep","Slowakije","Kazachstan"],
-  ["2 okt","Faeröer","Slowakije"],["2 okt","Kazachstan","Moldavië","16:00"],
-  ["6 okt","Kazachstan","Faeröer","16:00"],["6 okt","Moldavië","Slowakije"],
-  ["13 nov","Slowakije","Faeröer"],["13 nov","Moldavië","Kazachstan","18:00"],
-  ["16 nov","Faeröer","Moldavië","16:00"],["16 nov","Kazachstan","Slowakije","16:00"],
- ],
- C4:[
-  ["26 sep","Bulgarije","Luxemburg","18:00"],["26 sep","IJsland","Estland","18:00"],
-  ["29 sep","Bulgarije","Estland"],["29 sep","Luxemburg","IJsland"],
-  ["3 okt","IJsland","Bulgarije","18:00"],["3 okt","Estland","Luxemburg","18:00"],
-  ["6 okt","Luxemburg","Bulgarije"],["6 okt","Estland","IJsland"],
-  ["13 nov","Bulgarije","IJsland"],["13 nov","Luxemburg","Estland"],
-  ["16 nov","Estland","Bulgarije","18:00"],["16 nov","IJsland","Luxemburg","18:00"],
- ],
- D1:[
-  ["24 sep","Andorra","Malta","18:00"],["27 sep","Gibraltar","Andorra","18:00"],
-  ["1 okt","Malta","Gibraltar"],["4 okt","Malta","Andorra","18:00"],
-  ["13 nov","Andorra","Gibraltar"],["16 nov","Gibraltar","Malta"],
- ],
- D2:[
-  ["24 sep","Liechtenstein","Litouwen"],["27 sep","Litouwen","Azerbeidzjan","15:00"],
-  ["1 okt","Azerbeidzjan","Liechtenstein","18:00"],["4 okt","Azerbeidzjan","Litouwen","15:00"],
-  ["13 nov","Liechtenstein","Azerbeidzjan"],["16 nov","Litouwen","Liechtenstein","18:00"],
- ],
+const competitionThemes: Record<
+  string,
+  {
+    hero: string;
+    card: string;
+    accent: string;
+    glow: string;
+    page: string;
+    surface: string;
+    surfaceSoft: string;
+    border: string;
+  }
+> = {
+  DED: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(38,103,255,0.55) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,181,255,0.24) 0%, transparent 28%), linear-gradient(135deg, #03132f 0%, #082d73 55%, #0757c9 100%)",
+    card: "linear-gradient(135deg, #071d45 0%, #0a4ba8 100%)",
+    accent: "#8ac5ff",
+    glow: "rgba(31,112,255,0.30)",
+    page: "#030b18",
+    surface: "#07172b",
+    surfaceSoft: "#0a2039",
+    border: "rgba(138,197,255,0.16)",
+  },
+  PL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(216,0,255,0.35) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(0,255,209,0.18) 0%, transparent 28%), linear-gradient(135deg, #170020 0%, #37003c 55%, #5b075f 100%)",
+    card: "linear-gradient(135deg, #24002b 0%, #52005c 100%)",
+    accent: "#ef8cff",
+    glow: "rgba(181,36,202,0.28)",
+    page: "#0d0612",
+    surface: "#1b0b22",
+    surfaceSoft: "#25102e",
+    border: "rgba(239,140,255,0.15)",
+  },
+  PD: {
+    hero: "radial-gradient(circle at 82% 20%, rgba(255,126,38,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,43,43,0.22) 0%, transparent 28%), linear-gradient(135deg, #1b0808 0%, #641616 55%, #a52b12 100%)",
+    card: "linear-gradient(135deg, #3b0c0c 0%, #9a2915 100%)",
+    accent: "#ffad78",
+    glow: "rgba(231,76,35,0.27)",
+    page: "#130707",
+    surface: "#251010",
+    surfaceSoft: "#321414",
+    border: "rgba(255,173,120,0.15)",
+  },
+  BL1: {
+    hero: "radial-gradient(circle at 80% 20%, rgba(255,70,70,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,255,255,0.09) 0%, transparent 28%), linear-gradient(135deg, #190404 0%, #650909 55%, #a20e0e 100%)",
+    card: "linear-gradient(135deg, #3d0606 0%, #9e1010 100%)",
+    accent: "#ff8b8b",
+    glow: "rgba(220,25,25,0.27)",
+    page: "#120505",
+    surface: "#260909",
+    surfaceSoft: "#330d0d",
+    border: "rgba(255,139,139,0.15)",
+  },
+  SA: {
+    hero: "radial-gradient(circle at 80% 20%, rgba(36,131,255,0.45) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(72,205,255,0.18) 0%, transparent 28%), linear-gradient(135deg, #041326 0%, #073c78 55%, #0967b5 100%)",
+    card: "linear-gradient(135deg, #062a55 0%, #0874bd 100%)",
+    accent: "#8bd1ff",
+    glow: "rgba(28,126,219,0.27)",
+    page: "#04101b",
+    surface: "#071d31",
+    surfaceSoft: "#092843",
+    border: "rgba(139,209,255,0.15)",
+  },
+  FL1: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(216,255,0,0.22) 0%, transparent 30%), radial-gradient(circle at 15% 80%, rgba(39,82,255,0.22) 0%, transparent 28%), linear-gradient(135deg, #071124 0%, #101f4b 55%, #19327b 100%)",
+    card: "linear-gradient(135deg, #0c1837 0%, #1c3474 100%)",
+    accent: "#d8ff49",
+    glow: "rgba(97,119,255,0.24)",
+    page: "#050a16",
+    surface: "#0a1328",
+    surfaceSoft: "#101d3b",
+    border: "rgba(216,255,73,0.13)",
+  },
+  PPL: {
+    hero: "radial-gradient(circle at 82% 20%, rgba(225,32,50,0.34) 0%, transparent 31%), radial-gradient(circle at 15% 80%, rgba(31,190,102,0.25) 0%, transparent 28%), linear-gradient(135deg, #061a11 0%, #0a5130 55%, #12693f 100%)",
+    card: "linear-gradient(135deg, #082f1d 0%, #12653d 100%)",
+    accent: "#76ecad",
+    glow: "rgba(26,166,91,0.25)",
+    page: "#04110b",
+    surface: "#082218",
+    surfaceSoft: "#0b3020",
+    border: "rgba(118,236,173,0.14)",
+  },
+  EL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(255,117,24,0.42) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(255,181,71,0.20) 0%, transparent 30%), linear-gradient(135deg, #160904 0%, #5a2108 55%, #a8490c 100%)",
+    card: "linear-gradient(135deg, #341207 0%, #9a400b 100%)",
+    accent: "#ffad63",
+    glow: "rgba(235,105,20,0.27)",
+    page: "#100703",
+    surface: "#241008",
+    surfaceSoft: "#32160a",
+    border: "rgba(255,173,99,0.15)",
+  },
+  ECL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(55,215,112,0.38) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(123,255,167,0.16) 0%, transparent 30%), linear-gradient(135deg, #031008 0%, #0a4827 55%, #11713b 100%)",
+    card: "linear-gradient(135deg, #062a17 0%, #0e6937 100%)",
+    accent: "#7cf0a9",
+    glow: "rgba(32,180,91,0.25)",
+    page: "#030d07",
+    surface: "#071d11",
+    surfaceSoft: "#0a2a18",
+    border: "rgba(124,240,169,0.14)",
+  },
+  CL: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(93,110,255,0.42) 0%, transparent 32%), radial-gradient(circle at 18% 80%, rgba(42,58,180,0.30) 0%, transparent 30%), linear-gradient(135deg, #030514 0%, #0b1240 55%, #171e68 100%)",
+    card: "linear-gradient(135deg, #070b2b 0%, #192365 100%)",
+    accent: "#aeb7ff",
+    glow: "rgba(76,91,220,0.28)",
+    page: "#03040d",
+    surface: "#080b1d",
+    surfaceSoft: "#0d1230",
+    border: "rgba(174,183,255,0.14)",
+  },
+  KNVB: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(255,190,46,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,111,0,0.22) 0%, transparent 28%), linear-gradient(135deg, #1b0d02 0%, #6b3105 55%, #a85208 100%)",
+    card: "linear-gradient(135deg, #3a1903 0%, #9a4808 100%)",
+    accent: "#ffd36b",
+    glow: "rgba(255,145,24,0.28)",
+    page: "#120902",
+    surface: "#241207",
+    surfaceSoft: "#321a0a",
+    border: "rgba(255,211,107,0.17)",
+  },
 };
 
-const monthMap: Record<string,string> = {sep:"SEP",okt:"OKT",nov:"NOV"};
 
-const groups: Group[] = groupInfo.map((g) => ({
-  ...g,
-  matches: raw[g.id].map(([date,home,away,time], i) => ({
-    id: `${g.id}-${i+1}`,
-    date,
-    time: time || "20:45",
-    home,
-    away,
-  })),
-}));
+const ECL_KICKOFFS_2026_10_15_UTC: Record<string, string> = {
+  "Lugano|Red Star Belgrade": "2026-10-15T16:45:00Z",
+  "Hajduk Split|Ajax": "2026-10-15T16:45:00Z",
+  "Gent|AGF": "2026-10-15T16:45:00Z",
+  "Egnatia|Midtjylland": "2026-10-15T16:45:00Z",
+  "KuPS|Trabzonspor": "2026-10-15T16:45:00Z",
+  "Mjällby AIF|Inter Club d'Escaldes": "2026-10-15T16:45:00Z",
+  "Panathinaikos|Borac Banja Luka": "2026-10-15T16:45:00Z",
+  "CSKA Sofia|Monaco": "2026-10-15T16:45:00Z",
+  "Riga|Kairat": "2026-10-15T16:45:00Z",
+  "Universitatea Craiova|Getafe": "2026-10-15T16:45:00Z",
+  "Atalanta|Pafos": "2026-10-15T19:00:00Z",
+  "Brighton & Hove Albion|Kauno Žalgiris": "2026-10-15T19:00:00Z",
+  "Copenhagen|Braga": "2026-10-15T19:00:00Z",
+  "Twente|Thun": "2026-10-15T19:00:00Z",
+  "Heart of Midlothian|Nordsjælland": "2026-10-15T19:00:00Z",
+  "Sint-Truiden|Iberia 1999": "2026-10-15T19:00:00Z",
+  "SC Freiburg|Jablonec": "2026-10-15T19:00:00Z",
+  "Brann|Lincoln Red Imps": "2026-10-15T19:00:00Z",
+};
 
-type Prediction = {home:string; away:string};
+function getEffectiveMatchDate(match: Match, competitionCode: string): Date {
+  if (competitionCode === "ECL") {
+    const kickoffKey = `${match.homeTeam.name}|${match.awayTeam.name}`;
+    const scheduledKickoff = ECL_KICKOFFS_2026_10_15_UTC[kickoffKey];
 
-export default function NationsLeaguePage() {
-  const [league, setLeague] = useState<"A"|"B"|"C"|"D">("A");
-  const [selected, setSelected] = useState("A2");
-  const [predictions, setPredictions] = useState<Record<string,Prediction>>({});
-  const [saved, setSaved] = useState<Record<string,boolean>>({});
-  const [saving, setSaving] = useState<string | null>(null);
+    if (scheduledKickoff) {
+      return new Date(scheduledKickoff);
+    }
+  }
+
+  return new Date(match.utcDate);
+}
+
+function getUserTimezone(): string {
+  if (typeof Intl !== "undefined") {
+    const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (browserTimezone) {
+      return browserTimezone;
+    }
+  }
+
+  return "Europe/Amsterdam";
+}
+
+export default function Wedstrijden() {
+  const router = useRouter();
+
+  const [selectedCompetition, setSelectedCompetition] =
+    useState("DED");
+  const [competitionUrlReady, setCompetitionUrlReady] =
+    useState(false);
+
+  const [matches, setMatches] = useState<Match[]>([]);
+
+  const [predictions, setPredictions] = useState<
+    Record<number, Prediction>
+  >({});
+
+  const [savedMatchIds, setSavedMatchIds] = useState<
+    Set<number>
+  >(new Set());
+
+  const [savingMatchId, setSavingMatchId] = useState<
+    number | null
+  >(null);
+
   const [message, setMessage] = useState("");
-  const [loadingSaved, setLoadingSaved] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [language, setLanguage] = useState<LanguageCode>("nl");
+  const [isPremium, setIsPremium] = useState(false);
+  const [premiumLoading, setPremiumLoading] = useState(true);
+  const [timezone, setTimezone] = useState("Europe/Amsterdam");
 
-  const leagueGroups = useMemo(() => groups.filter(g => g.league === league), [league]);
-  const group = groups.find(g => g.id === selected) ?? leagueGroups[0];
+  const [selectedMatchday, setSelectedMatchday] =
+    useState<number | null>(null);
 
   useEffect(() => {
-    async function loadSavedPredictions() {
-      setLoadingSaved(true);
+    const savedLanguage = window.localStorage.getItem("voetiq-language");
+    const initialLanguage: LanguageCode =
+      savedLanguage && isLanguageCode(savedLanguage) ? savedLanguage : "nl";
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
+    setLanguage(initialLanguage);
+    document.documentElement.lang = initialLanguage;
 
-      if (!user) {
-        setLoadingSaved(false);
-        return;
+    const fallbackTimezone = getUserTimezone();
+    setTimezone(fallbackTimezone);
+
+    async function loadRegisteredTimezone() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        const registeredTimezone = user?.user_metadata?.timezone;
+
+        if (
+          typeof registeredTimezone === "string" &&
+          registeredTimezone.trim() !== ""
+        ) {
+          setTimezone(registeredTimezone);
+        }
+      } catch (error) {
+        console.error("Kon geregistreerde tijdzone niet laden:", error);
       }
-
-      const { data, error } = await supabase
-        .from("tournament_predictions")
-        .select("match_id, home_score, away_score")
-        .eq("user_id", user.id)
-        .eq("tournament", "nations-league-2026-27");
-
-      if (error) {
-        console.error("Kon toernooivoorspellingen niet laden:", error);
-        setMessage("Je opgeslagen voorspellingen konden niet worden geladen.");
-        setLoadingSaved(false);
-        return;
-      }
-
-      const predictionMap: Record<string, Prediction> = {};
-      const savedMap: Record<string, boolean> = {};
-
-      (data || []).forEach((row) => {
-        predictionMap[row.match_id] = {
-          home: String(row.home_score),
-          away: String(row.away_score),
-        };
-        savedMap[row.match_id] = true;
-      });
-
-      setPredictions(predictionMap);
-      setSaved(savedMap);
-      setLoadingSaved(false);
     }
 
-    loadSavedPredictions();
+    loadRegisteredTimezone();
+
+    function handleLanguageChange(event: Event) {
+      const customEvent = event as CustomEvent<{ language?: string }>;
+      const nextLanguage = customEvent.detail?.language;
+
+      if (nextLanguage && isLanguageCode(nextLanguage)) {
+        setLanguage(nextLanguage);
+        document.documentElement.lang = nextLanguage;
+      }
+    }
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+    };
   }, []);
 
-  const chooseLeague = (value:"A"|"B"|"C"|"D") => {
-    setLeague(value);
-    const first = groups.find(g => g.league === value);
-    if (first) setSelected(first.id);
-  };
+  useEffect(() => {
+    async function loadPremiumStatus() {
+      try {
+        setPremiumLoading(true);
 
-  const setScore = (matchId:string, side:"home"|"away", value:string) => {
-    const clean = value.replace(/\D/g,"").slice(0,2);
-    setPredictions(p => ({
-      ...p,
-      [matchId]: {...(p[matchId] ?? {home:"",away:""}), [side]:clean}
-    }));
-    setSaved(s => ({...s,[matchId]:false}));
-  };
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
-  const save = async (match: Match) => {
-    if (saving) return;
+        if (!user) {
+          setIsPremium(false);
+          return;
+        }
 
-    const p = predictions[match.id];
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("is_premium, premium_expires_at")
+          .eq("id", user.id)
+          .maybeSingle();
 
-    if (!p || p.home === "" || p.away === "") {
-      setMessage("Vul eerst een volledige uitslag in.");
+        if (error || !data) {
+          console.error("Kon Premium-status niet laden:", error);
+          setIsPremium(false);
+          return;
+        }
+
+        const premiumNotExpired =
+          !data.premium_expires_at ||
+          new Date(data.premium_expires_at).getTime() > Date.now();
+
+        setIsPremium(data.is_premium === true && premiumNotExpired);
+      } finally {
+        setPremiumLoading(false);
+      }
+    }
+
+    loadPremiumStatus();
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const competitionFromUrl =
+      params.get("competition")?.toUpperCase() || "DED";
+
+    const isValidCompetition = competitions.some(
+      (competition) => competition.code === competitionFromUrl
+    );
+
+    setSelectedCompetition(
+      isValidCompetition ? competitionFromUrl : "DED"
+    );
+    setCompetitionUrlReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!competitionUrlReady) {
       return;
     }
 
-    const homeScore = Number(p.home);
-    const awayScore = Number(p.away);
+    loadCompetition(selectedCompetition);
+  }, [selectedCompetition, competitionUrlReady]);
 
-    if (
-      !Number.isInteger(homeScore) ||
-      !Number.isInteger(awayScore) ||
-      homeScore < 0 ||
-      awayScore < 0 ||
-      homeScore > 20 ||
-      awayScore > 20
-    ) {
-      setMessage("Vul een geldige uitslag in van 0 t/m 20.");
-      return;
+  async function loadCompetition(
+    competitionCode: string
+  ) {
+    setLoading(true);
+    setMessage("");
+    setMatches([]);
+    setPredictions({});
+    setSavedMatchIds(new Set());
+    setSelectedMatchday(null);
+
+    try {
+      const response = await fetch(
+        `/api/matches?competition=${competitionCode}`,
+        {
+          cache: "no-store",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Kon wedstrijden niet ophalen"
+        );
+      }
+
+      const data = await response.json();
+
+      const upcomingMatches: Match[] = (
+        data.matches || []
+      )
+        .filter(
+          (match: Match) =>
+            match.status === "SCHEDULED" ||
+            match.status === "TIMED"
+        )
+        .sort(
+          (a: Match, b: Match) =>
+            new Date(a.utcDate).getTime() -
+            new Date(b.utcDate).getTime()
+        );
+
+      setMatches(upcomingMatches);
+
+      const matchdays = upcomingMatches
+        .map((match: Match) => match.matchday)
+        .filter(
+          (
+            matchday: number | undefined
+          ): matchday is number =>
+            typeof matchday === "number"
+        );
+
+      if (matchdays.length > 0) {
+        setSelectedMatchday(
+          Math.min(...matchdays)
+        );
+      }
+
+      await loadSavedPredictions(
+        upcomingMatches
+      );
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        t("matchesLoadFailed")
+      );
+    } finally {
+      setLoading(false);
     }
+  }
 
+  async function loadSavedPredictions(
+    upcomingMatches: Match[]
+  ) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
-      setMessage("Je moet ingelogd zijn om een voorspelling op te slaan.");
+    if (!user || upcomingMatches.length === 0) {
       return;
     }
 
-    setSaving(match.id);
+    const matchIds = upcomingMatches.map(
+      (match) => match.id
+    );
+
+    const { data, error } = await supabase
+      .from("predictions")
+      .select(
+        "match_id, home_score, away_score"
+      )
+      .eq("user_id", user.id)
+      .in("match_id", matchIds);
+
+    if (error) {
+      console.error(
+        "Kon opgeslagen voorspellingen niet laden:",
+        error
+      );
+      return;
+    }
+
+    const predictionMap: Record<
+      number,
+      Prediction
+    > = {};
+
+    const storedIds = new Set<number>();
+
+    ((data || []) as StoredPrediction[]).forEach(
+      (prediction) => {
+        predictionMap[prediction.match_id] = {
+          home: String(
+            prediction.home_score
+          ),
+          away: String(
+            prediction.away_score
+          ),
+        };
+
+        storedIds.add(
+          prediction.match_id
+        );
+      }
+    );
+
+    setPredictions(predictionMap);
+    setSavedMatchIds(storedIds);
+  }
+
+  const availableMatchdays = useMemo(() => {
+    return Array.from(
+      new Set(
+        matches
+          .map(
+            (match: Match) =>
+              match.matchday
+          )
+          .filter(
+            (
+              matchday:
+                | number
+                | undefined
+            ): matchday is number =>
+              typeof matchday ===
+              "number"
+          )
+      )
+    ).sort((a, b) => a - b);
+  }, [matches]);
+
+  const currentMatchdayIndex =
+    selectedMatchday !== null
+      ? availableMatchdays.indexOf(
+          selectedMatchday
+        )
+      : -1;
+
+  const currentMatches = matches.filter(
+    (match) =>
+      match.matchday === selectedMatchday
+  );
+
+  const selectedCompetitionData =
+    competitions.find(
+      (competition) =>
+        competition.code ===
+        selectedCompetition
+    ) || competitions[1];
+
+  const activeTheme =
+    competitionThemes[selectedCompetition] ||
+    competitionThemes.DED;
+
+  const savedPredictionsThisRound =
+    currentMatches.filter((match) =>
+      savedMatchIds.has(match.id)
+    ).length;
+
+  function changeCompetition(
+    code: string
+  ) {
+    setSelectedCompetition(code);
+
+    const url = new URL(
+      window.location.href
+    );
+
+    url.searchParams.set(
+      "competition",
+      code
+    );
+
+    window.history.replaceState(
+      {},
+      "",
+      `${url.pathname}${url.search}`
+    );
+  }
+
+  function updatePrediction(
+    matchId: number,
+    type: "home" | "away",
+    value: string
+  ) {
+    setPredictions((current) => ({
+      ...current,
+      [matchId]: {
+        home:
+          current[matchId]?.home || "",
+        away:
+          current[matchId]?.away || "",
+        [type]: value,
+      },
+    }));
+  }
+
+  async function savePrediction(
+    match: Match
+  ) {
+    if (savingMatchId !== null) {
+      return;
+    }
+
+    if (selectedCompetition === "CL" && !isPremium) {
+      setMessage(t("premiumRequired"));
+      return;
+    }
+
+    const prediction =
+      predictions[match.id];
+
+    if (
+      !prediction ||
+      prediction.home === "" ||
+      prediction.away === ""
+    ) {
+      setMessage(
+        t("completeScore")
+      );
+      return;
+    }
+
+    const home = Number(
+      prediction.home
+    );
+
+    const away = Number(
+      prediction.away
+    );
+
+    if (
+      !Number.isInteger(home) ||
+      !Number.isInteger(away) ||
+      home < 0 ||
+      away < 0 ||
+      home > 20 ||
+      away > 20
+    ) {
+      setMessage(
+        t("validScore")
+      );
+      return;
+    }
+
+    const {
+      data: { session },
+    } =
+      await supabase.auth.getSession();
+
+    if (!session) {
+      setMessage(
+        t("loginRequired")
+      );
+      return;
+    }
+
+    setSavingMatchId(match.id);
     setMessage("");
 
-    const { error } = await supabase
-      .from("tournament_predictions")
-      .upsert(
+    try {
+      const response = await fetch(
+        "/api/predictions",
         {
-          user_id: user.id,
-          tournament: "nations-league-2026-27",
-          group_id: group.id,
-          match_id: match.id,
-          home_team: match.home,
-          away_team: match.away,
-          home_score: homeScore,
-          away_score: awayScore,
-          updated_at: new Date().toISOString(),
-        },
-        {
-          onConflict: "user_id,tournament,match_id",
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+          body: JSON.stringify({
+            accessToken:
+              session.access_token,
+            matchId: match.id,
+            competition:
+              selectedCompetition,
+            homeScore: home,
+            awayScore: away,
+          }),
         }
       );
 
-    if (error) {
-      console.error("Kon voorspelling niet opslaan:", error);
-      setMessage("Er ging iets mis bij het opslaan van je voorspelling.");
-      setSaving(null);
+      const result =
+        await response.json();
+
+      if (!response.ok) {
+        setMessage(
+          translateServerMessage(result.error, language) ||
+            t("predictionSaveFailed")
+        );
+        return;
+      }
+
+      setSavedMatchIds(
+        (current) => {
+          const next =
+            new Set(current);
+
+          next.add(match.id);
+
+          return next;
+        }
+      );
+
+      setMessage(
+        translateServerMessage(result.message, language) ||
+          t("predictionSaved")
+      );
+    } catch (error) {
+      console.error(error);
+
+      setMessage(
+        t("predictionSaveError")
+      );
+    } finally {
+      setSavingMatchId(null);
+    }
+  }
+
+  function changeMatchday(
+    direction: "previous" | "next"
+  ) {
+    if (
+      currentMatchdayIndex === -1
+    ) {
       return;
     }
 
-    setSaved(s => ({ ...s, [match.id]: true }));
-    setMessage("Je voorspelling is opgeslagen.");
-    setSaving(null);
-  };
+    const newIndex =
+      direction === "previous"
+        ? currentMatchdayIndex - 1
+        : currentMatchdayIndex + 1;
+
+    if (
+      newIndex >= 0 &&
+      newIndex <
+        availableMatchdays.length
+    ) {
+      setSelectedMatchday(
+        availableMatchdays[newIndex]
+      );
+
+      setMessage("");
+    }
+  }
+
+  const t = (key: TranslationKey) =>
+    translations[language][key] || translations.nl[key];
+
+  const locale = localeByLanguage[language];
 
   return (
-    <main className="nl-page">
-      <div className="glow g1"/><div className="glow g2"/>
-      <div className="shell">
-        <div className="top">
-          <Link href="/toernooien" className="back">← Toernooien</Link>
-          <span className="brand"><i/> VOETIQ TOERNOOIEN</span>
+    <main
+      style={{
+        minHeight: "100vh",
+        background: activeTheme.page,
+        color: "white",
+        fontFamily:
+          "Arial, Helvetica, sans-serif",
+      }}
+    >
+      <section
+        style={{
+          background: activeTheme.hero,
+          position: "relative",
+          overflow: "hidden",
+          boxShadow: `inset 0 -50px 80px ${activeTheme.glow}`,
+          color: "white",
+          padding:
+            "38px 20px 36px",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: "1180px",
+            margin: "0 auto",
+          }}
+        >
+          <button
+            onClick={() => router.back()}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "7px",
+              marginBottom: "13px",
+              padding: "8px 12px",
+              borderRadius: "10px",
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: "rgba(255,255,255,0.10)",
+              color: "white",
+              fontSize: "13px",
+              fontWeight: 800,
+              cursor: "pointer",
+            }}
+          >
+            ← {t("back")}
+          </button>
+
+          <br />
+
+          <div
+            style={{
+              display:
+                "inline-flex",
+              alignItems: "center",
+              gap: "7px",
+              padding: "7px 12px",
+              borderRadius:
+                "999px",
+              background:
+                "rgba(255,255,255,0.10)",
+              border:
+                "1px solid rgba(255,255,255,0.18)",
+              color: activeTheme.accent,
+              fontSize: "11px",
+              fontWeight: 900,
+              letterSpacing:
+                "0.4px",
+              marginBottom:
+                "15px",
+            }}
+          >
+            ⚽ {t("matchCenter")}
+          </div>
+
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "42px",
+              fontWeight: 900,
+              letterSpacing:
+                "-1.5px",
+            }}
+          >
+            {t("matches")}
+          </h1>
+
+          <p
+            style={{
+              margin:
+                "10px 0 0",
+              color: "rgba(255,255,255,0.72)",
+              fontSize: "15px",
+            }}
+          >
+            {t("subtitle")}
+          </p>
         </div>
-
-        <section className="hero">
-          <div className="cup">🏆</div>
-          <div>
-            <span className="eyebrow">UEFA NATIONS LEAGUE • 2026/27</span>
-            <h1>Voorspel de <span>Nations League.</span></h1>
-            <p>Kies een league en poule en vul jouw voorspelling voor iedere wedstrijd in.</p>
-          </div>
-        </section>
-
-        <div className="notice">
-          <span>⚡</span>
-          <div>
-            <strong>League phase: 24 september – 17 november 2026</strong>
-            <p>
-              {loadingSaved
-                ? "Je opgeslagen voorspellingen worden geladen..."
-                : "Je voorspellingen worden gekoppeld aan je VoetIQ-account en blijven na een refresh bewaard."}
-            </p>
-          </div>
-        </div>
-
-        {message && <div className="message">{message}</div>}
-
-        <div className="league-tabs">
-          {(["A","B","C","D"] as const).map(l => (
-            <button key={l} onClick={() => chooseLeague(l)} className={league===l?"active":""}>
-              <span>LEAGUE</span><strong>{l}</strong>
-            </button>
-          ))}
-        </div>
-
-        <section className="group-area">
-          <div className="group-tabs">
-            {leagueGroups.map(g => (
-              <button key={g.id} onClick={() => setSelected(g.id)} className={group.id===g.id?"active":""}>
-                Groep {g.id}
-              </button>
-            ))}
-          </div>
-
-          <div className="group-head">
-            <div>
-              <span className="small-label">LEAGUE {group.league}</span>
-              <h2>Groep {group.id}</h2>
-            </div>
-            <div className="team-pills">
-              {group.teams.map(t => <span key={t}>{flags[t]} {t}</span>)}
-            </div>
-          </div>
-
-          <div className="matches">
-            {group.matches.map((m, index) => {
-              const p = predictions[m.id] ?? {home:"",away:""};
-              const ok = saved[m.id];
-              const [day, mon] = m.date.split(" ");
-              return (
-                <article className="match" key={m.id}>
-                  <div className="match-number">#{index+1}</div>
-                  <div className="date">
-                    <strong>{day}</strong><span>{monthMap[mon] ?? mon.toUpperCase()}</span><small>{m.time}</small>
-                  </div>
-
-                  <div className="prediction">
-                    <div className="team home">
-                      <span>{flags[m.home]}</span><strong>{m.home}</strong>
-                    </div>
-
-                    <div className="score">
-                      <input aria-label={`${m.home} score`} inputMode="numeric" value={p.home} onChange={e=>setScore(m.id,"home",e.target.value)} placeholder="-" />
-                      <b>:</b>
-                      <input aria-label={`${m.away} score`} inputMode="numeric" value={p.away} onChange={e=>setScore(m.id,"away",e.target.value)} placeholder="-" />
-                    </div>
-
-                    <div className="team away">
-                      <strong>{m.away}</strong><span>{flags[m.away]}</span>
-                    </div>
-                  </div>
-
-                  <button
-                    className={ok ? "save saved" : "save"}
-                    onClick={() => save(m)}
-                    disabled={saving === m.id}
-                  >
-                    {saving === m.id
-                      ? "Opslaan..."
-                      : ok
-                        ? "✓ Opgeslagen"
-                        : "Opslaan"}
-                  </button>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <div className="points-info">
-          <div className="pi-icon">🎯</div>
-          <div><span>PUNTENSYSTEEM</span><h3>Voorspel zo nauwkeurig mogelijk</h3><p>Het definitieve puntensysteem en automatisch verwerken van uitslagen koppelen we samen met de database.</p></div>
-        </div>
-      </div>
+      </section>
 
       <style jsx global>{`
-        *{box-sizing:border-box}
-        .nl-page{position:relative;min-height:calc(100vh - 86px);overflow:hidden;padding:34px 0 90px;background:radial-gradient(circle at 50% 0%,rgba(46,230,129,.09),transparent 31%),#03140d;color:#fff}
-        .shell{position:relative;z-index:2;width:min(1100px,calc(100% - 40px));margin:auto}
-        .glow{position:absolute;border-radius:50%;filter:blur(30px);pointer-events:none}.g1{width:420px;height:420px;top:-300px;left:calc(50% - 210px);background:rgba(46,230,129,.12)}.g2{width:300px;height:300px;right:-190px;top:600px;background:rgba(46,230,129,.05)}
-        .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:42px}.back{color:#8ba095;text-decoration:none;font-size:11px;font-weight:850}.brand{display:flex;align-items:center;gap:8px;color:#63eda0;font-size:9px;font-weight:950;letter-spacing:1.4px}.brand i{width:7px;height:7px;border-radius:50%;background:#2ee681;box-shadow:0 0 12px #2ee681}
-        .hero{display:flex;align-items:center;gap:22px;margin-bottom:26px}.cup{width:82px;height:82px;flex:0 0 82px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(46,230,129,.17);border-radius:20px;background:rgba(46,230,129,.07);font-size:38px}.eyebrow,.small-label{display:block;margin-bottom:7px;color:#56ea98;font-size:9px;font-weight:950;letter-spacing:1.4px}.hero h1{margin:0;font-size:clamp(34px,5vw,50px);letter-spacing:-1.7px;line-height:1.04}.hero h1 span{color:#2ee681}.hero p{margin:10px 0 0;color:#81998c;font-size:12px}
-        .notice{margin-bottom:20px;padding:14px 17px;display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(46,230,129,.12);border-radius:11px;background:rgba(46,230,129,.035)}.notice>span{font-size:18px}.notice strong{font-size:10px}.notice p{margin:3px 0 0;color:#70887b;font-size:9px}
-        .message{margin:-8px 0 20px;padding:11px 14px;border:1px solid rgba(46,230,129,.14);border-radius:9px;background:rgba(46,230,129,.045);color:#9fb4a9;font-size:10px;font-weight:750}
-        .league-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.league-tabs button{padding:12px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02);color:#738a7e;cursor:pointer}.league-tabs button span{display:block;font-size:7px;font-weight:900;letter-spacing:1px}.league-tabs button strong{font-size:18px}.league-tabs button.active{border-color:rgba(46,230,129,.28);background:rgba(46,230,129,.075);color:#54eb98}
-        .group-area{padding:23px;border:1px solid rgba(255,255,255,.065);border-radius:17px;background:linear-gradient(145deg,rgba(8,34,22,.97),rgba(5,25,16,.97))}
-        .group-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px}.group-tabs button{padding:8px 11px;border:1px solid rgba(255,255,255,.06);border-radius:8px;background:rgba(255,255,255,.025);color:#778e82;cursor:pointer;font-size:9px;font-weight:850}.group-tabs button.active{border-color:rgba(46,230,129,.2);background:#2ee681;color:#032014}
-        .group-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.055)}.group-head h2{margin:0;font-size:25px}.team-pills{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}.team-pills span{padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.03);color:#9cb0a5;font-size:8px;font-weight:800}
-        .matches{display:grid;gap:8px;padding-top:14px}.match{min-height:75px;padding:10px 11px;display:grid;grid-template-columns:28px 63px 1fr 100px;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.05);border-radius:10px;background:rgba(255,255,255,.018)}.match-number{color:#526a5d;font-size:8px;font-weight:900}.date{display:flex;flex-direction:column;text-align:center}.date strong{font-size:15px}.date span{color:#4fe994;font-size:7px;font-weight:950;letter-spacing:1px}.date small{margin-top:2px;color:#657d70;font-size:7px}
-        .prediction{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:13px}.team{display:flex;align-items:center;gap:7px;min-width:0}.team.home{justify-content:flex-end;text-align:right}.team.away{justify-content:flex-start}.team span{font-size:19px}.team strong{font-size:10px;line-height:1.2}.score{display:flex;align-items:center;gap:5px}.score input{width:38px;height:38px;border:1px solid rgba(46,230,129,.16);border-radius:8px;outline:none;background:#061d13;color:#fff;text-align:center;font-size:15px;font-weight:950}.score input:focus{border-color:#2ee681;box-shadow:0 0 0 2px rgba(46,230,129,.06)}.score b{color:#526a5d}
-        .save{padding:9px 10px;border:1px solid rgba(46,230,129,.15);border-radius:8px;background:rgba(46,230,129,.06);color:#55eb99;cursor:pointer;font-size:8px;font-weight:950}.save.saved{background:#2ee681;color:#032014}.save:disabled{opacity:.55;cursor:default}
-        .points-info{margin-top:18px;padding:19px 22px;display:flex;gap:16px;align-items:center;border:1px dashed rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.015)}.pi-icon{font-size:27px}.points-info span{color:#4be991;font-size:8px;font-weight:950;letter-spacing:1.2px}.points-info h3{margin:3px 0;font-size:14px}.points-info p{margin:0;color:#6e8679;font-size:9px}
-        @media(max-width:760px){.brand{display:none}.hero{align-items:flex-start;flex-direction:column}.league-tabs{grid-template-columns:repeat(2,1fr)}.group-head{align-items:flex-start;flex-direction:column}.team-pills{justify-content:flex-start}.match{grid-template-columns:45px 1fr 78px}.match-number{display:none}.prediction{grid-column:2/3}.save{grid-column:3/4}.date{grid-column:1/2;grid-row:1}.team strong{font-size:9px}}
-        @media(max-width:520px){.nl-page{padding-top:23px}.shell{width:min(100% - 24px,1100px)}.group-area{padding:15px}.match{grid-template-columns:45px 1fr;padding:12px 8px}.prediction{grid-column:1/-1;grid-row:2}.date{grid-row:1}.save{grid-column:2/3;grid-row:1}.team{flex-direction:column;gap:2px}.team.home{flex-direction:column-reverse;text-align:center}.team.away{text-align:center}.score input{width:36px;height:36px}.team-pills span{font-size:7px}}
+        .voetiq-competition-scroll { scrollbar-width: thin; scrollbar-color: ${activeTheme.accent} ${activeTheme.surface}; }
+        .voetiq-competition-scroll::-webkit-scrollbar { height: 7px; }
+        .voetiq-competition-scroll::-webkit-scrollbar-track { background: ${activeTheme.surface}; border-radius: 999px; }
+        .voetiq-competition-scroll::-webkit-scrollbar-thumb { background: ${activeTheme.accent}; border-radius: 999px; }
+        @media (max-width: 760px) {
+          .voetiq-competition-scroll { scrollbar-width: none; }
+          .voetiq-competition-scroll::-webkit-scrollbar { display: none; }
+        }
       `}</style>
+
+      <section
+        style={{
+          maxWidth: "1180px",
+          margin: "0 auto",
+          padding:
+            "24px 20px 70px",
+        }}
+      >
+        <div
+          className="voetiq-competition-scroll"
+          style={{
+            background: activeTheme.surface,
+            border: `1px solid ${activeTheme.border}`,
+            borderRadius: "16px",
+            padding: "10px",
+            boxShadow:
+              `0 8px 28px ${activeTheme.glow}`,
+            overflowX: "auto",
+            marginBottom:
+              "18px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "6px",
+              minWidth: "max-content",
+            }}
+          >
+            {[
+              competitions.filter((competition) =>
+                ["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL"].includes(
+                  competition.code
+                )
+              ),
+              competitions.filter((competition) =>
+                ["EL", "ECL", "CL", "KNVB"].includes(competition.code)
+              ),
+            ].map((competitionRow, rowIndex) => (
+              <div
+                key={rowIndex}
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  minWidth: "max-content",
+                }}
+              >
+                {competitionRow.map((competition) => {
+                  const active =
+                    selectedCompetition === competition.code;
+
+                  return (
+                    <button
+                      key={competition.code}
+                      onClick={() => changeCompetition(competition.code)}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "7px",
+                        padding: "10px 13px",
+                        borderRadius: "10px",
+                        border: active
+                          ? `1px solid ${activeTheme.border}`
+                          : "1px solid transparent",
+                        background: active
+                          ? activeTheme.surfaceSoft
+                          : "transparent",
+                        color: active
+                          ? activeTheme.accent
+                          : "rgba(255,255,255,0.68)",
+                        fontSize: "13px",
+                        fontWeight: active ? 800 : 600,
+                        cursor: "pointer",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <span>{competition.flag}</span>
+                      {competition.name}
+                      {competition.code === "CL" &&
+                        !premiumLoading &&
+                        !isPremium && (
+                          <span
+                            style={{
+                              fontSize: "11px",
+                              opacity: 0.9,
+                            }}
+                          >
+                            🔒
+                          </span>
+                        )}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: activeTheme.card,
+            borderRadius: "18px",
+            padding:
+              "22px 24px",
+            color: "white",
+            marginBottom: "16px",
+            boxShadow:
+              `0 12px 34px ${activeTheme.glow}`,
+            display: "flex",
+            justifyContent:
+              "space-between",
+            alignItems: "center",
+            gap: "20px",
+            flexWrap: "wrap",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "13px",
+            }}
+          >
+            <div
+              style={{
+                width: "48px",
+                height: "48px",
+                borderRadius:
+                  "13px",
+                background:
+                  "rgba(255,255,255,0.08)",
+                display: "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "center",
+                fontSize: "25px",
+              }}
+            >
+              {
+                selectedCompetitionData.flag
+              }
+            </div>
+
+            <div>
+              <div
+                style={{
+                  color:
+                    activeTheme.accent,
+                  fontSize:
+                    "10px",
+                  fontWeight: 900,
+                  textTransform:
+                    "uppercase",
+                  letterSpacing:
+                    "0.9px",
+                }}
+              >
+                {t("competition")}
+              </div>
+
+              <h2
+                style={{
+                  margin:
+                    "3px 0 0",
+                  fontSize:
+                    "25px",
+                }}
+              >
+                {
+                  selectedCompetitionData.name
+                }
+                {selectedCompetition === "CL" && !premiumLoading && !isPremium && (
+                  <span style={{ marginLeft: "10px", fontSize: "12px", color: activeTheme.accent }}>
+                    🔒 {t("premiumOnly")}
+                  </span>
+                )}
+              </h2>
+            </div>
+          </div>
+
+          {!loading &&
+            !(selectedCompetition === "CL" && !premiumLoading && !isPremium) &&
+            currentMatches.length >
+              0 && (
+              <div
+                style={{
+                  background:
+                    "rgba(255,255,255,0.08)",
+                  border:
+                    "1px solid rgba(255,255,255,0.08)",
+                  borderRadius:
+                    "12px",
+                  padding:
+                    "10px 15px",
+                  textAlign:
+                    "center",
+                }}
+              >
+                <div
+                  style={{
+                    color:
+                      "#70f0aa",
+                    fontSize:
+                      "10px",
+                    fontWeight:
+                      900,
+                    textTransform:
+                      "uppercase",
+                  }}
+                >
+                  {t("filled")}
+                </div>
+
+                <div
+                  style={{
+                    marginTop:
+                      "3px",
+                    fontSize:
+                      "17px",
+                    fontWeight:
+                      900,
+                  }}
+                >
+                  {
+                    savedPredictionsThisRound
+                  }{" "}
+                  /{" "}
+                  {
+                    currentMatches.length
+                  }
+                </div>
+              </div>
+            )}
+        </div>
+
+        {selectedCompetition === "CL" && !premiumLoading && !isPremium && (
+          <div
+            style={{
+              background: activeTheme.surface,
+              border: `1px solid ${activeTheme.border}`,
+              borderRadius: "18px",
+              padding: "58px 28px",
+              textAlign: "center",
+              boxShadow: `0 10px 32px ${activeTheme.glow}`,
+            }}
+          >
+            <div
+              style={{
+                width: "76px",
+                height: "76px",
+                margin: "0 auto 20px",
+                borderRadius: "22px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: activeTheme.surfaceSoft,
+                border: `1px solid ${activeTheme.border}`,
+                fontSize: "36px",
+              }}
+            >
+              🔒
+            </div>
+
+            <h3
+              style={{
+                margin: 0,
+                fontSize: "25px",
+                fontWeight: 900,
+                color: "white",
+              }}
+            >
+              {t("premiumGateTitle")}
+            </h3>
+
+            <p
+              style={{
+                maxWidth: "560px",
+                margin: "12px auto 0",
+                color: "rgba(255,255,255,0.62)",
+                fontSize: "14px",
+                lineHeight: 1.6,
+              }}
+            >
+              {t("premiumGateDescription")}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => router.push("/premium")}
+              style={{
+                marginTop: "24px",
+                padding: "13px 20px",
+                border: "none",
+                borderRadius: "11px",
+                background: activeTheme.accent,
+                color: "#080b1d",
+                fontSize: "14px",
+                fontWeight: 900,
+                cursor: "pointer",
+              }}
+            >
+              👑 {t("unlockPremium")}
+            </button>
+          </div>
+        )}
+
+        {!(selectedCompetition === "CL" && !premiumLoading && !isPremium) && loading && (
+          <div style={{...emptyCardStyle, background: activeTheme.surface, border: `1px solid ${activeTheme.border}`, color: "white"}}>
+            <div
+              style={{
+                fontSize: "32px",
+                marginBottom:
+                  "10px",
+              }}
+            >
+              ⚽
+            </div>
+
+            <strong>{t("loading")}</strong>
+          </div>
+        )}
+
+        {!(selectedCompetition === "CL" && !premiumLoading && !isPremium) &&
+          !loading &&
+          availableMatchdays.length ===
+            0 && (
+            <div style={{...emptyCardStyle, background: activeTheme.surface, border: `1px solid ${activeTheme.border}`, color: "white"}}>
+              <div
+                style={{
+                  fontSize: "34px",
+                  marginBottom:
+                    "10px",
+                }}
+              >
+                📅
+              </div>
+
+              <strong
+                style={{
+                  fontSize:
+                    "17px",
+                }}
+              >
+                {t("noUpcoming")}
+              </strong>
+
+              <p
+                style={{
+                  color:
+                    "#78827d",
+                  margin:
+                    "8px 0 0",
+                }}
+              >
+                {t("noUpcomingDescription")}
+              </p>
+            </div>
+          )}
+
+        {!(selectedCompetition === "CL" && !premiumLoading && !isPremium) &&
+          !loading &&
+          availableMatchdays.length >
+            0 && (
+            <>
+              <div
+                style={{
+                  background:
+                    activeTheme.surface,
+                  border: `1px solid ${activeTheme.border}`,
+                  borderRadius:
+                    "15px",
+                  padding: "10px",
+                  display: "grid",
+                  gridTemplateColumns:
+                    "1fr auto 1fr",
+                  alignItems:
+                    "center",
+                  marginBottom:
+                    "15px",
+                  boxShadow:
+                    `0 6px 22px ${activeTheme.glow}`,
+                }}
+              >
+                <div>
+                  <button
+                    onClick={() =>
+                      changeMatchday(
+                        "previous"
+                      )
+                    }
+                    disabled={
+                      currentMatchdayIndex <=
+                      0
+                    }
+                    style={navigationButtonStyle(
+                      currentMatchdayIndex <=
+                        0,
+                        activeTheme
+                    )}
+                  >
+                    ← {t("previous")}
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    textAlign:
+                      "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      color:
+                        "rgba(255,255,255,0.52)",
+                      fontSize:
+                        "10px",
+                      fontWeight:
+                        900,
+                      textTransform:
+                        "uppercase",
+                      letterSpacing:
+                        "0.6px",
+                    }}
+                  >
+                    {t("matchday")}
+                  </div>
+
+                  <strong
+                    style={{
+                      fontSize:
+                        "20px",
+                      color: "white",
+                    }}
+                  >
+                    {
+                      selectedMatchday
+                    }
+                  </strong>
+                </div>
+
+                <div
+                  style={{
+                    textAlign:
+                      "right",
+                  }}
+                >
+                  <button
+                    onClick={() =>
+                      changeMatchday(
+                        "next"
+                      )
+                    }
+                    disabled={
+                      currentMatchdayIndex ===
+                      availableMatchdays.length -
+                        1
+                    }
+                    style={navigationButtonStyle(
+                      currentMatchdayIndex ===
+                        availableMatchdays.length -
+                          1,
+                          activeTheme
+                    )}
+                  >
+                    {t("next")} →
+                  </button>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection:
+                    "column",
+                  gap: "12px",
+                }}
+              >
+                {currentMatches.map(
+                  (match) => {
+                    const prediction =
+                      predictions[
+                        match.id
+                      ] || {
+                        home: "",
+                        away: "",
+                      };
+
+                    const date = getEffectiveMatchDate(
+                      match,
+                      selectedCompetition
+                    );
+
+                    const isSaved =
+                      savedMatchIds.has(
+                        match.id
+                      );
+
+                    const isSaving =
+                      savingMatchId ===
+                      match.id;
+
+                    const locked =
+                      date.getTime() <=
+                      Date.now();
+
+                    const premiumLocked =
+                      selectedCompetition === "CL" &&
+                      !premiumLoading &&
+                      !isPremium;
+
+                    const predictionLocked = locked || premiumLocked;
+
+                    return (
+                      <div
+                        key={match.id}
+                        style={{
+                          background:
+                            activeTheme.surfaceSoft,
+                          borderRadius:
+                            "17px",
+                          border:
+                            isSaved
+                              ? `1px solid ${activeTheme.accent}`
+                              : `1px solid ${activeTheme.border}`,
+                          overflow:
+                            "hidden",
+                          boxShadow:
+                            `0 7px 24px ${activeTheme.glow}`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display:
+                              "flex",
+                            justifyContent:
+                              "space-between",
+                            alignItems:
+                              "center",
+                            padding:
+                              "11px 18px",
+                            background:
+                              activeTheme.surface,
+                            borderBottom:
+                              `1px solid ${activeTheme.border}`,
+                            color:
+                              "rgba(255,255,255,0.72)",
+                            fontSize:
+                              "12px",
+                            fontWeight:
+                              700,
+                          }}
+                        >
+                          <span>
+                            {date.toLocaleDateString(
+                              locale,
+                              {
+                                timeZone: timezone,
+                                weekday: "short",
+                                day: "numeric",
+                                month: "short",
+                              }
+                            )}
+                          </span>
+
+                          <div
+                            style={{
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              gap: "12px",
+                            }}
+                          >
+                            {isSaved && (
+                              <span
+                                style={{
+                                  color:
+                                    "#0b8f4d",
+                                  fontSize:
+                                    "11px",
+                                  fontWeight:
+                                    900,
+                                }}
+                              >
+                                ✓ {t("predicted")}
+                              </span>
+                            )}
+
+                            <span>
+                              {date.toLocaleTimeString(locale, {
+                                timeZone: timezone,
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              })}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div
+                          style={{
+                            padding:
+                              "20px 22px 18px",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                "grid",
+                              gridTemplateColumns:
+                                "minmax(0,1fr) 170px minmax(0,1fr)",
+                              alignItems:
+                                "center",
+                              gap: "18px",
+                            }}
+                          >
+                            <Team
+                              name={
+                                match
+                                  .homeTeam
+                                  .name
+                              }
+                              crest={
+                                match
+                                  .homeTeam
+                                  .crest
+                              }
+                              side="home"
+                              theme={activeTheme}
+                            />
+
+                            <div
+                              style={{
+                                display:
+                                  "flex",
+                                justifyContent:
+                                  "center",
+                                alignItems:
+                                  "center",
+                                gap: "8px",
+                              }}
+                            >
+                              <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                disabled={
+                                  predictionLocked
+                                }
+                                value={
+                                  prediction.home
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  updatePrediction(
+                                    match.id,
+                                    "home",
+                                    e
+                                      .target
+                                      .value
+                                  )
+                                }
+                                style={{
+                                  ...scoreInputStyle,
+                                  background: activeTheme.surface,
+                                  border: `1px solid ${activeTheme.border}`,
+                                  color: "white",
+                                  opacity:
+                                    predictionLocked
+                                      ? 0.6
+                                      : 1,
+                                }}
+                              />
+
+                              <span
+                                style={{
+                                  fontWeight:
+                                    900,
+                                  color:
+                                    "#9ca7a1",
+                                }}
+                              >
+                                -
+                              </span>
+
+                              <input
+                                type="number"
+                                min="0"
+                                max="20"
+                                disabled={
+                                  predictionLocked
+                                }
+                                value={
+                                  prediction.away
+                                }
+                                onChange={(
+                                  e
+                                ) =>
+                                  updatePrediction(
+                                    match.id,
+                                    "away",
+                                    e
+                                      .target
+                                      .value
+                                  )
+                                }
+                                style={{
+                                  ...scoreInputStyle,
+                                  background: activeTheme.surface,
+                                  border: `1px solid ${activeTheme.border}`,
+                                  color: "white",
+                                  opacity:
+                                    predictionLocked
+                                      ? 0.6
+                                      : 1,
+                                }}
+                              />
+                            </div>
+
+                            <Team
+                              name={
+                                match
+                                  .awayTeam
+                                  .name
+                              }
+                              crest={
+                                match
+                                  .awayTeam
+                                  .crest
+                              }
+                              side="away"
+                              theme={activeTheme}
+                            />
+                          </div>
+
+                          <button
+                            onClick={() =>
+                              savePrediction(
+                                match
+                              )
+                            }
+                            disabled={
+                              isSaving ||
+                              predictionLocked
+                            }
+                            style={{
+                              marginTop:
+                                "21px",
+                              width: "100%",
+                              padding:
+                                "12px",
+                              background:
+                                predictionLocked
+                                  ? "#aeb8b2"
+                                  : isSaved
+                                    ? "#075f35"
+                                    : "#0b8f4d",
+                              color:
+                                "white",
+                              border:
+                                "none",
+                              borderRadius:
+                                "10px",
+                              fontSize:
+                                "14px",
+                              fontWeight:
+                                800,
+                              cursor:
+                                predictionLocked ||
+                                isSaving
+                                  ? "default"
+                                  : "pointer",
+                              opacity:
+                                isSaving
+                                  ? 0.75
+                                  : 1,
+                            }}
+                          >
+                            {premiumLocked
+                              ? `🔒 ${t("premiumOnly")}`
+                              : locked
+                                ? t("predictionClosed")
+                                : isSaving
+                                  ? t("saving")
+                                  : isSaved
+                                    ? t("changePrediction")
+                                    : t("savePrediction")}
+                          </button>
+
+                          {premiumLocked && (
+                            <button
+                              type="button"
+                              onClick={() => router.push("/premium")}
+                              style={{
+                                marginTop: "10px",
+                                width: "100%",
+                                padding: "12px",
+                                background: activeTheme.accent,
+                                color: "#050814",
+                                border: "none",
+                                borderRadius: "10px",
+                                fontSize: "14px",
+                                fontWeight: 900,
+                                cursor: "pointer",
+                              }}
+                            >
+                              👑 {t("unlockPremium")}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                )}
+              </div>
+            </>
+          )}
+
+        {message && (
+          <div
+            style={{
+              marginTop: "18px",
+              padding:
+                "14px 17px",
+              background:
+                activeTheme.surface,
+              border:
+                `1px solid ${activeTheme.border}`,
+              borderRadius:
+                "12px",
+              color: activeTheme.accent,
+              fontWeight: 700,
+              fontSize: "14px",
+            }}
+          >
+            {message}
+          </div>
+        )}
+
+        <p
+          style={{
+            marginTop: "28px",
+            fontSize: "11px",
+            color: "rgba(255,255,255,0.38)",
+            textAlign: "center",
+          }}
+        >
+          Data provided by
+          football-data.org
+        </p>
+      </section>
     </main>
   );
+}
+
+function Team({
+  name,
+  crest,
+  side,
+  theme,
+}: {
+  name: string;
+  crest?: string;
+  side: "home" | "away";
+  theme: { surfaceSoft: string; border: string };
+}) {
+  const home = side === "home";
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: home
+          ? "row"
+          : "row-reverse",
+        alignItems: "center",
+        justifyContent:
+          "flex-end",
+        gap: "13px",
+        minWidth: 0,
+      }}
+    >
+      <div
+        style={{
+          textAlign: home
+            ? "right"
+            : "left",
+          fontWeight: 800,
+          fontSize: "15px",
+          lineHeight: 1.25,
+        }}
+      >
+        {name}
+      </div>
+
+      <div
+        style={{
+          width: "48px",
+          height: "48px",
+          flexShrink: 0,
+          borderRadius: "12px",
+          background: theme.surfaceSoft,
+          border:
+            `1px solid ${theme.border}`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent:
+            "center",
+          padding: "7px",
+          boxSizing:
+            "border-box",
+        }}
+      >
+        {crest ? (
+          <img
+            src={crest}
+            alt={`${name} logo`}
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit:
+                "contain",
+            }}
+          />
+        ) : (
+          <span
+            style={{
+              fontSize: "20px",
+            }}
+          >
+            ⚽
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const scoreInputStyle = {
+  width: "55px",
+  height: "52px",
+  boxSizing:
+    "border-box" as const,
+  border:
+    "1px solid #dce3df",
+  borderRadius: "11px",
+  textAlign:
+    "center" as const,
+  fontSize: "20px",
+  fontWeight: 900,
+  outline: "none",
+  background: "rgba(255,255,255,0.06)",
+  color: "white",
+};
+
+const emptyCardStyle = {
+  background: "#07172b",
+  borderRadius: "17px",
+  padding: "45px 25px",
+  textAlign:
+    "center" as const,
+  boxShadow:
+    "0 7px 24px rgba(0,0,0,0.055)",
+};
+
+function navigationButtonStyle(
+  disabled: boolean,
+  theme: { surfaceSoft: string; border: string; accent: string }
+) {
+  return {
+    border: `1px solid ${theme.border}`,
+    background: disabled
+      ? "rgba(255,255,255,0.04)"
+      : theme.surfaceSoft,
+    color: disabled
+      ? "rgba(255,255,255,0.28)"
+      : theme.accent,
+    borderRadius: "9px",
+    padding: "10px 14px",
+    fontWeight: 800,
+    cursor: disabled
+      ? "default"
+      : "pointer",
+  };
 }
