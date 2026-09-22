@@ -7,16 +7,6 @@ import { supabase } from "@/lib/supabase";
 
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
-type Prediction = {
-  id: number;
-  points: number;
-  created_at: string;
-  actual_home_score: number | null;
-  actual_away_score: number | null;
-  home_score: number;
-  away_score: number;
-};
-
 type Challenge = {
   id: number;
   challenge_key: string;
@@ -39,13 +29,6 @@ const ui: Record<LanguageCode, any> = {
   it:{eyebrow:"Sfide",title:"Sfide giornaliere e settimanali",intro:"Completa le sfide con i tuoi pronostici VoetIQ.",daily:"Oggi",weekly:"Questa settimana",progress:"Progresso",reward:"punti premio",complete:"Completata",loading:"Caricamento sfide...",empty:"Nessuna sfida attiva.",error:"Impossibile caricare le sfide.",claimSuccess:"Sfida completata!",pointsEarned:"punti premio guadagnati",daily_predict_2:"Fai 2 pronostici",daily_predict_3:"Fai 3 pronostici",daily_predict_5:"Fai 5 pronostici",daily_correct_1:"Pronostica 1 esito corretto",daily_correct_2:"Pronostica 2 esiti corretti",daily_score_10:"Guadagna 10 punti",daily_score_20:"Guadagna 20 punti",daily_score_30:"Guadagna 30 punti",weekly_predict_5:"Fai 5 pronostici",weekly_predict_10:"Fai 10 pronostici",weekly_predict_15:"Fai 15 pronostici",weekly_predict_20:"Fai 20 pronostici",weekly_correct_3:"Pronostica 3 esiti corretti",weekly_correct_5:"Pronostica 5 esiti corretti",weekly_score_50:"Guadagna 50 punti",weekly_score_100:"Guadagna 100 punti"},
   pt:{eyebrow:"Desafios",title:"Desafios diários e semanais",intro:"Completa desafios com as tuas previsões VoetIQ.",daily:"Hoje",weekly:"Esta semana",progress:"Progresso",reward:"pontos de recompensa",complete:"Concluído",loading:"A carregar desafios...",empty:"Não há desafios ativos.",error:"Não foi possível carregar os desafios.",claimSuccess:"Desafio concluído!",pointsEarned:"pontos de recompensa ganhos",daily_predict_2:"Faz 2 previsões",daily_predict_3:"Faz 3 previsões",daily_predict_5:"Faz 5 previsões",daily_correct_1:"Prevê 1 resultado correto",daily_correct_2:"Prevê 2 resultados corretos",daily_score_10:"Ganha 10 pontos",daily_score_20:"Ganha 20 pontos",daily_score_30:"Ganha 30 pontos",weekly_predict_5:"Faz 5 previsões",weekly_predict_10:"Faz 10 previsões",weekly_predict_15:"Faz 15 previsões",weekly_predict_20:"Faz 20 previsões",weekly_correct_3:"Prevê 3 resultados corretos",weekly_correct_5:"Prevê 5 resultados corretos",weekly_score_50:"Ganha 50 pontos",weekly_score_100:"Ganha 100 pontos"}
 };
-
-function correctResult(p: Prediction) {
-  if (p.actual_home_score === null || p.actual_away_score === null) return false;
-  const predicted = p.home_score === p.away_score ? 0 : p.home_score > p.away_score ? 1 : -1;
-  const actual = p.actual_home_score === p.actual_away_score ? 0 : p.actual_home_score > p.actual_away_score ? 1 : -1;
-  return predicted === actual;
-}
 
 function localDayStart() {
   const d = new Date();
@@ -103,7 +86,7 @@ export default function ChallengesPage() {
   const router = useRouter();
   const [language,setLanguage] = useState<LanguageCode>("nl");
   const [challenges,setChallenges] = useState<Challenge[]>([]);
-  const [predictions,setPredictions] = useState<Prediction[]>([]);
+  const [progress,setProgress] = useState<Record<string,number>>({});
   const [completedChallenges,setCompletedChallenges] = useState<Set<string>>(new Set());
   const [claimingChallenges,setClaimingChallenges] = useState<Set<string>>(new Set());
   const [loading,setLoading] = useState(true);
@@ -128,58 +111,48 @@ export default function ChallengesPage() {
     const {data:{user}}=await supabase.auth.getUser();
     if(!user){ router.push("/inloggen"); return; }
 
-    const [challengeResult,predictionResult,completionResult]=await Promise.all([
+    const [challengeResult,completionResult]=await Promise.all([
       supabase.from("challenges").select("id, challenge_key, challenge_type, target, reward_points").eq("active",true).order("id"),
-      supabase.from("predictions").select("id, points, created_at, actual_home_score, actual_away_score, home_score, away_score").eq("user_id",user.id).order("created_at",{ascending:false}),
       supabase.from("challenge_completions").select("challenge_id, period_key").eq("user_id",user.id)
     ]);
 
-    if(challengeResult.error || predictionResult.error || completionResult.error){
-      console.error(challengeResult.error || predictionResult.error || completionResult.error);
+    if(challengeResult.error || completionResult.error){
+      console.error(challengeResult.error || completionResult.error);
       setError(ui[language].error);
-    } else {
-      setChallenges((challengeResult.data || []) as Challenge[]);
-      setPredictions((predictionResult.data || []) as Prediction[]);
-
-      const completionKeys = new Set(
-        ((completionResult.data || []) as ChallengeCompletion[]).map((item) =>
-          completionKey(item.challenge_id, item.period_key)
-        )
-      );
-      setCompletedChallenges(completionKeys);
+      setLoading(false);
+      return;
     }
+
+    const activeChallenges = (challengeResult.data || []) as Challenge[];
+    setChallenges(activeChallenges);
+
+    const completionKeys = new Set(
+      ((completionResult.data || []) as ChallengeCompletion[]).map((item) =>
+        completionKey(item.challenge_id, item.period_key)
+      )
+    );
+    setCompletedChallenges(completionKeys);
+
+    const progressResults = await Promise.all(
+      activeChallenges.map(async (challenge) => {
+        const periodKey = periodKeyForChallenge(challenge);
+        const { data, error: progressError } = await supabase.rpc("get_challenge_progress", {
+          requested_challenge_id: challenge.id,
+          requested_period_key: periodKey,
+        });
+
+        if (progressError) {
+          console.error(`Progress laden mislukt voor ${challenge.challenge_key}:`, progressError);
+          return [challenge.challenge_key, 0] as const;
+        }
+
+        return [challenge.challenge_key, Number(data || 0)] as const;
+      })
+    );
+
+    setProgress(Object.fromEntries(progressResults));
     setLoading(false);
   }
-
-  const progress = useMemo(()=>{
-    const today=localDayStart().getTime();
-    const week=localWeekStart().getTime();
-    const daily=predictions.filter(p=>new Date(p.created_at).getTime()>=today);
-    const weekly=predictions.filter(p=>new Date(p.created_at).getTime()>=week);
-    const dailyCorrect = daily.filter(correctResult).length;
-    const weeklyCorrect = weekly.filter(correctResult).length;
-    const dailyPoints = daily.reduce((n,p)=>n+Number(p.points||0),0);
-    const weeklyPoints = weekly.reduce((n,p)=>n+Number(p.points||0),0);
-
-    return {
-      daily_predict_2: daily.length,
-      daily_predict_3: daily.length,
-      daily_predict_5: daily.length,
-      daily_correct_1: dailyCorrect,
-      daily_correct_2: dailyCorrect,
-      daily_score_10: dailyPoints,
-      daily_score_20: dailyPoints,
-      daily_score_30: dailyPoints,
-      weekly_predict_5: weekly.length,
-      weekly_predict_10: weekly.length,
-      weekly_predict_15: weekly.length,
-      weekly_predict_20: weekly.length,
-      weekly_correct_3: weeklyCorrect,
-      weekly_correct_5: weeklyCorrect,
-      weekly_score_50: weeklyPoints,
-      weekly_score_100: weeklyPoints
-    } as Record<string,number>;
-  },[predictions]);
 
   const t=ui[language];
 
