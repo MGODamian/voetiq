@@ -2316,16 +2316,16 @@ export default function Wedstrijden() {
                           style={{
                             position: "relative",
                             color:
-                              selectedCompetition === "CL"
+                              ["CL", "EL", "ECL"].includes(selectedCompetition)
                                 ? "white"
                                 : row.position <= 4
                                   ? activeTheme.accent
                                   : "rgba(255,255,255,0.62)",
                             fontWeight: 900,
-                            paddingLeft: selectedCompetition === "CL" ? "16px" : undefined,
+                            paddingLeft: ["CL", "EL", "ECL"].includes(selectedCompetition) ? "16px" : undefined,
                           }}
                         >
-                          {selectedCompetition === "CL" && (
+                          {["CL", "EL", "ECL"].includes(selectedCompetition) && (
                             <span
                               aria-hidden="true"
                               style={{
