@@ -718,7 +718,7 @@ export default function Wedstrijden() {
       return;
     }
 
-    const supportsStandings = ["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL"].includes(
+    const supportsStandings = ["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL", "CL"].includes(
       selectedCompetition
     );
 
@@ -2143,7 +2143,7 @@ export default function Wedstrijden() {
           football-data.org
         </p>
       
-        {["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL"].includes(
+        {["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL", "CL"].includes(
           selectedCompetition
         ) && (
           <div
@@ -2207,6 +2207,48 @@ export default function Wedstrijden() {
                 </div>
               )}
             </div>
+
+            {selectedCompetition === "CL" && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  flexWrap: "wrap",
+                  padding: "13px 22px",
+                  borderBottom: `1px solid ${activeTheme.border}`,
+                  background: "rgba(255,255,255,0.025)",
+                }}
+              >
+                {[
+                  { color: "#35d07f", label: "1–8 · Achtste finales" },
+                  { color: "#f3a63a", label: "9–24 · Knock-out play-offs" },
+                  { color: "#ef5b5b", label: "25–36 · Uitgeschakeld" },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "7px",
+                      color: "rgba(255,255,255,0.68)",
+                      fontSize: "11px",
+                      fontWeight: 800,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "9px",
+                        height: "9px",
+                        borderRadius: "3px",
+                        background: item.color,
+                        boxShadow: `0 0 10px ${item.color}55`,
+                      }}
+                    />
+                    {item.label}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {standingsLoading && (
               <div
@@ -2272,13 +2314,36 @@ export default function Wedstrijden() {
                       <tr key={row.team.id ?? row.team.name}>
                         <td
                           style={{
+                            position: "relative",
                             color:
-                              row.position <= 4
-                                ? activeTheme.accent
-                                : "rgba(255,255,255,0.62)",
+                              selectedCompetition === "CL"
+                                ? "white"
+                                : row.position <= 4
+                                  ? activeTheme.accent
+                                  : "rgba(255,255,255,0.62)",
                             fontWeight: 900,
+                            paddingLeft: selectedCompetition === "CL" ? "16px" : undefined,
                           }}
                         >
+                          {selectedCompetition === "CL" && (
+                            <span
+                              aria-hidden="true"
+                              style={{
+                                position: "absolute",
+                                left: 0,
+                                top: "5px",
+                                bottom: "5px",
+                                width: "4px",
+                                borderRadius: "0 4px 4px 0",
+                                background:
+                                  row.position <= 8
+                                    ? "#35d07f"
+                                    : row.position <= 24
+                                      ? "#f3a63a"
+                                      : "#ef5b5b",
+                              }}
+                            />
+                          )}
                           {row.position}
                         </td>
                         <td className="voetiq-standings-team">
