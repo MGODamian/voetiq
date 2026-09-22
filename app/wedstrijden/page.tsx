@@ -39,6 +39,36 @@ type StoredPrediction = {
   away_score: number;
 };
 
+type StandingRow = {
+  position: number;
+  team: {
+    id: number | null;
+    name: string;
+    shortName: string;
+    tla: string | null;
+    crest: string | null;
+  };
+  playedGames: number;
+  won: number;
+  draw: number;
+  lost: number;
+  points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+};
+
+type StandingsResponse = {
+  competition?: {
+    id: number | null;
+    name: string;
+    code: string;
+    emblem: string | null;
+  };
+  table?: StandingRow[];
+  error?: string;
+};
+
 
 type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
 
@@ -565,6 +595,9 @@ export default function Wedstrijden() {
   const [isPremium, setIsPremium] = useState(false);
   const [premiumLoading, setPremiumLoading] = useState(true);
   const [timezone, setTimezone] = useState("Europe/Amsterdam");
+  const [standings, setStandings] = useState<StandingRow[]>([]);
+  const [standingsLoading, setStandingsLoading] = useState(false);
+  const [standingsError, setStandingsError] = useState("");
 
   const [selectedMatchday, setSelectedMatchday] =
     useState<number | null>(null);
@@ -678,6 +711,64 @@ export default function Wedstrijden() {
     }
 
     loadCompetition(selectedCompetition);
+  }, [selectedCompetition, competitionUrlReady]);
+
+  useEffect(() => {
+    if (!competitionUrlReady) {
+      return;
+    }
+
+    const supportsStandings = ["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL"].includes(
+      selectedCompetition
+    );
+
+    if (!supportsStandings) {
+      setStandings([]);
+      setStandingsError("");
+      setStandingsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadStandings() {
+      setStandingsLoading(true);
+      setStandingsError("");
+      setStandings([]);
+
+      try {
+        const response = await fetch(
+          `/api/standings?competition=${selectedCompetition}`,
+          { cache: "no-store" }
+        );
+
+        const data: StandingsResponse = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Kon stand niet ophalen");
+        }
+
+        if (!cancelled) {
+          setStandings(Array.isArray(data.table) ? data.table : []);
+        }
+      } catch (error) {
+        console.error("Kon competitiestand niet laden:", error);
+
+        if (!cancelled) {
+          setStandingsError("De actuele stand kon niet worden opgehaald.");
+        }
+      } finally {
+        if (!cancelled) {
+          setStandingsLoading(false);
+        }
+      }
+    }
+
+    loadStandings();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedCompetition, competitionUrlReady]);
 
   async function loadCompetition(
@@ -1157,6 +1248,44 @@ export default function Wedstrijden() {
         @media (max-width: 760px) {
           .voetiq-competition-scroll { scrollbar-width: none; }
           .voetiq-competition-scroll::-webkit-scrollbar { display: none; }
+        }
+        .voetiq-standings-scroll { overflow-x: auto; }
+        .voetiq-standings-table { width: 100%; min-width: 720px; border-collapse: collapse; }
+        .voetiq-standings-table th {
+          padding: 11px 10px;
+          color: rgba(255,255,255,0.46);
+          font-size: 10px;
+          font-weight: 900;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          text-align: center;
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+        }
+        .voetiq-standings-table th:nth-child(2) { text-align: left; }
+        .voetiq-standings-table td {
+          padding: 12px 10px;
+          color: rgba(255,255,255,0.72);
+          font-size: 12px;
+          font-weight: 700;
+          text-align: center;
+          border-bottom: 1px solid rgba(255,255,255,0.055);
+        }
+        .voetiq-standings-table tbody tr:last-child td { border-bottom: 0; }
+        .voetiq-standings-team {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          text-align: left !important;
+          white-space: nowrap;
+        }
+        .voetiq-standings-team img {
+          width: 25px;
+          height: 25px;
+          object-fit: contain;
+          flex: 0 0 auto;
+        }
+        @media (max-width: 760px) {
+          .voetiq-standings-scroll { scrollbar-width: thin; }
         }
       `}</style>
 
@@ -2013,7 +2142,195 @@ export default function Wedstrijden() {
           Data provided by
           football-data.org
         </p>
-      </section>
+      
+        {["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL"].includes(
+          selectedCompetition
+        ) && (
+          <div
+            style={{
+              marginTop: "24px",
+              background: activeTheme.surface,
+              border: `1px solid ${activeTheme.border}`,
+              borderRadius: "18px",
+              overflow: "hidden",
+              boxShadow: `0 10px 32px ${activeTheme.glow}`,
+            }}
+          >
+            <div
+              style={{
+                padding: "20px 22px 15px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: "14px",
+                flexWrap: "wrap",
+                borderBottom: `1px solid ${activeTheme.border}`,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    color: activeTheme.accent,
+                    fontSize: "10px",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.8px",
+                  }}
+                >
+                  Actuele stand
+                </div>
+                <h3
+                  style={{
+                    margin: "4px 0 0",
+                    color: "white",
+                    fontSize: "21px",
+                    fontWeight: 900,
+                  }}
+                >
+                  {selectedCompetitionData.flag} {selectedCompetitionData.name}
+                </h3>
+              </div>
+
+              {!standingsLoading && standings.length > 0 && (
+                <div
+                  style={{
+                    padding: "7px 10px",
+                    borderRadius: "9px",
+                    background: activeTheme.surfaceSoft,
+                    border: `1px solid ${activeTheme.border}`,
+                    color: activeTheme.accent,
+                    fontSize: "10px",
+                    fontWeight: 900,
+                  }}
+                >
+                  {standings.length} clubs
+                </div>
+              )}
+            </div>
+
+            {standingsLoading && (
+              <div
+                style={{
+                  padding: "28px 22px",
+                  textAlign: "center",
+                  color: "rgba(255,255,255,0.58)",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                }}
+              >
+                📊 Stand laden...
+              </div>
+            )}
+
+            {!standingsLoading && standingsError && (
+              <div
+                style={{
+                  padding: "28px 22px",
+                  textAlign: "center",
+                  color: "#ffb0b0",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                }}
+              >
+                {standingsError}
+              </div>
+            )}
+
+            {!standingsLoading && !standingsError && standings.length === 0 && (
+              <div
+                style={{
+                  padding: "28px 22px",
+                  textAlign: "center",
+                  color: "rgba(255,255,255,0.58)",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                }}
+              >
+                Voor deze competitie is momenteel geen stand beschikbaar.
+              </div>
+            )}
+
+            {!standingsLoading && !standingsError && standings.length > 0 && (
+              <div className="voetiq-standings-scroll">
+                <table className="voetiq-standings-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Club</th>
+                      <th title="Gespeeld">GS</th>
+                      <th title="Gewonnen">W</th>
+                      <th title="Gelijk">G</th>
+                      <th title="Verloren">V</th>
+                      <th title="Doelpunten voor">DV</th>
+                      <th title="Doelpunten tegen">DT</th>
+                      <th title="Doelsaldo">DS</th>
+                      <th title="Punten">P</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {standings.map((row) => (
+                      <tr key={row.team.id ?? row.team.name}>
+                        <td
+                          style={{
+                            color:
+                              row.position <= 4
+                                ? activeTheme.accent
+                                : "rgba(255,255,255,0.62)",
+                            fontWeight: 900,
+                          }}
+                        >
+                          {row.position}
+                        </td>
+                        <td className="voetiq-standings-team">
+                          {row.team.crest ? (
+                            <img src={row.team.crest} alt="" />
+                          ) : (
+                            <span
+                              style={{
+                                width: "25px",
+                                height: "25px",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              ⚽
+                            </span>
+                          )}
+                          <strong style={{ color: "white" }}>
+                            {row.team.shortName || row.team.name}
+                          </strong>
+                        </td>
+                        <td>{row.playedGames}</td>
+                        <td>{row.won}</td>
+                        <td>{row.draw}</td>
+                        <td>{row.lost}</td>
+                        <td>{row.goalsFor}</td>
+                        <td>{row.goalsAgainst}</td>
+                        <td>
+                          {row.goalDifference > 0
+                            ? `+${row.goalDifference}`
+                            : row.goalDifference}
+                        </td>
+                        <td
+                          style={{
+                            color: "white",
+                            fontSize: "14px",
+                            fontWeight: 900,
+                          }}
+                        >
+                          {row.points}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+</section>
     </main>
   );
 }
