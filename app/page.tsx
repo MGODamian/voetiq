@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Navbar from "./Navbar";
+import HomeStructuredData from "./HomeStructuredData";
 
 const competitions = [
   {
@@ -114,7 +115,10 @@ export default function Home() {
   }
 
   return (
-    <main
+    <>
+      <HomeStructuredData />
+
+      <main
       style={{
         minHeight: "100vh",
         background: "#020d08",
@@ -690,7 +694,8 @@ export default function Home() {
           </div>
         </div>
       </footer>
-    </main>
+      </main>
+    </>
   );
 }
 
