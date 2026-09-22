@@ -70,8 +70,8 @@ const copy: Record<
         title: "Voetbalquiz",
         description:
           "Tien vragen. Eén score. Laat zien hoeveel jij écht van voetbal weet.",
-        href: "/game/voetbalquiz",
-        status: "soon",
+        href: "/games/voetbalquiz",
+        status: "available",
       },
       {
         id: "link",
@@ -133,8 +133,8 @@ const copy: Record<
         title: "Football quiz",
         description:
           "Ten questions. One score. Show how much you really know about football.",
-        href: "/game/voetbalquiz",
-        status: "soon",
+        href: "/games/voetbalquiz",
+        status: "available",
       },
       {
         id: "link",
