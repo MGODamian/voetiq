@@ -1,6 +1,109 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+
+type LanguageCode = "nl" | "en" | "de" | "es" | "fr" | "it" | "pt";
+
+const translations = {
+  nl: {
+    backHome: "Terug naar Home", kicker: "{t.kicker}",
+    titleBefore: "Voorspel complete", titleAccent: "toernooien.",
+    intro: "Van de groepsfase tot de beslissende wedstrijden. Vul je voorspellingen in, volg de poules en verzamel punten.",
+    tournaments: "Toernooien", matchPredictions: "Wedstrijdvoorspellingen", groupsStandings: "Poules & standen",
+    activeTournament: "{t.activeTournament}",
+    activeIntro: "De league phase van 2026/27 begint op 24 september. Bekijk alle poules en ga naar het toernooi om je voorspellingen in te vullen.",
+    active: "ACTIEF", tournamentDesc: "54 landen verdeeld over League A, B, C en D. Bekijk de groepen, wedstrijden en vul jouw uitslagen in.",
+    countries: "landen", groups: "groepen", openTournament: "Open toernooi",
+    groupLayout: "{t.groupLayout}", allGroups: "Alle groepen", pools: "POULES", group: "Groep", view: "Bekijk",
+    moreTournaments: "{t.moreTournaments}", beginning: "Dit is nog maar het begin",
+    later: "Later kunnen hier onder andere het EK en WK als aparte voorspeltoernooien aan worden toegevoegd.",
+  },
+  en: {
+    backHome: "Back to Home", kicker: "VOETIQ TOURNAMENTS",
+    titleBefore: "Predict complete", titleAccent: "tournaments.",
+    intro: "From the group stage to the decisive matches. Enter your predictions, follow the groups and collect points.",
+    tournaments: "Tournaments", matchPredictions: "Match predictions", groupsStandings: "Groups & standings",
+    activeTournament: "ACTIVE TOURNAMENT",
+    activeIntro: "The 2026/27 league phase starts on 24 September. View all groups and open the tournament to enter your predictions.",
+    active: "ACTIVE", tournamentDesc: "54 countries across Leagues A, B, C and D. View the groups and matches and enter your scores.",
+    countries: "countries", groups: "groups", openTournament: "Open tournament",
+    groupLayout: "GROUP DRAW", allGroups: "All groups", pools: "GROUPS", group: "Group", view: "View",
+    moreTournaments: "MORE TOURNAMENTS", beginning: "This is just the beginning",
+    later: "More prediction tournaments, including the European Championship and World Cup, can be added here later.",
+  },
+  de: {
+    backHome: "Zurück zur Startseite", kicker: "VOETIQ TURNIERE",
+    titleBefore: "Tippe komplette", titleAccent: "Turniere.",
+    intro: "Von der Gruppenphase bis zu den entscheidenden Spielen. Gib deine Tipps ab, verfolge die Gruppen und sammle Punkte.",
+    tournaments: "Turniere", matchPredictions: "Spieltipps", groupsStandings: "Gruppen & Tabellen",
+    activeTournament: "AKTIVES TURNIER",
+    activeIntro: "Die Ligaphase 2026/27 beginnt am 24. September. Sieh dir alle Gruppen an und öffne das Turnier, um deine Tipps abzugeben.",
+    active: "AKTIV", tournamentDesc: "54 Länder in Liga A, B, C und D. Sieh dir Gruppen und Spiele an und tippe die Ergebnisse.",
+    countries: "Länder", groups: "Gruppen", openTournament: "Turnier öffnen",
+    groupLayout: "GRUPPENEINTEILUNG", allGroups: "Alle Gruppen", pools: "GRUPPEN", group: "Gruppe", view: "Ansehen",
+    moreTournaments: "MEHR TURNIERE", beginning: "Das ist erst der Anfang",
+    later: "Später können hier unter anderem die EM und WM als eigene Tippspiel-Turniere hinzugefügt werden.",
+  },
+  es: {
+    backHome: "Volver al inicio", kicker: "TORNEOS VOETIQ",
+    titleBefore: "Predice torneos", titleAccent: "completos.",
+    intro: "Desde la fase de grupos hasta los partidos decisivos. Haz tus pronósticos, sigue los grupos y suma puntos.",
+    tournaments: "Torneos", matchPredictions: "Pronósticos", groupsStandings: "Grupos y clasificación",
+    activeTournament: "TORNEO ACTIVO",
+    activeIntro: "La fase de liga 2026/27 comienza el 24 de septiembre. Consulta todos los grupos y entra al torneo para hacer tus pronósticos.",
+    active: "ACTIVO", tournamentDesc: "54 países repartidos entre las Ligas A, B, C y D. Consulta los grupos y partidos y pronostica los resultados.",
+    countries: "países", groups: "grupos", openTournament: "Abrir torneo",
+    groupLayout: "DISTRIBUCIÓN DE GRUPOS", allGroups: "Todos los grupos", pools: "GRUPOS", group: "Grupo", view: "Ver",
+    moreTournaments: "MÁS TORNEOS", beginning: "Esto es solo el comienzo",
+    later: "Más adelante se podrán añadir aquí torneos de pronósticos como la Eurocopa y el Mundial.",
+  },
+  fr: {
+    backHome: "Retour à l’accueil", kicker: "TOURNOIS VOETIQ",
+    titleBefore: "Pronostique des", titleAccent: "tournois complets.",
+    intro: "De la phase de groupes aux matchs décisifs. Fais tes pronostics, suis les groupes et gagne des points.",
+    tournaments: "Tournois", matchPredictions: "Pronostics de matchs", groupsStandings: "Groupes & classements",
+    activeTournament: "TOURNOI ACTIF",
+    activeIntro: "La phase de ligue 2026/27 débute le 24 septembre. Consulte tous les groupes et ouvre le tournoi pour saisir tes pronostics.",
+    active: "ACTIF", tournamentDesc: "54 pays répartis entre les Ligues A, B, C et D. Consulte les groupes et les matchs et saisis tes scores.",
+    countries: "pays", groups: "groupes", openTournament: "Ouvrir le tournoi",
+    groupLayout: "RÉPARTITION DES GROUPES", allGroups: "Tous les groupes", pools: "GROUPES", group: "Groupe", view: "Voir",
+    moreTournaments: "PLUS DE TOURNOIS", beginning: "Ce n’est que le début",
+    later: "D’autres tournois de pronostics, comme l’Euro et la Coupe du monde, pourront être ajoutés ici plus tard.",
+  },
+  it: {
+    backHome: "Torna alla Home", kicker: "TORNEI VOETIQ",
+    titleBefore: "Pronostica interi", titleAccent: "tornei.",
+    intro: "Dalla fase a gironi alle partite decisive. Inserisci i pronostici, segui i gruppi e raccogli punti.",
+    tournaments: "Tornei", matchPredictions: "Pronostici partite", groupsStandings: "Gruppi e classifiche",
+    activeTournament: "TORNEO ATTIVO",
+    activeIntro: "La fase campionato 2026/27 inizia il 24 settembre. Guarda tutti i gruppi e apri il torneo per inserire i tuoi pronostici.",
+    active: "ATTIVO", tournamentDesc: "54 nazioni suddivise tra Lega A, B, C e D. Guarda gruppi e partite e inserisci i risultati.",
+    countries: "nazioni", groups: "gruppi", openTournament: "Apri torneo",
+    groupLayout: "COMPOSIZIONE GRUPPI", allGroups: "Tutti i gruppi", pools: "GRUPPI", group: "Gruppo", view: "Vedi",
+    moreTournaments: "ALTRI TORNEI", beginning: "Questo è solo l’inizio",
+    later: "In futuro potranno essere aggiunti qui altri tornei di pronostici, tra cui Europei e Mondiali.",
+  },
+  pt: {
+    backHome: "Voltar ao início", kicker: "TORNEIOS VOETIQ",
+    titleBefore: "Prevê torneios", titleAccent: "completos.",
+    intro: "Da fase de grupos aos jogos decisivos. Faz os teus prognósticos, acompanha os grupos e soma pontos.",
+    tournaments: "Torneios", matchPredictions: "Prognósticos de jogos", groupsStandings: "Grupos e classificações",
+    activeTournament: "TORNEIO ATIVO",
+    activeIntro: "A fase de liga 2026/27 começa a 24 de setembro. Vê todos os grupos e abre o torneio para fazeres os teus prognósticos.",
+    active: "ATIVO", tournamentDesc: "54 países distribuídos pelas Ligas A, B, C e D. Vê os grupos e jogos e indica os teus resultados.",
+    countries: "países", groups: "grupos", openTournament: "Abrir torneio",
+    groupLayout: "COMPOSIÇÃO DOS GRUPOS", allGroups: "Todos os grupos", pools: "GRUPOS", group: "Grupo", view: "Ver",
+    moreTournaments: "MAIS TORNEIOS", beginning: "Isto é apenas o começo",
+    later: "Mais tarde poderão ser adicionados aqui outros torneios de prognósticos, incluindo o Europeu e o Mundial.",
+  },
+} satisfies Record<LanguageCode, Record<string, string>>;
+
+function isLanguageCode(value: string | null): value is LanguageCode {
+  return value === "nl" || value === "en" || value === "de" || value === "es" ||
+    value === "fr" || value === "it" || value === "pt";
+}
 
 const leagues = [
   {
@@ -44,6 +147,36 @@ const leagues = [
 ];
 
 export default function ToernooienPage() {
+  const [language, setLanguage] = useState<LanguageCode>("nl");
+  const t = translations[language];
+
+  useEffect(() => {
+    const syncLanguage = () => {
+      const stored = window.localStorage.getItem("voetiq-language");
+      setLanguage(isLanguageCode(stored) ? stored : "nl");
+    };
+
+    syncLanguage();
+
+    const handleLanguageChange = (event: Event) => {
+      const customEvent = event as CustomEvent<{ language?: string }>;
+      const nextLanguage = customEvent.detail?.language;
+      if (isLanguageCode(nextLanguage ?? null)) {
+        setLanguage(nextLanguage as LanguageCode);
+      } else {
+        syncLanguage();
+      }
+    };
+
+    window.addEventListener("voetiq-language-change", handleLanguageChange);
+    window.addEventListener("storage", syncLanguage);
+
+    return () => {
+      window.removeEventListener("voetiq-language-change", handleLanguageChange);
+      window.removeEventListener("storage", syncLanguage);
+    };
+  }, []);
+
   return (
     <main className="tournaments-page">
       <div className="glow glow-one" />
@@ -53,7 +186,7 @@ export default function ToernooienPage() {
         <div className="container">
           <div className="hero-back-row">
             <Link href="/" className="home-back-link">
-              ← Terug naar Home
+              ← {t.backHome}
             </Link>
           </div>
 
@@ -63,18 +196,17 @@ export default function ToernooienPage() {
           </div>
 
           <h1>
-            Voorspel complete <span>toernooien.</span>
+            {t.titleBefore} <span>{t.titleAccent}</span>
           </h1>
 
           <p>
-            Van de groepsfase tot de beslissende wedstrijden. Vul je
-            voorspellingen in, volg de poules en verzamel punten.
+            {t.intro}
           </p>
 
           <div className="hero-pills">
-            <div>🏆 Toernooien</div>
-            <div>⚽ Wedstrijdvoorspellingen</div>
-            <div>📊 Poules &amp; standen</div>
+            <div>🏆 {t.tournaments}</div>
+            <div>⚽ {t.matchPredictions}</div>
+            <div>📊 {t.groupsStandings}</div>
           </div>
         </div>
       </section>
@@ -87,8 +219,7 @@ export default function ToernooienPage() {
               <h2>UEFA Nations League</h2>
             </div>
             <p>
-              De league phase van 2026/27 begint op 24 september. Bekijk alle
-              poules en ga naar het toernooi om je voorspellingen in te vullen.
+              {t.activeIntro}
             </p>
           </div>
 
@@ -98,26 +229,25 @@ export default function ToernooienPage() {
 
               <div className="featured-copy">
                 <div className="badges">
-                  <span className="live">ACTIEF</span>
+                  <span className="live">{t.active}</span>
                   <span>2026/27</span>
                 </div>
 
                 <h3>UEFA Nations League</h3>
                 <p>
-                  54 landen verdeeld over League A, B, C en D. Bekijk de
-                  groepen, wedstrijden en vul jouw uitslagen in.
+                  {t.tournamentDesc}
                 </p>
 
                 <div className="meta">
                   <span>📅 24 sep – 17 nov 2026</span>
-                  <span>🌍 54 landen</span>
-                  <span>🏁 14 groepen</span>
+                  <span>🌍 54 {t.countries}</span>
+                  <span>🏁 14 {t.groups}</span>
                 </div>
               </div>
             </div>
 
             <div className="open">
-              Open toernooi <span>→</span>
+              {t.openTournament} <span>→</span>
             </div>
 
             <div className="shine" />
@@ -126,9 +256,9 @@ export default function ToernooienPage() {
           <div className="groups-title">
             <div>
               <span className="label">POULE-INDELING</span>
-              <h2>Alle groepen</h2>
+              <h2>{t.allGroups}</h2>
             </div>
-            <span className="group-count">14 POULES</span>
+            <span className="group-count">14 {t.pools}</span>
           </div>
 
           <div className="league-list">
@@ -152,8 +282,8 @@ export default function ToernooienPage() {
                       key={group.id}
                     >
                       <div className="group-card-top">
-                        <strong>Groep {group.id}</strong>
-                        <span>Bekijk →</span>
+                        <strong>{t.group} {group.id}</strong>
+                        <span>{t.view} →</span>
                       </div>
 
                       <div className="teams">
@@ -175,10 +305,9 @@ export default function ToernooienPage() {
             <div className="coming-icon">＋</div>
             <div>
               <span>MEER TOERNOOIEN</span>
-              <h3>Dit is nog maar het begin</h3>
+              <h3>{t.beginning}</h3>
               <p>
-                Later kunnen hier onder andere het EK en WK als aparte
-                voorspeltoernooien aan worden toegevoegd.
+                {t.later}
               </p>
             </div>
           </div>
