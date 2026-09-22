@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 type Match = {
   id: string;
@@ -181,14 +182,89 @@ export default function NationsLeaguePage() {
   const [selected, setSelected] = useState("A2");
   const [predictions, setPredictions] = useState<Record<string,Prediction>>({});
   const [saved, setSaved] = useState<Record<string,boolean>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [message, setMessage] = useState("");
+  const [loadingSaved, setLoadingSaved] = useState(true);
+  const [selectedRound, setSelectedRound] = useState(0);
 
   const leagueGroups = useMemo(() => groups.filter(g => g.league === league), [league]);
   const group = groups.find(g => g.id === selected) ?? leagueGroups[0];
 
+  const rounds = useMemo(() => {
+    const dates: string[] = [];
+    group.matches.forEach((match) => {
+      if (!dates.includes(match.date)) dates.push(match.date);
+    });
+
+    return dates.map((date, index) => ({
+      number: index + 1,
+      date,
+      matches: group.matches.filter((match) => match.date === date),
+    }));
+  }, [group]);
+
+  const activeRound = rounds[selectedRound] ?? rounds[0];
+
+  useEffect(() => {
+    setSelectedRound(0);
+  }, [group.id]);
+
+  useEffect(() => {
+    async function loadSavedPredictions() {
+      setLoadingSaved(true);
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setLoadingSaved(false);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("tournament_predictions")
+        .select("match_id, home_score, away_score")
+        .eq("user_id", user.id)
+        .eq("tournament", "nations-league-2026-27");
+
+      if (error) {
+        console.error("Kon toernooivoorspellingen niet laden:", error);
+        setMessage("Je opgeslagen voorspellingen konden niet worden geladen.");
+        setLoadingSaved(false);
+        return;
+      }
+
+      const predictionMap: Record<string, Prediction> = {};
+      const savedMap: Record<string, boolean> = {};
+
+      (data || []).forEach((row) => {
+        predictionMap[row.match_id] = {
+          home: String(row.home_score),
+          away: String(row.away_score),
+        };
+        savedMap[row.match_id] = true;
+      });
+
+      setPredictions(predictionMap);
+      setSaved(savedMap);
+      setLoadingSaved(false);
+    }
+
+    loadSavedPredictions();
+  }, []);
+
   const chooseLeague = (value:"A"|"B"|"C"|"D") => {
     setLeague(value);
+    setSelectedRound(0);
     const first = groups.find(g => g.league === value);
     if (first) setSelected(first.id);
+  };
+
+  const chooseGroup = (groupId: string) => {
+    setSelected(groupId);
+    setSelectedRound(0);
+    setMessage("");
   };
 
   const setScore = (matchId:string, side:"home"|"away", value:string) => {
@@ -200,10 +276,72 @@ export default function NationsLeaguePage() {
     setSaved(s => ({...s,[matchId]:false}));
   };
 
-  const save = (matchId:string) => {
-    const p = predictions[matchId];
-    if (!p || p.home === "" || p.away === "") return;
-    setSaved(s => ({...s,[matchId]:true}));
+  const save = async (match: Match) => {
+    if (saving) return;
+
+    const p = predictions[match.id];
+
+    if (!p || p.home === "" || p.away === "") {
+      setMessage("Vul eerst een volledige uitslag in.");
+      return;
+    }
+
+    const homeScore = Number(p.home);
+    const awayScore = Number(p.away);
+
+    if (
+      !Number.isInteger(homeScore) ||
+      !Number.isInteger(awayScore) ||
+      homeScore < 0 ||
+      awayScore < 0 ||
+      homeScore > 20 ||
+      awayScore > 20
+    ) {
+      setMessage("Vul een geldige uitslag in van 0 t/m 20.");
+      return;
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setMessage("Je moet ingelogd zijn om een voorspelling op te slaan.");
+      return;
+    }
+
+    setSaving(match.id);
+    setMessage("");
+
+    const { error } = await supabase
+      .from("tournament_predictions")
+      .upsert(
+        {
+          user_id: user.id,
+          tournament: "nations-league-2026-27",
+          group_id: group.id,
+          match_id: match.id,
+          home_team: match.home,
+          away_team: match.away,
+          home_score: homeScore,
+          away_score: awayScore,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "user_id,tournament,match_id",
+        }
+      );
+
+    if (error) {
+      console.error("Kon voorspelling niet opslaan:", error);
+      setMessage("Er ging iets mis bij het opslaan van je voorspelling.");
+      setSaving(null);
+      return;
+    }
+
+    setSaved(s => ({ ...s, [match.id]: true }));
+    setMessage("Je voorspelling is opgeslagen.");
+    setSaving(null);
   };
 
   return (
@@ -226,8 +364,17 @@ export default function NationsLeaguePage() {
 
         <div className="notice">
           <span>⚡</span>
-          <div><strong>League phase: 24 september – 17 november 2026</strong><p>Voorspellingen op deze pagina worden in deze eerste versie lokaal bijgehouden. Supabase-opslag koppelen we hierna.</p></div>
+          <div>
+            <strong>League phase: 24 september – 17 november 2026</strong>
+            <p>
+              {loadingSaved
+                ? "Je opgeslagen voorspellingen worden geladen..."
+                : "Je voorspellingen worden gekoppeld aan je VoetIQ-account en blijven na een refresh bewaard."}
+            </p>
+          </div>
         </div>
+
+        {message && <div className="message">{message}</div>}
 
         <div className="league-tabs">
           {(["A","B","C","D"] as const).map(l => (
@@ -240,7 +387,7 @@ export default function NationsLeaguePage() {
         <section className="group-area">
           <div className="group-tabs">
             {leagueGroups.map(g => (
-              <button key={g.id} onClick={() => setSelected(g.id)} className={group.id===g.id?"active":""}>
+              <button key={g.id} onClick={() => chooseGroup(g.id)} className={group.id===g.id?"active":""}>
                 Groep {g.id}
               </button>
             ))}
@@ -256,8 +403,52 @@ export default function NationsLeaguePage() {
             </div>
           </div>
 
+          {activeRound && (
+            <div className="round-navigation">
+              <button
+                type="button"
+                onClick={() => setSelectedRound((current) => Math.max(0, current - 1))}
+                disabled={selectedRound === 0}
+              >
+                ← Vorige
+              </button>
+
+              <div className="round-title">
+                <span>SPEELRONDE</span>
+                <strong>{activeRound.number} van {rounds.length}</strong>
+                <small>{activeRound.date}</small>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setSelectedRound((current) =>
+                    Math.min(rounds.length - 1, current + 1)
+                  )
+                }
+                disabled={selectedRound === rounds.length - 1}
+              >
+                Volgende →
+              </button>
+            </div>
+          )}
+
+          <div className="round-dots">
+            {rounds.map((round, index) => (
+              <button
+                type="button"
+                key={`${group.id}-round-${round.number}`}
+                className={selectedRound === index ? "active" : ""}
+                onClick={() => setSelectedRound(index)}
+                aria-label={`Ga naar speelronde ${round.number}`}
+              >
+                {round.number}
+              </button>
+            ))}
+          </div>
+
           <div className="matches">
-            {group.matches.map((m, index) => {
+            {(activeRound?.matches ?? []).map((m, index) => {
               const p = predictions[m.id] ?? {home:"",away:""};
               const ok = saved[m.id];
               const [day, mon] = m.date.split(" ");
@@ -284,8 +475,16 @@ export default function NationsLeaguePage() {
                     </div>
                   </div>
 
-                  <button className={ok?"save saved":"save"} onClick={()=>save(m.id)}>
-                    {ok ? "✓ Opgeslagen" : "Opslaan"}
+                  <button
+                    className={ok ? "save saved" : "save"}
+                    onClick={() => save(m)}
+                    disabled={saving === m.id}
+                  >
+                    {saving === m.id
+                      ? "Opslaan..."
+                      : ok
+                        ? "✓ Opgeslagen"
+                        : "Opslaan"}
                   </button>
                 </article>
               );
@@ -307,16 +506,18 @@ export default function NationsLeaguePage() {
         .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:42px}.back{color:#8ba095;text-decoration:none;font-size:11px;font-weight:850}.brand{display:flex;align-items:center;gap:8px;color:#63eda0;font-size:9px;font-weight:950;letter-spacing:1.4px}.brand i{width:7px;height:7px;border-radius:50%;background:#2ee681;box-shadow:0 0 12px #2ee681}
         .hero{display:flex;align-items:center;gap:22px;margin-bottom:26px}.cup{width:82px;height:82px;flex:0 0 82px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(46,230,129,.17);border-radius:20px;background:rgba(46,230,129,.07);font-size:38px}.eyebrow,.small-label{display:block;margin-bottom:7px;color:#56ea98;font-size:9px;font-weight:950;letter-spacing:1.4px}.hero h1{margin:0;font-size:clamp(34px,5vw,50px);letter-spacing:-1.7px;line-height:1.04}.hero h1 span{color:#2ee681}.hero p{margin:10px 0 0;color:#81998c;font-size:12px}
         .notice{margin-bottom:20px;padding:14px 17px;display:flex;gap:12px;align-items:flex-start;border:1px solid rgba(46,230,129,.12);border-radius:11px;background:rgba(46,230,129,.035)}.notice>span{font-size:18px}.notice strong{font-size:10px}.notice p{margin:3px 0 0;color:#70887b;font-size:9px}
+        .message{margin:-8px 0 20px;padding:11px 14px;border:1px solid rgba(46,230,129,.14);border-radius:9px;background:rgba(46,230,129,.045);color:#9fb4a9;font-size:10px;font-weight:750}
         .league-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.league-tabs button{padding:12px;border:1px solid rgba(255,255,255,.06);border-radius:10px;background:rgba(255,255,255,.02);color:#738a7e;cursor:pointer}.league-tabs button span{display:block;font-size:7px;font-weight:900;letter-spacing:1px}.league-tabs button strong{font-size:18px}.league-tabs button.active{border-color:rgba(46,230,129,.28);background:rgba(46,230,129,.075);color:#54eb98}
         .group-area{padding:23px;border:1px solid rgba(255,255,255,.065);border-radius:17px;background:linear-gradient(145deg,rgba(8,34,22,.97),rgba(5,25,16,.97))}
         .group-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:24px}.group-tabs button{padding:8px 11px;border:1px solid rgba(255,255,255,.06);border-radius:8px;background:rgba(255,255,255,.025);color:#778e82;cursor:pointer;font-size:9px;font-weight:850}.group-tabs button.active{border-color:rgba(46,230,129,.2);background:#2ee681;color:#032014}
         .group-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding-bottom:20px;border-bottom:1px solid rgba(255,255,255,.055)}.group-head h2{margin:0;font-size:25px}.team-pills{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px}.team-pills span{padding:6px 8px;border-radius:7px;background:rgba(255,255,255,.03);color:#9cb0a5;font-size:8px;font-weight:800}
+        .round-navigation{margin-top:18px;padding:10px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;border:1px solid rgba(46,230,129,.10);border-radius:12px;background:rgba(46,230,129,.025)}.round-navigation>button{width:fit-content;padding:9px 12px;border:1px solid rgba(46,230,129,.13);border-radius:8px;background:rgba(46,230,129,.05);color:#67eea2;font-size:9px;font-weight:900;cursor:pointer}.round-navigation>button:last-child{justify-self:end}.round-navigation>button:disabled{opacity:.28;cursor:default}.round-title{text-align:center}.round-title span{display:block;color:#5ae99a;font-size:7px;font-weight:950;letter-spacing:1.2px}.round-title strong{display:block;margin-top:2px;font-size:15px}.round-title small{display:block;margin-top:2px;color:#6f887b;font-size:8px;text-transform:uppercase}.round-dots{display:flex;justify-content:center;gap:6px;margin:10px 0 2px}.round-dots button{width:27px;height:27px;padding:0;border:1px solid rgba(255,255,255,.06);border-radius:7px;background:rgba(255,255,255,.025);color:#71877b;font-size:8px;font-weight:900;cursor:pointer}.round-dots button.active{border-color:#2ee681;background:#2ee681;color:#032014}
         .matches{display:grid;gap:8px;padding-top:14px}.match{min-height:75px;padding:10px 11px;display:grid;grid-template-columns:28px 63px 1fr 100px;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.05);border-radius:10px;background:rgba(255,255,255,.018)}.match-number{color:#526a5d;font-size:8px;font-weight:900}.date{display:flex;flex-direction:column;text-align:center}.date strong{font-size:15px}.date span{color:#4fe994;font-size:7px;font-weight:950;letter-spacing:1px}.date small{margin-top:2px;color:#657d70;font-size:7px}
         .prediction{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:13px}.team{display:flex;align-items:center;gap:7px;min-width:0}.team.home{justify-content:flex-end;text-align:right}.team.away{justify-content:flex-start}.team span{font-size:19px}.team strong{font-size:10px;line-height:1.2}.score{display:flex;align-items:center;gap:5px}.score input{width:38px;height:38px;border:1px solid rgba(46,230,129,.16);border-radius:8px;outline:none;background:#061d13;color:#fff;text-align:center;font-size:15px;font-weight:950}.score input:focus{border-color:#2ee681;box-shadow:0 0 0 2px rgba(46,230,129,.06)}.score b{color:#526a5d}
-        .save{padding:9px 10px;border:1px solid rgba(46,230,129,.15);border-radius:8px;background:rgba(46,230,129,.06);color:#55eb99;cursor:pointer;font-size:8px;font-weight:950}.save.saved{background:#2ee681;color:#032014}
+        .save{padding:9px 10px;border:1px solid rgba(46,230,129,.15);border-radius:8px;background:rgba(46,230,129,.06);color:#55eb99;cursor:pointer;font-size:8px;font-weight:950}.save.saved{background:#2ee681;color:#032014}.save:disabled{opacity:.55;cursor:default}
         .points-info{margin-top:18px;padding:19px 22px;display:flex;gap:16px;align-items:center;border:1px dashed rgba(255,255,255,.09);border-radius:13px;background:rgba(255,255,255,.015)}.pi-icon{font-size:27px}.points-info span{color:#4be991;font-size:8px;font-weight:950;letter-spacing:1.2px}.points-info h3{margin:3px 0;font-size:14px}.points-info p{margin:0;color:#6e8679;font-size:9px}
         @media(max-width:760px){.brand{display:none}.hero{align-items:flex-start;flex-direction:column}.league-tabs{grid-template-columns:repeat(2,1fr)}.group-head{align-items:flex-start;flex-direction:column}.team-pills{justify-content:flex-start}.match{grid-template-columns:45px 1fr 78px}.match-number{display:none}.prediction{grid-column:2/3}.save{grid-column:3/4}.date{grid-column:1/2;grid-row:1}.team strong{font-size:9px}}
-        @media(max-width:520px){.nl-page{padding-top:23px}.shell{width:min(100% - 24px,1100px)}.group-area{padding:15px}.match{grid-template-columns:45px 1fr;padding:12px 8px}.prediction{grid-column:1/-1;grid-row:2}.date{grid-row:1}.save{grid-column:2/3;grid-row:1}.team{flex-direction:column;gap:2px}.team.home{flex-direction:column-reverse;text-align:center}.team.away{text-align:center}.score input{width:36px;height:36px}.team-pills span{font-size:7px}}
+        @media(max-width:520px){.round-navigation{grid-template-columns:1fr 1fr}.round-title{grid-column:1/-1;grid-row:1}.round-navigation>button{grid-row:2}.round-navigation>button:last-child{justify-self:end}.nl-page{padding-top:23px}.shell{width:min(100% - 24px,1100px)}.group-area{padding:15px}.match{grid-template-columns:45px 1fr;padding:12px 8px}.prediction{grid-column:1/-1;grid-row:2}.date{grid-row:1}.save{grid-column:2/3;grid-row:1}.team{flex-direction:column;gap:2px}.team.home{flex-direction:column-reverse;text-align:center}.team.away{text-align:center}.score input{width:36px;height:36px}.team-pills span{font-size:7px}}
       `}</style>
     </main>
   );
