@@ -8,6 +8,7 @@ const FOOTBALL_DATA_COMPETITIONS = [
   "SA",
   "FL1",
   "PPL",
+  "CL",
 ] as const;
 
 export async function GET(request: Request) {
