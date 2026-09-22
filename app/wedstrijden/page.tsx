@@ -102,7 +102,8 @@ type TranslationKey =
   | "premiumGateDescription"
   | "back"
   | "timeTbd"
-  | "matchCenter";
+  | "matchCenter"
+  | "knvbSpecial";
 
 const localeByLanguage: Record<LanguageCode, string> = {
   nl: "nl-NL",
@@ -151,6 +152,7 @@ const translations: Record<
     back: "Terug",
     timeTbd: "Tijd volgt",
     matchCenter: "VOETIQ MATCH CENTER",
+    knvbSpecial: "KNVB Beker Special",
   },
   en: {
     matches: "Matches",
@@ -184,6 +186,7 @@ const translations: Record<
     back: "Back",
     timeTbd: "Time TBA",
     matchCenter: "VOETIQ MATCH CENTER",
+    knvbSpecial: "KNVB Cup Special",
   },
   de: {
     matches: "Spiele",
@@ -217,6 +220,7 @@ const translations: Record<
     back: "Zurück",
     timeTbd: "Uhrzeit folgt",
     matchCenter: "VOETIQ MATCH CENTER",
+    knvbSpecial: "KNVB-Pokal-Special",
   },
   es: {
     matches: "Partidos",
@@ -250,6 +254,7 @@ const translations: Record<
     back: "Volver",
     timeTbd: "Hora por confirmar",
     matchCenter: "CENTRO DE PARTIDOS VOETIQ",
+    knvbSpecial: "Especial Copa KNVB",
   },
   fr: {
     matches: "Matchs",
@@ -285,6 +290,7 @@ const translations: Record<
     back: "Retour",
     timeTbd: "Horaire à confirmer",
     matchCenter: "CENTRE DES MATCHS VOETIQ",
+    knvbSpecial: "Spécial Coupe KNVB",
   },
   it: {
     matches: "Partite",
@@ -319,6 +325,7 @@ const translations: Record<
     back: "Indietro",
     timeTbd: "Orario da definire",
     matchCenter: "CENTRO PARTITE VOETIQ",
+    knvbSpecial: "Speciale Coppa KNVB",
   },
   pt: {
     matches: "Jogos",
@@ -352,6 +359,7 @@ const translations: Record<
     back: "Voltar",
     timeTbd: "Hora a confirmar",
     matchCenter: "CENTRO DE JOGOS VOETIQ",
+    knvbSpecial: "Especial Taça KNVB",
   },
 };
 
@@ -1367,7 +1375,9 @@ export default function Wedstrijden() {
                       }}
                     >
                       <span>{competition.flag}</span>
-                      {competition.name}
+                      {competition.code === "KNVB"
+                        ? translations[language].knvbSpecial
+                        : competition.name}
                       {competition.code === "CL" &&
                         !premiumLoading &&
                         !isPremium && (
