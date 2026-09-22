@@ -339,6 +339,121 @@ export default function Home() {
         </button>
       </section>
 
+      {/* ACTIVE SPECIAL */}
+      <section
+        style={{
+          maxWidth: "1100px",
+          margin: "0 auto",
+          padding: "42px 20px 0",
+        }}
+      >
+        <button
+          onClick={() => openCompetition("KNVB")}
+          style={{
+            width: "100%",
+            padding: "0",
+            borderRadius: "24px",
+            border: "1px solid rgba(255, 201, 71, 0.32)",
+            background:
+              "radial-gradient(circle at 85% 15%, rgba(255,193,61,0.22), transparent 32%), linear-gradient(135deg, #261b05 0%, #151307 52%, #07140c 100%)",
+            color: "white",
+            cursor: "pointer",
+            textAlign: "left",
+            overflow: "hidden",
+            boxShadow: "0 18px 55px rgba(0,0,0,0.28)",
+          }}
+        >
+          <div
+            style={{
+              padding: "28px clamp(22px, 4vw, 42px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "22px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "18px", flex: "1 1 520px" }}>
+              <div
+                style={{
+                  width: "62px",
+                  height: "62px",
+                  borderRadius: "18px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  fontSize: "31px",
+                  background: "rgba(255,196,61,0.12)",
+                  border: "1px solid rgba(255,204,86,0.22)",
+                }}
+              >
+                🏆
+              </div>
+
+              <div>
+                <div
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "7px",
+                    padding: "6px 10px",
+                    borderRadius: "999px",
+                    background: "rgba(255,196,61,0.12)",
+                    color: "#ffd66b",
+                    fontSize: "10px",
+                    fontWeight: 950,
+                    letterSpacing: "0.9px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  ✨ {tr("Nu actief op VoetIQ")}
+                </div>
+
+                <h2
+                  style={{
+                    margin: "10px 0 6px",
+                    fontSize: "clamp(24px, 4vw, 34px)",
+                    fontWeight: 950,
+                    letterSpacing: "-0.8px",
+                  }}
+                >
+                  {tr("KNVB Beker Special")}
+                </h2>
+
+                <p
+                  style={{
+                    margin: 0,
+                    color: "#c9c3aa",
+                    fontSize: "14px",
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {tr("Voorspel de KNVB Beker-kwalificatiewedstrijden van 22 en 23 september en verdien punten.")}
+                </p>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                padding: "13px 17px",
+                borderRadius: "12px",
+                background: "#f5c84c",
+                color: "#171000",
+                fontSize: "13px",
+                fontWeight: 950,
+                whiteSpace: "nowrap",
+              }}
+            >
+              ⚽ {tr("Voorspel de Special →")}
+            </div>
+          </div>
+        </button>
+      </section>
+
       {/* COMPETITIONS */}
       <section
         id="competities"
