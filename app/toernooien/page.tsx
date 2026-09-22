@@ -51,6 +51,12 @@ export default function ToernooienPage() {
 
       <section className="hero">
         <div className="container">
+          <div className="hero-back-row">
+            <Link href="/" className="home-back-link">
+              ← Terug naar Home
+            </Link>
+          </div>
+
           <div className="kicker">
             <span className="dot" />
             VOETIQ TOERNOOIEN
@@ -227,6 +233,34 @@ export default function ToernooienPage() {
           text-align: center;
           border-bottom: 1px solid rgba(46,230,129,.08);
           background: linear-gradient(180deg, rgba(5,30,19,.88), rgba(3,20,13,.96));
+        }
+
+        .hero-back-row {
+          display: flex;
+          justify-content: flex-start;
+          margin-bottom: 28px;
+        }
+
+        .home-back-link {
+          display: inline-flex;
+          align-items: center;
+          gap: 7px;
+          padding: 9px 13px;
+          border: 1px solid rgba(255,255,255,.12);
+          border-radius: 10px;
+          background: rgba(255,255,255,.045);
+          color: #c8d8d0;
+          font-size: 12px;
+          font-weight: 850;
+          text-decoration: none;
+          transition: .18s ease;
+        }
+
+        .home-back-link:hover {
+          transform: translateX(-2px);
+          border-color: rgba(46,230,129,.32);
+          background: rgba(46,230,129,.08);
+          color: #72f0aa;
         }
 
         .kicker {
@@ -637,7 +671,8 @@ export default function ToernooienPage() {
 
         @media (max-width: 640px) {
           .container { width: min(100% - 28px, 1180px); }
-          .hero { padding: 57px 0 49px; }
+          .hero { padding: 28px 0 49px; }
+          .hero-back-row { margin-bottom: 24px; }
           .hero h1 { font-size: 39px; letter-spacing: -1.8px; }
           .content { padding: 43px 0 65px; }
           .featured-main { align-items: flex-start; flex-direction: column; }
