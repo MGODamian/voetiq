@@ -188,6 +188,20 @@ export default function Home() {
             }}
           >
             Voet<span style={{ color: "#42e985" }}>IQ</span>
+
+            <span
+              style={{
+                display: "block",
+                marginTop: "18px",
+                fontSize: "clamp(18px, 2.5vw, 28px)",
+                lineHeight: 1.2,
+                letterSpacing: "-0.5px",
+                color: "#b8c9bf",
+                fontWeight: 800,
+              }}
+            >
+              {tr("Gratis voetbal voorspellen")}
+            </span>
           </h1>
 
           <h2
