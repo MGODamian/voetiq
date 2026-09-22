@@ -362,6 +362,7 @@ const competitions: Competition[] = [
   { code: "EL", name: "Europa League", flag: "🟠" },
   { code: "ECL", name: "Conference League", flag: "🟢" },
   { code: "CL", name: "Champions League", flag: "🏆" },
+  { code: "KNVB", name: "KNVB Beker Special", flag: "✨" },
 ];
 
 const competitionThemes: Record<
@@ -476,6 +477,16 @@ const competitionThemes: Record<
     surface: "#080b1d",
     surfaceSoft: "#0d1230",
     border: "rgba(174,183,255,0.14)",
+  },
+  KNVB: {
+    hero: "radial-gradient(circle at 82% 18%, rgba(255,190,46,0.42) 0%, transparent 32%), radial-gradient(circle at 15% 80%, rgba(255,111,0,0.22) 0%, transparent 28%), linear-gradient(135deg, #1b0d02 0%, #6b3105 55%, #a85208 100%)",
+    card: "linear-gradient(135deg, #3a1903 0%, #9a4808 100%)",
+    accent: "#ffd36b",
+    glow: "rgba(255,145,24,0.28)",
+    page: "#120902",
+    surface: "#241207",
+    surfaceSoft: "#321a0a",
+    border: "rgba(255,211,107,0.17)",
   },
 };
 
@@ -1181,7 +1192,7 @@ export default function Wedstrijden() {
                 )
               ),
               competitions.filter((competition) =>
-                ["EL", "ECL", "CL"].includes(competition.code)
+                ["EL", "ECL", "CL", "KNVB"].includes(competition.code)
               ),
             ].map((competitionRow, rowIndex) => (
               <div
