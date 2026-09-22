@@ -5,6 +5,7 @@ const FOOTBALL_DATA_COMPETITIONS = [
 ];
 
 const ZAFRONIX_COMPETITIONS = ["EL", "ECL"] as const;
+const SPECIAL_COMPETITIONS = ["KNVB"] as const;
 
 function formatDate(date: Date) {
   return date.toISOString().split("T")[0];
@@ -608,6 +609,92 @@ async function getZafronixEuropaLeagueMatches(
   });
 }
 
+function getKnvbSpecialMatches(
+  dateFrom: string,
+  dateTo: string
+) {
+  const sourceMatches = [
+    // Dinsdag 22 september 2026 — tweede kwalificatieronde
+    [92622001, "2026-09-22T18:00:00Z", "ACV", "Hoogeveen"],
+    [92622002, "2026-09-22T18:00:00Z", "Eemdijk", "RBC"],
+    [92622003, "2026-09-22T18:00:00Z", "EVV Echt", "Halsteren"],
+    [92622004, "2026-09-22T18:00:00Z", "Excelsior '31", "AFC '34"],
+    [92622005, "2026-09-22T18:00:00Z", "FC Rijnvogels", "VVSB"],
+    [92622006, "2026-09-22T18:00:00Z", "Groene Ster", "AFC"],
+    [92622007, "2026-09-22T18:00:00Z", "GVVV", "DVS '33 Ermelo"],
+    [92622008, "2026-09-22T18:00:00Z", "HHC Hardenberg", "Barendrecht"],
+    [92622009, "2026-09-22T18:00:00Z", "Kloetinge", "Achilles Veen"],
+    [92622010, "2026-09-22T18:00:00Z", "Koninklijke HFC", "DOVO"],
+    [92622011, "2026-09-22T18:00:00Z", "Noordwijk", "LAC Frisia 1883"],
+    [92622012, "2026-09-22T18:00:00Z", "RKAV Volendam", "Spakenburg"],
+    [92622013, "2026-09-22T18:00:00Z", "Sportlust '46", "Excelsior Maassluis"],
+    [92622014, "2026-09-22T18:00:00Z", "Staphorst", "Genemuiden SC"],
+
+    // Woensdag 23 september 2026 — tweede kwalificatieronde
+    [92623001, "2026-09-23T18:00:00Z", "Germania", "Kozakken Boys"],
+    [92623002, "2026-09-23T18:00:00Z", "IJsselmeervogels", "Gemert"],
+    [92623003, "2026-09-23T18:00:00Z", "JOS Watergraafsmeer", "TEC"],
+    [92623004, "2026-09-23T18:00:00Z", "Sparta Nijkerk", "UDI '19"],
+    [92623005, "2026-09-23T18:00:00Z", "TOGB", "Rohda Raalte"],
+    [92623006, "2026-09-23T18:00:00Z", "Zwaluwen", "Purmersteijn"],
+  ] as const;
+
+  const matches = sourceMatches
+    .filter(([, utcDate]) => {
+      const date = utcDate.slice(0, 10);
+      return date >= dateFrom && date <= dateTo;
+    })
+    .map(([id, utcDate, homeTeam, awayTeam]) => ({
+      id,
+      utcDate,
+      status: "SCHEDULED",
+      matchday: 2,
+      stage: "QUALIFICATION_ROUND_2",
+      homeTeam: {
+        id: null,
+        name: homeTeam,
+        shortName: homeTeam,
+        tla: null,
+        crest: null,
+      },
+      awayTeam: {
+        id: null,
+        name: awayTeam,
+        shortName: awayTeam,
+        tla: null,
+        crest: null,
+      },
+      competition: {
+        id: 926,
+        name: "Eurojackpot KNVB Beker",
+        code: "KNVB",
+      },
+      score: {
+        winner: null,
+        duration: "REGULAR",
+        fullTime: {
+          home: null,
+          away: null,
+        },
+        halfTime: {
+          home: null,
+          away: null,
+        },
+      },
+    }));
+
+  return NextResponse.json({
+    competition: {
+      id: 926,
+      code: "KNVB",
+      name: "Eurojackpot KNVB Beker",
+    },
+    count: matches.length,
+    matches,
+  });
+}
+
+
 async function getFootballDataMatches(
   competition: string,
   dateFrom: string,
@@ -671,6 +758,7 @@ export async function GET(
   const supportedCompetitions = [
     ...FOOTBALL_DATA_COMPETITIONS,
     ...ZAFRONIX_COMPETITIONS,
+    ...SPECIAL_COMPETITIONS,
   ];
 
   if (
@@ -719,6 +807,13 @@ export async function GET(
 
     if (competition === "EL") {
       return await getZafronixEuropaLeagueMatches(
+        dateFrom,
+        dateTo
+      );
+    }
+
+    if (competition === "KNVB") {
+      return getKnvbSpecialMatches(
         dateFrom,
         dateTo
       );
