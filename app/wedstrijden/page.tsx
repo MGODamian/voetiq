@@ -718,7 +718,7 @@ export default function Wedstrijden() {
       return;
     }
 
-    const supportsStandings = ["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL", "CL"].includes(
+    const supportsStandings = ["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL", "CL", "EL", "ECL"].includes(
       selectedCompetition
     );
 
@@ -2143,7 +2143,7 @@ export default function Wedstrijden() {
           football-data.org
         </p>
       
-        {["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL", "CL"].includes(
+        {["PL", "DED", "PD", "BL1", "SA", "FL1", "PPL", "CL", "EL", "ECL"].includes(
           selectedCompetition
         ) && (
           <div
