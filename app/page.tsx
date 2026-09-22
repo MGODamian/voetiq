@@ -442,6 +442,20 @@ export default function Home() {
             </span>
             <span style={{ color: "#42e985", fontSize: "22px" }}>→</span>
           </button>
+
+          <button
+            onClick={() => router.push("/voetbal-voorspellen")}
+            style={discoverCardStyle}
+          >
+            <span style={{ fontSize: "30px" }}>⚽</span>
+            <span style={{ flex: 1 }}>
+              <strong style={discoverTitleStyle}>Meer over voetbal voorspellen</strong>
+              <span style={discoverTextStyle}>
+                Ontdek hoe voetbal voorspellen bij VoetIQ werkt en met welke competities je kunt meespelen.
+              </span>
+            </span>
+            <span style={{ color: "#42e985", fontSize: "22px" }}>→</span>
+          </button>
         </div>
       </section>
 
