@@ -105,45 +105,103 @@ function isLanguageCode(value: string | null): value is LanguageCode {
     value === "fr" || value === "it" || value === "pt";
 }
 
+const countryNames: Record<string, Record<LanguageCode, string>> = {
+  FR: { nl:"Frankrijk", en:"France", de:"Frankreich", es:"Francia", fr:"France", it:"Francia", pt:"França" },
+  IT: { nl:"Italië", en:"Italy", de:"Italien", es:"Italia", fr:"Italie", it:"Italia", pt:"Itália" },
+  BE: { nl:"België", en:"Belgium", de:"Belgien", es:"Bélgica", fr:"Belgique", it:"Belgio", pt:"Bélgica" },
+  TR: { nl:"Turkije", en:"Türkiye", de:"Türkei", es:"Turquía", fr:"Turquie", it:"Turchia", pt:"Turquia" },
+  DE: { nl:"Duitsland", en:"Germany", de:"Deutschland", es:"Alemania", fr:"Allemagne", it:"Germania", pt:"Alemanha" },
+  NL: { nl:"Nederland", en:"Netherlands", de:"Niederlande", es:"Países Bajos", fr:"Pays-Bas", it:"Paesi Bassi", pt:"Países Baixos" },
+  RS: { nl:"Servië", en:"Serbia", de:"Serbien", es:"Serbia", fr:"Serbie", it:"Serbia", pt:"Sérvia" },
+  GR: { nl:"Griekenland", en:"Greece", de:"Griechenland", es:"Grecia", fr:"Grèce", it:"Grecia", pt:"Grécia" },
+  ES: { nl:"Spanje", en:"Spain", de:"Spanien", es:"España", fr:"Espagne", it:"Spagna", pt:"Espanha" },
+  HR: { nl:"Kroatië", en:"Croatia", de:"Kroatien", es:"Croacia", fr:"Croatie", it:"Croazia", pt:"Croácia" },
+  EN: { nl:"Engeland", en:"England", de:"England", es:"Inglaterra", fr:"Angleterre", it:"Inghilterra", pt:"Inglaterra" },
+  CZ: { nl:"Tsjechië", en:"Czechia", de:"Tschechien", es:"Chequia", fr:"Tchéquie", it:"Cechia", pt:"Chéquia" },
+  PT: { nl:"Portugal", en:"Portugal", de:"Portugal", es:"Portugal", fr:"Portugal", it:"Portogallo", pt:"Portugal" },
+  DK: { nl:"Denemarken", en:"Denmark", de:"Dänemark", es:"Dinamarca", fr:"Danemark", it:"Danimarca", pt:"Dinamarca" },
+  NO: { nl:"Noorwegen", en:"Norway", de:"Norwegen", es:"Noruega", fr:"Norvège", it:"Norvegia", pt:"Noruega" },
+  WA: { nl:"Wales", en:"Wales", de:"Wales", es:"Gales", fr:"Pays de Galles", it:"Galles", pt:"País de Gales" },
+  SC: { nl:"Schotland", en:"Scotland", de:"Schottland", es:"Escocia", fr:"Écosse", it:"Scozia", pt:"Escócia" },
+  CH: { nl:"Zwitserland", en:"Switzerland", de:"Schweiz", es:"Suiza", fr:"Suisse", it:"Svizzera", pt:"Suíça" },
+  SI: { nl:"Slovenië", en:"Slovenia", de:"Slowenien", es:"Eslovenia", fr:"Slovénie", it:"Slovenia", pt:"Eslovénia" },
+  MK: { nl:"Noord-Macedonië", en:"North Macedonia", de:"Nordmazedonien", es:"Macedonia del Norte", fr:"Macédoine du Nord", it:"Macedonia del Nord", pt:"Macedónia do Norte" },
+  HU: { nl:"Hongarije", en:"Hungary", de:"Ungarn", es:"Hungría", fr:"Hongrie", it:"Ungheria", pt:"Hungria" },
+  UA: { nl:"Oekraïne", en:"Ukraine", de:"Ukraine", es:"Ucrania", fr:"Ukraine", it:"Ucraina", pt:"Ucrânia" },
+  GE: { nl:"Georgië", en:"Georgia", de:"Georgien", es:"Georgia", fr:"Géorgie", it:"Georgia", pt:"Geórgia" },
+  NI: { nl:"Noord-Ierland", en:"Northern Ireland", de:"Nordirland", es:"Irlanda del Norte", fr:"Irlande du Nord", it:"Irlanda del Nord", pt:"Irlanda do Norte" },
+  IL: { nl:"Israël", en:"Israel", de:"Israel", es:"Israel", fr:"Israël", it:"Israele", pt:"Israel" },
+  AT: { nl:"Oostenrijk", en:"Austria", de:"Österreich", es:"Austria", fr:"Autriche", it:"Austria", pt:"Áustria" },
+  IE: { nl:"Ierland", en:"Ireland", de:"Irland", es:"Irlanda", fr:"Irlande", it:"Irlanda", pt:"Irlanda" },
+  XK: { nl:"Kosovo", en:"Kosovo", de:"Kosovo", es:"Kosovo", fr:"Kosovo", it:"Kosovo", pt:"Kosovo" },
+  PL: { nl:"Polen", en:"Poland", de:"Polen", es:"Polonia", fr:"Pologne", it:"Polonia", pt:"Polónia" },
+  BA: { nl:"Bosnië en Herzegovina", en:"Bosnia and Herzegovina", de:"Bosnien und Herzegowina", es:"Bosnia y Herzegovina", fr:"Bosnie-Herzégovine", it:"Bosnia ed Erzegovina", pt:"Bósnia e Herzegovina" },
+  RO: { nl:"Roemenië", en:"Romania", de:"Rumänien", es:"Rumanía", fr:"Roumanie", it:"Romania", pt:"Roménia" },
+  SE: { nl:"Zweden", en:"Sweden", de:"Schweden", es:"Suecia", fr:"Suède", it:"Svezia", pt:"Suécia" },
+  AL: { nl:"Albanië", en:"Albania", de:"Albanien", es:"Albania", fr:"Albanie", it:"Albania", pt:"Albânia" },
+  FI: { nl:"Finland", en:"Finland", de:"Finnland", es:"Finlandia", fr:"Finlande", it:"Finlandia", pt:"Finlândia" },
+  BY: { nl:"Belarus", en:"Belarus", de:"Belarus", es:"Bielorrusia", fr:"Biélorussie", it:"Bielorussia", pt:"Bielorrússia" },
+  SM: { nl:"San Marino", en:"San Marino", de:"San Marino", es:"San Marino", fr:"Saint-Marin", it:"San Marino", pt:"São Marinho" },
+  ME: { nl:"Montenegro", en:"Montenegro", de:"Montenegro", es:"Montenegro", fr:"Monténégro", it:"Montenegro", pt:"Montenegro" },
+  AM: { nl:"Armenië", en:"Armenia", de:"Armenien", es:"Armenia", fr:"Arménie", it:"Armenia", pt:"Arménia" },
+  CY: { nl:"Cyprus", en:"Cyprus", de:"Zypern", es:"Chipre", fr:"Chypre", it:"Cipro", pt:"Chipre" },
+  LV: { nl:"Letland", en:"Latvia", de:"Lettland", es:"Letonia", fr:"Lettonie", it:"Lettonia", pt:"Letónia" },
+  KZ: { nl:"Kazachstan", en:"Kazakhstan", de:"Kasachstan", es:"Kazajistán", fr:"Kazakhstan", it:"Kazakistan", pt:"Cazaquistão" },
+  SK: { nl:"Slowakije", en:"Slovakia", de:"Slowakei", es:"Eslovaquia", fr:"Slovaquie", it:"Slovacchia", pt:"Eslováquia" },
+  FO: { nl:"Faeröer", en:"Faroe Islands", de:"Färöer", es:"Islas Feroe", fr:"Îles Féroé", it:"Isole Faroe", pt:"Ilhas Faroé" },
+  MD: { nl:"Moldavië", en:"Moldova", de:"Moldau", es:"Moldavia", fr:"Moldavie", it:"Moldavia", pt:"Moldávia" },
+  IS: { nl:"IJsland", en:"Iceland", de:"Island", es:"Islandia", fr:"Islande", it:"Islanda", pt:"Islândia" },
+  BG: { nl:"Bulgarije", en:"Bulgaria", de:"Bulgarien", es:"Bulgaria", fr:"Bulgarie", it:"Bulgaria", pt:"Bulgária" },
+  EE: { nl:"Estland", en:"Estonia", de:"Estland", es:"Estonia", fr:"Estonie", it:"Estonia", pt:"Estónia" },
+  LU: { nl:"Luxemburg", en:"Luxembourg", de:"Luxemburg", es:"Luxemburgo", fr:"Luxembourg", it:"Lussemburgo", pt:"Luxemburgo" },
+  GI: { nl:"Gibraltar", en:"Gibraltar", de:"Gibraltar", es:"Gibraltar", fr:"Gibraltar", it:"Gibilterra", pt:"Gibraltar" },
+  MT: { nl:"Malta", en:"Malta", de:"Malta", es:"Malta", fr:"Malte", it:"Malta", pt:"Malta" },
+  AD: { nl:"Andorra", en:"Andorra", de:"Andorra", es:"Andorra", fr:"Andorre", it:"Andorra", pt:"Andorra" },
+  LT: { nl:"Litouwen", en:"Lithuania", de:"Litauen", es:"Lituania", fr:"Lituanie", it:"Lituania", pt:"Lituânia" },
+  AZ: { nl:"Azerbeidzjan", en:"Azerbaijan", de:"Aserbaidschan", es:"Azerbaiyán", fr:"Azerbaïdjan", it:"Azerbaigian", pt:"Azerbaijão" },
+  LI: { nl:"Liechtenstein", en:"Liechtenstein", de:"Liechtenstein", es:"Liechtenstein", fr:"Liechtenstein", it:"Liechtenstein", pt:"Liechtenstein" },
+};
+
+const teams = {
+  FR:["🇫🇷","FR"], IT:["🇮🇹","IT"], BE:["🇧🇪","BE"], TR:["🇹🇷","TR"],
+  DE:["🇩🇪","DE"], NL:["🇳🇱","NL"], RS:["🇷🇸","RS"], GR:["🇬🇷","GR"],
+  ES:["🇪🇸","ES"], HR:["🇭🇷","HR"], EN:["🏴","EN"], CZ:["🇨🇿","CZ"],
+  PT:["🇵🇹","PT"], DK:["🇩🇰","DK"], NO:["🇳🇴","NO"], WA:["🏴","WA"],
+  SC:["🏴","SC"], CH:["🇨🇭","CH"], SI:["🇸🇮","SI"], MK:["🇲🇰","MK"],
+  HU:["🇭🇺","HU"], UA:["🇺🇦","UA"], GE:["🇬🇪","GE"], NI:["🇬🇧","NI"],
+  IL:["🇮🇱","IL"], AT:["🇦🇹","AT"], IE:["🇮🇪","IE"], XK:["🇽🇰","XK"],
+  PL:["🇵🇱","PL"], BA:["🇧🇦","BA"], RO:["🇷🇴","RO"], SE:["🇸🇪","SE"],
+  AL:["🇦🇱","AL"], FI:["🇫🇮","FI"], BY:["🇧🇾","BY"], SM:["🇸🇲","SM"],
+  ME:["🇲🇪","ME"], AM:["🇦🇲","AM"], CY:["🇨🇾","CY"], LV:["🇱🇻","LV"],
+  KZ:["🇰🇿","KZ"], SK:["🇸🇰","SK"], FO:["🇫🇴","FO"], MD:["🇲🇩","MD"],
+  IS:["🇮🇸","IS"], BG:["🇧🇬","BG"], EE:["🇪🇪","EE"], LU:["🇱🇺","LU"],
+  GI:["🇬🇮","GI"], MT:["🇲🇹","MT"], AD:["🇦🇩","AD"], LT:["🇱🇹","LT"],
+  AZ:["🇦🇿","AZ"], LI:["🇱🇮","LI"],
+} as const;
+
 const leagues = [
-  {
-    name: "League A",
-    color: "A",
-    groups: [
-      { id: "A1", teams: ["🇫🇷 Frankrijk", "🇮🇹 Italië", "🇧🇪 België", "🇹🇷 Turkije"] },
-      { id: "A2", teams: ["🇩🇪 Duitsland", "🇳🇱 Nederland", "🇷🇸 Servië", "🇬🇷 Griekenland"] },
-      { id: "A3", teams: ["🇪🇸 Spanje", "🇭🇷 Kroatië", "🏴 Engeland", "🇨🇿 Tsjechië"] },
-      { id: "A4", teams: ["🇵🇹 Portugal", "🇩🇰 Denemarken", "🇳🇴 Noorwegen", "🏴 Wales"] },
-    ],
-  },
-  {
-    name: "League B",
-    color: "B",
-    groups: [
-      { id: "B1", teams: ["🏴 Schotland", "🇨🇭 Zwitserland", "🇸🇮 Slovenië", "🇲🇰 Noord-Macedonië"] },
-      { id: "B2", teams: ["🇭🇺 Hongarije", "🇺🇦 Oekraïne", "🇬🇪 Georgië", "🇬🇧 Noord-Ierland"] },
-      { id: "B3", teams: ["🇮🇱 Israël", "🇦🇹 Oostenrijk", "🇮🇪 Ierland", "🇽🇰 Kosovo"] },
-      { id: "B4", teams: ["🇵🇱 Polen", "🇧🇦 Bosnië en Herzegovina", "🇷🇴 Roemenië", "🇸🇪 Zweden"] },
-    ],
-  },
-  {
-    name: "League C",
-    color: "C",
-    groups: [
-      { id: "C1", teams: ["🇦🇱 Albanië", "🇫🇮 Finland", "🇧🇾 Belarus", "🇸🇲 San Marino"] },
-      { id: "C2", teams: ["🇲🇪 Montenegro", "🇦🇲 Armenië", "🇨🇾 Cyprus", "🇱🇻 Letland"] },
-      { id: "C3", teams: ["🇰🇿 Kazachstan", "🇸🇰 Slowakije", "🇫🇴 Faeröer", "🇲🇩 Moldavië"] },
-      { id: "C4", teams: ["🇮🇸 IJsland", "🇧🇬 Bulgarije", "🇪🇪 Estland", "🇱🇺 Luxemburg"] },
-    ],
-  },
-  {
-    name: "League D",
-    color: "D",
-    groups: [
-      { id: "D1", teams: ["🇬🇮 Gibraltar", "🇲🇹 Malta", "🇦🇩 Andorra"] },
-      { id: "D2", teams: ["🇱🇹 Litouwen", "🇦🇿 Azerbeidzjan", "🇱🇮 Liechtenstein"] },
-    ],
-  },
+  { name:"League A", color:"A", groups:[
+    {id:"A1",teams:[teams.FR,teams.IT,teams.BE,teams.TR]},
+    {id:"A2",teams:[teams.DE,teams.NL,teams.RS,teams.GR]},
+    {id:"A3",teams:[teams.ES,teams.HR,teams.EN,teams.CZ]},
+    {id:"A4",teams:[teams.PT,teams.DK,teams.NO,teams.WA]},
+  ]},
+  { name:"League B", color:"B", groups:[
+    {id:"B1",teams:[teams.SC,teams.CH,teams.SI,teams.MK]},
+    {id:"B2",teams:[teams.HU,teams.UA,teams.GE,teams.NI]},
+    {id:"B3",teams:[teams.IL,teams.AT,teams.IE,teams.XK]},
+    {id:"B4",teams:[teams.PL,teams.BA,teams.RO,teams.SE]},
+  ]},
+  { name:"League C", color:"C", groups:[
+    {id:"C1",teams:[teams.AL,teams.FI,teams.BY,teams.SM]},
+    {id:"C2",teams:[teams.ME,teams.AM,teams.CY,teams.LV]},
+    {id:"C3",teams:[teams.KZ,teams.SK,teams.FO,teams.MD]},
+    {id:"C4",teams:[teams.IS,teams.BG,teams.EE,teams.LU]},
+  ]},
+  { name:"League D", color:"D", groups:[
+    {id:"D1",teams:[teams.GI,teams.MT,teams.AD]},
+    {id:"D2",teams:[teams.LT,teams.AZ,teams.LI]},
+  ]},
 ];
 
 export default function ToernooienPage() {
@@ -287,10 +345,12 @@ export default function ToernooienPage() {
                       </div>
 
                       <div className="teams">
-                        {group.teams.map((team, index) => (
-                          <div className="team" key={team}>
+                        {group.teams.map(([flag, countryCode], index) => (
+                          <div className="team" key={countryCode}>
                             <span className="position">{index + 1}</span>
-                            <strong>{team}</strong>
+                            <strong>
+                              {flag} {countryNames[countryCode][language]}
+                            </strong>
                           </div>
                         ))}
                       </div>
