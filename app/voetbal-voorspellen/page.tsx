@@ -56,6 +56,11 @@ const competitions = [
   ],
 ];
 
+const competitionLinks: Record<string, string> = {
+  Eredivisie: "/eredivisie-voorspellen",
+  "Premier League": "/premier-league-voorspellen",
+};
+
 const structuredData = {
   "@context": "https://schema.org",
   "@type": "WebPage",
@@ -95,6 +100,7 @@ const structuredData = {
         "@type": "ListItem",
         position: 2,
         name: "Premier League",
+        url: "https://voetiq.nl/premier-league-voorspellen",
       },
       {
         "@type": "ListItem",
@@ -207,19 +213,19 @@ export default function VoetbalVoorspellenPage() {
           </p>
 
           <div style={styles.grid}>
-            {competitions.map(([icon, name, text]) =>
-              name === "Eredivisie" ? (
-                <Link
-                  key={name}
-                  href="/eredivisie-voorspellen"
-                  style={styles.cardLink}
-                >
-                  <Card icon={icon} title={name} text={text} />
-                </Link>
-              ) : (
-                <Card key={name} icon={icon} title={name} text={text} />
-              )
-            )}
+            {competitions.map(([icon, name, text]) => {
+              const href = competitionLinks[name];
+
+              if (href) {
+                return (
+                  <Link key={name} href={href} style={styles.cardLink}>
+                    <Card icon={icon} title={name} text={text} />
+                  </Link>
+                );
+              }
+
+              return <Card key={name} icon={icon} title={name} text={text} />;
+            })}
           </div>
 
           <div style={{ textAlign: "center", marginTop: "30px" }}>
