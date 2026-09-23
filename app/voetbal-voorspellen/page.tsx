@@ -56,9 +56,80 @@ const competitions = [
   ],
 ];
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+
+  name: "Voetbal voorspellen",
+  url: "https://voetiq.nl/voetbal-voorspellen",
+
+  description:
+    "Voorspel gratis voetbalwedstrijden bij VoetIQ, verdien punten en vergelijk jouw voorspellingen met vrienden en andere spelers.",
+
+  inLanguage: "nl-NL",
+
+  isPartOf: {
+    "@type": "WebSite",
+    name: "VoetIQ",
+    url: "https://voetiq.nl/",
+  },
+
+  publisher: {
+    "@type": "Organization",
+    name: "VoetIQ",
+    url: "https://voetiq.nl/",
+  },
+
+  mainEntity: {
+    "@type": "ItemList",
+    name: "Voetbalcompetities om te voorspellen",
+    numberOfItems: 6,
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Eredivisie",
+        url: "https://voetiq.nl/eredivisie-voorspellen",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Premier League",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: "Champions League",
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: "La Liga",
+      },
+      {
+        "@type": "ListItem",
+        position: 5,
+        name: "Bundesliga",
+      },
+      {
+        "@type": "ListItem",
+        position: 6,
+        name: "Serie A",
+      },
+    ],
+  },
+};
+
 export default function VoetbalVoorspellenPage() {
   return (
     <main style={styles.main}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
+
       <section style={styles.hero}>
         <div style={styles.container}>
           <Link href="/" style={styles.logo}>
