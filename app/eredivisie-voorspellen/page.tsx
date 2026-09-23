@@ -23,6 +23,59 @@ export const metadata: Metadata = {
   },
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+
+  name: "Eredivisie voorspellen",
+  url: "https://voetiq.nl/eredivisie-voorspellen",
+
+  description:
+    "Voorspel gratis Eredivisie-wedstrijden bij VoetIQ, verdien punten en vergelijk jouw voorspellingen met andere voetbalfans.",
+
+  inLanguage: "nl-NL",
+
+  isPartOf: {
+    "@type": "WebSite",
+    name: "VoetIQ",
+    url: "https://voetiq.nl/",
+  },
+
+  publisher: {
+    "@type": "Organization",
+    name: "VoetIQ",
+    url: "https://voetiq.nl/",
+  },
+
+  about: {
+    "@type": "SportsOrganization",
+    name: "Eredivisie",
+    sport: "Voetbal",
+  },
+
+  mainEntity: {
+    "@type": "ItemList",
+    name: "Eredivisie voetbalclubs",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Ajax",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "PSV",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: "Feyenoord",
+      },
+    ],
+  },
+};
+
 export default function EredivisieVoorspellenPage() {
   return (
     <main
@@ -33,6 +86,13 @@ export default function EredivisieVoorspellenPage() {
         color: "white",
       }}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
+
       <section
         style={{
           maxWidth: "900px",
