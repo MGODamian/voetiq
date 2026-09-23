@@ -26,10 +26,76 @@ export const metadata: Metadata = {
   },
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: "Voetbal spelletjes & voetbalquiz",
+  url: "https://voetiq.nl/games",
+  description:
+    "Speel gratis voetbal spelletjes en quizzen bij VoetIQ en test jouw voetbalkennis.",
+  inLanguage: "nl-NL",
+
+  isPartOf: {
+    "@type": "WebSite",
+    name: "VoetIQ",
+    url: "https://voetiq.nl/",
+  },
+
+  mainEntity: {
+    "@type": "ItemList",
+    name: "VoetIQ voetbalgames",
+    numberOfItems: 5,
+
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Wie is de speler?",
+        url: "https://voetiq.nl/games/wie-is-de-speler",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Raad het stadion",
+        url: "https://voetiq.nl/games/raad-het-stadion",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: "Voetbalquiz",
+        url: "https://voetiq.nl/games/voetbalquiz",
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        name: "Player Link",
+        url: "https://voetiq.nl/games/player-link",
+      },
+      {
+        "@type": "ListItem",
+        position: 5,
+        name: "Raad het voetballand",
+        url: "https://voetiq.nl/games/raad-het-land",
+      },
+    ],
+  },
+};
+
 export default function GamesLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
+
+      {children}
+    </>
+  );
 }
