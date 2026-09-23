@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Player Link – Verbind voetballers | VoetIQ",
+  title: "Player Link | Verbind de voetballers",
 
   description:
-    "Speel Player Link gratis bij VoetIQ. Verbind bekende voetballers via clubs waarvoor ze hebben gespeeld en probeer de route in zo weinig mogelijk stappen te vinden.",
+    "Speel Player Link bij VoetIQ. Vind de verbinding tussen voetballers en test hoe goed jij spelers, clubs en transfers kent.",
 
   alternates: {
     canonical: "https://voetiq.nl/games/player-link",
   },
 
   openGraph: {
-    title: "Player Link – Verbind voetballers | VoetIQ",
+    title: "Player Link | Verbind de voetballers | VoetIQ",
     description:
-      "Kun jij twee voetballers met elkaar verbinden via hun clubs? Speel Player Link gratis bij VoetIQ en test jouw voetbalkennis.",
+      "Vind de verbinding tussen voetballers en test jouw voetbalkennis met Player Link bij VoetIQ.",
     url: "https://voetiq.nl/games/player-link",
     siteName: "VoetIQ",
     locale: "nl_NL",
