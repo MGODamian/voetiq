@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Voetbal voorspellingen ranglijst",
+  title: "Voetbal voorspellingen ranglijst | VoetIQ",
 
   description:
-    "Bekijk de VoetIQ-ranglijst en ontdek wie de meeste punten verdient met voetbalvoorspellingen. Voorspel wedstrijden, verzamel punten en strijd om de eerste plaats.",
+    "Bekijk de VoetIQ-ranglijst en ontdek wie de meeste punten heeft verdiend met voetbalvoorspellingen. Vergelijk spelers per competitie en speelronde.",
 
   alternates: {
     canonical: "https://voetiq.nl/ranglijst",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Voetbal voorspellingen ranglijst | VoetIQ",
     description:
-      "Bekijk wie de meeste punten heeft verzameld met voetbalvoorspellingen op VoetIQ.",
+      "Bekijk wie bovenaan staat bij VoetIQ. Vergelijk punten en voetbalvoorspellingen in het algemene klassement en per competitie.",
     url: "https://voetiq.nl/ranglijst",
     siteName: "VoetIQ",
     locale: "nl_NL",
