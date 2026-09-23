@@ -59,6 +59,7 @@ const competitions = [
 const competitionLinks: Record<string, string> = {
   Eredivisie: "/eredivisie-voorspellen",
   "Premier League": "/premier-league-voorspellen",
+  "Champions League": "/champions-league-voorspellen",
 };
 
 const structuredData = {
@@ -106,6 +107,7 @@ const structuredData = {
         "@type": "ListItem",
         position: 3,
         name: "Champions League",
+        url: "https://voetiq.nl/champions-league-voorspellen",
       },
       {
         "@type": "ListItem",
