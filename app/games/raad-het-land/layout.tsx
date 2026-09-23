@@ -26,10 +26,63 @@ export const metadata: Metadata = {
   },
 };
 
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+
+  name: "Raad het voetballand",
+  url: "https://voetiq.nl/games/raad-het-land",
+
+  description:
+    "Een gratis voetbalspel van VoetIQ waarin je het juiste voetballand probeert te raden aan de hand van voetbalhints.",
+
+  inLanguage: "nl-NL",
+
+  genre: ["Voetbal", "Quiz", "Trivia"],
+
+  gamePlatform: "Web Browser",
+
+  applicationCategory: "Game",
+
+  operatingSystem: "Web Browser",
+
+  isAccessibleForFree: true,
+
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "EUR",
+    availability: "https://schema.org/InStock",
+  },
+
+  publisher: {
+    "@type": "Organization",
+    name: "VoetIQ",
+    url: "https://voetiq.nl/",
+  },
+
+  isPartOf: {
+    "@type": "WebSite",
+    name: "VoetIQ",
+    url: "https://voetiq.nl/",
+  },
+};
+
 export default function RaadHetLandLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
+
+      {children}
+    </>
+  );
 }
