@@ -62,6 +62,7 @@ const competitionLinks: Record<string, string> = {
   "Champions League": "/champions-league-voorspellen",
   "La Liga": "/la-liga-voorspellen",
   Bundesliga: "/bundesliga-voorspellen",
+  "Serie A": "/serie-a-voorspellen",
 };
 
 const structuredData = {
@@ -127,6 +128,7 @@ const structuredData = {
         "@type": "ListItem",
         position: 6,
         name: "Serie A",
+        url: "https://voetiq.nl/serie-a-voorspellen",
       },
     ],
   },
