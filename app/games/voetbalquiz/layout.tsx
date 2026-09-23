@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Voetbalquiz – Test je voetbalkennis | VoetIQ",
+  title: "Voetbalquiz | Test je voetbalkennis",
 
   description:
-    "Speel de gratis voetbalquiz van VoetIQ. Beantwoord vragen over clubs, spelers, competities, het WK, EK en meer en test jouw voetbalkennis.",
+    "Speel de gratis voetbalquiz van VoetIQ. Beantwoord voetbalvragen, test jouw voetbalkennis en probeer een zo hoog mogelijke score te halen.",
 
   alternates: {
     canonical: "https://voetiq.nl/games/voetbalquiz",
   },
 
   openGraph: {
-    title: "Voetbalquiz – Test je voetbalkennis | VoetIQ",
+    title: "Voetbalquiz | Test je voetbalkennis | VoetIQ",
     description:
-      "Hoe goed ken jij voetbal? Speel 10 willekeurige voetbalvragen en probeer de hoogste score te halen.",
+      "Speel de gratis voetbalquiz van VoetIQ en ontdek hoe goed jouw voetbalkennis echt is.",
     url: "https://voetiq.nl/games/voetbalquiz",
     siteName: "VoetIQ",
     locale: "nl_NL",
