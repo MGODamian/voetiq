@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Voetbal voorspellingen ranglijst | VoetIQ",
+  title: "Voetbal voorspellingen ranglijst",
 
   description:
     "Bekijk de VoetIQ-ranglijst en ontdek wie de meeste punten heeft verdiend met voetbalvoorspellingen. Vergelijk spelers per competitie en speelronde.",
