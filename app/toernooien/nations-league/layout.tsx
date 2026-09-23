@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Nations League voorspellen 2026/27 | VoetIQ",
+  title: "Nations League voorspellen 2026/27",
 
   description:
     "Voorspel de UEFA Nations League 2026/27 bij VoetIQ. Vul wedstrijduitslagen in, volg de poules en standen en verzamel punten met jouw voorspellingen.",
