@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Voetbal spelletjes & voetbalquiz | VoetIQ",
+  title: "Voetbal spelletjes & voetbalquiz",
 
   description:
     "Speel gratis voetbal spelletjes bij VoetIQ. Test je voetbalkennis met Wie is de speler, Raad het stadion, de voetbalquiz, Player Link en meer.",
