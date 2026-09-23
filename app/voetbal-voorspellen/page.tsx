@@ -24,12 +24,36 @@ export const metadata: Metadata = {
 };
 
 const competitions = [
-  ["🇳🇱", "Eredivisie", "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de andere clubs uit de Eredivisie."],
-  ["🏴", "Premier League", "Test je voetbalkennis met wedstrijden uit de Engelse Premier League."],
-  ["🏆", "Champions League", "Voorspel de grootste Europese wedstrijden in de Champions League."],
-  ["🇪🇸", "La Liga", "Speel mee met voorspellingen uit de hoogste Spaanse voetbalcompetitie."],
-  ["🇩🇪", "Bundesliga", "Voorspel wedstrijden uit de Bundesliga en verzamel punten."],
-  ["🇮🇹", "Serie A", "Doe voorspellingen voor wedstrijden van de grootste Italiaanse clubs."],
+  [
+    "🇳🇱",
+    "Eredivisie",
+    "Voorspel wedstrijden van Ajax, PSV, Feyenoord en de andere clubs uit de Eredivisie.",
+  ],
+  [
+    "🏴",
+    "Premier League",
+    "Test je voetbalkennis met wedstrijden uit de Engelse Premier League.",
+  ],
+  [
+    "🏆",
+    "Champions League",
+    "Voorspel de grootste Europese wedstrijden in de Champions League.",
+  ],
+  [
+    "🇪🇸",
+    "La Liga",
+    "Speel mee met voorspellingen uit de hoogste Spaanse voetbalcompetitie.",
+  ],
+  [
+    "🇩🇪",
+    "Bundesliga",
+    "Voorspel wedstrijden uit de Bundesliga en verzamel punten.",
+  ],
+  [
+    "🇮🇹",
+    "Serie A",
+    "Doe voorspellingen voor wedstrijden van de grootste Italiaanse clubs.",
+  ],
 ];
 
 export default function VoetbalVoorspellenPage() {
@@ -55,6 +79,7 @@ export default function VoetbalVoorspellenPage() {
             <Link href="/registreren" style={styles.primaryButton}>
               Begin gratis →
             </Link>
+
             <Link href="/wedstrijden" style={styles.secondaryButton}>
               Bekijk wedstrijden
             </Link>
@@ -65,7 +90,9 @@ export default function VoetbalVoorspellenPage() {
       <section style={styles.section}>
         <div style={styles.container}>
           <div style={styles.eyebrow}>HOE WERKT HET?</div>
+
           <h2 style={styles.h2}>Voorspel de uitslag en verdien punten</h2>
+
           <p style={styles.sectionText}>
             Bij VoetIQ kies je aankomende voetbalwedstrijden en vul je jouw
             voorspelling in. Na de wedstrijd worden punten toegekend op basis
@@ -79,11 +106,13 @@ export default function VoetbalVoorspellenPage() {
               title="1. Kies een wedstrijd"
               text="Bekijk aankomende wedstrijden uit verschillende nationale en Europese competities."
             />
+
             <Card
               icon="🎯"
               title="2. Voorspel de score"
               text="Vul voor de aftrap in welke uitslag jij verwacht."
             />
+
             <Card
               icon="🏆"
               title="3. Verdien punten"
@@ -96,16 +125,30 @@ export default function VoetbalVoorspellenPage() {
       <section style={styles.altSection}>
         <div style={styles.container}>
           <div style={styles.eyebrow}>COMPETITIES</div>
-          <h2 style={styles.h2}>Voetbalvoorspellingen voor populaire competities</h2>
+
+          <h2 style={styles.h2}>
+            Voetbalvoorspellingen voor populaire competities
+          </h2>
+
           <p style={styles.sectionText}>
             Speel mee met wedstrijden uit bekende voetbalcompetities. Nieuwe
             wedstrijden kun je rechtstreeks via de wedstrijdpagina voorspellen.
           </p>
 
           <div style={styles.grid}>
-            {competitions.map(([icon, name, text]) => (
-              <Card key={name} icon={icon} title={name} text={text} />
-            ))}
+            {competitions.map(([icon, name, text]) =>
+              name === "Eredivisie" ? (
+                <Link
+                  key={name}
+                  href="/eredivisie-voorspellen"
+                  style={styles.cardLink}
+                >
+                  <Card icon={icon} title={name} text={text} />
+                </Link>
+              ) : (
+                <Card key={name} icon={icon} title={name} text={text} />
+              )
+            )}
           </div>
 
           <div style={{ textAlign: "center", marginTop: "30px" }}>
@@ -119,7 +162,11 @@ export default function VoetbalVoorspellenPage() {
       <section style={styles.section}>
         <div style={styles.container}>
           <div style={styles.eyebrow}>SAMEN SPELEN</div>
-          <h2 style={styles.h2}>Daag je vrienden uit met voetbal voorspellen</h2>
+
+          <h2 style={styles.h2}>
+            Daag je vrienden uit met voetbal voorspellen
+          </h2>
+
           <p style={styles.sectionText}>
             Maak een poule, nodig vrienden uit en vergelijk jullie punten op
             een eigen ranglijst. Je kunt daarnaast op de algemene ranglijst
@@ -130,6 +177,7 @@ export default function VoetbalVoorspellenPage() {
             <Link href="/poules" style={styles.secondaryButton}>
               Bekijk poules
             </Link>
+
             <Link href="/ranglijst" style={styles.secondaryButton}>
               Bekijk ranglijst
             </Link>
@@ -140,11 +188,14 @@ export default function VoetbalVoorspellenPage() {
       <section style={styles.cta}>
         <div style={styles.container}>
           <div style={{ fontSize: "38px" }}>⚽</div>
+
           <h2 style={styles.h2}>Klaar om jouw voetbal-IQ te testen?</h2>
+
           <p style={styles.sectionText}>
             Maak gratis een account aan en begin met het voorspellen van
             voetbalwedstrijden.
           </p>
+
           <div style={{ marginTop: "28px" }}>
             <Link href="/registreren" style={styles.primaryButton}>
               Maak gratis een account →
@@ -160,10 +211,21 @@ export default function VoetbalVoorspellenPage() {
           </Link>
 
           <div style={styles.footerLinks}>
-            <Link href="/" style={styles.footerLink}>Home</Link>
-            <Link href="/wedstrijden" style={styles.footerLink}>Wedstrijden</Link>
-            <Link href="/ranglijst" style={styles.footerLink}>Ranglijst</Link>
-            <Link href="/contact" style={styles.footerLink}>Contact</Link>
+            <Link href="/" style={styles.footerLink}>
+              Home
+            </Link>
+
+            <Link href="/wedstrijden" style={styles.footerLink}>
+              Wedstrijden
+            </Link>
+
+            <Link href="/ranglijst" style={styles.footerLink}>
+              Ranglijst
+            </Link>
+
+            <Link href="/contact" style={styles.footerLink}>
+              Contact
+            </Link>
           </div>
         </div>
       </footer>
@@ -195,6 +257,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#020d08",
     color: "white",
   },
+
   hero: {
     padding: "70px 20px 85px",
     textAlign: "center",
@@ -202,11 +265,13 @@ const styles: Record<string, React.CSSProperties> = {
       "radial-gradient(circle at 50% 20%, rgba(46,230,129,0.16), transparent 32%), linear-gradient(180deg, #061a10 0%, #020d08 100%)",
     borderBottom: "1px solid rgba(255,255,255,0.06)",
   },
+
   container: {
     width: "100%",
     maxWidth: "1050px",
     margin: "0 auto",
   },
+
   logo: {
     display: "inline-block",
     color: "white",
@@ -215,6 +280,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 950,
     marginBottom: "40px",
   },
+
   badge: {
     width: "fit-content",
     margin: "0 auto",
@@ -227,6 +293,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 900,
     letterSpacing: "0.8px",
   },
+
   h1: {
     maxWidth: "850px",
     margin: "24px auto 0",
@@ -235,6 +302,7 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: "-2.5px",
     fontWeight: 950,
   },
+
   intro: {
     maxWidth: "720px",
     margin: "22px auto 0",
@@ -242,6 +310,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "clamp(16px, 2vw, 19px)",
     lineHeight: 1.7,
   },
+
   actions: {
     display: "flex",
     justifyContent: "center",
@@ -249,6 +318,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: "12px",
     marginTop: "30px",
   },
+
   primaryButton: {
     display: "inline-block",
     padding: "13px 20px",
@@ -259,6 +329,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "14px",
     fontWeight: 900,
   },
+
   secondaryButton: {
     display: "inline-block",
     padding: "13px 20px",
@@ -270,15 +341,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "14px",
     fontWeight: 900,
   },
+
   section: {
     padding: "75px 20px",
   },
+
   altSection: {
     padding: "75px 20px",
     background: "rgba(255,255,255,0.015)",
     borderTop: "1px solid rgba(255,255,255,0.05)",
     borderBottom: "1px solid rgba(255,255,255,0.05)",
   },
+
   eyebrow: {
     textAlign: "center",
     color: "#42e985",
@@ -286,6 +360,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 900,
     letterSpacing: "1px",
   },
+
   h2: {
     maxWidth: "800px",
     margin: "10px auto 0",
@@ -295,6 +370,7 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: "-1px",
     fontWeight: 950,
   },
+
   sectionText: {
     maxWidth: "720px",
     margin: "16px auto 0",
@@ -303,30 +379,43 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "15px",
     lineHeight: 1.75,
   },
+
   grid: {
     marginTop: "38px",
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "16px",
   },
+
+  cardLink: {
+    display: "block",
+    color: "inherit",
+    textDecoration: "none",
+  },
+
   card: {
+    height: "100%",
+    boxSizing: "border-box",
     padding: "25px",
     borderRadius: "18px",
     background:
       "linear-gradient(145deg, rgba(8,35,23,0.96), rgba(3,18,11,0.96))",
     border: "1px solid rgba(75,255,153,0.10)",
   },
+
   h3: {
     margin: "15px 0 8px",
     fontSize: "18px",
     fontWeight: 900,
   },
+
   cardText: {
     margin: 0,
     color: "#83998c",
     fontSize: "13px",
     lineHeight: 1.65,
   },
+
   cta: {
     padding: "80px 20px",
     textAlign: "center",
@@ -334,11 +423,13 @@ const styles: Record<string, React.CSSProperties> = {
       "radial-gradient(circle at 50% 0%, rgba(46,230,129,0.12), transparent 60%)",
     borderTop: "1px solid rgba(255,255,255,0.05)",
   },
+
   footer: {
     borderTop: "1px solid rgba(255,255,255,0.06)",
     background: "#010905",
     padding: "28px 20px",
   },
+
   footerInner: {
     maxWidth: "1050px",
     margin: "0 auto",
@@ -348,11 +439,13 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: "wrap",
     gap: "18px",
   },
+
   footerLinks: {
     display: "flex",
     flexWrap: "wrap",
     gap: "18px",
   },
+
   footerLink: {
     color: "#758a7e",
     textDecoration: "none",
